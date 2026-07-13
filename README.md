@@ -89,9 +89,9 @@ LynxHub consolidates your AI workflow into a single, unified workspace.
 ### 2. Download LynxHub
 
 | Channel          | Version                                                         | Release Date |
-| ---------------- |-----------------------------------------------------------------|--------------|
-| **Insider**      | [V3.5.5](https://www.patreon.com/collection/1557749)            | 2026-06-30   |
-| **Early Access** | [V3.5.5](https://www.patreon.com/collection/714004)             | 2026-06-30   |
+| ---------------- | --------------------------------------------------------------- | ------------ |
+| **Insider**      | [V3.5.6](https://www.patreon.com/collection/1557749)            | 2026-07-13   |
+| **Early Access** | [V3.5.6](https://www.patreon.com/collection/714004)             | 2026-07-13   |
 | **Public**       | [V3.5.1](https://github.com/KindaBrazy/LynxHub/releases/latest) | 2026-06-06   |
 
 > [!TIP]  
@@ -117,6 +117,7 @@ LynxHub's true power lies in its community-driven ecosystem. Integrate these int
 - 🐍 [**Python Toolkit:**](https://github.com/KindaBrazy/LynxHub-Python-Toolkit) Streamline Python virtual environments (venv) and package management.
 - 📊 [**Hardware Monitor:**](https://github.com/KindaBrazy/LynxHub-Hardware-Monitor) Real-time CPU, GPU, and RAM telemetry injected directly into the status bar.
 - ⚡ [**Custom Actions:**](https://github.com/KindaBrazy/LynxHub-Custom-Actions) Create personalized workflow shortcuts and macro cards.
+- 📖 [**Skills Manager:**](https://github.com/KindaBrazy/LynxHub-Skills-Toolkit) An interactive, feature-rich GUI management extension for AI Coding Agent Skills.
 
 ### Featured Modules
 
