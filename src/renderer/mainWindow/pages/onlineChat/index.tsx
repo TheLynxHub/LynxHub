@@ -7,7 +7,7 @@ import {ChatRound, Earth} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
 import {Send} from 'lucide-react';
 import {KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, {Components} from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import {useTabsState} from '../../redux/reducers/tabs';
@@ -22,6 +22,41 @@ interface Message {
 interface Props {
   tabID?: string;
 }
+
+const markdownComponents: Components = {
+  code({node, inline, className, children, ...props}: any) {
+    const match = /language-(\w+)/.exec(className || '');
+    const isInline = inline ?? !className;
+
+    if (isInline) {
+      return (
+        <code
+          className={
+            'rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-xs ' +
+            'font-JetBrainsMono text-foreground before:content-none after:content-none'
+          }
+          {...props}>
+          {children}
+        </code>
+      );
+    }
+
+    return (
+      <code className={`${match ? className : ''} text-sm font-JetBrainsMono`} {...props}>
+        {children}
+      </code>
+    );
+  },
+  pre({children, ...props}) {
+    return (
+      <pre
+        className={'overflow-x-auto rounded-lg bg-gray-100 p-4 ' + 'dark:bg-gray-800 text-sm font-JetBrainsMono my-2'}
+        {...props}>
+        {children}
+      </pre>
+    );
+  },
+};
 
 export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
   console.log('cc');
@@ -441,7 +476,9 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
                           : 'bg-surface border-border rounded-tl-sm'
                       } transition-all duration-200`}>
                       <div className="prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                          {msg.text}
+                        </ReactMarkdown>
                       </div>
                     </div>
                   </div>
