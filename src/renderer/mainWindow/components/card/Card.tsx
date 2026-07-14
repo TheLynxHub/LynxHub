@@ -1,14 +1,14 @@
 import {Card, Description, useOverlayState} from '@heroui/react';
 import {extensionsData} from '@lynx/plugins/extensions/loader';
+import {tabsActions} from '@lynx/redux/reducers/tabs';
+import {AppDispatch} from '@lynx/redux/store';
 import {getAccentColorAsHex} from '@lynx/utils/accentColorGenerator';
+import {PageID} from '@lynx_common/consts';
 import {extractGitUrl} from '@lynx_common/utils';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {motion} from 'framer-motion';
 import {CSSProperties, memo, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
-import {AppDispatch} from '@lynx/redux/store';
-import {tabsActions} from '@lynx/redux/reducers/tabs';
-import {PageID} from '@lynx_common/consts';
 
 import Footer from './Footer';
 import {CardHeaderContent} from './Header';
@@ -64,6 +64,10 @@ const LynxCard = memo(() => {
   return (
     <>
       <MotionCard
+        className={
+          'relative h-46 w-75 border border-surface/50 transition-all duration-200 overflow-hidden ' +
+          `group hover:scale-[1.02] hover:shadow-lg ${isPressable && 'cursor-pointer'}`
+        }
         onClick={() => {
           if (isOnline) {
             AddBreadcrumb_Renderer(`Card Interaction: Clicked online card "${title}"`);
@@ -86,10 +90,6 @@ const LynxCard = memo(() => {
           if (isInstalled) startAi();
           else install();
         }}
-        className={
-          'relative h-46 w-75 border border-surface/50 transition-all duration-200 overflow-hidden ' +
-          `group hover:scale-[1.02] hover:shadow-lg ${isPressable && 'cursor-pointer'}`
-        }
         whileHover="hover"
         onContextMenu={isOnline ? undefined : () => setMenuIsOpen(true)}>
         <div

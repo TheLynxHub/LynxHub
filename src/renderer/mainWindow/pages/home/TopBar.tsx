@@ -5,7 +5,7 @@ import {AppDispatch} from '@lynx/redux/store';
 import {Terminal_Icon} from '@lynx_assets/icons';
 import {PageID} from '@lynx_common/consts';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Earth, ChatRound} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRound, Earth} from '@solar-icons/react-perf/BoldDuotone';
 import {motion} from 'framer-motion';
 import {Plus} from 'lucide-react';
 import {useDispatch} from 'react-redux';
@@ -78,7 +78,7 @@ export default function HomeTopBar() {
           </Button>
         </motion.div>
 
-        <Separator orientation="vertical" variant="secondary" className="my-2" />
+        <Separator className="my-2" variant="secondary" orientation="vertical" />
 
         <motion.div transition={{delay: 0.1}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
           <Button size="sm" className="w-25" variant="tertiary" onPress={handleNewTerminal}>

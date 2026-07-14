@@ -1,9 +1,9 @@
 import {Button, Card, ScrollShadow, TextArea} from '@heroui/react';
+import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import {useTabsState} from '@lynx/redux/reducers/tabs';
-import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {ChatSquare, Earth, CheckCircle} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatSquare} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
 import {Send} from 'lucide-react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -326,7 +326,11 @@ export default function OnlineChatPage() {
   return (
     <div className="flex size-full flex-col overflow-hidden bg-surface-secondary rounded-3xl">
       {/* Chat Header */}
-      <div className="flex items-center justify-between border-b border-border px-6 py-4 bg-surface-secondary/80 backdrop-blur-md shrink-0 shadow-sm">
+      <div
+        className={
+          'flex items-center justify-between border-b border-border px-6 py-4 bg-surface-secondary/80' +
+          ' backdrop-blur-md shrink-0 shadow-sm'
+        }>
         <div className="flex items-center gap-x-3">
           <Button size="sm" variant="ghost" className="min-w-8 p-0" onPress={handleBackToSelect}>
             <AltArrowLeft className="size-5" />
@@ -360,9 +364,9 @@ export default function OnlineChatPage() {
               return (
                 <div key={index} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[75%] rounded-3xl px-4 py-3 shadow-surface border text-sm transition-all duration-200 ${
+                    className={`max-w-[75%] rounded-3xl px-4 py-3 shadow-surface border text-sm ${
                       isUser ? 'bg-accent/10 border-accent/25 rounded-tr-sm' : 'bg-surface border-border rounded-tl-sm'
-                    }`}>
+                    } transition-all duration-200`}>
                     <div className="prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
                     </div>
@@ -377,21 +381,29 @@ export default function OnlineChatPage() {
 
       {/* Message Input Box */}
       <div className="border-t border-border p-4 bg-surface-secondary/50 shrink-0">
-        <div className="max-w-4xl mx-auto flex items-end gap-3 bg-surface-secondary border border-border rounded-2xl p-2 focus-within:border-accent/50 transition-colors duration-200">
+        <div
+          className={
+            'max-w-4xl mx-auto flex items-end gap-3 bg-surface-secondary border border-border rounded-2xl' +
+            ' p-2 focus-within:border-accent/50 transition-colors duration-200'
+          }>
           <TextArea
-            value={inputText}
-            onChange={e => setInputText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={`Message ${selectedCard.title}...`}
-            className="flex-1 max-h-32 min-h-10 outline-none border-none bg-transparent py-2 px-3 text-sm text-foreground placeholder-default-400 resize-none overflow-y-auto scrollbar-hide font-Nunito shadow-none focus:bg-transparent hover:bg-transparent focus:border-none"
+            className={
+              'flex-1 max-h-32 min-h-10 outline-none border-none bg-transparent py-2 px-3 text-sm' +
+              ' text-foreground placeholder-default-400 resize-none overflow-y-auto scrollbar-hide' +
+              ' font-Nunito shadow-none focus:bg-transparent hover:bg-transparent focus:border-none'
+            }
             rows={1}
+            value={inputText}
+            onKeyDown={handleKeyDown}
+            onChange={e => setInputText(e.target.value)}
+            placeholder={`Message ${selectedCard.title}...`}
           />
           <Button
             variant="primary"
-            isIconOnly
             className="shrink-0"
             onPress={handleSendMessage}
-            isDisabled={!inputText.trim() || isSending}>
+            isDisabled={!inputText.trim() || isSending}
+            isIconOnly>
             <Send />
           </Button>
         </div>
