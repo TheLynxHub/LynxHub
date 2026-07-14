@@ -5,6 +5,7 @@ import {AppDispatch} from '@lynx/redux/store';
 import {getAccentColorAsHex} from '@lynx/utils/accentColorGenerator';
 import {PageID} from '@lynx_common/consts';
 import {extractGitUrl} from '@lynx_common/utils';
+import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {motion} from 'framer-motion';
 import {CSSProperties, memo, useMemo, useState} from 'react';
@@ -71,6 +72,7 @@ const LynxCard = memo(() => {
         onClick={() => {
           if (isOnline) {
             AddBreadcrumb_Renderer(`Card Interaction: Clicked online card "${title}"`);
+            storageUtilsIpc.invoke.recentlyUsedCards('update', id);
             dispatch(
               tabsActions.addTab({
                 id: `online-chat-${id}`,
@@ -122,23 +124,22 @@ const LynxCard = memo(() => {
           </Card.Content>
         )}
 
-        {!isOnline &&
-          (extensionsData.cards.customize.footer ? (
-            <extensionsData.cards.customize.footer
-              useCardStore={useCardStore}
-              useCardOverlayState={useCardOverlayState}
-            />
-          ) : (
-            <Footer
-              id={id}
-              updating={updating}
-              state={installModal}
-              isRunning={isRunning}
-              updateCount={updateCount}
-              setType={setInstallModalType}
-              updatingExtensions={isUpdatingExtensions}
-            />
-          ))}
+        {extensionsData.cards.customize.footer ? (
+          <extensionsData.cards.customize.footer
+            useCardStore={useCardStore}
+            useCardOverlayState={useCardOverlayState}
+          />
+        ) : (
+          <Footer
+            id={id}
+            updating={updating}
+            state={installModal}
+            isRunning={isRunning}
+            updateCount={updateCount}
+            setType={setInstallModalType}
+            updatingExtensions={isUpdatingExtensions}
+          />
+        )}
       </MotionCard>
 
       <InstallCardModal state={installModal} type={installModalType} />

@@ -38,6 +38,7 @@ const Footer = memo(({isRunning, updatingExtensions, updating, updateCount, id, 
   const darkMode = useAppState('darkMode');
 
   const isInstalled = useCardStore(state => state.installed);
+  const isOnline = useCardStore(state => state.isOnline);
   const isPinned = useIsPinnedCard(id);
 
   const isCtrlPressed = useHotkeysState('isCtrlPressed');
@@ -65,6 +66,7 @@ const Footer = memo(({isRunning, updatingExtensions, updating, updateCount, id, 
         onContextMenu={e => e.stopPropagation()}
         className="flex flex-row items-center gap-x-2">
         {!isRunning &&
+          !isOnline &&
           (isInstalled ? (
             ReplaceMenu ? (
               <ReplaceMenu useCardStore={useCardStore} useCardOverlayState={useCardOverlayState} />
@@ -74,7 +76,7 @@ const Footer = memo(({isRunning, updatingExtensions, updating, updateCount, id, 
           ) : (
             <UninstalledMenu />
           ))}
-        {isInstalled && (
+        {(isInstalled || isOnline) && (
           <Button
             className={
               `shrink-0 -translate-x-2 opacity-0 transition duration-200 ` +
@@ -100,12 +102,14 @@ const Footer = memo(({isRunning, updatingExtensions, updating, updateCount, id, 
       ) : isRunning ? (
         <ShinyText speed={2} text="Running" darkMode={darkMode} className="text-xs font-bold text-accent/70" />
       ) : (
-        <div
-          className={
-            'translate-y-2 opacity-0 transition duration-400 group-hover:translate-y-0 group-hover:opacity-100'
-          }>
-          {isInstalled ? <Play className="size-4 text-accent" /> : <DownloadMinimalistic className="size-4" />}
-        </div>
+        !isOnline && (
+          <div
+            className={
+              'translate-y-2 opacity-0 transition duration-400 group-hover:translate-y-0 group-hover:opacity-100'
+            }>
+            {isInstalled ? <Play className="size-4 text-accent" /> : <DownloadMinimalistic className="size-4" />}
+          </div>
+        )
       )}
 
       <AnimatePresence>

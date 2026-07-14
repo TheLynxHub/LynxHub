@@ -23,6 +23,7 @@ interface Props {
 }
 
 export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
+  console.log('cc');
   const activeTab = useTabsState('activeTab');
   const allCards = useAllCardDataWithPath();
 
