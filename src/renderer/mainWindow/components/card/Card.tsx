@@ -122,22 +122,23 @@ const LynxCard = memo(() => {
           </Card.Content>
         )}
 
-        {!isOnline && (extensionsData.cards.customize.footer ? (
-          <extensionsData.cards.customize.footer
-            useCardStore={useCardStore}
-            useCardOverlayState={useCardOverlayState}
-          />
-        ) : (
-          <Footer
-            id={id}
-            updating={updating}
-            state={installModal}
-            isRunning={isRunning}
-            updateCount={updateCount}
-            setType={setInstallModalType}
-            updatingExtensions={isUpdatingExtensions}
-          />
-        ))}
+        {!isOnline &&
+          (extensionsData.cards.customize.footer ? (
+            <extensionsData.cards.customize.footer
+              useCardStore={useCardStore}
+              useCardOverlayState={useCardOverlayState}
+            />
+          ) : (
+            <Footer
+              id={id}
+              updating={updating}
+              state={installModal}
+              isRunning={isRunning}
+              updateCount={updateCount}
+              setType={setInstallModalType}
+              updatingExtensions={isUpdatingExtensions}
+            />
+          ))}
       </MotionCard>
 
       <InstallCardModal state={installModal} type={installModalType} />

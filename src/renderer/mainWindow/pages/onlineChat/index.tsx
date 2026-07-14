@@ -1,9 +1,10 @@
-import {Button, Card, ScrollShadow} from '@heroui/react';
+import {Button, Card, ScrollShadow, TextArea} from '@heroui/react';
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import {useTabsState} from '@lynx/redux/reducers/tabs';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {AltArrowLeft, ChatSquare, Earth, CheckCircle} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatSquare, Earth, CheckCircle} from '@solar-icons/react-perf/BoldDuotone';
+import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
 import {Send} from 'lucide-react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -258,7 +259,7 @@ export default function OnlineChatPage() {
         </div>
 
         {onlineCards.length === 0 ? (
-          <Card className="p-8 max-w-md text-center border border-divider">
+          <Card className="p-8 max-w-md text-center border border-border">
             <Card.Content className="flex flex-col items-center gap-4">
               <ChatSquare className="size-16 text-default-400 opacity-60" />
               <div className="font-semibold text-lg text-foreground">No Online Modules Installed</div>
@@ -276,7 +277,7 @@ export default function OnlineChatPage() {
                 className="hover:scale-[1.02] cursor-pointer transition-all duration-200">
                 <Card.Content className="flex flex-col gap-3 p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                    <div className="p-2.5 rounded-xl bg-accent/10 text-accent">
                       <ChatSquare className="size-6" />
                     </div>
                     <div className="font-bold text-lg text-foreground">{card.title}</div>
@@ -315,7 +316,7 @@ export default function OnlineChatPage() {
               </span>
             )}
             <Button size="sm" variant="primary" onPress={handleGoToChat}>
-              Start Chatting (Go to Background)
+              Show Chatting
             </Button>
           </div>
         </div>
@@ -331,7 +332,7 @@ export default function OnlineChatPage() {
   return (
     <div className="flex size-full flex-col overflow-hidden bg-surface-secondary rounded-3xl">
       {/* Chat Header */}
-      <div className="flex items-center justify-between border-b border-divider px-6 py-4 bg-surface-secondary/80 backdrop-blur-md shrink-0 shadow-sm">
+      <div className="flex items-center justify-between border-b border-border px-6 py-4 bg-surface-secondary/80 backdrop-blur-md shrink-0 shadow-sm">
         <div className="flex items-center gap-x-3">
           <Button size="sm" variant="ghost" className="min-w-8 p-0" onPress={handleBackToSelect}>
             <AltArrowLeft className="size-5" />
@@ -345,9 +346,8 @@ export default function OnlineChatPage() {
           </div>
         </div>
 
-        <Button size="sm" variant="tertiary" className="font-semibold text-xs" onPress={handleShowWebpage}>
-          <Earth className="size-4" />
-          Show Web Page
+        <Button size="sm" variant="primary" onPress={handleShowWebpage}>
+          Show Page
         </Button>
       </div>
 
@@ -356,7 +356,7 @@ export default function OnlineChatPage() {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-2 opacity-50 py-12">
             <ChatSquare className="size-12 text-default-400" />
-            <div className="font-semibold text-foreground">Start a new conversation</div>
+            <div className="font-semibold">Start a new conversation</div>
             <div className="text-xs text-default-500">Your chat history will sync here automatically.</div>
           </div>
         ) : (
@@ -366,12 +366,10 @@ export default function OnlineChatPage() {
               return (
                 <div key={index} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-sm border text-sm transition-all duration-200 ${
-                      isUser
-                        ? 'bg-primary/10 text-foreground border-primary/25 rounded-tr-none'
-                        : 'bg-surface-secondary text-foreground border-divider rounded-tl-none'
+                    className={`max-w-[75%] rounded-3xl px-4 py-3 shadow-surface border text-sm transition-all duration-200 ${
+                      isUser ? 'bg-accent/10 border-accent/25 rounded-tr-sm' : 'bg-surface border-border rounded-tl-sm'
                     }`}>
-                    <div className="prose dark:prose-invert max-w-none text-sm break-words leading-relaxed">
+                    <div className="prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
                     </div>
                   </div>
@@ -385,13 +383,13 @@ export default function OnlineChatPage() {
 
       {/* Message Input Box */}
       <div className="border-t border-border p-4 bg-surface-secondary/50 shrink-0">
-        <div className="max-w-4xl mx-auto flex items-end gap-3 bg-surface-secondary border border-divider rounded-2xl p-2 focus-within:border-primary/50 transition-colors duration-200">
-          <textarea
+        <div className="max-w-4xl mx-auto flex items-end gap-3 bg-surface-secondary border border-border rounded-2xl p-2 focus-within:border-accent/50 transition-colors duration-200">
+          <TextArea
             value={inputText}
             onChange={e => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Message ${selectedCard.title}...`}
-            className="flex-1 max-h-32 min-h-10 outline-none border-none bg-transparent py-2 px-3 text-sm text-foreground placeholder-default-400 resize-none overflow-y-auto scrollbar-hide font-Nunito"
+            className="flex-1 max-h-32 min-h-10 outline-none border-none bg-transparent py-2 px-3 text-sm text-foreground placeholder-default-400 resize-none overflow-y-auto scrollbar-hide font-Nunito shadow-none focus:bg-transparent hover:bg-transparent focus:border-none"
             rows={1}
           />
           <Button
