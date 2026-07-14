@@ -253,10 +253,10 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
   // Render TopBar
   const renderTopBar = () => {
     return (
-      <div className="h-12 inset-x-0 top-0 absolute bg-surface flex px-2 py-1 items-center justify-between z-10">
+      <div className="h-12 inset-x-0 top-0 absolute bg-surface flex pl-4 pr-2 py-1 items-center justify-between z-10">
         {step === 'select_module' ? (
           <div className="flex items-center gap-x-2">
-            <ChatSquare className="size-5 text-accent" />
+            <ChatRound className="size-5" />
             <span className="font-bold text-foreground text-sm">Online Chat</span>
           </div>
         ) : (
@@ -311,7 +311,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
                 return (
                   <Card
                     className={
-                      'hover:scale-[1.02] cursor-pointer transition-all duration-200 w-77 h-41' +
+                      'hover:scale-[1.02] cursor-pointer transition-all duration-200 w-77 h-42' +
                       ' border border-border'
                     }
                     key={card.id}
@@ -349,10 +349,10 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
     return (
       <div className="flex size-full flex-col overflow-hidden bg-white dark:bg-LynxNearBlack">
         {/* Chat Messages */}
-        <ScrollShadow className="flex-1 p-6 space-y-4 overflow-y-auto">
+        <ScrollShadow className="flex-1 p-6 gap-y-4">
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center space-y-2 opacity-50 py-12">
-              <ChatSquare className="size-12 text-muted" />
+            <div className={'flex flex-col text-semi-muted items-center justify-center h-full text-center gap-y-2'}>
+              <ChatSquare className="size-12" />
               <div className="font-semibold">Start a new conversation</div>
               <div className="text-xs text-muted">Your chat history will sync here automatically.</div>
             </div>
