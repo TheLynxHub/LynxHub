@@ -1,6 +1,7 @@
-import {Button, Card, ScrollShadow, TextArea} from '@heroui/react';
+import {Avatar, Button, Card, ScrollShadow, TextArea} from '@heroui/react';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
+import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
 import browserIpc from '@lynx_shared/ipc/browser';
 import {ChatRound, ChatSquare, Earth} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
@@ -276,7 +277,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
         )}
 
         <div className="flex items-center gap-3">
-          {step === 'login' && !isPageLoaded && <span className="text-xs text-default-400">Loading website...</span>}
+          {step === 'login' && !isPageLoaded && <span className="text-xs text-muted">Loading website...</span>}
 
           {step !== 'select_module' && (
             <Button
@@ -296,42 +297,39 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
     if (step === 'select_module') {
       return (
         <div className="flex size-full flex-col items-center justify-center p-6 gap-y-6 bg-surface-secondary">
-          <div className="text-center space-y-2 mb-4">
-            <h2 className="text-3xl font-bold font-Nunito text-foreground">Select an Online AI Service</h2>
-            <p className="text-default-500 max-w-md text-sm">
-              Choose a web-based AI assistant. You will log in once via the page tab, then switch to a clean custom
-              interface.
-            </p>
-          </div>
-
           {onlineCards.length === 0 ? (
             <Card className="p-8 max-w-md text-center border border-border">
               <Card.Content className="flex flex-col items-center gap-4">
-                <ChatSquare className="size-16 text-default-400 opacity-60" />
+                <ChatSquare className="size-16 text-muted opacity-60" />
                 <div className="font-semibold text-lg text-foreground">No Online Modules Installed</div>
-                <div className="text-sm text-default-500">
+                <div className="text-sm text-muted">
                   Install a module marked as an online background scraper to begin.
                 </div>
               </Card.Content>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
-              {onlineCards.map(card => (
-                <Card
-                  key={card.id}
-                  onClick={() => handleSelectCard(card)}
-                  className="hover:scale-[1.02] cursor-pointer transition-all duration-200">
-                  <Card.Content className="flex flex-col gap-3 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-accent/10 text-accent">
-                        <ChatSquare className="size-6" />
+            <div className="flex flex-wrap gap-4 size-full">
+              {onlineCards.map(card => {
+                const avatarUrl = getCacheUrl(card.logoUrl || card.iconUrl);
+
+                return (
+                  <Card
+                    key={card.id}
+                    onClick={() => handleSelectCard(card)}
+                    className="hover:scale-[1.02] cursor-pointer transition-all duration-200 w-77 h-41">
+                    <Card.Content className="flex flex-col gap-4 p-2">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-12 shrink-0">
+                          <Avatar.Image src={avatarUrl} alt={card.title} />
+                          <Avatar.Fallback>{getFallbackString(card.title)}</Avatar.Fallback>
+                        </Avatar>
+                        <div className="font-bold text-base text-foreground">{card.title}</div>
                       </div>
-                      <div className="font-bold text-lg text-foreground">{card.title}</div>
-                    </div>
-                    <div className="text-sm text-default-500 line-clamp-2">{card.description}</div>
-                  </Card.Content>
-                </Card>
-              ))}
+                      <div className="text-xs text-muted line-clamp-3">{card.description}</div>
+                    </Card.Content>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
@@ -355,9 +353,9 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
         <ScrollShadow className="flex-1 p-6 space-y-4 overflow-y-auto">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-2 opacity-50 py-12">
-              <ChatSquare className="size-12 text-default-400" />
+              <ChatSquare className="size-12 text-muted" />
               <div className="font-semibold">Start a new conversation</div>
-              <div className="text-xs text-default-500">Your chat history will sync here automatically.</div>
+              <div className="text-xs text-muted">Your chat history will sync here automatically.</div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -393,7 +391,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
             <TextArea
               className={
                 'flex-1 max-h-32 min-h-10 outline-none border-none bg-transparent py-2 px-3 text-sm' +
-                ' text-foreground placeholder-default-400 resize-none overflow-y-auto scrollbar-hide' +
+                ' text-foreground placeholder-muted resize-none overflow-y-auto scrollbar-hide' +
                 ' font-Nunito shadow-none focus:bg-transparent hover:bg-transparent focus:border-none'
               }
               rows={1}
