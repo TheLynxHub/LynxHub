@@ -347,7 +347,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
 
     // step === 'chat'
     return (
-      <div className="flex size-full flex-col overflow-hidden bg-white dark:bg-LynxNearBlack">
+      <div className="flex size-full flex-col overflow-hidden bg-surface">
         {/* Chat Messages */}
         <ScrollShadow className="flex-1 p-6 gap-y-4">
           {messages.length === 0 ? (
@@ -381,7 +381,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
         </ScrollShadow>
 
         {/* Message Input Box */}
-        <div className="border-t border-border p-4 bg-white dark:bg-LynxNearBlack shrink-0">
+        <div className="p-4 bg-surface shrink-0">
           <div
             className={
               'max-w-4xl mx-auto flex items-end gap-3 bg-surface-secondary border border-border rounded-2xl' +
@@ -414,7 +414,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
   };
 
   return (
-    <div className="absolute inset-0 bg-white dark:bg-LynxNearBlack overflow-hidden flex flex-col">
+    <div className="absolute inset-0 bg-surface overflow-hidden flex flex-col">
       {renderTopBar()}
       <div className="absolute inset-0 top-12! overflow-hidden flex flex-col">{renderContent()}</div>
     </div>
