@@ -2,12 +2,11 @@ import {Button, Card, ScrollShadow, TextArea} from '@heroui/react';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import {useTabsState} from '@lynx/redux/reducers/tabs';
-import {Terminal_Icon} from '@lynx_assets/icons';
 import browserIpc from '@lynx_shared/ipc/browser';
 import {ChatRound, ChatSquare, Earth} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
 import {Send} from 'lucide-react';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -34,7 +33,7 @@ export default function OnlineChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevMessagesCount = useRef<number>(0);
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom for new messages
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
   }, []);
@@ -240,7 +239,7 @@ export default function OnlineChatPage() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
