@@ -32,7 +32,7 @@ const PageComponents = {
 };
 
 import ptyIpc from '@lynx_shared/ipc/pty';
-import {memo, useEffect, useMemo} from 'react';
+import {ComponentType, memo, useEffect, useMemo} from 'react';
 
 import {useRemoveTab} from './tabs/utils';
 
@@ -68,8 +68,8 @@ const AppPages = memo(({tabID, pageID}: Props) => {
 
   const customPage = (extensionsData.router.pages || []).find(p => p.id === pageID);
   if (customPage) {
-    const Component = customPage.component;
-    return <Component />;
+    const Component = customPage.component as ComponentType<{tabID?: string}>;
+    return <Component tabID={tabID} />;
   }
 
   const routerReplace = extensionsData.router.replace;
@@ -83,14 +83,14 @@ const AppPages = memo(({tabID, pageID}: Props) => {
     [PageID.dashboard]: routerReplace.dashboardPage,
     [PageID.plugins]: routerReplace.extensionsPage,
     [PageID.settings]: routerReplace.settingsPage,
-  }[pageID];
+  }[pageID] as ComponentType<{tabID?: string}> | undefined;
 
   if (ReplacedComponent) {
-    return <ReplacedComponent />;
+    return <ReplacedComponent tabID={tabID} />;
   }
 
-  const Component = PageComponents[pageID] || HomePage;
-  return <Component />;
+  const Component = (PageComponents[pageID] || HomePage) as ComponentType<{tabID?: string}>;
+  return <Component tabID={tabID} />;
 });
 
 export default AppPages;

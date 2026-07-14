@@ -1,7 +1,6 @@
 import {Button, Card, ScrollShadow, TextArea} from '@heroui/react';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
-import {useTabsState} from '@lynx/redux/reducers/tabs';
 import browserIpc from '@lynx_shared/ipc/browser';
 import {ChatRound, ChatSquare, Earth} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
@@ -10,6 +9,8 @@ import {KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState} from '
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import {useTabsState} from '../../redux/reducers/tabs';
+
 type ChatStep = 'select_module' | 'login' | 'chat';
 
 interface Message {
@@ -17,7 +18,11 @@ interface Message {
   text: string;
 }
 
-export default function OnlineChatPage() {
+interface Props {
+  tabID?: string;
+}
+
+export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
   const activeTab = useTabsState('activeTab');
   const allCards = useAllCardDataWithPath();
 
@@ -47,12 +52,8 @@ export default function OnlineChatPage() {
 
   // Clean up browser if unmounting page
   useEffect(() => {
-    return () => {
-      // We don't remove it completely to preserve session in the background
-      // but ensure it's hidden
-      browserIpc.send.setVisible(activeTab, false);
-    };
-  }, [activeTab]);
+    browserIpc.send.setVisible(tabID, activeTab === tabID);
+  }, [tabID, activeTab]);
 
   const handleSelectCard = useCallback(
     (card: any) => {
@@ -61,65 +62,33 @@ export default function OnlineChatPage() {
       setIsPageLoaded(false);
 
       // Initialize browser view
-      browserIpc.send.createBrowser(activeTab);
-      browserIpc.send.loadURL(activeTab, card.onlineConfig.url);
-      browserIpc.send.setVisible(activeTab, true);
+      browserIpc.send.createBrowser(tabID);
+      browserIpc.send.loadURL(tabID, card.onlineConfig.url);
+      browserIpc.send.setVisible(tabID, true);
     },
-    [activeTab],
+    [tabID],
   );
 
   // Auto-select card if tab ID contains a card identifier
   useEffect(() => {
-    if (activeTab.startsWith('online-chat-')) {
-      const cardId = activeTab.replace('online-chat-', '');
+    if (tabID.startsWith('online-chat-')) {
+      const cardId = tabID.replace('online-chat-', '');
       const foundCard = onlineCards.find(c => c.id === cardId);
       if (foundCard && (!selectedCard || selectedCard.id !== cardId)) {
         handleSelectCard(foundCard);
       }
     }
-  }, [activeTab, onlineCards, selectedCard, handleSelectCard]);
+  }, [tabID, onlineCards, selectedCard, handleSelectCard]);
 
   const handleBackToSelect = () => {
-    browserIpc.send.removeBrowser(activeTab);
+    browserIpc.send.removeBrowser(tabID);
     setSelectedCard(null);
     setStep('select_module');
     setMessages([]);
   };
 
-  const handleGoToChat = () => {
-    browserIpc.send.setVisible(activeTab, false);
-    setStep('chat');
-    // Run initial scrape immediately
-    scrapeMessages();
-  };
-
-  const handleShowWebpage = () => {
-    setStep('login');
-    browserIpc.send.setVisible(activeTab, true);
-  };
-
-  // Monitor loading state of the browser page
-  useEffect(() => {
-    const offLoading = browserIpc.on.loading((id, isLoading) => {
-      if (id === activeTab && !isLoading) {
-        setIsPageLoaded(true);
-      }
-    });
-
-    const offDomReady = browserIpc.on.domReady((id, isReady) => {
-      if (id === activeTab && isReady) {
-        setIsPageLoaded(true);
-      }
-    });
-
-    return () => {
-      offLoading();
-      offDomReady();
-    };
-  }, [activeTab]);
-
   // Dynamic DOM scraping function
-  const scrapeMessages = async () => {
+  const scrapeMessages = useCallback(async () => {
     if (!selectedCard || !selectedCard.onlineConfig) return;
     const {selectors} = selectedCard.onlineConfig;
 
@@ -142,7 +111,7 @@ export default function OnlineChatPage() {
     `;
 
     try {
-      const res = await browserIpc.invoke.executeJavaScript(activeTab, script);
+      const res = await browserIpc.invoke.executeJavaScript(tabID, script);
       if (Array.isArray(res)) {
         // Simple sanity check of contents
         const validMsgs: Message[] = res
@@ -157,7 +126,39 @@ export default function OnlineChatPage() {
     } catch (err) {
       console.error('Failed to scrape background page:', err);
     }
+  }, [selectedCard, tabID]);
+
+  const handleGoToChat = () => {
+    browserIpc.send.setVisible(tabID, false);
+    setStep('chat');
+    // Run initial scrape immediately
+    scrapeMessages();
   };
+
+  const handleShowWebpage = () => {
+    setStep('login');
+    browserIpc.send.setVisible(tabID, true);
+  };
+
+  // Monitor loading state of the browser page
+  useEffect(() => {
+    const offLoading = browserIpc.on.loading((id, isLoading) => {
+      if (id === tabID && !isLoading) {
+        setIsPageLoaded(true);
+      }
+    });
+
+    const offDomReady = browserIpc.on.domReady((id, isReady) => {
+      if (id === tabID && isReady) {
+        setIsPageLoaded(true);
+      }
+    });
+
+    return () => {
+      offLoading();
+      offDomReady();
+    };
+  }, [tabID]);
 
   // Polling hook when in chat mode
   useEffect(() => {
@@ -167,10 +168,10 @@ export default function OnlineChatPage() {
     const interval = setInterval(scrapeMessages, 1000);
 
     return () => clearInterval(interval);
-  }, [step, selectedCard, activeTab]);
+  }, [step, selectedCard, scrapeMessages]);
 
   // Send message using JS injection
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!inputText.trim() || isSending || !selectedCard) return;
     const messageToSend = inputText;
     setInputText('');
@@ -229,7 +230,7 @@ export default function OnlineChatPage() {
     `;
 
     try {
-      await browserIpc.invoke.executeJavaScript(activeTab, script);
+      await browserIpc.invoke.executeJavaScript(tabID, script);
       // Wait a short moment and then pull updates immediately
       setTimeout(scrapeMessages, 600);
     } catch (err) {
@@ -237,7 +238,7 @@ export default function OnlineChatPage() {
     } finally {
       setIsSending(false);
     }
-  };
+  }, [inputText, isSending, selectedCard, scrapeMessages, tabID]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
