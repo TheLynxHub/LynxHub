@@ -2,8 +2,9 @@ import {Button, Card, ScrollShadow, TextArea} from '@heroui/react';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import {useTabsState} from '@lynx/redux/reducers/tabs';
+import {Terminal_Icon} from '@lynx_assets/icons';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {ChatSquare} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRound, ChatSquare, Earth} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
 import {Send} from 'lucide-react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -260,36 +261,27 @@ export default function OnlineChatPage() {
             <span className="font-bold text-foreground text-sm">Online Chat</span>
           </div>
         ) : (
-          <div className="flex items-center gap-x-3">
+          <div className="flex items-center gap-x-2">
             <Button size="sm" variant="ghost" className="min-w-8 p-0 h-8" onPress={handleBackToSelect}>
               <AltArrowLeft className="size-5" />
             </Button>
             <div className="flex flex-col justify-center">
               <div className="flex items-center gap-2 leading-none">
                 <span className="font-bold text-foreground text-sm">{selectedCard.title}</span>
-                {step === 'chat' && <span className="size-1.5 rounded-full bg-success animate-pulse" />}
               </div>
-              <span className="text-[10px] text-default-400 leading-none mt-0.5">
-                {step === 'login' ? 'Login & Authentication Screen' : 'Running in background'}
-              </span>
             </div>
           </div>
         )}
 
         <div className="flex items-center gap-3">
-          {step === 'login' && (
-            <>
-              {!isPageLoaded && <span className="text-xs text-default-400">Loading website...</span>}
-              <Button size="sm" className="h-8" variant="primary" onPress={handleGoToChat}>
-                Show Chatting
-              </Button>
-            </>
-          )}
-          {step === 'chat' && (
-            <Button size="sm" className="h-8" variant="primary" onPress={handleShowWebpage}>
-              Show Page
-            </Button>
-          )}
+          {step === 'login' && !isPageLoaded && <span className="text-xs text-default-400">Loading website...</span>}
+
+          <Button
+            size="sm"
+            onPress={step === 'chat' ? handleShowWebpage : handleGoToChat}
+            className="w-18 bg-accent-soft hover:bg-accent/30 text-accent-soft-foreground">
+            {step === 'chat' ? <Earth className="size-4" /> : <ChatRound className="size-4" />}
+          </Button>
         </div>
       </div>
     );
