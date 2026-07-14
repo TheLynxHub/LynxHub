@@ -278,12 +278,14 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
         <div className="flex items-center gap-3">
           {step === 'login' && !isPageLoaded && <span className="text-xs text-default-400">Loading website...</span>}
 
-          <Button
-            size="sm"
-            onPress={step === 'chat' ? handleShowWebpage : handleGoToChat}
-            className="w-18 bg-accent-soft hover:bg-accent/30 text-accent-soft-foreground">
-            {step === 'chat' ? <Earth className="size-4" /> : <ChatRound className="size-4" />}
-          </Button>
+          {step !== 'select_module' && (
+            <Button
+              size="sm"
+              onPress={step === 'chat' ? handleShowWebpage : handleGoToChat}
+              className="w-18 bg-accent-soft hover:bg-accent/30 text-accent-soft-foreground">
+              {step === 'chat' ? <Earth className="size-4" /> : <ChatRound className="size-4" />}
+            </Button>
+          )}
         </div>
       </div>
     );
