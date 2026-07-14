@@ -52,7 +52,8 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
 
   // Clean up browser if unmounting page
   useEffect(() => {
-    browserIpc.send.setVisible(tabID, activeTab === tabID);
+    const visible = activeTab === tabID && step === 'login';
+    browserIpc.send.setVisible(tabID, visible);
   }, [tabID, activeTab]);
 
   const handleSelectCard = useCallback(
