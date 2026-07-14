@@ -253,11 +253,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
   // Render TopBar
   const renderTopBar = () => {
     return (
-      <div
-        className={
-          'h-12 inset-x-0 top-0 absolute bg-white dark:bg-LynxNearBlack ' +
-          'flex flex-row px-4 py-1 items-center justify-between shadow-sm z-10'
-        }>
+      <div className="h-12 inset-x-0 top-0 absolute bg-surface flex px-2 py-1 items-center justify-between z-10">
         {step === 'select_module' ? (
           <div className="flex items-center gap-x-2">
             <ChatSquare className="size-5 text-accent" />
@@ -265,7 +261,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
           </div>
         ) : (
           <div className="flex items-center gap-x-2">
-            <Button size="sm" variant="ghost" className="min-w-8 p-0 h-8" onPress={handleBackToSelect}>
+            <Button size="sm" variant="ghost" className="shrink-0" onPress={handleBackToSelect} isIconOnly>
               <AltArrowLeft className="size-5" />
             </Button>
             <div className="flex flex-col justify-center">
