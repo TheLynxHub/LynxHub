@@ -308,13 +308,7 @@ export default function OnlineChatPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {!isPageLoaded ? (
-              <span className="text-xs text-default-400">Loading website...</span>
-            ) : (
-              <span className="flex items-center gap-1.5 text-xs text-success-600 font-semibold bg-success-500/10 px-2 py-1 rounded-full">
-                <CheckCircle className="size-3.5" /> Ready
-              </span>
-            )}
+            {!isPageLoaded && <span className="text-xs text-default-400">Loading website...</span>}
             <Button size="sm" variant="primary" onPress={handleGoToChat}>
               Show Chatting
             </Button>
