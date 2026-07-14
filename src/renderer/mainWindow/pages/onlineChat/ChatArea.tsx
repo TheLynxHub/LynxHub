@@ -68,6 +68,18 @@ const markdownComponents: Components = {
       </li>
     );
   },
+  a({href, children, ...props}) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-accent hover:underline font-semibold"
+        {...props}>
+        {children}
+      </a>
+    );
+  },
 };
 
 const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatAreaProps) => {
