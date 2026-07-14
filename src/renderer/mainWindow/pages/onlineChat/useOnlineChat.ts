@@ -132,6 +132,14 @@ export function useOnlineChat(tabID = 'online-chat') {
               }
               case 'a':
                 return ' [' + children.trim() + '](' + (node.getAttribute('href') || '') + ') ';
+              case 'blockquote':
+                return (
+                  '\\n\\n> ' +
+                  children.trim().replace(/\\n/g, '\\n> ') +
+                  '\\n\\n'
+                );
+              case 'hr':
+                return '\\n\\n---\\n\\n';
               case 'br':
                 return '\\n';
               default:
