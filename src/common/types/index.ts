@@ -266,6 +266,7 @@ export type CardState = {
   isOnline?: boolean;
   logoUrl?: string;
   iconUrl?: string;
+  developer?: string;
 
   installed: boolean;
   menuIsOpen: boolean;

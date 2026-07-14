@@ -27,18 +27,19 @@ export const CardHeaderContent = memo(({modifiedTitle, onTitleChange, updateAvai
   const isOnline = useCardStore(state => state.isOnline);
   const iconUrl = useCardStore(state => state.iconUrl);
   const logoUrl = useCardStore(state => state.logoUrl);
+  const customDeveloper = useCardStore(state => state.developer);
 
   const {developer, avatarSrc} = useMemo(() => {
     const customIcon = iconUrl || logoUrl;
     if (isOnline) {
-      return {developer: 'Online', avatarSrc: customIcon || ''};
+      return {developer: customDeveloper || 'Online', avatarSrc: customIcon || ''};
     }
     if (!repoUrl) {
-      return {developer: 'Local', avatarSrc: customIcon || ''};
+      return {developer: customDeveloper || 'Local', avatarSrc: customIcon || ''};
     }
     const {owner, avatarUrl} = extractGitUrl(repoUrl);
-    return {developer: owner || 'Local', avatarSrc: customIcon || getCacheUrl(avatarUrl)};
-  }, [repoUrl, isOnline, iconUrl, logoUrl]);
+    return {developer: customDeveloper || owner || 'Local', avatarSrc: customIcon || getCacheUrl(avatarUrl)};
+  }, [repoUrl, isOnline, iconUrl, logoUrl, customDeveloper]);
 
   return (
     <CardHeader className="justify-between flex-row">

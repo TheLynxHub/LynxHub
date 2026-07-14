@@ -520,6 +520,9 @@ export type CardData = {
   /** An optional URL or local path for the card's avatar or icon */
   logoUrl?: string;
   iconUrl?: string;
+
+  /** An optional developer/creator name to display on the card */
+  developer?: string;
 };
 
 export interface OnlineConfig {

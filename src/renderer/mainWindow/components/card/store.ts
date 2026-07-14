@@ -29,6 +29,7 @@ export const createCardStore = (
     isOnline: initialData.isOnline,
     logoUrl: initialData.logoUrl,
     iconUrl: initialData.iconUrl,
+    developer: initialData.developer,
 
     // Component State
     menuIsOpen: false,
