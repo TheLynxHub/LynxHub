@@ -1,9 +1,9 @@
-import {Avatar, Button, Card, ScrollShadow, TextArea} from '@heroui/react';
+import {Avatar, Button, Card, InputGroup, ScrollShadow, TextField} from '@heroui/react';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {ChatRound, ChatSquare, Earth} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRound, Earth} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
 import {Send} from 'lucide-react';
 import {KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -296,7 +296,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
           {onlineCards.length === 0 ? (
             <Card className="p-8 max-w-md text-center border border-border">
               <Card.Content className="flex flex-col items-center gap-4">
-                <ChatSquare className="size-16 text-muted opacity-60" />
+                <ChatRound className="size-16 text-muted opacity-60" />
                 <div className="font-semibold text-lg text-foreground">No Online Modules Installed</div>
                 <div className="text-sm text-muted">
                   Install a module marked as an online background scraper to begin.
@@ -352,7 +352,7 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
         <ScrollShadow className="flex-1 p-6 gap-y-4">
           {messages.length === 0 ? (
             <div className={'flex flex-col text-semi-muted items-center justify-center h-full text-center gap-y-2'}>
-              <ChatSquare className="size-12" />
+              <ChatRound className="size-12" />
               <div className="font-semibold">Start a new conversation</div>
               <div className="text-xs text-muted">Your chat history will sync here automatically.</div>
             </div>
@@ -382,32 +382,28 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
 
         {/* Message Input Box */}
         <div className="p-4 bg-surface shrink-0">
-          <div
-            className={
-              'max-w-4xl mx-auto flex items-end gap-3 bg-surface-secondary border border-border rounded-2xl' +
-              ' p-2 focus-within:border-accent/50 transition-colors duration-200'
-            }>
-            <TextArea
-              className={
-                'flex-1 max-h-32 min-h-10 outline-none border-none bg-transparent py-2 px-3 text-sm' +
-                ' text-foreground placeholder-muted resize-none overflow-y-auto scrollbar-hide' +
-                ' font-Nunito shadow-none focus:bg-transparent hover:bg-transparent focus:border-none'
-              }
-              rows={1}
-              value={inputText}
-              onKeyDown={handleKeyDown}
-              onChange={e => setInputText(e.target.value)}
-              placeholder={`Message ${selectedCard.title}...`}
-            />
-            <Button
-              variant="primary"
-              className="shrink-0"
-              onPress={handleSendMessage}
-              isDisabled={!inputText.trim() || isSending}
-              isIconOnly>
-              <Send />
-            </Button>
-          </div>
+          <TextField name="message" aria-label="Message input" className="max-w-4xl mx-auto w-full">
+            <InputGroup className="p-2" variant="secondary" fullWidth>
+              <InputGroup.TextArea
+                rows={1}
+                value={inputText}
+                className="max-h-32"
+                onKeyDown={handleKeyDown}
+                onChange={e => setInputText(e.target.value)}
+                placeholder={`Message ${selectedCard.title}...`}
+              />
+              <InputGroup.Suffix className="p-0.5 shrink-0 self-end">
+                <Button
+                  variant="primary"
+                  className="shrink-0"
+                  onPress={handleSendMessage}
+                  isDisabled={!inputText.trim() || isSending}
+                  isIconOnly>
+                  <Send />
+                </Button>
+              </InputGroup.Suffix>
+            </InputGroup>
+          </TextField>
         </div>
       </div>
     );
