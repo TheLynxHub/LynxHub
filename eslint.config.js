@@ -37,6 +37,7 @@ export default defineConfig([
         ...globals.browser,
         ...globals.node,
       },
+      ecmaVersion: '2025',
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
