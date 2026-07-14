@@ -7,7 +7,7 @@ import react from 'eslint-plugin-react';
 import hooksPlugin from 'eslint-plugin-react-hooks';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
-// import tsEslint from 'typescript-eslint';
+import tsEslint from 'typescript-eslint';
 
 const MAX_LINE_LENGTH = 120;
 
@@ -19,7 +19,7 @@ export default defineConfig([
 
   eslint.configs.recommended,
   react.configs.flat.recommended,
-  // tsEslint.configs.recommended,
+  tsEslint.configs.recommended,
   {
     rules: {
       '@typescript-eslint/ban-ts-comment': 'off',
@@ -37,7 +37,6 @@ export default defineConfig([
         ...globals.browser,
         ...globals.node,
       },
-      ecmaVersion: '2025',
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
