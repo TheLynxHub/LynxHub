@@ -53,16 +53,19 @@ export default function OnlineChatPage() {
     };
   }, [activeTab]);
 
-  const handleSelectCard = useCallback((card: any) => {
-    setSelectedCard(card);
-    setStep('login');
-    setIsPageLoaded(false);
+  const handleSelectCard = useCallback(
+    (card: any) => {
+      setSelectedCard(card);
+      setStep('login');
+      setIsPageLoaded(false);
 
-    // Initialize browser view
-    browserIpc.send.createBrowser(activeTab);
-    browserIpc.send.loadURL(activeTab, card.onlineConfig.url);
-    browserIpc.send.setVisible(activeTab, true);
-  }, [activeTab]);
+      // Initialize browser view
+      browserIpc.send.createBrowser(activeTab);
+      browserIpc.send.loadURL(activeTab, card.onlineConfig.url);
+      browserIpc.send.setVisible(activeTab, true);
+    },
+    [activeTab],
+  );
 
   // Auto-select card if tab ID contains a card identifier
   useEffect(() => {
@@ -245,8 +248,8 @@ export default function OnlineChatPage() {
   // Render Step 1: Select Module
   if (step === 'select_module') {
     return (
-      <div className="flex size-full flex-col items-center justify-center p-6 gap-y-6">
-        <div className="text-center space-y-2">
+      <div className="flex size-full flex-col items-center justify-center p-6 gap-y-6 bg-surface-secondary rounded-3xl">
+        <div className="text-center space-y-2 mb-4">
           <h2 className="text-3xl font-bold font-Nunito text-foreground">Select an Online AI Service</h2>
           <p className="text-default-500 max-w-md text-sm">
             Choose a web-based AI assistant. You will log in once via the page tab, then switch to a clean custom
@@ -270,8 +273,8 @@ export default function OnlineChatPage() {
               <Card
                 key={card.id}
                 onClick={() => handleSelectCard(card)}
-                className="hover:scale-[1.02] cursor-pointer transition-all duration-200 border border-divider bg-content1 shadow-sm">
-                <Card.Content className="flex flex-col gap-3 p-5">
+                className="hover:scale-[1.02] cursor-pointer transition-all duration-200">
+                <Card.Content className="flex flex-col gap-3 p-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
                       <ChatSquare className="size-6" />
@@ -291,8 +294,8 @@ export default function OnlineChatPage() {
   // Render Step 2: Web Login Webpage
   if (step === 'login') {
     return (
-      <div className="flex size-full flex-col overflow-hidden bg-background">
-        <div className="flex items-center justify-between border-b border-divider px-6 py-3 bg-content1/80 backdrop-blur-md shrink-0">
+      <div className="flex size-full flex-col overflow-hidden rounded-3xl bg-surface-secondary">
+        <div className="flex items-center justify-between px-6 py-3 bg-surface-secondary/80 shrink-0">
           <div className="flex items-center gap-x-3">
             <Button size="sm" variant="ghost" className="min-w-8 p-0" onPress={handleBackToSelect}>
               <AltArrowLeft className="size-5" />
@@ -311,7 +314,7 @@ export default function OnlineChatPage() {
                 <CheckCircle className="size-3.5" /> Ready
               </span>
             )}
-            <Button size="sm" variant="primary" className="font-semibold shadow-md" onPress={handleGoToChat}>
+            <Button size="sm" variant="primary" onPress={handleGoToChat}>
               Start Chatting (Go to Background)
             </Button>
           </div>
@@ -326,9 +329,9 @@ export default function OnlineChatPage() {
 
   // Render Step 3: Custom Chat Interface
   return (
-    <div className="flex size-full flex-col overflow-hidden bg-background">
+    <div className="flex size-full flex-col overflow-hidden bg-surface-secondary rounded-3xl">
       {/* Chat Header */}
-      <div className="flex items-center justify-between border-b border-divider px-6 py-4 bg-content1/80 backdrop-blur-md shrink-0 shadow-sm">
+      <div className="flex items-center justify-between border-b border-divider px-6 py-4 bg-surface-secondary/80 backdrop-blur-md shrink-0 shadow-sm">
         <div className="flex items-center gap-x-3">
           <Button size="sm" variant="ghost" className="min-w-8 p-0" onPress={handleBackToSelect}>
             <AltArrowLeft className="size-5" />
@@ -342,11 +345,7 @@ export default function OnlineChatPage() {
           </div>
         </div>
 
-        <Button
-          size="sm"
-          variant="tertiary"
-          className="font-semibold text-xs border border-divider hover:bg-content2"
-          onPress={handleShowWebpage}>
+        <Button size="sm" variant="tertiary" className="font-semibold text-xs" onPress={handleShowWebpage}>
           <Earth className="size-4" />
           Show Web Page
         </Button>
@@ -370,7 +369,7 @@ export default function OnlineChatPage() {
                     className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-sm border text-sm transition-all duration-200 ${
                       isUser
                         ? 'bg-primary/10 text-foreground border-primary/25 rounded-tr-none'
-                        : 'bg-content1 text-foreground border-divider rounded-tl-none'
+                        : 'bg-surface-secondary text-foreground border-divider rounded-tl-none'
                     }`}>
                     <div className="prose dark:prose-invert max-w-none text-sm break-words leading-relaxed">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
@@ -385,8 +384,8 @@ export default function OnlineChatPage() {
       </ScrollShadow>
 
       {/* Message Input Box */}
-      <div className="border-t border-divider p-4 bg-content1/50 shrink-0">
-        <div className="max-w-4xl mx-auto flex items-end gap-3 bg-content1 border border-divider rounded-2xl p-2 focus-within:border-primary/50 transition-colors duration-200">
+      <div className="border-t border-border p-4 bg-surface-secondary/50 shrink-0">
+        <div className="max-w-4xl mx-auto flex items-end gap-3 bg-surface-secondary border border-divider rounded-2xl p-2 focus-within:border-primary/50 transition-colors duration-200">
           <textarea
             value={inputText}
             onChange={e => setInputText(e.target.value)}
@@ -396,12 +395,12 @@ export default function OnlineChatPage() {
             rows={1}
           />
           <Button
-            size="sm"
             variant="primary"
-            className="min-w-10 w-10 h-10 p-0 rounded-xl shrink-0 shadow-md"
+            isIconOnly
+            className="shrink-0"
             onPress={handleSendMessage}
             isDisabled={!inputText.trim() || isSending}>
-            <Send className="size-4" />
+            <Send />
           </Button>
         </div>
       </div>

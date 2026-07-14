@@ -1,11 +1,11 @@
-import {Button} from '@heroui/react';
+import {Button, Separator} from '@heroui/react';
 import {cardsActions} from '@lynx/redux/reducers/cards';
 import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
 import {Terminal_Icon} from '@lynx_assets/icons';
 import {PageID} from '@lynx_common/consts';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Earth, ChatSquare} from '@solar-icons/react-perf/BoldDuotone';
+import {Earth, ChatRound} from '@solar-icons/react-perf/BoldDuotone';
 import {motion} from 'framer-motion';
 import {Plus} from 'lucide-react';
 import {useDispatch} from 'react-redux';
@@ -72,11 +72,13 @@ export default function HomeTopBar() {
         animate={{scale: 1, translateY: 0, opacity: 1}}
         initial={{scale: 0.96, translateY: -10, opacity: 0}}>
         <motion.div transition={{delay: 0.05}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
-          <Button size="sm" className="w-27" variant="tertiary" onPress={handleNewOnlineChat}>
-            <ChatSquare className="size-4" />
-            Online Chat
+          <Button size="sm" variant="tertiary" onPress={handleNewOnlineChat}>
+            <ChatRound />
+            Chat
           </Button>
         </motion.div>
+
+        <Separator orientation="vertical" variant="secondary" className="my-2" />
 
         <motion.div transition={{delay: 0.1}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
           <Button size="sm" className="w-25" variant="tertiary" onPress={handleNewTerminal}>
