@@ -314,9 +314,12 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
 
                 return (
                   <Card
+                    className={
+                      'hover:scale-[1.02] cursor-pointer transition-all duration-200 w-77 h-41' +
+                      ' border border-border'
+                    }
                     key={card.id}
-                    onClick={() => handleSelectCard(card)}
-                    className="hover:scale-[1.02] cursor-pointer transition-all duration-200 w-77 h-41">
+                    onClick={() => handleSelectCard(card)}>
                     <Card.Content className="flex flex-col gap-4 p-2">
                       <div className="flex items-center gap-3">
                         <Avatar className="size-12 shrink-0">
