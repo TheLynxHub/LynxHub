@@ -101,13 +101,85 @@ export default function OnlineChatPage({tabID = 'online-chat'}: Props) {
         const assistantSel = ${JSON.stringify(selectors.assistantMessage)};
         const textSel = ${JSON.stringify(selectors.messageText)};
         
+        const htmlToMarkdown = (el) => {
+          if (!el) return '';
+          
+          const walk = (node) => {
+            if (node.nodeType === 3) {
+              return node.nodeValue || '';
+            }
+            if (node.nodeType !== 1) {
+              return '';
+            }
+            const tag = node.tagName.toLowerCase();
+            
+            // Handle code blocks specially to avoid grabbing extra copy-button text
+            if (tag === 'pre') {
+              const codeEl = node.querySelector('code');
+              if (codeEl) {
+                const langClass = Array.from(codeEl.classList).find(c => c.startsWith('language-'));
+                const lang = langClass ? langClass.replace('language-', '') : '';
+                return '\\n\`\`\`' + lang + '\\n' + (codeEl.textContent || '') + '\\n\`\`\`\\n';
+              }
+              return '\\n\`\`\`\\n' + (node.textContent || '') + '\\n\`\`\`\\n';
+            }
+            
+            let children = '';
+            for (let i = 0; i < node.childNodes.length; i++) {
+              children += walk(node.childNodes[i]);
+            }
+            
+            switch (tag) {
+              case 'p':
+                return '\\n\\n' + children.trim() + '\\n\\n';
+              case 'h1': return '\\n\\n# ' + children.trim() + '\\n\\n';
+              case 'h2': return '\\n\\n## ' + children.trim() + '\\n\\n';
+              case 'h3': return '\\n\\n### ' + children.trim() + '\\n\\n';
+              case 'h4': return '\\n\\n#### ' + children.trim() + '\\n\\n';
+              case 'h5': return '\\n\\n##### ' + children.trim() + '\\n\\n';
+              case 'h6': return '\\n\\n###### ' + children.trim() + '\\n\\n';
+              case 'strong':
+              case 'b':
+                return ' **' + children.trim() + '** ';
+              case 'em':
+              case 'i':
+                return ' *' + children.trim() + '* ';
+              case 'code':
+                return ' \`' + children.trim() + '\` ';
+              case 'ul':
+                return '\\n' + children + '\\n';
+              case 'ol':
+                return '\\n' + children + '\\n';
+              case 'li': {
+                const isOrdered = node.parentNode && node.parentNode.tagName.toLowerCase() === 'ol';
+                if (isOrdered) {
+                  const lis = Array.from(node.parentNode.children).filter(c => c.tagName.toLowerCase() === 'li');
+                  const index = lis.indexOf(node) + 1;
+                  return '\\n' + index + '. ' + children.trim();
+                }
+                return '\\n- ' + children.trim();
+              }
+              case 'a':
+                return ' [' + children.trim() + '](' + (node.getAttribute('href') || '') + ') ';
+              case 'br':
+                return '\\n';
+              default:
+                return children;
+            }
+          };
+          
+          return walk(el)
+            .replace(/\\n{3,}/g, '\\n\\n')
+            .trim();
+        };
+
         const elements = Array.from(document.querySelectorAll(\`\${userSel}, \${assistantSel}\`));
         return elements.map(el => {
           const isUser = el.matches(userSel) || el.closest(userSel) !== null;
           const textEl = textSel ? el.querySelector(textSel) : el;
           return {
             sender: isUser ? 'user' : 'assistant',
-            text: textEl ? textEl.innerText || textEl.textContent : el.innerText
+            text: htmlToMarkdown(textEl)
           };
         });
       })()
