@@ -17,7 +17,7 @@ import {
 import {APP_ICON_TRANSPARENT, PageID} from '@lynx_common/consts';
 import {TabInfo} from '@lynx_common/types';
 import {getCacheUrl} from '@lynx_common/utils';
-import {Earth} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRound, Earth} from '@solar-icons/react-perf/BoldDuotone';
 import {AnimatePresence, motion, MotionProps} from 'framer-motion';
 import {memo, useCallback, useEffect, useMemo, useState} from 'react';
 
@@ -57,6 +57,8 @@ const getPageIcon = (pageID: string) => {
       return <PluginPage_Icon className="size-full" />;
     case PageID.settings:
       return <SettingPage_Icon className="size-full" />;
+    case PageID.onlineChat:
+      return <ChatRound className="size-full" />;
     default: {
       const customPage = (extensionsData.router.pages || []).find(p => p.id === pageID);
       if (customPage) {
