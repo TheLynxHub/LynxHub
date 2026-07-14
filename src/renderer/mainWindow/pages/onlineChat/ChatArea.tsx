@@ -1,4 +1,4 @@
-import {Button, InputGroup, ScrollShadow, TextField} from '@heroui/react';
+import {Button, InputGroup, Link, linkVariants, ScrollShadow, TextField} from '@heroui/react';
 import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
 import {Send} from 'lucide-react';
 import {KeyboardEvent, memo, useCallback, useEffect, useRef, useState} from 'react';
@@ -70,13 +70,9 @@ const markdownComponents: Components = {
   },
   a({href, children, ...props}) {
     return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-accent hover:underline font-semibold"
-        {...props}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className="link no-underline text-accent" {...props}>
         {children}
+        <Link.Icon className="link__icon" />
       </a>
     );
   },
