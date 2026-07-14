@@ -246,168 +246,184 @@ export default function OnlineChatPage() {
     }
   };
 
-  // Render Step 1: Select Module
-  if (step === 'select_module') {
+  // Render TopBar
+  const renderTopBar = () => {
     return (
-      <div className="flex size-full flex-col items-center justify-center p-6 gap-y-6 bg-surface-secondary rounded-3xl">
-        <div className="text-center space-y-2 mb-4">
-          <h2 className="text-3xl font-bold font-Nunito text-foreground">Select an Online AI Service</h2>
-          <p className="text-default-500 max-w-md text-sm">
-            Choose a web-based AI assistant. You will log in once via the page tab, then switch to a clean custom
-            interface.
-          </p>
-        </div>
-
-        {onlineCards.length === 0 ? (
-          <Card className="p-8 max-w-md text-center border border-border">
-            <Card.Content className="flex flex-col items-center gap-4">
-              <ChatSquare className="size-16 text-default-400 opacity-60" />
-              <div className="font-semibold text-lg text-foreground">No Online Modules Installed</div>
-              <div className="text-sm text-default-500">
-                Install a module marked as an online background scrapper to begin.
-              </div>
-            </Card.Content>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
-            {onlineCards.map(card => (
-              <Card
-                key={card.id}
-                onClick={() => handleSelectCard(card)}
-                className="hover:scale-[1.02] cursor-pointer transition-all duration-200">
-                <Card.Content className="flex flex-col gap-3 p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-accent/10 text-accent">
-                      <ChatSquare className="size-6" />
-                    </div>
-                    <div className="font-bold text-lg text-foreground">{card.title}</div>
-                  </div>
-                  <div className="text-sm text-default-500 line-clamp-2">{card.description}</div>
-                </Card.Content>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Render Step 2: Web Login Webpage
-  if (step === 'login') {
-    return (
-      <div className="flex size-full flex-col overflow-hidden rounded-3xl bg-surface-secondary">
-        <div className="flex items-center justify-between px-6 py-3 bg-surface-secondary/80 shrink-0">
-          <div className="flex items-center gap-x-3">
-            <Button size="sm" variant="ghost" className="min-w-8 p-0" onPress={handleBackToSelect}>
-              <AltArrowLeft className="size-5" />
-            </Button>
-            <div>
-              <span className="font-bold text-foreground text-base">{selectedCard.title}</span>
-              <span className="text-xs text-default-400 block">Login & Authentication Screen</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {!isPageLoaded && <span className="text-xs text-default-400">Loading website...</span>}
-            <Button size="sm" variant="primary" onPress={handleGoToChat}>
-              Show Chatting
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex-1 relative w-full bg-white">
-          <BrowserViewPlaceholder />
-        </div>
-      </div>
-    );
-  }
-
-  // Render Step 3: Custom Chat Interface
-  return (
-    <div className="flex size-full flex-col overflow-hidden bg-surface-secondary rounded-3xl">
-      {/* Chat Header */}
       <div
         className={
-          'flex items-center justify-between border-b border-border px-6 py-4 bg-surface-secondary/80' +
-          ' backdrop-blur-md shrink-0 shadow-sm'
+          'h-12 inset-x-0 top-0 absolute bg-white dark:bg-LynxNearBlack ' +
+          'flex flex-row px-4 py-1 items-center justify-between shadow-sm z-10'
         }>
-        <div className="flex items-center gap-x-3">
-          <Button size="sm" variant="ghost" className="min-w-8 p-0" onPress={handleBackToSelect}>
-            <AltArrowLeft className="size-5" />
-          </Button>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-foreground text-lg">{selectedCard.title}</span>
-              <span className="size-2 rounded-full bg-success animate-pulse" />
-            </div>
-            <span className="text-xs text-default-400">Running in background</span>
-          </div>
-        </div>
-
-        <Button size="sm" variant="primary" onPress={handleShowWebpage}>
-          Show Page
-        </Button>
-      </div>
-
-      {/* Chat Messages */}
-      <ScrollShadow className="flex-1 p-6 space-y-4 overflow-y-auto">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center space-y-2 opacity-50 py-12">
-            <ChatSquare className="size-12 text-default-400" />
-            <div className="font-semibold">Start a new conversation</div>
-            <div className="text-xs text-default-500">Your chat history will sync here automatically.</div>
+        {step === 'select_module' ? (
+          <div className="flex items-center gap-x-2">
+            <ChatSquare className="size-5 text-accent" />
+            <span className="font-bold text-foreground text-sm">Online Chat</span>
           </div>
         ) : (
-          <div className="space-y-4">
-            {messages.map((msg, index) => {
-              const isUser = msg.sender === 'user';
-              return (
-                <div key={index} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
-                  <div
-                    className={`max-w-[75%] rounded-3xl px-4 py-3 shadow-surface border text-sm ${
-                      isUser ? 'bg-accent/10 border-accent/25 rounded-tr-sm' : 'bg-surface border-border rounded-tl-sm'
-                    } transition-all duration-200`}>
-                    <div className="prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="flex items-center gap-x-3">
+            <Button size="sm" variant="ghost" className="min-w-8 p-0 h-8" onPress={handleBackToSelect}>
+              <AltArrowLeft className="size-5" />
+            </Button>
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-2 leading-none">
+                <span className="font-bold text-foreground text-sm">{selectedCard.title}</span>
+                {step === 'chat' && <span className="size-1.5 rounded-full bg-success animate-pulse" />}
+              </div>
+              <span className="text-[10px] text-default-400 leading-none mt-0.5">
+                {step === 'login' ? 'Login & Authentication Screen' : 'Running in background'}
+              </span>
+            </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
-      </ScrollShadow>
 
-      {/* Message Input Box */}
-      <div className="border-t border-border p-4 bg-surface-secondary/50 shrink-0">
-        <div
-          className={
-            'max-w-4xl mx-auto flex items-end gap-3 bg-surface-secondary border border-border rounded-2xl' +
-            ' p-2 focus-within:border-accent/50 transition-colors duration-200'
-          }>
-          <TextArea
-            className={
-              'flex-1 max-h-32 min-h-10 outline-none border-none bg-transparent py-2 px-3 text-sm' +
-              ' text-foreground placeholder-default-400 resize-none overflow-y-auto scrollbar-hide' +
-              ' font-Nunito shadow-none focus:bg-transparent hover:bg-transparent focus:border-none'
-            }
-            rows={1}
-            value={inputText}
-            onKeyDown={handleKeyDown}
-            onChange={e => setInputText(e.target.value)}
-            placeholder={`Message ${selectedCard.title}...`}
-          />
-          <Button
-            variant="primary"
-            className="shrink-0"
-            onPress={handleSendMessage}
-            isDisabled={!inputText.trim() || isSending}
-            isIconOnly>
-            <Send />
-          </Button>
+        <div className="flex items-center gap-3">
+          {step === 'login' && (
+            <>
+              {!isPageLoaded && <span className="text-xs text-default-400">Loading website...</span>}
+              <Button size="sm" className="h-8" variant="primary" onPress={handleGoToChat}>
+                Show Chatting
+              </Button>
+            </>
+          )}
+          {step === 'chat' && (
+            <Button size="sm" className="h-8" variant="primary" onPress={handleShowWebpage}>
+              Show Page
+            </Button>
+          )}
         </div>
       </div>
+    );
+  };
+
+  // Render main step content
+  const renderContent = () => {
+    if (step === 'select_module') {
+      return (
+        <div className="flex size-full flex-col items-center justify-center p-6 gap-y-6 bg-surface-secondary">
+          <div className="text-center space-y-2 mb-4">
+            <h2 className="text-3xl font-bold font-Nunito text-foreground">Select an Online AI Service</h2>
+            <p className="text-default-500 max-w-md text-sm">
+              Choose a web-based AI assistant. You will log in once via the page tab, then switch to a clean custom
+              interface.
+            </p>
+          </div>
+
+          {onlineCards.length === 0 ? (
+            <Card className="p-8 max-w-md text-center border border-border">
+              <Card.Content className="flex flex-col items-center gap-4">
+                <ChatSquare className="size-16 text-default-400 opacity-60" />
+                <div className="font-semibold text-lg text-foreground">No Online Modules Installed</div>
+                <div className="text-sm text-default-500">
+                  Install a module marked as an online background scraper to begin.
+                </div>
+              </Card.Content>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
+              {onlineCards.map(card => (
+                <Card
+                  key={card.id}
+                  onClick={() => handleSelectCard(card)}
+                  className="hover:scale-[1.02] cursor-pointer transition-all duration-200">
+                  <Card.Content className="flex flex-col gap-3 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-accent/10 text-accent">
+                        <ChatSquare className="size-6" />
+                      </div>
+                      <div className="font-bold text-lg text-foreground">{card.title}</div>
+                    </div>
+                    <div className="text-sm text-default-500 line-clamp-2">{card.description}</div>
+                  </Card.Content>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (step === 'login') {
+      return (
+        <div className="flex size-full flex-col overflow-hidden bg-white">
+          <div className="flex-1 relative w-full bg-white">
+            <BrowserViewPlaceholder />
+          </div>
+        </div>
+      );
+    }
+
+    // step === 'chat'
+    return (
+      <div className="flex size-full flex-col overflow-hidden bg-white dark:bg-LynxNearBlack">
+        {/* Chat Messages */}
+        <ScrollShadow className="flex-1 p-6 space-y-4 overflow-y-auto">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-2 opacity-50 py-12">
+              <ChatSquare className="size-12 text-default-400" />
+              <div className="font-semibold">Start a new conversation</div>
+              <div className="text-xs text-default-500">Your chat history will sync here automatically.</div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((msg, index) => {
+                const isUser = msg.sender === 'user';
+                return (
+                  <div key={index} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`max-w-[75%] rounded-3xl px-4 py-3 shadow-surface border text-sm ${
+                        isUser
+                          ? 'bg-accent/10 border-accent/25 rounded-tr-sm'
+                          : 'bg-surface border-border rounded-tl-sm'
+                      } transition-all duration-200`}>
+                      <div className="prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </ScrollShadow>
+
+        {/* Message Input Box */}
+        <div className="border-t border-border p-4 bg-white dark:bg-LynxNearBlack shrink-0">
+          <div
+            className={
+              'max-w-4xl mx-auto flex items-end gap-3 bg-surface-secondary border border-border rounded-2xl' +
+              ' p-2 focus-within:border-accent/50 transition-colors duration-200'
+            }>
+            <TextArea
+              className={
+                'flex-1 max-h-32 min-h-10 outline-none border-none bg-transparent py-2 px-3 text-sm' +
+                ' text-foreground placeholder-default-400 resize-none overflow-y-auto scrollbar-hide' +
+                ' font-Nunito shadow-none focus:bg-transparent hover:bg-transparent focus:border-none'
+              }
+              rows={1}
+              value={inputText}
+              onKeyDown={handleKeyDown}
+              onChange={e => setInputText(e.target.value)}
+              placeholder={`Message ${selectedCard.title}...`}
+            />
+            <Button
+              variant="primary"
+              className="shrink-0"
+              onPress={handleSendMessage}
+              isDisabled={!inputText.trim() || isSending}
+              isIconOnly>
+              <Send />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="absolute inset-0 bg-white dark:bg-LynxNearBlack overflow-hidden flex flex-col">
+      {renderTopBar()}
+      <div className="absolute inset-0 top-12! overflow-hidden flex flex-col">{renderContent()}</div>
     </div>
   );
 }
