@@ -474,7 +474,7 @@ export type CardData = {
   id: string;
 
   /**  Url to repository (Using this url recognize, clone and update card) */
-  repoUrl: string;
+  repoUrl?: string;
 
   /**  The title of card */
   title: string;
@@ -488,7 +488,7 @@ export type CardData = {
   extensionsDir?: string;
 
   /** Type of installation. */
-  installationType: 'git' | 'others';
+  installationType?: 'git' | 'others';
 
   /** Type of uninstallation. */
   uninstallType?: 'removeFolder' | 'others';
@@ -509,13 +509,17 @@ export type CardData = {
   /** These methods will be called in the renderer process
    * @description This methods will be used when user interaction (Like recognizing URL to show in browser)
    */
-  methods: CardRendererMethods;
+  methods?: CardRendererMethods;
 
   /** Whether this is an online module running in the background browser */
   isOnline?: boolean;
 
   /** Selector configurations for scraping and inputting messages in the online module */
   onlineConfig?: OnlineConfig;
+
+  /** An optional URL or local path for the card's avatar or icon */
+  logoUrl?: string;
+  iconUrl?: string;
 };
 
 export interface OnlineConfig {

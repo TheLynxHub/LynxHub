@@ -263,6 +263,9 @@ export type CardState = {
   extensionsDir?: string;
   haveArguments: boolean;
   type: 'image' | 'audio' | 'text' | 'unknown';
+  isOnline?: boolean;
+  logoUrl?: string;
+  iconUrl?: string;
 
   installed: boolean;
   menuIsOpen: boolean;

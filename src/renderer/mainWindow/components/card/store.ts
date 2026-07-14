@@ -22,10 +22,13 @@ export const createCardStore = (
     title: initialData.title,
     id: initialData.id,
     description: initialData.description,
-    repoUrl: validateGitRepoUrl(initialData.repoUrl),
+    repoUrl: initialData.repoUrl ? validateGitRepoUrl(initialData.repoUrl) : '',
     extensionsDir: initialData.extensionsDir,
     haveArguments: initialData.hasArguments,
     type: initialData.type || 'unknown',
+    isOnline: initialData.isOnline,
+    logoUrl: initialData.logoUrl,
+    iconUrl: initialData.iconUrl,
 
     // Component State
     menuIsOpen: false,

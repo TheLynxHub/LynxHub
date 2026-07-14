@@ -53,7 +53,7 @@ export default function OnlineChatPage() {
     };
   }, [activeTab]);
 
-  const handleSelectCard = (card: any) => {
+  const handleSelectCard = useCallback((card: any) => {
     setSelectedCard(card);
     setStep('login');
     setIsPageLoaded(false);
@@ -62,7 +62,18 @@ export default function OnlineChatPage() {
     browserIpc.send.createBrowser(activeTab);
     browserIpc.send.loadURL(activeTab, card.onlineConfig.url);
     browserIpc.send.setVisible(activeTab, true);
-  };
+  }, [activeTab]);
+
+  // Auto-select card if tab ID contains a card identifier
+  useEffect(() => {
+    if (activeTab.startsWith('online-chat-')) {
+      const cardId = activeTab.replace('online-chat-', '');
+      const foundCard = onlineCards.find(c => c.id === cardId);
+      if (foundCard && (!selectedCard || selectedCard.id !== cardId)) {
+        handleSelectCard(foundCard);
+      }
+    }
+  }, [activeTab, onlineCards, selectedCard, handleSelectCard]);
 
   const handleBackToSelect = () => {
     browserIpc.send.removeBrowser(activeTab);

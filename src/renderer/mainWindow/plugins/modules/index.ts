@@ -189,6 +189,9 @@ const useGetUninstallType = (id: string) =>
  * Tokens include: description, title, repo owner, and repo name.
  */
 function buildCardSearchTokens(card: CardData): string[] {
+  if (!card.repoUrl) {
+    return [card.description, card.title, 'Online', 'online'];
+  }
   const {owner, repo} = extractGitUrl(card.repoUrl);
   return [card.description, card.title, owner, repo];
 }
