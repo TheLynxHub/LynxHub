@@ -47,6 +47,27 @@ const markdownComponents: Components = {
       </pre>
     );
   },
+  ul({children, ...props}) {
+    return (
+      <ul className="list-disc pl-5 my-1.5 space-y-0.5" {...props}>
+        {children}
+      </ul>
+    );
+  },
+  ol({children, ...props}) {
+    return (
+      <ol className="list-decimal pl-5 my-1.5 space-y-0.5" {...props}>
+        {children}
+      </ol>
+    );
+  },
+  li({children, ...props}) {
+    return (
+      <li className="my-1 py-0 pl-0 leading-normal" {...props}>
+        {children}
+      </li>
+    );
+  },
 };
 
 const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatAreaProps) => {

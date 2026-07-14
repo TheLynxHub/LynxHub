@@ -97,12 +97,29 @@ export function useOnlineChat(tabID = 'online-chat') {
             
             let children = '';
             for (let i = 0; i < node.childNodes.length; i++) {
-              children += walk(node.childNodes[i]);
+              const child = node.childNodes[i];
+              if ((tag === 'ul' || tag === 'ol') && child.nodeType === 3 && !child.nodeValue.trim()) {
+                continue;
+              }
+              children += walk(child);
             }
             
             switch (tag) {
-              case 'p':
+              case 'p': {
+                let isInsideLi = false;
+                let pNode = node.parentNode;
+                while (pNode) {
+                  if (pNode.tagName && pNode.tagName.toLowerCase() === 'li') {
+                    isInsideLi = true;
+                    break;
+                  }
+                  pNode = pNode.parentNode;
+                }
+                if (isInsideLi) {
+                  return children.trim();
+                }
                 return '\\n\\n' + children.trim() + '\\n\\n';
+              }
               case 'h1': return '\\n\\n# ' + children.trim() + '\\n\\n';
               case 'h2': return '\\n\\n## ' + children.trim() + '\\n\\n';
               case 'h3': return '\\n\\n### ' + children.trim() + '\\n\\n';
@@ -139,7 +156,7 @@ export function useOnlineChat(tabID = 'online-chat') {
                   '\\n\\n'
                 );
               case 'hr':
-                return '\\n\\n---\\n\\n';
+                return '---';
               case 'br':
                 return '\\n';
               default:
