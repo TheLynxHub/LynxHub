@@ -131,6 +131,14 @@ export async function listenBrowser() {
 
   // Gets current audio state (playing, muted) for browser webview
   browserIpc.handle.getState(id => handleGetAudioState(browserManager, id));
+
+  // Executes JavaScript in the browser webview
+  browserIpc.handle.executeJavaScript((id, script) => {
+    return (
+      browserManager.getWebContentsById(id)?.executeJavaScript(script) ??
+      Promise.reject(new Error('No WebContents found'))
+    );
+  });
 }
 
 /**
@@ -246,5 +254,8 @@ export const browserIpc = {
     /** Handles get audio state request */
     getState: (callback: (id: string) => MainHT<AudioState | null>) =>
       lynxIpc.handle(browserChannels.getState, callback),
+    /** Handles execute JavaScript request */
+    executeJavaScript: (callback: (id: string, script: string) => MainHT<any>) =>
+      lynxIpc.handle(browserChannels.executeJavaScript, callback),
   },
 };

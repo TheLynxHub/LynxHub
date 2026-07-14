@@ -61,4 +61,5 @@ export const browserChannels = {
   onTabMutedUpdate: 'volume:onTabMutedUpdate',
 
   onAudioStateChange: 'volume:onAudioStateChange',
+  executeJavaScript: 'browser:execute-javascript',
 } as const;

@@ -10,6 +10,7 @@ import PluginsPage from '@lynx/pages/plugins';
 import SettingsPage from '@lynx/pages/settings';
 import TextGenerationPage from '@lynx/pages/text';
 import ToolsPage from '@lynx/pages/tools';
+import OnlineChatPage from '@lynx/pages/onlineChat';
 import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {useCardsState} from '@lynx/redux/reducers/cards';
 import {useTerminalState} from '@lynx/redux/reducers/terminal';
@@ -27,6 +28,7 @@ const PageComponents = {
   [PageID.dashboard]: DashboardPage,
   [PageID.plugins]: PluginsPage,
   [PageID.settings]: SettingsPage,
+  [PageID.onlineChat]: OnlineChatPage,
 };
 
 import ptyIpc from '@lynx_shared/ipc/pty';

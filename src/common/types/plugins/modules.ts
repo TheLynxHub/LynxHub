@@ -510,7 +510,24 @@ export type CardData = {
    * @description This methods will be used when user interaction (Like recognizing URL to show in browser)
    */
   methods: CardRendererMethods;
+
+  /** Whether this is an online module running in the background browser */
+  isOnline?: boolean;
+
+  /** Selector configurations for scraping and inputting messages in the online module */
+  onlineConfig?: OnlineConfig;
 };
+
+export interface OnlineConfig {
+  url: string;
+  selectors: {
+    input: string;
+    sendButton?: string;
+    userMessage: string;
+    assistantMessage: string;
+    messageText: string;
+  };
+}
 
 /**
  * Card data loaded into the application, including route path.

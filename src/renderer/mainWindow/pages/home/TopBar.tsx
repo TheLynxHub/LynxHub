@@ -1,10 +1,11 @@
 import {Button} from '@heroui/react';
 import {cardsActions} from '@lynx/redux/reducers/cards';
-import {useTabsState} from '@lynx/redux/reducers/tabs';
+import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
 import {Terminal_Icon} from '@lynx_assets/icons';
+import {PageID} from '@lynx_common/consts';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Earth} from '@solar-icons/react-perf/BoldDuotone';
+import {Earth, ChatSquare} from '@solar-icons/react-perf/BoldDuotone';
 import {motion} from 'framer-motion';
 import {Plus} from 'lucide-react';
 import {useDispatch} from 'react-redux';
@@ -45,6 +46,20 @@ export default function HomeTopBar() {
     addRunningEmpty('both');
   };
 
+  const handleNewOnlineChat = () => {
+    AddBreadcrumb_Renderer(`New Online Chat Tab`);
+    dispatch(
+      tabsActions.addTab({
+        id: 'online-chat',
+        title: 'Online Chat',
+        pageID: PageID.onlineChat,
+        isLoading: false,
+        isTerminal: false,
+        favIcon: {show: false, url: ''},
+      }),
+    );
+  };
+
   return (
     <div className="flex w-full shrink-0 flex-row items-center justify-end gap-x-3 px-6 py-3">
       <motion.div
@@ -56,6 +71,13 @@ export default function HomeTopBar() {
         className="flex gap-3"
         animate={{scale: 1, translateY: 0, opacity: 1}}
         initial={{scale: 0.96, translateY: -10, opacity: 0}}>
+        <motion.div transition={{delay: 0.05}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
+          <Button size="sm" className="w-27" variant="tertiary" onPress={handleNewOnlineChat}>
+            <ChatSquare className="size-4" />
+            Online Chat
+          </Button>
+        </motion.div>
+
         <motion.div transition={{delay: 0.1}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
           <Button size="sm" className="w-25" variant="tertiary" onPress={handleNewTerminal}>
             <Terminal_Icon />

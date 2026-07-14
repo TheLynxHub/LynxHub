@@ -3,6 +3,7 @@ import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
 import {volumeActions} from '@lynx/redux/reducers/volume';
 import {AppDispatch} from '@lynx/redux/store';
 import applicationIpc from '@lynx_shared/ipc/application';
+import browserIpc from '@lynx_shared/ipc/browser';
 import ptyIpc from '@lynx_shared/ipc/pty';
 import {useCallback, useMemo} from 'react';
 import {useDispatch} from 'react-redux';
@@ -38,6 +39,7 @@ export function useRemoveTab() {
         dispatch(tabsActions.removeTab(tId));
         dispatch(cardsActions.stopRunningCard({tabId: tId}));
         dispatch(volumeActions.removeTab(tId));
+        browserIpc.send.removeBrowser(tId);
       }
     },
     [runningCards, tabs, activeTab, dispatch],

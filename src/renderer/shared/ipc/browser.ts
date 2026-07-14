@@ -165,6 +165,10 @@ const browserIpc = {
     // Sets mute state for browser webview
     setMuted: (id: string, muted: boolean) =>
       invokeWithSoftTimeout(browserChannels.setMuted, 'Mute set operation timed out', id, muted),
+
+    // Executes JavaScript in browser webview
+    executeJavaScript: (id: string, script: string) =>
+      lynxIpc.invoke<any>(browserChannels.executeJavaScript, id, script),
   },
 };
 
