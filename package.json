@@ -71,7 +71,7 @@
     "@sentry/react": "^10.62.0",
     "axios": "^1.18.1",
     "fix-path": "^5.0.0",
-    "fuse.js": "^7.4.2",
+    "fuse.js": "^7.5.0",
     "graceful-fs": "^4.2.11",
     "lowdb": "^7.0.1",
     "node-pty": "^1.2.0-beta.13",
@@ -157,7 +157,7 @@
     "tailwindcss": "^4.3.2",
     "three": "^0.185.1",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "typescript-eslint": "^8.63.0",
+    "typescript-eslint": "^8.64.0",
     "vite": "^8.1.4"
   },
   "allowScripts": {
