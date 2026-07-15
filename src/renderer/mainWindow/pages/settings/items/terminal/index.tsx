@@ -6,6 +6,7 @@ import CloseOnExit from './CloseOnExit';
 import Conpty from './Conpty';
 import CursorInactiveStyle from './CursorInactiveStyle';
 import CursorStyle from './CursorStyle';
+import FontLoadTimeout from './FontLoadTimeout';
 import FontSize from './FontSize';
 import Ligatures from './Ligatures';
 import OpenLinks from './OpenLinks';
@@ -31,6 +32,7 @@ export default function SettingsTerminal() {
       <Conpty />
       <ScrollBack />
       <ResizeDelay />
+      <FontLoadTimeout />
       <FontSize />
       <Ligatures />
       <CursorStyle />

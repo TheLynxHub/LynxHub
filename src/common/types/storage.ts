@@ -120,6 +120,7 @@ export type TerminalStorage = {
   cursorInactiveStyle: TerminalCursorInactiveStyle;
   blinkCursor: boolean;
   resizeDelay: number;
+  fontLoadTimeout: number;
   closeTabOnExit: boolean;
   enableLigatures: boolean;
   cdHistory: string[];

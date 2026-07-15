@@ -27,7 +27,7 @@ class BaseStorage {
   private readonly migrationManager: StorageMigrationManager;
 
   private readonly DEFAULT_DATA: AppStorageData = {
-    storage: {version: 1.06},
+    storage: {version: 1.07},
     cards: {
       installedCards: [],
       autoUpdateCards: [],
@@ -96,6 +96,7 @@ class BaseStorage {
       cursorInactiveStyle: 'none',
       blinkCursor: true,
       resizeDelay: 77,
+      fontLoadTimeout: 3000,
       closeTabOnExit: true,
       enableLigatures: true,
       cdHistory: [],

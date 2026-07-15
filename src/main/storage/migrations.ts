@@ -46,6 +46,7 @@ export class StorageMigrationManager {
     [1.04, () => this.migrate_1_04()],
     [1.05, () => this.migrate_1_05()],
     [1.06, () => this.migrate_1_06()],
+    [1.07, () => this.migrate_1_07()],
   ]);
 
   constructor(
@@ -371,5 +372,11 @@ export class StorageMigrationManager {
     });
 
     this.storage.data.app.hotkeys = mergedHotkeys;
+  }
+
+  private migrate_1_07() {
+    if (this.storage.data.terminal && this.storage.data.terminal.fontLoadTimeout === undefined) {
+      this.storage.data.terminal.fontLoadTimeout = 3000;
+    }
   }
 }

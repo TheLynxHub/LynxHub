@@ -18,6 +18,7 @@ const createDefaultTerminalState = (): TerminalState => ({
   cursorInactiveStyle: 'outline',
   blinkCursor: true,
   resizeDelay: 100,
+  fontLoadTimeout: 3000,
   closeTabOnExit: false,
   enableLigatures: false,
   cdHistory: [],

@@ -34,6 +34,7 @@ export interface XTermCoreProps {
   cursorInactiveStyle?: 'none' | 'block' | 'underline' | 'bar' | 'outline';
   blinkCursor?: boolean;
   resizeDelay?: number;
+  fontLoadTimeout?: number;
 
   // Enable PTY write (for interactive terminals)
   enablePtyWrite?: boolean;
@@ -65,6 +66,7 @@ const XTermCore = memo(
         cursorInactiveStyle: cursorInactiveStyleOverride,
         blinkCursor: blinkCursorOverride,
         resizeDelay: resizeDelayOverride,
+        fontLoadTimeout: fontLoadTimeoutOverride,
         enablePtyWrite = true,
         enableResizeNotify = true,
         minResizeCols = MIN_RESIZE_COLS,
@@ -85,6 +87,7 @@ const XTermCore = memo(
       const cursorInactiveStyle = cursorInactiveStyleOverride ?? terminalSettings.cursorInactiveStyle;
       const blinkCursor = blinkCursorOverride ?? terminalSettings.blinkCursor;
       const resizeDelay = resizeDelayOverride ?? terminalSettings.resizeDelay;
+      const fontLoadTimeout = fontLoadTimeoutOverride ?? terminalSettings.fontLoadTimeout ?? 3000;
       const useConpty = terminalSettings.useConpty;
       const enableLigatures = terminalSettings.enableLigatures;
       const outputColor = terminalSettings.outputColor;
@@ -104,6 +107,7 @@ const XTermCore = memo(
         cursorInactiveStyle,
         blinkCursor,
         resizeDelay,
+        fontLoadTimeout,
         enablePtyWrite,
         enableResizeNotify,
         minResizeCols,

@@ -50,6 +50,7 @@ export interface UseXTermProps {
   cursorInactiveStyle: 'none' | 'block' | 'underline' | 'bar' | 'outline';
   blinkCursor: boolean;
   resizeDelay: number;
+  fontLoadTimeout: number;
   enablePtyWrite: boolean;
   enableResizeNotify: boolean;
   minResizeCols: number;
@@ -76,6 +77,7 @@ export const useXTerm = ({
   cursorInactiveStyle,
   blinkCursor,
   resizeDelay,
+  fontLoadTimeout,
   enablePtyWrite,
   enableResizeNotify,
   minResizeCols,
@@ -255,7 +257,7 @@ export const useXTerm = ({
 
     const font = new FontFaceObserver(FONT_FAMILY);
     font
-      .load()
+      .load(null, fontLoadTimeout)
       .then(() => loadTerminal(FONT_FAMILY))
       .catch(() => {
         void loadTerminal();
