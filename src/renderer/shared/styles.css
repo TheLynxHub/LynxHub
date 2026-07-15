@@ -8,8 +8,8 @@
 
 /* Shared Tailwind theme tokens for child-window renderers. */
 @theme {
-  --font-JetBrainsMono: JetBrainsMono, sans-serif;
-  --font-Nunito: Nunito, sans-serif;
+  --font-JetBrainsMono: var(--font-mono-stack);
+  --font-Nunito: var(--font-sans-stack);
 
   --color-LynxOrange: #ff5f00;
   --color-LynxRaisinBlack: #212121;
@@ -49,7 +49,7 @@
 
 :root {
   color-scheme: light dark;
-  font-family: Nunito, sans-serif;
+  font-family: var(--font-sans-stack), serif;
 
   --duration: 2s;
   --i: 0;

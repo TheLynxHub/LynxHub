@@ -7,8 +7,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-JetBrainsMono: JetBrainsMono, sans-serif;
-  --font-Nunito: Nunito, sans-serif;
+  --font-JetBrainsMono: var(--font-mono-stack);
+  --font-Nunito: var(--font-sans-stack);
 
   --color-LynxOrange: #ff5f00;
   --color-LynxNearBlack: #191919;
@@ -41,7 +41,7 @@
 :root {
   color-scheme: light dark;
   background-color: #212121;
-  font-family: Nunito, sans-serif;
+  font-family: var(--font-sans-stack), serif;
 
   /* Card overlay variables shared by installed/uninstalled card backgrounds. */
   --uninstalled-card-bg-color: #ededed;
@@ -86,7 +86,7 @@
 
 html,
 body {
-  font-family: Nunito, sans-serif;
+  font-family: var(--font-sans-stack), serif;
 }
 
 .dark {

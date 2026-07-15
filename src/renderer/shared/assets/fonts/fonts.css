@@ -1,4 +1,30 @@
-/* -----------------------------------------------> Nunito */
+/*
+ * LynxHub font map
+ * ---------------------------------------------------------------------------
+ * UI (sans) primary:  Nunito            — rounded geometric, friendly
+ * Code (mono) primary: JetBrains Mono   — tall x-height, coding ligatures
+ *
+ * Language / script → UI font (closest to Nunito) → mono font (closest to JBM)
+ * ---------------------------------------------------------------------------
+ * English, Western EU, Vietnamese     → Nunito                    → JetBrains Mono
+ * Russian, Ukrainian, Bulgarian, …    → Nunito                    → JetBrains Mono
+ * Greek                               → Nunito / Noto Sans        → JetBrains Mono
+ * Chinese Simplified (zh-Hans)        → Noto Sans SC              → Noto Sans Mono CJK SC
+ * Chinese Traditional (zh-Hant)       → Noto Sans TC              → Noto Sans Mono CJK TC
+ * Japanese (ja)                       → M PLUS Rounded 1c         → Noto Sans Mono CJK JP
+ * Korean (ko)                         → Noto Sans KR              → Noto Sans Mono CJK KR
+ * Arabic (ar)                         → Vazirmatn                 → Noto Sans Mono Arabic
+ * Hebrew (he)                         → Rubik                     → Noto Sans Mono Hebrew
+ * Thai (th)                           → Prompt                    → Noto Sans Mono Thai
+ * Hindi / Devanagari (hi)             → Baloo 2                   → Noto Sans Mono Devanagari
+ * Other / unknown                     → system-ui / Noto Sans     → ui-monospace / monospace
+ * ---------------------------------------------------------------------------
+ * Bundled files cover Latin + Cyrillic (Nunito) and Latin + Cyrillic + Greek
+ * (JetBrains Mono). Other scripts resolve via system / Noto / companion fonts
+ * listed below. Mixed-script strings use per-glyph fallthrough.
+ */
+
+/* -----------------------------------------------> Nunito (UI, bundled) */
 @font-face {
   font-family: 'Nunito';
   src: url('Nunito/Nunito-VariableFont_wght.ttf');
@@ -14,11 +40,220 @@
   font-display: swap;
 }
 
-/* -----------------------------------------------> JetBrains Mono */
-
+/* -----------------------------------------------> JetBrains Mono (code, bundled) */
 @font-face {
   font-family: 'JetBrainsMono';
   src: url('JetBrainsMono/JetBrainsMono.ttf') format('truetype');
   font-weight: 100 800;
   font-display: swap;
+}
+
+/* ---- Script companions (system / local), same family for glyph fallthrough ---- */
+
+/* Arabic — Vazirmatn pairs well with Nunito */
+@font-face {
+  font-family: 'Nunito';
+  src: url('Vazirmatn/Vazirmatn-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-089F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  font-display: swap;
+}
+
+/* Hebrew — Rubik is geometric, pairs well with Nunito */
+@font-face {
+  font-family: 'Nunito';
+  src: url('Rubik/Rubik-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  unicode-range: U+0590-05FF, U+FB1D-FB4F;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  src: url('Rubik/Rubik-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  font-style: italic;
+  unicode-range: U+0590-05FF, U+FB1D-FB4F;
+  font-display: swap;
+}
+
+/* Thai — Prompt is rounded geometric */
+@font-face {
+  font-family: 'Nunito';
+  src: url('Prompt/Prompt-Regular.ttf') format('truetype');
+  font-weight: 100 500;
+  unicode-range: U+0E00-0E7F;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  src: url('Prompt/Prompt-Bold.ttf') format('truetype');
+  font-weight: 600 1000;
+  unicode-range: U+0E00-0E7F;
+  font-display: swap;
+}
+
+/* Devanagari (Hindi, Marathi, Nepali, …) */
+@font-face {
+  font-family: 'Nunito';
+  src: url('Baloo2/Baloo2-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  unicode-range: U+0900-097F, U+A8E0-A8FF;
+  font-display: swap;
+}
+
+/* Japanese kana + preference for rounded JP UI fonts (shared Han uses CJK block) */
+@font-face {
+  font-family: 'Nunito';
+  src: url('MPLUSRounded1c/MPLUSRounded1c-Regular.ttf') format('truetype');
+  font-weight: 100 500;
+  unicode-range: U+3040-309F, U+30A0-30FF, U+31F0-31FF, U+FF66-FF9F;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  src: url('MPLUSRounded1c/MPLUSRounded1c-Bold.ttf') format('truetype');
+  font-weight: 600 1000;
+  unicode-range: U+3040-309F, U+30A0-30FF, U+31F0-31FF, U+FF66-FF9F;
+  font-display: swap;
+}
+
+/* Hangul (Korean) */
+@font-face {
+  font-family: 'Nunito';
+  src: url('NotoSansKR/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7AF, U+D7B0-D7FF;
+  font-display: swap;
+}
+
+/* CJK Unified Ideographs (zh / ja / ko shared Han) */
+@font-face {
+  font-family: 'Nunito';
+  src: url('NotoSansSC/NotoSansSC-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  unicode-range: U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-2A6DF, U+2F800-2FA1F;
+  font-display: swap;
+}
+
+/* Mono: Arabic */
+@font-face {
+  font-family: 'JetBrainsMono';
+  src: url('NotoSansMono/NotoSansMono-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-089F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  font-display: swap;
+}
+
+/* Mono: Hebrew */
+@font-face {
+  font-family: 'JetBrainsMono';
+  src: url('NotoSansMono/NotoSansMono-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  unicode-range: U+0590-05FF, U+FB1D-FB4F;
+  font-display: swap;
+}
+
+/* Mono: Thai */
+@font-face {
+  font-family: 'JetBrainsMono';
+  src: url('NotoSansMono/NotoSansMono-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  unicode-range: U+0E00-0E7F;
+  font-display: swap;
+}
+
+/* Mono: Devanagari */
+@font-face {
+  font-family: 'JetBrainsMono';
+  src: url('NotoSansMono/NotoSansMono-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 1000;
+  unicode-range: U+0900-097F, U+A8E0-A8FF;
+  font-display: swap;
+}
+
+/* Mono: CJK + kana + hangul */
+@font-face {
+  font-family: 'JetBrainsMono';
+  src: local('Noto Sans Mono CJK SC');
+  unicode-range:
+    U+3040-309F, U+30A0-30FF, U+31F0-31FF, U+FF66-FF9F, U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7AF, U+D7B0-D7FF,
+    U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-2A6DF, U+2F800-2FA1F;
+  font-display: swap;
+}
+
+:root {
+  /*
+   * Full stacks: bundled primary first, then language companions and system UI.
+   * Existing class names (font-Nunito / font-JetBrainsMono) keep working.
+   */
+  --font-sans-stack:
+    Nunito, 'M PLUS Rounded 1c', Vazirmatn, Rubik, Prompt, 'Baloo 2', 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans KR',
+    'Noto Sans', system-ui, sans-serif;
+
+  --font-mono-stack:
+    JetBrainsMono, 'Noto Sans Mono CJK SC', 'Noto Sans Mono CJK TC', 'Noto Sans Mono CJK JP', 'Noto Sans Mono CJK KR',
+    'Noto Sans Mono Arabic', 'Noto Sans Mono Hebrew', 'Noto Sans Mono Thai', 'Noto Sans Mono Devanagari',
+    'Noto Sans Mono', ui-monospace, monospace;
+}
+
+/* Document-language overrides (used when <html lang="…"> is set for i18n). */
+:lang(zh-Hans),
+:lang(zh-CN),
+:lang(zh) {
+  --font-sans-stack: Nunito, 'Noto Sans SC', system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono CJK SC', ui-monospace, monospace;
+}
+
+:lang(zh-Hant),
+:lang(zh-TW),
+:lang(zh-HK) {
+  --font-sans-stack: Nunito, 'Noto Sans TC', system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono CJK TC', ui-monospace, monospace;
+}
+
+:lang(ja) {
+  --font-sans-stack: Nunito, 'M PLUS Rounded 1c', system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono CJK JP', ui-monospace, monospace;
+}
+
+:lang(ko) {
+  --font-sans-stack: Nunito, 'Noto Sans KR', system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono CJK KR', ui-monospace, monospace;
+}
+
+:lang(ar) {
+  --font-sans-stack: Nunito, Vazirmatn, system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono Arabic', ui-monospace, monospace;
+}
+
+:lang(he) {
+  --font-sans-stack: Nunito, Rubik, system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono Hebrew', ui-monospace, monospace;
+}
+
+:lang(th) {
+  --font-sans-stack: Nunito, Prompt, system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono Thai', ui-monospace, monospace;
+}
+
+:lang(hi) {
+  --font-sans-stack: Nunito, 'Baloo 2', system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono Devanagari', ui-monospace, monospace;
+}
+
+:lang(el) {
+  --font-sans-stack: Nunito, 'Noto Sans', system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono', ui-monospace, monospace;
+}
+
+:lang(ru),
+:lang(uk),
+:lang(bg),
+:lang(sr) {
+  /* Cyrillic is covered by bundled Nunito + JetBrains Mono */
+  --font-sans-stack: Nunito, system-ui, sans-serif;
+  --font-mono-stack: JetBrainsMono, ui-monospace, monospace;
 }
