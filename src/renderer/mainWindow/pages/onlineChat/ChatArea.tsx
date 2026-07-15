@@ -40,11 +40,11 @@ function markdownToPlainText(markdown: string): string {
   return markdown
     .replace(/```[\s\S]*?```/g, block => block.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, ''))
     .replace(/`([^`]+)`/g, '$1')
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/!\[([^\]]*)]\([^)]+\)/g, '$1')
+    .replace(/\[([^\]]+)]\([^)]+\)/g, '$1')
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/(\*\*|__)(.*?)\1/g, '$2')
-    .replace(/(\*|_)(.*?)\1/g, '$2')
+    .replace(/([*_])(.*?)\1/g, '$2')
     .replace(/~~(.*?)~~/g, '$1')
     .replace(/^>\s?/gm, '')
     .replace(/^[-*+]\s+/gm, '')
@@ -84,20 +84,16 @@ const MessageCopyDropdown = memo(({markdown, plainTextFallback}: MessageCopyDrop
       className={`shrink-0 self-center transition-opacity duration-150 ${
         isOpen
           ? 'opacity-100 pointer-events-auto'
-          : 'opacity-0 pointer-events-none group-hover/msg:opacity-100 group-hover/msg:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto'
+          : 'opacity-0 pointer-events-none group-hover/msg:opacity-100 group-hover/msg:pointer-events-auto' +
+            ' focus-within:opacity-100 focus-within:pointer-events-auto'
       }`}>
       <Dropdown isOpen={isOpen} onOpenChange={setIsOpen}>
         <Dropdown.Trigger>
-          <Button
-            size="sm"
-            variant="ghost"
-            aria-label="Copy message"
-            className="bg-surface/80 backdrop-blur-sm"
-            isIconOnly>
+          <Button size="sm" variant="ghost" aria-label="Copy message" isIconOnly>
             <Copy className="size-3.5" />
           </Button>
         </Dropdown.Trigger>
-        <Dropdown.Popover placement="bottom end" className="min-w-44">
+        <Dropdown.Popover className="min-w-44" placement="bottom end">
           <Dropdown.Menu
             onAction={key => {
               if (key === 'markdown') handleCopyMarkdown();
@@ -204,12 +200,12 @@ const ChatBubble = memo(({message}: ChatBubbleProps) => {
 
   return (
     <div className={`group/msg flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex max-w-[85%] items-start gap-1.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+      <div className="flex max-w-[85%] flex-col gap-1">
         <div
-          dir={dir}
-          className={`max-w-full rounded-3xl px-4 py-3 shadow-surface border text-sm ${
+          className={`rounded-3xl px-4 py-3 shadow-surface border text-sm ${
             isUser ? 'bg-accent/10 border-accent/25 rounded-tr-sm' : 'bg-surface border-border rounded-tl-sm'
-          } transition-all duration-200`}>
+          } transition-all duration-200`}
+          dir={dir}>
           <div
             ref={contentRef}
             className="prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed text-start">
@@ -219,7 +215,10 @@ const ChatBubble = memo(({message}: ChatBubbleProps) => {
           </div>
         </div>
 
-        <MessageCopyDropdown markdown={message.text} plainTextFallback={plainText} />
+        {/* User (right): bottom-left · Assistant (left): bottom-right */}
+        <div className={`flex ${isUser ? 'justify-start' : 'justify-end'}`}>
+          <MessageCopyDropdown markdown={message.text} plainTextFallback={plainText} />
+        </div>
       </div>
     </div>
   );

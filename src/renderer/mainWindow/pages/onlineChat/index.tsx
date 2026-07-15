@@ -32,12 +32,12 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
       <div className="absolute inset-0 bg-surface overflow-hidden flex flex-col">
         <ChatTopBar
           step={step}
+          onRefresh={handleRefresh}
           selectedCard={selectedCard}
           isPageLoaded={isPageLoaded}
           onGoToChat={handleGoToChat}
           onShowWebpage={handleShowWebpage}
           onBackToSelect={handleBackToSelect}
-          onRefresh={handleRefresh}
         />
         <div className="absolute inset-0 top-12! overflow-hidden flex flex-col">
           {step === 'select_module' && <ModuleSelector onlineCards={onlineCards} onSelectCard={handleSelectCard} />}
