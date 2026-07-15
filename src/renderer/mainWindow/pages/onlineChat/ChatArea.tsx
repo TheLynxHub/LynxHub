@@ -93,7 +93,7 @@ const MessageCopyDropdown = memo(({markdown, plainTextFallback}: MessageCopyDrop
             <Copy className="size-3.5" />
           </Button>
         </Dropdown.Trigger>
-        <Dropdown.Popover className="min-w-44" placement="bottom end">
+        <Dropdown.Popover placement="bottom end" className="min-w-44 bg-surface-secondary border-border">
           <Dropdown.Menu
             onAction={key => {
               if (key === 'markdown') handleCopyMarkdown();
@@ -202,8 +202,8 @@ const ChatBubble = memo(({message}: ChatBubbleProps) => {
     <div className={`group/msg flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className="flex max-w-[85%] flex-col gap-1">
         <div
-          className={`rounded-3xl px-4 py-3 shadow-surface border text-sm ${
-            isUser ? 'bg-accent/10 border-accent/25 rounded-tr-sm' : 'bg-surface border-border rounded-tl-sm'
+          className={`rounded-3xl px-4 py-3 shadow-surface text-sm ${
+            isUser ? 'bg-surface-secondary rounded-tr-md' : 'bg-surface-tertiary rounded-tl-md'
           } transition-all duration-200`}
           dir={dir}>
           <div
@@ -278,7 +278,7 @@ const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatA
       {/* Message Input Box */}
       <div className="p-4 bg-surface shrink-0">
         <TextField name="message" aria-label="Message input" className="max-w-4xl mx-auto w-full">
-          <InputGroup className="p-2" variant="secondary" fullWidth>
+          <InputGroup variant="secondary" className="p-2 rounded-2xl" fullWidth>
             <InputGroup.TextArea
               rows={1}
               value={inputText}
