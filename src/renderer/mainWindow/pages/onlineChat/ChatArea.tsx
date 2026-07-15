@@ -1,4 +1,4 @@
-import {Button, InputGroup, Link, linkVariants, ScrollShadow, TextField} from '@heroui/react';
+import {Button, InputGroup, Link, ScrollShadow, TextField} from '@heroui/react';
 import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
 import {Send} from 'lucide-react';
 import {KeyboardEvent, memo, useCallback, useEffect, useRef, useState} from 'react';
@@ -14,6 +14,26 @@ interface ChatAreaProps {
   onSendMessage: (messageText: string) => void;
 }
 
+/** Unicode ranges for strong RTL scripts (Hebrew, Arabic, Syriac, Thaana, N'Ko, etc.). */
+const STRONG_RTL = /[\u0590-\u05FF\u0600-\u06FF\u0700-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFC]/;
+/** Latin and related strong LTR letters. */
+const STRONG_LTR = /[A-Za-z\u00C0-\u024F\u1E00-\u1EFF]/;
+
+/**
+ * Detect paragraph direction from the first strong directional character.
+ * Code fences/inline code are stripped so language tags don't force LTR.
+ */
+function getTextDirection(text: string): 'rtl' | 'ltr' {
+  const stripped = text.replace(/```[\s\S]*?```/g, ' ').replace(/`[^`]*`/g, ' ');
+
+  for (const char of stripped) {
+    if (STRONG_RTL.test(char)) return 'rtl';
+    if (STRONG_LTR.test(char)) return 'ltr';
+  }
+
+  return 'ltr';
+}
+
 const markdownComponents: Components = {
   code({node, inline, className, children, ...props}: any) {
     const match = /language-(\w+)/.exec(className || '');
@@ -26,6 +46,7 @@ const markdownComponents: Components = {
             'rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-xs ' +
             'font-JetBrainsMono text-foreground before:content-none after:content-none'
           }
+          dir="ltr"
           {...props}>
           {children}
         </code>
@@ -33,7 +54,7 @@ const markdownComponents: Components = {
     }
 
     return (
-      <code className={`${match ? className : ''} text-sm font-JetBrainsMono`} {...props}>
+      <code dir="ltr" className={`${match ? className : ''} text-sm font-JetBrainsMono`} {...props}>
         {children}
       </code>
     );
@@ -41,6 +62,7 @@ const markdownComponents: Components = {
   pre({children, ...props}) {
     return (
       <pre
+        dir="ltr"
         className={'overflow-x-auto rounded-lg bg-gray-100 p-4 ' + 'dark:bg-gray-800 text-sm font-JetBrainsMono my-2'}
         {...props}>
         {children}
@@ -49,21 +71,21 @@ const markdownComponents: Components = {
   },
   ul({children, ...props}) {
     return (
-      <ul className="list-disc pl-5 my-1.5 space-y-0.5" {...props}>
+      <ul className="list-disc ps-5 my-1.5 space-y-0.5" {...props}>
         {children}
       </ul>
     );
   },
   ol({children, ...props}) {
     return (
-      <ol className="list-decimal pl-5 my-1.5 space-y-0.5" {...props}>
+      <ol className="list-decimal ps-5 my-1.5 space-y-0.5" {...props}>
         {children}
       </ol>
     );
   },
   li({children, ...props}) {
     return (
-      <li className="my-1 py-0 pl-0 leading-normal" {...props}>
+      <li className="my-1 py-0 ps-0 leading-normal" {...props}>
         {children}
       </li>
     );
@@ -121,13 +143,18 @@ const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatA
           <div className="space-y-4">
             {messages.map((msg, index) => {
               const isUser = msg.sender === 'user';
+              const dir = getTextDirection(msg.text);
               return (
                 <div key={index} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
                   <div
                     className={`max-w-[75%] rounded-3xl px-4 py-3 shadow-surface border text-sm ${
                       isUser ? 'bg-accent/10 border-accent/25 rounded-tr-sm' : 'bg-surface border-border rounded-tl-sm'
-                    } transition-all duration-200`}>
-                    <div className="prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed">
+                    } transition-all duration-200`}
+                    dir={dir}>
+                    <div
+                      className={
+                        'prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed text-start'
+                      }>
                       <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                         {msg.text}
                       </ReactMarkdown>
