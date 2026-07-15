@@ -8,15 +8,15 @@
  * ---------------------------------------------------------------------------
  * English, Western EU, Vietnamese     → Nunito                    → JetBrains Mono
  * Russian, Ukrainian, Bulgarian, …    → Nunito                    → JetBrains Mono
- * Greek                               → Nunito / Noto Sans        → JetBrains Mono
- * Chinese Simplified (zh-Hans)        → Noto Sans SC              → Noto Sans Mono CJK SC
- * Chinese Traditional (zh-Hant)       → Noto Sans TC              → Noto Sans Mono CJK TC
- * Japanese (ja)                       → M PLUS Rounded 1c         → Noto Sans Mono CJK JP
- * Korean (ko)                         → Noto Sans KR              → Noto Sans Mono CJK KR
- * Arabic (ar)                         → Vazirmatn                 → Noto Sans Mono Arabic
- * Hebrew (he)                         → Rubik                     → Noto Sans Mono Hebrew
- * Thai (th)                           → Prompt                    → Noto Sans Mono Thai
- * Hindi / Devanagari (hi)             → Baloo 2                   → Noto Sans Mono Devanagari
+ * Greek                               → Nunito                    → JetBrains Mono
+ * Chinese Simplified (zh-Hans)        → Noto Sans SC              → ui-monospace / monospace
+ * Chinese Traditional (zh-Hant)       → Noto Sans TC              → ui-monospace / monospace
+ * Japanese (ja)                       → M PLUS Rounded 1c         → ui-monospace / monospace
+ * Korean (ko)                         → Noto Sans KR              → ui-monospace / monospace
+ * Arabic (ar)                         → Vazirmatn                 → ui-monospace / monospace
+ * Hebrew (he)                         → Rubik                     → ui-monospace / monospace
+ * Thai (th)                           → Prompt                    → ui-monospace / monospace
+ * Hindi / Devanagari (hi)             → Baloo 2                   → ui-monospace / monospace
  * Other / unknown                     → system-ui / Noto Sans     → ui-monospace / monospace
  * ---------------------------------------------------------------------------
  * Bundled files cover Latin + Cyrillic (Nunito) and Latin + Cyrillic + Greek
@@ -27,14 +27,14 @@
 /* -----------------------------------------------> Nunito (UI, bundled) */
 @font-face {
   font-family: 'Nunito';
-  src: url('Nunito/Nunito-VariableFont_wght.ttf');
+  src: url('Nunito/Nunito-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 1000;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Nunito';
-  src: url('Nunito/Nunito-Italic-VariableFont_wght.ttf');
+  src: url('Nunito/Nunito-Italic-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 1000;
   font-style: italic;
   font-display: swap;
@@ -129,48 +129,27 @@
   font-display: swap;
 }
 
-/* CJK Unified Ideographs (zh / ja / ko shared Han) */
+/* CJK Unified Ideographs - Simplified Chinese (Bundled) */
 @font-face {
-  font-family: 'Nunito';
+  font-family: 'NotoSansSC-Bundled';
   src: url('NotoSansSC/NotoSansSC-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 1000;
-  unicode-range: U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-2A6DF, U+2F800-2FA1F;
   font-display: swap;
 }
 
-/* Mono: Arabic */
+/* CJK Unified Ideographs - Traditional Chinese (Bundled) */
 @font-face {
-  font-family: 'JetBrainsMono';
-  src: url('NotoSansMono/NotoSansMono-VariableFont_wdth,wght.ttf') format('truetype');
+  font-family: 'NotoSansTC-Bundled';
+  src: url('NotoSansTC/NotoSansTC-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 1000;
-  unicode-range: U+0600-06FF, U+0750-077F, U+0870-089F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
   font-display: swap;
 }
 
-/* Mono: Hebrew */
+/* Hangul & Hanja - Korean (Bundled, for stack fallback) */
 @font-face {
-  font-family: 'JetBrainsMono';
-  src: url('NotoSansMono/NotoSansMono-VariableFont_wdth,wght.ttf') format('truetype');
+  font-family: 'NotoSansKR-Bundled';
+  src: url('NotoSansKR/NotoSansKR-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 1000;
-  unicode-range: U+0590-05FF, U+FB1D-FB4F;
-  font-display: swap;
-}
-
-/* Mono: Thai */
-@font-face {
-  font-family: 'JetBrainsMono';
-  src: url('NotoSansMono/NotoSansMono-VariableFont_wdth,wght.ttf') format('truetype');
-  font-weight: 100 1000;
-  unicode-range: U+0E00-0E7F;
-  font-display: swap;
-}
-
-/* Mono: Devanagari */
-@font-face {
-  font-family: 'JetBrainsMono';
-  src: url('NotoSansMono/NotoSansMono-VariableFont_wdth,wght.ttf') format('truetype');
-  font-weight: 100 1000;
-  unicode-range: U+0900-097F, U+A8E0-A8FF;
   font-display: swap;
 }
 
@@ -179,71 +158,24 @@
    * Full stacks: bundled primary first, then language companions and system UI.
    * Existing class names (font-Nunito / font-JetBrainsMono) keep working.
    */
-  --font-sans-stack:
-    Nunito, 'M PLUS Rounded 1c', Vazirmatn, Rubik, Prompt, 'Baloo 2', 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans KR',
-    'Noto Sans', system-ui, sans-serif;
+  --font-sans-stack: Nunito, 'NotoSansSC-Bundled', 'NotoSansTC-Bundled', 'NotoSansKR-Bundled', system-ui, sans-serif;
 
-  --font-mono-stack:
-    JetBrainsMono, 'Noto Sans Mono CJK SC', 'Noto Sans Mono CJK TC', 'Noto Sans Mono CJK JP', 'Noto Sans Mono CJK KR',
-    'Noto Sans Mono Arabic', 'Noto Sans Mono Hebrew', 'Noto Sans Mono Thai', 'Noto Sans Mono Devanagari',
-    'Noto Sans Mono', ui-monospace, monospace;
+  --font-mono-stack: JetBrainsMono, ui-monospace, monospace;
 }
 
 /* Document-language overrides (used when <html lang="…"> is set for i18n). */
 :lang(zh-Hans),
 :lang(zh-CN),
 :lang(zh) {
-  --font-sans-stack: Nunito, 'Noto Sans SC', system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono CJK SC', ui-monospace, monospace;
+  --font-sans-stack: Nunito, 'NotoSansSC-Bundled', system-ui, sans-serif;
 }
 
 :lang(zh-Hant),
 :lang(zh-TW),
 :lang(zh-HK) {
-  --font-sans-stack: Nunito, 'Noto Sans TC', system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono CJK TC', ui-monospace, monospace;
-}
-
-:lang(ja) {
-  --font-sans-stack: Nunito, 'M PLUS Rounded 1c', system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono CJK JP', ui-monospace, monospace;
+  --font-sans-stack: Nunito, 'NotoSansTC-Bundled', system-ui, sans-serif;
 }
 
 :lang(ko) {
-  --font-sans-stack: Nunito, 'Noto Sans KR', system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono CJK KR', ui-monospace, monospace;
-}
-
-:lang(ar) {
-  --font-sans-stack: Nunito, Vazirmatn, system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono Arabic', ui-monospace, monospace;
-}
-
-:lang(he) {
-  --font-sans-stack: Nunito, Rubik, system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono Hebrew', ui-monospace, monospace;
-}
-
-:lang(th) {
-  --font-sans-stack: Nunito, Prompt, system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono Thai', ui-monospace, monospace;
-}
-
-:lang(hi) {
-  --font-sans-stack: Nunito, 'Baloo 2', system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono Devanagari', ui-monospace, monospace;
-}
-
-:lang(el) {
-  --font-sans-stack: Nunito, 'Noto Sans', system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, 'Noto Sans Mono', ui-monospace, monospace;
-}
-
-:lang(ru),
-:lang(uk),
-:lang(bg),
-:lang(sr) {
-  /* Cyrillic is covered by bundled Nunito + JetBrains Mono */
-  --font-sans-stack: Nunito, system-ui, sans-serif;
-  --font-mono-stack: JetBrainsMono, ui-monospace, monospace;
+  --font-sans-stack: Nunito, 'NotoSansKR-Bundled', system-ui, sans-serif;
 }
