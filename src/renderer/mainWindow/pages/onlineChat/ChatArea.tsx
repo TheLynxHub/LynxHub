@@ -1,10 +1,11 @@
-import {Button, InputGroup, Link, ScrollShadow, TextField} from '@heroui/react';
-import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
+import {Button, Dropdown, InputGroup, Label, Link, ScrollShadow, TextField} from '@heroui/react';
+import {ChatRound, CodeFile, Copy, DocumentText} from '@solar-icons/react-perf/BoldDuotone';
 import {Send} from 'lucide-react';
 import {KeyboardEvent, memo, useCallback, useEffect, useRef, useState} from 'react';
 import ReactMarkdown, {Components} from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import {topToast} from '../../layouts/ToastProviders';
 import {Message} from './useOnlineChat';
 
 interface ChatAreaProps {
@@ -33,6 +34,91 @@ function getTextDirection(text: string): 'rtl' | 'ltr' {
 
   return 'ltr';
 }
+
+/** Best-effort markdown → plain text for the "Copy text" action. */
+function markdownToPlainText(markdown: string): string {
+  return markdown
+    .replace(/```[\s\S]*?```/g, block => block.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, ''))
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/(\*|_)(.*?)\1/g, '$2')
+    .replace(/~~(.*?)~~/g, '$1')
+    .replace(/^>\s?/gm, '')
+    .replace(/^[-*+]\s+/gm, '')
+    .replace(/^\d+\.\s+/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+async function copyToClipboard(value: string, successMessage: string) {
+  try {
+    await navigator.clipboard.writeText(value);
+    topToast.success(successMessage, {timeout: 1500});
+  } catch (err) {
+    console.error('Failed to copy to clipboard:', err);
+    topToast.danger('Failed to copy', {timeout: 2000});
+  }
+}
+
+interface MessageCopyDropdownProps {
+  markdown: string;
+  plainTextFallback: string;
+}
+
+const MessageCopyDropdown = memo(({markdown, plainTextFallback}: MessageCopyDropdownProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleCopyMarkdown = useCallback(() => {
+    void copyToClipboard(markdown, 'Copied markdown');
+  }, [markdown]);
+
+  const handleCopyText = useCallback(() => {
+    void copyToClipboard(plainTextFallback || markdownToPlainText(markdown), 'Copied text');
+  }, [markdown, plainTextFallback]);
+
+  return (
+    <div
+      className={`shrink-0 self-center transition-opacity duration-150 ${
+        isOpen
+          ? 'opacity-100 pointer-events-auto'
+          : 'opacity-0 pointer-events-none group-hover/msg:opacity-100 group-hover/msg:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto'
+      }`}>
+      <Dropdown isOpen={isOpen} onOpenChange={setIsOpen}>
+        <Dropdown.Trigger>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Copy message"
+            className="bg-surface/80 backdrop-blur-sm"
+            isIconOnly>
+            <Copy className="size-3.5" />
+          </Button>
+        </Dropdown.Trigger>
+        <Dropdown.Popover placement="bottom end" className="min-w-44">
+          <Dropdown.Menu
+            onAction={key => {
+              if (key === 'markdown') handleCopyMarkdown();
+              if (key === 'text') handleCopyText();
+            }}>
+            <Dropdown.Item id="markdown" textValue="Copy markdown">
+              <CodeFile className="size-4 text-muted" />
+              <Label>Copy markdown</Label>
+            </Dropdown.Item>
+            <Dropdown.Item id="text" textValue="Copy text">
+              <DocumentText className="size-4 text-muted" />
+              <Label>Copy text</Label>
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>
+    </div>
+  );
+});
+
+MessageCopyDropdown.displayName = 'MessageCopyDropdown';
 
 const markdownComponents: Components = {
   code({node, inline, className, children, ...props}: any) {
@@ -100,6 +186,47 @@ const markdownComponents: Components = {
   },
 };
 
+interface ChatBubbleProps {
+  message: Message;
+}
+
+const ChatBubble = memo(({message}: ChatBubbleProps) => {
+  const isUser = message.sender === 'user';
+  const dir = getTextDirection(message.text);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [plainText, setPlainText] = useState(() => markdownToPlainText(message.text));
+
+  // Keep plain-text copy in sync with rendered content (handles markdown formatting).
+  useEffect(() => {
+    const rendered = contentRef.current?.innerText?.trim();
+    setPlainText(rendered || markdownToPlainText(message.text));
+  }, [message.text]);
+
+  return (
+    <div className={`group/msg flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`flex max-w-[85%] items-start gap-1.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+        <div
+          dir={dir}
+          className={`max-w-full rounded-3xl px-4 py-3 shadow-surface border text-sm ${
+            isUser ? 'bg-accent/10 border-accent/25 rounded-tr-sm' : 'bg-surface border-border rounded-tl-sm'
+          } transition-all duration-200`}>
+          <div
+            ref={contentRef}
+            className="prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed text-start">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+              {message.text}
+            </ReactMarkdown>
+          </div>
+        </div>
+
+        <MessageCopyDropdown markdown={message.text} plainTextFallback={plainText} />
+      </div>
+    </div>
+  );
+});
+
+ChatBubble.displayName = 'ChatBubble';
+
 const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatAreaProps) => {
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -141,28 +268,9 @@ const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatA
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((msg, index) => {
-              const isUser = msg.sender === 'user';
-              const dir = getTextDirection(msg.text);
-              return (
-                <div key={index} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
-                  <div
-                    className={`max-w-[75%] rounded-3xl px-4 py-3 shadow-surface border text-sm ${
-                      isUser ? 'bg-accent/10 border-accent/25 rounded-tr-sm' : 'bg-surface border-border rounded-tl-sm'
-                    } transition-all duration-200`}
-                    dir={dir}>
-                    <div
-                      className={
-                        'prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed text-start'
-                      }>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                        {msg.text}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {messages.map((msg, index) => (
+              <ChatBubble key={index} message={msg} />
+            ))}
           </div>
         )}
         <div ref={messagesEndRef} />
