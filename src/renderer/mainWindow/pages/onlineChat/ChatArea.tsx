@@ -207,8 +207,10 @@ const ChatBubble = memo(({message}: ChatBubbleProps) => {
           } transition-all duration-200`}
           dir={dir}>
           <div
-            ref={contentRef}
-            className="prose dark:prose-invert max-w-none text-sm wrap-break-word leading-relaxed text-start">
+            className={
+              'prose dark:prose-invert max-w-none text-sm ' + 'wrap-break-word leading-relaxed text-start select-text'
+            }
+            ref={contentRef}>
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
               {message.text}
             </ReactMarkdown>

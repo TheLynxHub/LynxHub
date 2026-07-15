@@ -84,6 +84,12 @@
   -webkit-user-drag: none;
 }
 
+.select-text,
+.select-text * {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
 html,
 body {
   font-family: var(--font-sans-stack), serif;
