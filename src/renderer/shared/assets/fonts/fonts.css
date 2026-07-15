@@ -174,16 +174,6 @@
   font-display: swap;
 }
 
-/* Mono: CJK + kana + hangul */
-@font-face {
-  font-family: 'JetBrainsMono';
-  src: local('Noto Sans Mono CJK SC');
-  unicode-range:
-    U+3040-309F, U+30A0-30FF, U+31F0-31FF, U+FF66-FF9F, U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7AF, U+D7B0-D7FF,
-    U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-2A6DF, U+2F800-2FA1F;
-  font-display: swap;
-}
-
 :root {
   /*
    * Full stacks: bundled primary first, then language companions and system UI.
