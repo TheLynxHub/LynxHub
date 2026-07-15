@@ -1,9 +1,10 @@
-import {Label, NumberField} from '@heroui/react';
+import {Description, Label, NumberField} from '@heroui/react';
 import {terminalActions, useTerminalState} from '@lynx/redux/reducers/terminal';
 import {AppDispatch} from '@lynx/redux/store';
 import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
+import SettingsSearchHighlight from '../../SettingsSearchHighlight';
 
 /**
  * Settings component that controls the amount of scrollback buffer history retained in the terminal.
@@ -17,8 +18,13 @@ export default function ScrollBack() {
     dispatch(terminalActions.setTerminalState({key: 'scrollBack', value}));
   };
 
+  const labelText = 'Scrollback (lines)';
+  const descriptionText =
+    'The maximum number of lines kept in the terminal buffer to scroll back through. ' +
+    'Larger values keep more history but consume more memory.';
+
   return (
-    <SettingsFilterItem searchTexts={['Scrollback', 'terminal', 'scrollback', 'buffer', 'history']}>
+    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'terminal', 'scrollback', 'buffer', 'history']}>
       <NumberField
         step={100}
         minValue={100}
@@ -26,12 +32,17 @@ export default function ScrollBack() {
         value={scrollBack}
         onChange={onChange}
         aria-label="Terminal scrollback">
-        <Label>Scrollback</Label>
+        <Label>
+          <SettingsSearchHighlight text={labelText} />
+        </Label>
         <NumberField.Group>
           <NumberField.DecrementButton />
           <NumberField.Input />
           <NumberField.IncrementButton />
         </NumberField.Group>
+        <Description>
+          <SettingsSearchHighlight text={descriptionText} />
+        </Description>
       </NumberField>
     </SettingsFilterItem>
   );
