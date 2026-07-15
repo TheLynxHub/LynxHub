@@ -23,6 +23,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
     handleBackToSelect,
     handleGoToChat,
     handleShowWebpage,
+    handleRefresh,
     handleSendMessage,
   } = useOnlineChat(tabID);
 
@@ -36,6 +37,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           onGoToChat={handleGoToChat}
           onShowWebpage={handleShowWebpage}
           onBackToSelect={handleBackToSelect}
+          onRefresh={handleRefresh}
         />
         <div className="absolute inset-0 top-12! overflow-hidden flex flex-col">
           {step === 'select_module' && <ModuleSelector onlineCards={onlineCards} onSelectCard={handleSelectCard} />}

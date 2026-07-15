@@ -209,6 +209,11 @@ export function useOnlineChat(tabID = 'online-chat') {
     browserIpc.send.setVisible(tabID, true);
   }, [tabID]);
 
+  const handleRefresh = useCallback(() => {
+    setIsPageLoaded(false);
+    browserIpc.send.reload(tabID);
+  }, [tabID]);
+
   // Monitor loading state of the browser page
   useEffect(() => {
     const offLoading = browserIpc.on.loading((id, isLoading) => {
@@ -318,6 +323,7 @@ export function useOnlineChat(tabID = 'online-chat') {
     handleBackToSelect,
     handleGoToChat,
     handleShowWebpage,
+    handleRefresh,
     handleSendMessage,
   };
 }

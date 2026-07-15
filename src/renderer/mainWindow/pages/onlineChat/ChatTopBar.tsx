@@ -1,6 +1,6 @@
 import {Avatar, Button} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound, Earth} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRound, Earth, Restart} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
 import {memo} from 'react';
 
@@ -13,11 +13,11 @@ interface ChatTopBarProps {
   onBackToSelect: () => void;
   onShowWebpage: () => void;
   onGoToChat: () => void;
+  onRefresh: () => void;
 }
 
 const ChatTopBar = memo(
-  ({step, selectedCard, isPageLoaded, onBackToSelect, onShowWebpage, onGoToChat}: ChatTopBarProps) => {
-    console.log(selectedCard);
+  ({step, selectedCard, isPageLoaded, onBackToSelect, onShowWebpage, onGoToChat, onRefresh}: ChatTopBarProps) => {
     return (
       <div className="h-12 inset-x-0 top-0 absolute bg-surface flex pl-4 pr-2 py-1 items-center justify-between z-10">
         {step === 'select_module' ? (
@@ -42,8 +42,14 @@ const ChatTopBar = memo(
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {step === 'login' && !isPageLoaded && <span className="text-xs text-muted">Loading website...</span>}
+
+          {step === 'login' && (
+            <Button size="sm" variant="ghost" onPress={onRefresh} aria-label="Reload page" isIconOnly>
+              <Restart className="size-4" />
+            </Button>
+          )}
 
           {step !== 'select_module' && (
             <Button
