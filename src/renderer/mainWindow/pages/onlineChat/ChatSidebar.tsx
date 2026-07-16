@@ -17,8 +17,8 @@ interface ChatSidebarProps {
 
 const ChatSidebar = memo(({chatHistory, onSelectHistoryItem, onNewChat}: ChatSidebarProps) => {
   return (
-    <div className="w-60 h-full border-r border-border bg-surface-secondary flex flex-col shrink-0">
-      <div className="p-3.5 border-b border-border flex items-center justify-between">
+    <div className="w-60 h-full bg-background/50 flex flex-col shrink-0 rounded-tr-2xl">
+      <div className="px-3.5 pt-3 pb-1 flex items-center justify-between">
         {onNewChat ? (
           <Button
             size="sm"
