@@ -258,7 +258,7 @@ const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatA
   };
 
   return (
-    <div className="flex size-full flex-col overflow-hidden bg-surface">
+    <div className="flex size-full flex-col overflow-hidden bg-surface max-w-7xl">
       {/* Chat Messages */}
       <ScrollShadow className="flex-1 p-6 gap-y-4">
         {messages.length === 0 ? (

@@ -46,7 +46,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           onBackToSelect={handleBackToSelect}
           onCopyToClipboard={handleCopyToClipboard}
         />
-        <div className="absolute inset-0 top-12! overflow-hidden flex flex-col">
+        <div className="absolute inset-0 top-12! overflow-hidden flex flex-col items-center">
           {step === 'select_module' && <ModuleSelector onlineCards={onlineCards} onSelectCard={handleSelectCard} />}
 
           {step === 'login' && (
