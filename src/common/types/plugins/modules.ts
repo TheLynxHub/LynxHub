@@ -533,6 +533,9 @@ export interface OnlineConfig {
     userMessage: string;
     assistantMessage: string;
     messageText: string;
+    chatItem?: string;
+    chatItemText?: string;
+    chatActiveItem?: string;
   };
   newChat?: {
     action: 'click' | 'navigate';

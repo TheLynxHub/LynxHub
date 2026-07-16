@@ -62,6 +62,7 @@ export function useOnlineChat(tabID = 'online-chat') {
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const [step, setStep] = useState<ChatStep>('select_module');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [chatHistory, setChatHistory] = useState<{index: number; title: string; active: boolean}[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const [isGenerating, setIsGeneratingState] = useState(false);
@@ -123,6 +124,7 @@ export function useOnlineChat(tabID = 'online-chat') {
     setSelectedCard(null);
     setStep('select_module');
     setMessages([]);
+    setChatHistory([]);
     setIsGenerating(false);
     prevMessagesRef.current = [];
   }, [tabID]);
@@ -290,11 +292,94 @@ export function useOnlineChat(tabID = 'online-chat') {
     }
   }, [selectedCard, tabID]);
 
+  const scrapeChatHistory = useCallback(async () => {
+    if (!selectedCard || !selectedCard.onlineConfig) return;
+    const {selectors} = selectedCard.onlineConfig;
+    if (!selectors.chatItem) {
+      setChatHistory([]);
+      return;
+    }
+
+    const script = `
+      (() => {
+        const itemSel = ${JSON.stringify(selectors.chatItem)};
+        const textSel = ${JSON.stringify(selectors.chatItemText || '')};
+        const activeSel = ${JSON.stringify(selectors.chatActiveItem || '')};
+        
+        const items = Array.from(document.querySelectorAll(itemSel));
+        return items.map((el, index) => {
+          const textEl = textSel ? el.querySelector(textSel) : el;
+          let isActive = false;
+          if (activeSel) {
+            isActive = el.matches(activeSel) || el.closest(activeSel) !== null;
+          } else {
+            isActive = el.getAttribute('aria-current') === 'page' || 
+                       el.classList.contains('active') ||
+                       el.getAttribute('aria-selected') === 'true' ||
+                       Array.from(el.classList).some(cls => cls.includes('active') || cls.includes('selected'));
+          }
+          return {
+            index,
+            title: textEl ? textEl.textContent.trim() : '',
+            active: isActive
+          };
+        });
+      })()
+    `;
+
+    try {
+      const res = await browserIpc.invoke.executeJavaScript(tabID, script);
+      if (Array.isArray(res)) {
+        const history = res.map((item: any) => ({
+          index: Number(item.index),
+          title: String(item.title || 'Untitled Chat')
+            .replace(/\n+/g, ' ')
+            .trim(),
+          active: Boolean(item.active),
+        }));
+        setChatHistory(history);
+      }
+    } catch (err) {
+      console.error('Failed to scrape chat history:', err);
+    }
+  }, [selectedCard, tabID]);
+
+  const handleSelectHistoryItem = useCallback(
+    async (index: number) => {
+      if (!selectedCard || !selectedCard.onlineConfig) return;
+      const {selectors} = selectedCard.onlineConfig;
+      if (!selectors.chatItem) return;
+
+      const script = `
+        (() => {
+          const itemSel = ${JSON.stringify(selectors.chatItem)};
+          const items = Array.from(document.querySelectorAll(itemSel));
+          const item = items[${index}];
+          if (item) {
+            item.click();
+            return true;
+          }
+          return false;
+        })()
+      `;
+
+      try {
+        await browserIpc.invoke.executeJavaScript(tabID, script);
+        setTimeout(scrapeMessages, 500);
+        setTimeout(scrapeChatHistory, 500);
+      } catch (err) {
+        console.error('Failed to select chat history item:', err);
+      }
+    },
+    [selectedCard, tabID, scrapeMessages, scrapeChatHistory],
+  );
+
   const handleGoToChat = useCallback(() => {
     browserIpc.send.setVisible(tabID, false, 'offscreen');
     setStep('chat');
     scrapeMessages();
-  }, [tabID, scrapeMessages]);
+    scrapeChatHistory();
+  }, [tabID, scrapeMessages, scrapeChatHistory]);
 
   const handleShowWebpage = useCallback(() => {
     setStep('login');
@@ -330,9 +415,17 @@ export function useOnlineChat(tabID = 'online-chat') {
   useEffect(() => {
     if (step !== 'chat' || !selectedCard) return;
 
-    const interval = setInterval(scrapeMessages, 1000);
-    return () => clearInterval(interval);
-  }, [step, selectedCard, scrapeMessages]);
+    scrapeMessages();
+    scrapeChatHistory();
+
+    const msgInterval = setInterval(scrapeMessages, 1000);
+    const historyInterval = setInterval(scrapeChatHistory, 2000);
+
+    return () => {
+      clearInterval(msgInterval);
+      clearInterval(historyInterval);
+    };
+  }, [step, selectedCard, scrapeMessages, scrapeChatHistory]);
 
   // Send message using JS injection
   const handleSendMessage = useCallback(
@@ -498,7 +591,9 @@ export function useOnlineChat(tabID = 'online-chat') {
     isPageLoaded,
     isGenerating,
     onlineCards,
+    chatHistory,
     handleSelectCard,
+    handleSelectHistoryItem,
     handleBackToSelect,
     handleGoToChat,
     handleShowWebpage,
