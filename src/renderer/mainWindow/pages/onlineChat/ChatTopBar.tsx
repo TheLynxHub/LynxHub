@@ -1,9 +1,12 @@
 import {Avatar, Button, Dropdown, Label} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
 import {ChatRound, Copy, Earth, FileDownload, Pen2, Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {AltArrowDown, AltArrowUp} from '@solar-icons/react-perf/Linear';
 import {AltArrowLeft, ArrowRightUp} from '@solar-icons/react-perf/LineDuotone';
-import {memo} from 'react';
+import {AnimatePresence, motion} from 'framer-motion';
+import {memo, ReactNode} from 'react';
 
+import LynxTooltip from '../../components/LynxTooltip';
 import {ChatStep, Message} from './useOnlineChat';
 
 interface ChatTopBarProps {
@@ -18,6 +21,31 @@ interface ChatTopBarProps {
   onCopyToClipboard: (format: 'markdown' | 'text') => void;
   onSaveToFile: (format: 'markdown' | 'text') => void;
   onNewChat?: () => void;
+  showScrollTop?: boolean;
+  showScrollBottom?: boolean;
+  onScrollTop?: () => void;
+  onScrollBottom?: () => void;
+}
+
+type AnimProp = {
+  children: ReactNode;
+  show: boolean;
+};
+
+function AnimateChild({show, children}: AnimProp) {
+  return (
+    <AnimatePresence mode="popLayout">
+      {show && (
+        <motion.div
+          layout={true}
+          exit={{translateY: 5, opacity: 0, scale: 0.7}}
+          animate={{translateY: 0, opacity: 1, scale: 1}}
+          initial={{translateY: 5, opacity: 0, scale: 0.7}}>
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }
 
 const ChatTopBar = memo(
@@ -33,6 +61,10 @@ const ChatTopBar = memo(
     onCopyToClipboard,
     onSaveToFile,
     onNewChat,
+    showScrollTop,
+    showScrollBottom,
+    onScrollTop,
+    onScrollBottom,
   }: ChatTopBarProps) => {
     return (
       <div className="h-12 inset-x-0 top-0 absolute bg-surface flex pl-4 pr-2 py-1 items-center justify-between z-10">
@@ -107,6 +139,26 @@ const ChatTopBar = memo(
                 </Dropdown.Menu>
               </Dropdown.Popover>
             </Dropdown>
+          )}
+
+          {step === 'chat' && (
+            <>
+              <AnimateChild show={!!showScrollTop}>
+                <LynxTooltip delay={500} content="Scroll to top">
+                  <Button size="sm" variant="ghost" onPress={onScrollTop} aria-label="Scroll to top" isIconOnly>
+                    <AltArrowUp className="size-4" />
+                  </Button>
+                </LynxTooltip>
+              </AnimateChild>
+
+              <AnimateChild show={!!showScrollBottom}>
+                <LynxTooltip delay={500} content="Scroll to bottom">
+                  <Button size="sm" variant="ghost" onPress={onScrollBottom} aria-label="Scroll to bottom" isIconOnly>
+                    <AltArrowDown className="size-4" />
+                  </Button>
+                </LynxTooltip>
+              </AnimateChild>
+            </>
           )}
 
           {step !== 'select_module' && (

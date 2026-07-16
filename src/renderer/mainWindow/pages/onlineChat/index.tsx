@@ -1,5 +1,5 @@
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
-import {memo} from 'react';
+import {memo, useCallback, useRef, useState} from 'react';
 
 import Page from '../Page';
 import ChatArea from './ChatArea';
@@ -30,6 +30,23 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
     handleNewChat,
   } = useOnlineChat(tabID);
 
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const chatAreaRef = useRef<{scrollToTop: () => void; scrollToBottom: () => void}>(null);
+
+  const handleScrollStateChange = useCallback((showTop: boolean, showBottom: boolean) => {
+    setShowScrollTop(showTop);
+    setShowScrollBottom(showBottom);
+  }, []);
+
+  const handleScrollTop = useCallback(() => {
+    chatAreaRef.current?.scrollToTop();
+  }, []);
+
+  const handleScrollBottom = useCallback(() => {
+    chatAreaRef.current?.scrollToBottom();
+  }, []);
+
   return (
     <Page>
       <div className="absolute inset-0 bg-surface overflow-hidden flex flex-col">
@@ -41,9 +58,13 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           selectedCard={selectedCard}
           isPageLoaded={isPageLoaded}
           onGoToChat={handleGoToChat}
+          showScrollTop={showScrollTop}
+          onScrollTop={handleScrollTop}
           onSaveToFile={handleSaveToFile}
           onShowWebpage={handleShowWebpage}
           onBackToSelect={handleBackToSelect}
+          showScrollBottom={showScrollBottom}
+          onScrollBottom={handleScrollBottom}
           onCopyToClipboard={handleCopyToClipboard}
         />
         <div className="absolute inset-0 top-12! overflow-hidden flex flex-col items-center">
@@ -61,8 +82,10 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
             <ChatArea
               messages={messages}
               isSending={isSending}
+              chatAreaRef={chatAreaRef}
               selectedCard={selectedCard}
               onSendMessage={handleSendMessage}
+              onScrollStateChange={handleScrollStateChange}
             />
           )}
         </div>

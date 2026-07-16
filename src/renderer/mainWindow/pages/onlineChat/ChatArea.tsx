@@ -13,6 +13,11 @@ interface ChatAreaProps {
   messages: Message[];
   isSending: boolean;
   onSendMessage: (messageText: string) => void;
+  chatAreaRef?: React.RefObject<{
+    scrollToTop: () => void;
+    scrollToBottom: () => void;
+  } | null>;
+  onScrollStateChange?: (showTop: boolean, showBottom: boolean) => void;
 }
 
 /** Unicode ranges for strong RTL scripts (Hebrew, Arabic, Syriac, Thaana, N'Ko, etc.). */
@@ -228,85 +233,148 @@ const ChatBubble = memo(({message}: ChatBubbleProps) => {
 
 ChatBubble.displayName = 'ChatBubble';
 
-const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatAreaProps) => {
-  const [inputText, setInputText] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const prevMessagesCount = useRef<number>(0);
+const ChatArea = memo(
+  ({selectedCard, messages, isSending, onSendMessage, chatAreaRef, onScrollStateChange}: ChatAreaProps) => {
+    const [inputText, setInputText] = useState('');
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const prevMessagesCount = useRef<number>(0);
 
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({behavior: 'instant'});
-  }, []);
+    const updateScrollState = useCallback(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const {scrollTop, scrollHeight, clientHeight} = el;
+      const isScrollable = scrollHeight > clientHeight;
+      const atTop = scrollTop <= 10;
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
 
-  useEffect(() => {
-    if (messages.length > prevMessagesCount.current) {
-      scrollToBottom();
-    }
-    prevMessagesCount.current = messages.length;
-  }, [messages, scrollToBottom]);
+      onScrollStateChange?.(isScrollable && !atTop, isScrollable && !atBottom);
+    }, [onScrollStateChange]);
 
-  const handleSend = useCallback(() => {
-    if (!inputText.trim() || isSending) return;
-    onSendMessage(inputText);
-    setInputText('');
-  }, [inputText, isSending, onSendMessage]);
+    const scrollToBottom = useCallback(() => {
+      const el = scrollRef.current;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      } else {
+        messagesEndRef.current?.scrollIntoView({behavior: 'instant'});
+      }
+    }, []);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+    useEffect(() => {
+      if (chatAreaRef) {
+        chatAreaRef.current = {
+          scrollToTop: () => {
+            scrollRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+          },
+          scrollToBottom: () => {
+            const el = scrollRef.current;
+            if (el) {
+              el.scrollTo({top: el.scrollHeight, behavior: 'smooth'});
+            }
+          },
+        };
+      }
+      return () => {
+        if (chatAreaRef) {
+          chatAreaRef.current = null;
+        }
+      };
+    }, [chatAreaRef]);
 
-  return (
-    <div className="flex size-full flex-col overflow-hidden bg-surface">
-      {/* Chat Messages */}
-      <ScrollShadow className="flex-1 w-full">
-        <div className="max-w-6xl mx-auto w-full min-h-full flex flex-col p-6">
-          {messages.length === 0 ? (
-            <div className="flex flex-col text-semi-muted items-center justify-center flex-1 text-center gap-y-2">
-              <ChatRound className="size-12" />
-              <div className="font-semibold">Start a new conversation</div>
-              <div className="text-xs text-muted">Your chat history will sync here automatically.</div>
-            </div>
-          ) : (
-            <div className="space-y-4 flex-1">
-              {messages.map((msg, index) => (
-                <ChatBubble key={index} message={msg} />
-              ))}
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+    const handleScroll = useCallback(() => {
+      updateScrollState();
+    }, [updateScrollState]);
+
+    useEffect(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+
+      const resizeObserver = new ResizeObserver(() => {
+        updateScrollState();
+      });
+      resizeObserver.observe(el);
+
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }, [updateScrollState]);
+
+    useEffect(() => {
+      if (messages.length > prevMessagesCount.current) {
+        scrollToBottom();
+      }
+      prevMessagesCount.current = messages.length;
+
+      const timer = setTimeout(() => {
+        updateScrollState();
+      }, 50);
+      return () => clearTimeout(timer);
+    }, [messages, scrollToBottom, updateScrollState]);
+
+    const handleSend = useCallback(() => {
+      if (!inputText.trim() || isSending) return;
+      onSendMessage(inputText);
+      setInputText('');
+    }, [inputText, isSending, onSendMessage]);
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    };
+
+    return (
+      <div className="flex size-full flex-col overflow-hidden bg-surface">
+        {/* Chat Messages */}
+        <ScrollShadow ref={scrollRef} onScroll={handleScroll} className="flex-1 w-full">
+          <div className="max-w-6xl mx-auto w-full min-h-full flex flex-col p-6">
+            {messages.length === 0 ? (
+              <div className="flex flex-col text-semi-muted items-center justify-center flex-1 text-center gap-y-2">
+                <ChatRound className="size-12" />
+                <div className="font-semibold">Start a new conversation</div>
+                <div className="text-xs text-muted">Your chat history will sync here automatically.</div>
+              </div>
+            ) : (
+              <div className="space-y-4 flex-1">
+                {messages.map((msg, index) => (
+                  <ChatBubble key={index} message={msg} />
+                ))}
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollShadow>
+
+        {/* Message Input Box */}
+        <div className="p-4 bg-surface shrink-0">
+          <TextField name="message" aria-label="Message input" className="max-w-4xl mx-auto w-full">
+            <InputGroup variant="secondary" className="p-2 rounded-2xl" fullWidth>
+              <InputGroup.TextArea
+                rows={1}
+                value={inputText}
+                className="max-h-32 "
+                onKeyDown={handleKeyDown}
+                onChange={e => setInputText(e.target.value)}
+                placeholder={selectedCard ? `Message ${selectedCard.title}...` : 'Message...'}
+              />
+              <InputGroup.Suffix className="p-0.5 shrink-0 self-end">
+                <Button
+                  variant="primary"
+                  className="shrink-0"
+                  onPress={handleSend}
+                  isDisabled={!inputText.trim() || isSending}
+                  isIconOnly>
+                  <Send />
+                </Button>
+              </InputGroup.Suffix>
+            </InputGroup>
+          </TextField>
         </div>
-      </ScrollShadow>
-
-      {/* Message Input Box */}
-      <div className="p-4 bg-surface shrink-0">
-        <TextField name="message" aria-label="Message input" className="max-w-4xl mx-auto w-full">
-          <InputGroup variant="secondary" className="p-2 rounded-2xl" fullWidth>
-            <InputGroup.TextArea
-              rows={1}
-              value={inputText}
-              className="max-h-32 "
-              onKeyDown={handleKeyDown}
-              onChange={e => setInputText(e.target.value)}
-              placeholder={selectedCard ? `Message ${selectedCard.title}...` : 'Message...'}
-            />
-            <InputGroup.Suffix className="p-0.5 shrink-0 self-end">
-              <Button
-                variant="primary"
-                className="shrink-0"
-                onPress={handleSend}
-                isDisabled={!inputText.trim() || isSending}
-                isIconOnly>
-                <Send />
-              </Button>
-            </InputGroup.Suffix>
-          </InputGroup>
-        </TextField>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 ChatArea.displayName = 'ChatArea';
 
