@@ -64,8 +64,16 @@ export function useOnlineChat(tabID = 'online-chat') {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const [isGenerating, setIsGeneratingState] = useState(false);
+  const isGeneratingRef = useRef(false);
+  const setIsGenerating = (val: boolean) => {
+    isGeneratingRef.current = val;
+    setIsGeneratingState(val);
+  };
 
   const lastNewChatTime = useRef<number>(0);
+  const prevMessagesRef = useRef<Message[]>([]);
+  const lastChangeTimeRef = useRef<number>(0);
 
   // Clean up browser if unmounting page
   useEffect(() => {
@@ -88,6 +96,8 @@ export function useOnlineChat(tabID = 'online-chat') {
       setSelectedCard(card);
       setStep('login');
       setIsPageLoaded(false);
+      setIsGenerating(false);
+      prevMessagesRef.current = [];
 
       // Initialize browser view with background throttling disabled
       browserIpc.send.createBrowser(tabID, {backgroundThrottling: false});
@@ -113,6 +123,8 @@ export function useOnlineChat(tabID = 'online-chat') {
     setSelectedCard(null);
     setStep('select_module');
     setMessages([]);
+    setIsGenerating(false);
+    prevMessagesRef.current = [];
   }, [tabID]);
 
   // Dynamic DOM scraping function
@@ -246,6 +258,31 @@ export function useOnlineChat(tabID = 'online-chat') {
           }))
           .filter(m => m.text.length > 0);
 
+        // Detect AI generation progress
+        const lastMsg = validMsgs[validMsgs.length - 1];
+        const prevLastMsg = prevMessagesRef.current[prevMessagesRef.current.length - 1];
+
+        if (lastMsg) {
+          if (lastMsg.sender === 'user') {
+            // Keep generating status as-is if the user recently sent a message
+          } else {
+            // Last message is from assistant
+            if (!prevLastMsg || prevLastMsg.sender === 'user' || prevLastMsg.text !== lastMsg.text) {
+              setIsGenerating(true);
+              lastChangeTimeRef.current = Date.now();
+            } else {
+              // Message text hasn't changed.
+              // If it hasn't changed for more than 3 seconds, we assume generation has finished.
+              if (isGeneratingRef.current && Date.now() - lastChangeTimeRef.current > 3000) {
+                setIsGenerating(false);
+              }
+            }
+          }
+        } else {
+          setIsGenerating(false);
+        }
+
+        prevMessagesRef.current = validMsgs;
         setMessages(validMsgs);
       }
     } catch (err) {
@@ -302,6 +339,8 @@ export function useOnlineChat(tabID = 'online-chat') {
     async (messageText: string) => {
       if (!messageText.trim() || isSending || !selectedCard) return;
       setIsSending(true);
+      setIsGenerating(true);
+      lastChangeTimeRef.current = Date.now();
 
       // Optimistically add message locally to feel faster
       setMessages(prev => [...prev, {sender: 'user', text: messageText}]);
@@ -415,6 +454,8 @@ export function useOnlineChat(tabID = 'online-chat') {
 
     const {newChat, url} = selectedCard.onlineConfig;
     setMessages([]);
+    setIsGenerating(false);
+    prevMessagesRef.current = [];
     lastNewChatTime.current = Date.now();
 
     if (newChat.action === 'click') {
@@ -455,6 +496,7 @@ export function useOnlineChat(tabID = 'online-chat') {
     messages,
     isSending,
     isPageLoaded,
+    isGenerating,
     onlineCards,
     handleSelectCard,
     handleBackToSelect,

@@ -1,5 +1,8 @@
+import 'flowtoken/dist/styles.css';
+
 import {Button, Dropdown, InputGroup, Label, Link, ScrollShadow, TextField} from '@heroui/react';
 import {ChatRound, CodeFile, Copy, DocumentText} from '@solar-icons/react-perf/BoldDuotone';
+import {AnimatedMarkdown} from 'flowtoken';
 import {Send} from 'lucide-react';
 import {KeyboardEvent, memo, useCallback, useEffect, useRef, useState} from 'react';
 import ReactMarkdown, {Components} from 'react-markdown';
@@ -12,6 +15,7 @@ interface ChatAreaProps {
   selectedCard: any;
   messages: Message[];
   isSending: boolean;
+  isGenerating: boolean;
   onSendMessage: (messageText: string) => void;
   chatAreaRef?: React.RefObject<{
     scrollToTop: () => void;
@@ -122,7 +126,7 @@ const MessageCopyDropdown = memo(({markdown, plainTextFallback}: MessageCopyDrop
 MessageCopyDropdown.displayName = 'MessageCopyDropdown';
 
 const markdownComponents: Components = {
-  code({node, inline, className, children, ...props}: any) {
+  code({node, inline, className, children, animateText, ...props}: any) {
     const match = /language-(\w+)/.exec(className || '');
     const isInline = inline ?? !className;
 
@@ -146,7 +150,7 @@ const markdownComponents: Components = {
       </code>
     );
   },
-  pre({children, ...props}) {
+  pre({children, animateText, ...props}: any) {
     return (
       <pre
         dir="ltr"
@@ -156,28 +160,28 @@ const markdownComponents: Components = {
       </pre>
     );
   },
-  ul({children, ...props}) {
+  ul({children, animateText, ...props}: any) {
     return (
       <ul className="list-disc ps-5 my-1.5 space-y-0.5" {...props}>
         {children}
       </ul>
     );
   },
-  ol({children, ...props}) {
+  ol({children, animateText, ...props}: any) {
     return (
       <ol className="list-decimal ps-5 my-1.5 space-y-0.5" {...props}>
         {children}
       </ol>
     );
   },
-  li({children, ...props}) {
+  li({children, animateText, ...props}: any) {
     return (
       <li className="my-1 py-0 ps-0 leading-normal" {...props}>
         {children}
       </li>
     );
   },
-  a({href, children, ...props}) {
+  a({href, children, animateText, ...props}: any) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" className="link no-underline text-accent" {...props}>
         {children}
@@ -189,9 +193,11 @@ const markdownComponents: Components = {
 
 interface ChatBubbleProps {
   message: Message;
+  isLast: boolean;
+  isGenerating: boolean;
 }
 
-const ChatBubble = memo(({message}: ChatBubbleProps) => {
+const ChatBubble = memo(({message, isLast, isGenerating}: ChatBubbleProps) => {
   const isUser = message.sender === 'user';
   const dir = getTextDirection(message.text);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -202,6 +208,8 @@ const ChatBubble = memo(({message}: ChatBubbleProps) => {
     const rendered = contentRef.current?.innerText?.trim();
     setPlainText(rendered || markdownToPlainText(message.text));
   }, [message.text]);
+
+  const shouldAnimate = !isUser && isLast && isGenerating;
 
   return (
     <div className={`group/msg flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -216,9 +224,19 @@ const ChatBubble = memo(({message}: ChatBubbleProps) => {
               'prose dark:prose-invert max-w-none text-sm ' + 'wrap-break-word leading-relaxed text-start select-text'
             }
             ref={contentRef}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-              {message.text}
-            </ReactMarkdown>
+            {shouldAnimate ? (
+              <AnimatedMarkdown
+                animation="fadeIn"
+                content={message.text}
+                animationDuration="0.3s"
+                animationTimingFunction="ease-out"
+                customComponents={markdownComponents}
+              />
+            ) : (
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                {message.text}
+              </ReactMarkdown>
+            )}
           </div>
         </div>
 
@@ -233,12 +251,42 @@ const ChatBubble = memo(({message}: ChatBubbleProps) => {
 
 ChatBubble.displayName = 'ChatBubble';
 
+const TypingIndicatorBubble = memo(() => {
+  return (
+    <div className="flex w-full justify-start">
+      <div className="flex max-w-[85%] flex-col gap-1">
+        <div
+          className={
+            'rounded-3xl px-5 py-4 shadow-surface bg-surface-tertiary ' +
+            'rounded-tl-md flex items-center gap-1.5 w-max'
+          }>
+          <span className="w-1.5 h-1.5 rounded-full bg-foreground/60 animate-bounce [animation-delay:-0.3s]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-foreground/60 animate-bounce [animation-delay:-0.15s]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-foreground/60 animate-bounce" />
+        </div>
+      </div>
+    </div>
+  );
+});
+
+TypingIndicatorBubble.displayName = 'TypingIndicatorBubble';
+
 const ChatArea = memo(
-  ({selectedCard, messages, isSending, onSendMessage, chatAreaRef, onScrollStateChange}: ChatAreaProps) => {
+  ({
+    selectedCard,
+    messages,
+    isSending,
+    isGenerating,
+    onSendMessage,
+    chatAreaRef,
+    onScrollStateChange,
+  }: ChatAreaProps) => {
     const [inputText, setInputText] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
     const prevMessagesCount = useRef<number>(0);
+    const isNearBottomRef = useRef<boolean>(true);
 
     const updateScrollState = useCallback(() => {
       const el = scrollRef.current;
@@ -246,7 +294,7 @@ const ChatArea = memo(
       const {scrollTop, scrollHeight, clientHeight} = el;
       const isScrollable = scrollHeight > clientHeight;
       const atTop = scrollTop <= 10;
-      const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 20;
 
       onScrollStateChange?.(isScrollable && !atTop, isScrollable && !atBottom);
     }, [onScrollStateChange]);
@@ -282,17 +330,27 @@ const ChatArea = memo(
     }, [chatAreaRef]);
 
     const handleScroll = useCallback(() => {
+      const el = scrollRef.current;
+      if (el) {
+        const {scrollTop, scrollHeight, clientHeight} = el;
+        // User is near bottom if scroll position is within 100px of maximum
+        isNearBottomRef.current = scrollTop + clientHeight >= scrollHeight - 100;
+      }
       updateScrollState();
     }, [updateScrollState]);
 
     useEffect(() => {
-      const el = scrollRef.current;
-      if (!el) return;
+      const scrollEl = scrollRef.current;
+      const contentEl = contentRef.current;
+      if (!scrollEl || !contentEl) return;
 
       const resizeObserver = new ResizeObserver(() => {
         updateScrollState();
+        if (isNearBottomRef.current) {
+          scrollEl.scrollTop = scrollEl.scrollHeight;
+        }
       });
-      resizeObserver.observe(el);
+      resizeObserver.observe(contentEl);
 
       return () => {
         resizeObserver.disconnect();
@@ -328,7 +386,7 @@ const ChatArea = memo(
       <div className="flex size-full flex-col overflow-hidden bg-surface">
         {/* Chat Messages */}
         <ScrollShadow ref={scrollRef} onScroll={handleScroll} className="flex-1 w-full">
-          <div className="max-w-6xl mx-auto w-full min-h-full flex flex-col p-6">
+          <div ref={contentRef} className="max-w-6xl mx-auto w-full min-h-full flex flex-col p-6">
             {messages.length === 0 ? (
               <div className="flex flex-col text-semi-muted items-center justify-center flex-1 text-center gap-y-2">
                 <ChatRound className="size-12" />
@@ -338,8 +396,14 @@ const ChatArea = memo(
             ) : (
               <div className="space-y-4 flex-1">
                 {messages.map((msg, index) => (
-                  <ChatBubble key={index} message={msg} />
+                  <ChatBubble
+                    key={index}
+                    message={msg}
+                    isGenerating={isGenerating}
+                    isLast={index === messages.length - 1}
+                  />
                 ))}
+                {isGenerating && messages[messages.length - 1]?.sender === 'user' && <TypingIndicatorBubble />}
               </div>
             )}
             <div ref={messagesEndRef} />

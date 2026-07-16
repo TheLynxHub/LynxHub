@@ -18,6 +18,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
     messages,
     isSending,
     isPageLoaded,
+    isGenerating,
     onlineCards,
     handleSelectCard,
     handleBackToSelect,
@@ -83,6 +84,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
               messages={messages}
               isSending={isSending}
               chatAreaRef={chatAreaRef}
+              isGenerating={isGenerating}
               selectedCard={selectedCard}
               onSendMessage={handleSendMessage}
               onScrollStateChange={handleScrollStateChange}
