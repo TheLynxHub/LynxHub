@@ -1,6 +1,6 @@
 import {Avatar, Button, Dropdown, Label} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound, Copy, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRound, Copy, Earth, FileDownload, Pen2, Restart} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowLeft, ArrowRightUp} from '@solar-icons/react-perf/LineDuotone';
 import {memo} from 'react';
 
@@ -17,6 +17,7 @@ interface ChatTopBarProps {
   messages: Message[];
   onCopyToClipboard: (format: 'markdown' | 'text') => void;
   onSaveToFile: (format: 'markdown' | 'text') => void;
+  onNewChat?: () => void;
 }
 
 const ChatTopBar = memo(
@@ -31,6 +32,7 @@ const ChatTopBar = memo(
     messages,
     onCopyToClipboard,
     onSaveToFile,
+    onNewChat,
   }: ChatTopBarProps) => {
     return (
       <div className="h-12 inset-x-0 top-0 absolute bg-surface flex pl-4 pr-2 py-1 items-center justify-between z-10">
@@ -62,6 +64,12 @@ const ChatTopBar = memo(
           {step === 'login' && (
             <Button size="sm" variant="ghost" onPress={onRefresh} aria-label="Reload page" isIconOnly>
               <Restart className="size-4" />
+            </Button>
+          )}
+
+          {step === 'chat' && selectedCard?.onlineConfig?.newChat && (
+            <Button size="sm" variant="ghost" onPress={onNewChat} aria-label="Start new chat" isIconOnly>
+              <Pen2 className="size-4" />
             </Button>
           )}
 

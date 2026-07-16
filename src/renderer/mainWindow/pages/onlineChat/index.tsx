@@ -27,6 +27,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
     handleSendMessage,
     handleCopyToClipboard,
     handleSaveToFile,
+    handleNewChat,
   } = useOnlineChat(tabID);
 
   return (
@@ -36,6 +37,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           step={step}
           messages={messages}
           onRefresh={handleRefresh}
+          onNewChat={handleNewChat}
           selectedCard={selectedCard}
           isPageLoaded={isPageLoaded}
           onGoToChat={handleGoToChat}

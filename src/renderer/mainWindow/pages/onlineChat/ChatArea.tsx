@@ -284,7 +284,7 @@ const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatA
             <InputGroup.TextArea
               rows={1}
               value={inputText}
-              className="max-h-32"
+              className="max-h-32 "
               onKeyDown={handleKeyDown}
               onChange={e => setInputText(e.target.value)}
               placeholder={selectedCard ? `Message ${selectedCard.title}...` : 'Message...'}

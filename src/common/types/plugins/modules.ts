@@ -534,6 +534,10 @@ export interface OnlineConfig {
     assistantMessage: string;
     messageText: string;
   };
+  newChat?: {
+    action: 'click' | 'navigate';
+    value: string;
+  };
 }
 
 /**

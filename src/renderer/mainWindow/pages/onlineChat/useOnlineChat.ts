@@ -1,7 +1,7 @@
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import browserIpc from '@lynx_shared/ipc/browser';
 import filesIpc from '@lynx_shared/ipc/files';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {topToast} from '../../layouts/ToastProviders';
 import {useTabsState} from '../../redux/reducers/tabs';
@@ -65,6 +65,8 @@ export function useOnlineChat(tabID = 'online-chat') {
   const [isSending, setIsSending] = useState(false);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
+  const lastNewChatTime = useRef<number>(0);
+
   // Clean up browser if unmounting page
   useEffect(() => {
     const visible = activeTab === tabID && step === 'login';
@@ -106,6 +108,7 @@ export function useOnlineChat(tabID = 'online-chat') {
   // Dynamic DOM scraping function
   const scrapeMessages = useCallback(async () => {
     if (!selectedCard || !selectedCard.onlineConfig) return;
+    if (Date.now() - lastNewChatTime.current < 2000) return;
     const {selectors} = selectedCard.onlineConfig;
 
     const script = `
@@ -397,6 +400,45 @@ export function useOnlineChat(tabID = 'online-chat') {
     [messages, selectedCard],
   );
 
+  const handleNewChat = useCallback(async () => {
+    if (!selectedCard || !selectedCard.onlineConfig || !selectedCard.onlineConfig.newChat) return;
+
+    const {newChat, url} = selectedCard.onlineConfig;
+    setMessages([]);
+    lastNewChatTime.current = Date.now();
+
+    if (newChat.action === 'click') {
+      const script = `
+        (() => {
+          const selectors = ${JSON.stringify(newChat.value.split(',').map(s => s.trim()))};
+          for (const selector of selectors) {
+            const btn = document.querySelector(selector);
+            if (btn) {
+              btn.click();
+              return true;
+            }
+          }
+          return false;
+        })()
+      `;
+      try {
+        const clicked = await browserIpc.invoke.executeJavaScript(tabID, script);
+        if (!clicked) {
+          console.warn('New chat button not found, falling back to page reload/navigation:', newChat.value);
+          setIsPageLoaded(false);
+          browserIpc.send.loadURL(tabID, url);
+        }
+      } catch (err) {
+        console.error('Failed to click new chat button, falling back:', err);
+        setIsPageLoaded(false);
+        browserIpc.send.loadURL(tabID, url);
+      }
+    } else if (newChat.action === 'navigate') {
+      setIsPageLoaded(false);
+      browserIpc.send.loadURL(tabID, newChat.value);
+    }
+  }, [selectedCard, tabID]);
+
   return {
     selectedCard,
     step,
@@ -412,5 +454,6 @@ export function useOnlineChat(tabID = 'online-chat') {
     handleSendMessage,
     handleCopyToClipboard,
     handleSaveToFile,
+    handleNewChat,
   };
 }
