@@ -38,6 +38,7 @@ function AnimateChild({show, children}: AnimProp) {
       {show && (
         <motion.div
           layout={true}
+          transition={{duration: 0.1}}
           exit={{translateY: 5, opacity: 0, scale: 0.7}}
           animate={{translateY: 0, opacity: 1, scale: 1}}
           initial={{translateY: 5, opacity: 0, scale: 0.7}}>
