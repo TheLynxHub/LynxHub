@@ -21,7 +21,7 @@ const ChatSidebar = memo(({chatHistory, onSelectHistoryItem}: ChatSidebarProps) 
         <ChatRound className="size-5 text-accent" />
         <span className="font-bold text-foreground text-sm">Recents</span>
       </div>
-      <ScrollShadow className="flex-1 p-2 flex flex-col gap-y-1" hideScrollBar>
+      <ScrollShadow className="flex-1 p-2 flex flex-col gap-y-1">
         {chatHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-6 text-center h-40">
             <span className="text-xs text-muted">No recent chats found</span>
@@ -56,7 +56,9 @@ const ChatSidebar = memo(({chatHistory, onSelectHistoryItem}: ChatSidebarProps) 
                 )}
 
                 <div className="relative z-10 flex items-center gap-2 w-full">
-                  <ChatRound className={`size-4 shrink-0 ${isSelected ? 'text-accent' : 'text-muted'}`} />
+                  <ChatRound
+                    className={`size-4 shrink-0 ${isSelected ? 'text-accent-soft-foreground' : 'text-muted'}`}
+                  />
                   <span
                     className={
                       'text-xs font-medium truncate transition-colors duration-150 flex-1 ' +
