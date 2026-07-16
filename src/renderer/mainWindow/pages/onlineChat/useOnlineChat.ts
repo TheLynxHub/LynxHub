@@ -501,7 +501,14 @@ export function useOnlineChat(tabID = 'online-chat') {
           inputEl.dispatchEvent(new Event('input', { bubbles: true }));
           inputEl.dispatchEvent(new Event('change', { bubbles: true }));
         } else {
-          inputEl.innerHTML = \`\${${JSON.stringify(escapedMessage)}}\`;
+          try {
+            inputEl.focus();
+            document.execCommand('selectAll', false, null);
+            document.execCommand('delete', false, null);
+            document.execCommand('insertText', false, \`\${${JSON.stringify(escapedMessage)}}\`);
+          } catch (e) {
+            inputEl.innerHTML = \`\${${JSON.stringify(escapedMessage)}}\`;
+          }
           inputEl.dispatchEvent(new Event('input', { bubbles: true }));
           inputEl.dispatchEvent(new Event('change', { bubbles: true }));
         }
