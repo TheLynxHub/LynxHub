@@ -66,6 +66,18 @@ export function useOnlineChat(tabID = 'online-chat') {
   const [isSending, setIsSending] = useState(false);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const [isGenerating, setIsGeneratingState] = useState(false);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const isSwitchingRef = useRef(false);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup loading timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, []);
   const isGeneratingRef = useRef(false);
   const setIsGenerating = (val: boolean) => {
     isGeneratingRef.current = val;
@@ -131,6 +143,7 @@ export function useOnlineChat(tabID = 'online-chat') {
 
   // Dynamic DOM scraping function
   const scrapeMessages = useCallback(async () => {
+    if (isSwitchingRef.current) return;
     if (!selectedCard || !selectedCard.onlineConfig) return;
     if (Date.now() - lastNewChatTime.current < 2000) return;
     const {selectors} = selectedCard.onlineConfig;
@@ -284,6 +297,9 @@ export function useOnlineChat(tabID = 'online-chat') {
           setIsGenerating(false);
         }
 
+        if (validMsgs.length > 0) {
+          setIsHistoryLoading(false);
+        }
         prevMessagesRef.current = validMsgs;
         setMessages(validMsgs);
       }
@@ -357,6 +373,21 @@ export function useOnlineChat(tabID = 'online-chat') {
       if (!selectedCard || !selectedCard.onlineConfig) return;
       const {selectors} = selectedCard.onlineConfig;
       if (!selectors.chatItem) return;
+
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+      setIsHistoryLoading(true);
+      setMessages([]);
+      isSwitchingRef.current = true;
+
+      setTimeout(() => {
+        isSwitchingRef.current = false;
+      }, 1000);
+
+      loadingTimeoutRef.current = setTimeout(() => {
+        setIsHistoryLoading(false);
+      }, 4000);
 
       const script = `
         (() => {
@@ -600,6 +631,7 @@ export function useOnlineChat(tabID = 'online-chat') {
     isGenerating,
     onlineCards,
     chatHistory,
+    isHistoryLoading,
     handleSelectCard,
     handleSelectHistoryItem,
     handleBackToSelect,

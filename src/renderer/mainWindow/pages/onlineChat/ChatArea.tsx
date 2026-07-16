@@ -22,6 +22,7 @@ interface ChatAreaProps {
     scrollToBottom: () => void;
   } | null>;
   onScrollStateChange?: (showTop: boolean, showBottom: boolean) => void;
+  isHistoryLoading?: boolean;
 }
 
 /** Unicode ranges for strong RTL scripts (Hebrew, Arabic, Syriac, Thaana, N'Ko, etc.). */
@@ -274,6 +275,31 @@ const TypingIndicatorBubble = memo(() => {
 
 TypingIndicatorBubble.displayName = 'TypingIndicatorBubble';
 
+const ChatSkeleton = memo(() => {
+  return (
+    <div className="space-y-6 flex-1 w-full animate-pulse flex flex-col justify-center">
+      <div className="flex w-full justify-end">
+        <div className="max-w-[70%] flex flex-col gap-1 items-end">
+          <div className="rounded-3xl rounded-tr-md bg-surface-secondary px-4 py-3 h-10 w-48" />
+        </div>
+      </div>
+      <div className="flex w-full justify-start">
+        <div className="max-w-[80%] flex flex-col gap-2 w-full">
+          <div className="rounded-3xl rounded-tl-md bg-surface-tertiary px-4 py-3 h-16 w-3/4" />
+          <div className="rounded-3xl rounded-tl-md bg-surface-tertiary px-4 py-3 h-24 w-5/6" />
+        </div>
+      </div>
+      <div className="flex w-full justify-end">
+        <div className="max-w-[70%] flex flex-col gap-1 items-end">
+          <div className="rounded-3xl rounded-tr-md bg-surface-secondary px-4 py-3 h-10 w-32" />
+        </div>
+      </div>
+    </div>
+  );
+});
+
+ChatSkeleton.displayName = 'ChatSkeleton';
+
 const ChatArea = memo(
   ({
     selectedCard,
@@ -283,6 +309,7 @@ const ChatArea = memo(
     onSendMessage,
     chatAreaRef,
     onScrollStateChange,
+    isHistoryLoading = false,
   }: ChatAreaProps) => {
     const [inputText, setInputText] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -390,7 +417,9 @@ const ChatArea = memo(
         {/* Chat Messages */}
         <ScrollShadow ref={scrollRef} onScroll={handleScroll} className="flex-1 w-full">
           <div ref={contentRef} className="max-w-6xl mx-auto w-full min-h-full flex flex-col p-6">
-            {messages.length === 0 ? (
+            {isHistoryLoading ? (
+              <ChatSkeleton />
+            ) : messages.length === 0 ? (
               <div className="flex flex-col text-semi-muted items-center justify-center flex-1 text-center gap-y-2">
                 <ChatRound className="size-12" />
                 <div className="font-semibold">Start a new conversation</div>
