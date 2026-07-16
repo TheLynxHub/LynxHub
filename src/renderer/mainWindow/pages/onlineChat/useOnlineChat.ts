@@ -164,6 +164,9 @@ export function useOnlineChat(tabID = 'online-chat') {
             if (node.nodeType !== 1) {
               return '';
             }
+            if (node.matches('.sr-only, .visually-hidden, [class*="sr-only"], [class*="visually-hidden"]')) {
+              return '';
+            }
             const tag = node.tagName.toLowerCase();
             
             // Handle code blocks specially to avoid grabbing extra copy-button text
