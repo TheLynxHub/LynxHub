@@ -1,7 +1,9 @@
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import browserIpc from '@lynx_shared/ipc/browser';
+import filesIpc from '@lynx_shared/ipc/files';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
+import {topToast} from '../../layouts/ToastProviders';
 import {useTabsState} from '../../redux/reducers/tabs';
 
 export type ChatStep = 'select_module' | 'login' | 'chat';
@@ -9,6 +11,46 @@ export type ChatStep = 'select_module' | 'login' | 'chat';
 export interface Message {
   sender: 'user' | 'assistant';
   text: string;
+}
+
+function markdownToPlainText(markdown: string): string {
+  return markdown
+    .replace(/```[\s\S]*?```/g, block => block.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, ''))
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/!\[([^\]]*)]\([^)]+\)/g, '$1')
+    .replace(/\[([^\]]+)]\([^)]+\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/([*_])(.*?)\1/g, '$2')
+    .replace(/~~(.*?)~~/g, '$1')
+    .replace(/^>\s?/gm, '')
+    .replace(/^[-*+]\s+/gm, '')
+    .replace(/^\d+\.\s+/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function formatChatToMarkdown(messages: Message[], cardTitle: string): string {
+  const header = `# Chat with ${cardTitle}\n\n`;
+  const body = messages
+    .map(msg => {
+      const sender = msg.sender === 'user' ? 'User' : cardTitle || 'Assistant';
+      return `**${sender}**:\n${msg.text}`;
+    })
+    .join('\n\n---\n\n');
+  return header + body;
+}
+
+function formatChatToPlainText(messages: Message[], cardTitle: string): string {
+  const header = `Chat with ${cardTitle}\n\n`;
+  const body = messages
+    .map(msg => {
+      const sender = msg.sender === 'user' ? 'User' : cardTitle || 'Assistant';
+      const plainText = markdownToPlainText(msg.text);
+      return `${sender}:\n${plainText}`;
+    })
+    .join('\n\n' + '-'.repeat(50) + '\n\n');
+  return header + body;
 }
 
 export function useOnlineChat(tabID = 'online-chat') {
@@ -312,6 +354,49 @@ export function useOnlineChat(tabID = 'online-chat') {
     [isSending, selectedCard, scrapeMessages, tabID],
   );
 
+  const handleCopyToClipboard = useCallback(
+    async (format: 'markdown' | 'text') => {
+      if (messages.length === 0) return;
+      const formatted =
+        format === 'markdown'
+          ? formatChatToMarkdown(messages, selectedCard?.title)
+          : formatChatToPlainText(messages, selectedCard?.title);
+      try {
+        await navigator.clipboard.writeText(formatted);
+        topToast.success(`Copied chat as ${format}`, {timeout: 1500});
+      } catch (err) {
+        console.error('Failed to copy chat:', err);
+        topToast.danger('Failed to copy chat', {timeout: 2000});
+      }
+    },
+    [messages, selectedCard],
+  );
+
+  const handleSaveToFile = useCallback(
+    async (format: 'markdown' | 'text') => {
+      if (messages.length === 0) return;
+      const formatted =
+        format === 'markdown'
+          ? formatChatToMarkdown(messages, selectedCard?.title)
+          : formatChatToPlainText(messages, selectedCard?.title);
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const cardName = selectedCard?.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'chat';
+      const defaultFilename = `chat-${cardName}-${dateStr}.${format === 'markdown' ? 'md' : 'txt'}`;
+
+      try {
+        const result = await filesIpc.saveToFile(formatted, defaultFilename);
+        if (result) {
+          topToast.success('Saved chat successfully', {timeout: 1500});
+        }
+      } catch (err) {
+        console.error('Failed to save chat:', err);
+        topToast.danger('Failed to save chat', {timeout: 2000});
+      }
+    },
+    [messages, selectedCard],
+  );
+
   return {
     selectedCard,
     step,
@@ -325,5 +410,7 @@ export function useOnlineChat(tabID = 'online-chat') {
     handleShowWebpage,
     handleRefresh,
     handleSendMessage,
+    handleCopyToClipboard,
+    handleSaveToFile,
   };
 }

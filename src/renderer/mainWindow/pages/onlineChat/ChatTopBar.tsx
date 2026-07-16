@@ -1,10 +1,10 @@
-import {Avatar, Button} from '@heroui/react';
+import {Avatar, Button, Dropdown, Label} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound, Earth, Restart} from '@solar-icons/react-perf/BoldDuotone';
-import {AltArrowLeft} from '@solar-icons/react-perf/Linear';
+import {ChatRound, Copy, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {AltArrowLeft, ArrowRightUp} from '@solar-icons/react-perf/LineDuotone';
 import {memo} from 'react';
 
-import {ChatStep} from './useOnlineChat';
+import {ChatStep, Message} from './useOnlineChat';
 
 interface ChatTopBarProps {
   step: ChatStep;
@@ -14,10 +14,24 @@ interface ChatTopBarProps {
   onShowWebpage: () => void;
   onGoToChat: () => void;
   onRefresh: () => void;
+  messages: Message[];
+  onCopyToClipboard: (format: 'markdown' | 'text') => void;
+  onSaveToFile: (format: 'markdown' | 'text') => void;
 }
 
 const ChatTopBar = memo(
-  ({step, selectedCard, isPageLoaded, onBackToSelect, onShowWebpage, onGoToChat, onRefresh}: ChatTopBarProps) => {
+  ({
+    step,
+    selectedCard,
+    isPageLoaded,
+    onBackToSelect,
+    onShowWebpage,
+    onGoToChat,
+    onRefresh,
+    messages,
+    onCopyToClipboard,
+    onSaveToFile,
+  }: ChatTopBarProps) => {
     return (
       <div className="h-12 inset-x-0 top-0 absolute bg-surface flex pl-4 pr-2 py-1 items-center justify-between z-10">
         {step === 'select_module' ? (
@@ -49,6 +63,42 @@ const ChatTopBar = memo(
             <Button size="sm" variant="ghost" onPress={onRefresh} aria-label="Reload page" isIconOnly>
               <Restart className="size-4" />
             </Button>
+          )}
+
+          {step === 'chat' && messages.length > 0 && (
+            <Dropdown>
+              <Dropdown.Trigger>
+                <Button size="sm" variant="ghost" className="shrink-0" aria-label="Export chat" isIconOnly>
+                  <ArrowRightUp className="size-4" />
+                </Button>
+              </Dropdown.Trigger>
+              <Dropdown.Popover placement="bottom end" className="min-w-48 bg-surface-secondary border-border">
+                <Dropdown.Menu
+                  onAction={key => {
+                    if (key === 'copy-markdown') onCopyToClipboard('markdown');
+                    if (key === 'copy-text') onCopyToClipboard('text');
+                    if (key === 'save-markdown') onSaveToFile('markdown');
+                    if (key === 'save-text') onSaveToFile('text');
+                  }}>
+                  <Dropdown.Item id="copy-markdown" textValue="Copy as Markdown">
+                    <Copy className="size-4 text-muted" />
+                    <Label>Copy as Markdown</Label>
+                  </Dropdown.Item>
+                  <Dropdown.Item id="copy-text" textValue="Copy as Plain Text">
+                    <Copy className="size-4 text-muted" />
+                    <Label>Copy as Plain Text</Label>
+                  </Dropdown.Item>
+                  <Dropdown.Item id="save-markdown" textValue="Save as Markdown (.md)">
+                    <FileDownload className="size-4 text-muted" />
+                    <Label>Save as Markdown (.md)</Label>
+                  </Dropdown.Item>
+                  <Dropdown.Item id="save-text" textValue="Save as Plain Text (.txt)">
+                    <FileDownload className="size-4 text-muted" />
+                    <Label>Save as Plain Text (.txt)</Label>
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown.Popover>
+            </Dropdown>
           )}
 
           {step !== 'select_module' && (
