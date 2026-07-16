@@ -190,7 +190,7 @@ const markdownComponents: Components = {
     );
   },
   hr({node, animateText, ...props}: any) {
-    return <hr className="my-4.5 border-t border-border-secondary" {...props} />;
+    return <hr className="my-4.5 border-t border-border-secondary/70" {...props} />;
   },
 };
 
@@ -218,8 +218,8 @@ const ChatBubble = memo(({message, isLast, isGenerating}: ChatBubbleProps) => {
     <div className={`group/msg flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className="flex max-w-[85%] flex-col gap-1">
         <div
-          className={`rounded-3xl px-4 py-3 shadow-surface text-sm ${
-            isUser ? 'bg-surface-secondary rounded-tr-md' : 'bg-surface-tertiary rounded-tl-md'
+          className={`rounded-3xl px-4 py-3 text-sm ${
+            isUser ? 'rounded-tr-md bg-surface-secondary' : 'rounded-tl-md'
           } transition-all duration-200`}
           dir={dir}>
           <div
