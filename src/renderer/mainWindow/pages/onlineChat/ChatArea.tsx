@@ -234,7 +234,7 @@ const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatA
   const prevMessagesCount = useRef<number>(0);
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
+    messagesEndRef.current?.scrollIntoView({behavior: 'instant'});
   }, []);
 
   useEffect(() => {
