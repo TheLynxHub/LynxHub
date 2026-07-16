@@ -59,7 +59,6 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           step={step}
           messages={messages}
           onRefresh={handleRefresh}
-          onNewChat={handleNewChat}
           selectedCard={selectedCard}
           isPageLoaded={isPageLoaded}
           onGoToChat={handleGoToChat}
@@ -74,7 +73,11 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
         />
         <div className="absolute inset-0 top-12! overflow-hidden flex flex-row">
           {step === 'chat' && selectedCard?.onlineConfig?.selectors?.chatItem && (
-            <ChatSidebar chatHistory={chatHistory} onSelectHistoryItem={handleSelectHistoryItem} />
+            <ChatSidebar
+              chatHistory={chatHistory}
+              onSelectHistoryItem={handleSelectHistoryItem}
+              onNewChat={selectedCard?.onlineConfig?.newChat ? handleNewChat : undefined}
+            />
           )}
           <div className="flex-1 h-full relative overflow-hidden flex flex-col">
             {step === 'select_module' && <ModuleSelector onlineCards={onlineCards} onSelectCard={handleSelectCard} />}

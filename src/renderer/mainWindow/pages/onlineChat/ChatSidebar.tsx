@@ -1,5 +1,5 @@
-import {ScrollShadow} from '@heroui/react';
-import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
+import {Button, ScrollShadow} from '@heroui/react';
+import {ChatRound, Pen2} from '@solar-icons/react-perf/BoldDuotone';
 import {motion} from 'framer-motion';
 import {memo} from 'react';
 
@@ -12,14 +12,28 @@ interface ChatHistoryItem {
 interface ChatSidebarProps {
   chatHistory: ChatHistoryItem[];
   onSelectHistoryItem: (index: number) => void;
+  onNewChat?: () => void;
 }
 
-const ChatSidebar = memo(({chatHistory, onSelectHistoryItem}: ChatSidebarProps) => {
+const ChatSidebar = memo(({chatHistory, onSelectHistoryItem, onNewChat}: ChatSidebarProps) => {
   return (
     <div className="w-60 h-full border-r border-border bg-surface-secondary flex flex-col shrink-0">
-      <div className="p-4 border-b border-border flex items-center gap-2">
-        <ChatRound className="size-5 text-accent" />
-        <span className="font-bold text-foreground text-sm">Recents</span>
+      <div className="p-3.5 border-b border-border flex items-center justify-between">
+        {onNewChat ? (
+          <Button
+            size="sm"
+            variant="secondary"
+            onPress={onNewChat}
+            className="w-full flex items-center justify-center gap-2 font-medium">
+            <Pen2 className="size-4" />
+            <span>New Chat</span>
+          </Button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <ChatRound className="size-5 text-accent" />
+            <span className="font-bold text-foreground text-sm">Recents</span>
+          </div>
+        )}
       </div>
       <ScrollShadow className="flex-1 p-2 flex flex-col gap-y-1">
         {chatHistory.length === 0 ? (
