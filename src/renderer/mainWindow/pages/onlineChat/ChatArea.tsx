@@ -258,23 +258,25 @@ const ChatArea = memo(({selectedCard, messages, isSending, onSendMessage}: ChatA
   };
 
   return (
-    <div className="flex size-full flex-col overflow-hidden bg-surface max-w-7xl">
+    <div className="flex size-full flex-col overflow-hidden bg-surface">
       {/* Chat Messages */}
-      <ScrollShadow className="flex-1 p-6 gap-y-4">
-        {messages.length === 0 ? (
-          <div className="flex flex-col text-semi-muted items-center justify-center h-full text-center gap-y-2">
-            <ChatRound className="size-12" />
-            <div className="font-semibold">Start a new conversation</div>
-            <div className="text-xs text-muted">Your chat history will sync here automatically.</div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {messages.map((msg, index) => (
-              <ChatBubble key={index} message={msg} />
-            ))}
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+      <ScrollShadow className="flex-1 w-full">
+        <div className="max-w-6xl mx-auto w-full min-h-full flex flex-col p-6">
+          {messages.length === 0 ? (
+            <div className="flex flex-col text-semi-muted items-center justify-center flex-1 text-center gap-y-2">
+              <ChatRound className="size-12" />
+              <div className="font-semibold">Start a new conversation</div>
+              <div className="text-xs text-muted">Your chat history will sync here automatically.</div>
+            </div>
+          ) : (
+            <div className="space-y-4 flex-1">
+              {messages.map((msg, index) => (
+                <ChatBubble key={index} message={msg} />
+              ))}
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
       </ScrollShadow>
 
       {/* Message Input Box */}
