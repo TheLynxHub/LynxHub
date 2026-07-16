@@ -310,13 +310,21 @@ export function useOnlineChat(tabID = 'online-chat') {
         return items.map((el, index) => {
           const textEl = textSel ? el.querySelector(textSel) : el;
           let isActive = false;
-          if (activeSel) {
-            isActive = el.matches(activeSel) || el.closest(activeSel) !== null;
-          } else {
-            isActive = el.getAttribute('aria-current') === 'page' || 
-                       el.classList.contains('active') ||
-                       el.getAttribute('aria-selected') === 'true' ||
-                       Array.from(el.classList).some(cls => cls.includes('active') || cls.includes('selected'));
+          const href = el.getAttribute('href');
+          if (href) {
+            const currentPath = window.location.pathname;
+            const currentHref = window.location.href;
+            isActive = currentPath === href || currentHref.endsWith(href) || currentPath.endsWith(href);
+          }
+          if (!isActive) {
+            if (activeSel) {
+              isActive = el.matches(activeSel) || el.closest(activeSel) !== null;
+            } else {
+              isActive = el.getAttribute('aria-current') === 'page' || 
+                         el.classList.contains('active') ||
+                         el.getAttribute('aria-selected') === 'true' ||
+                         Array.from(el.classList).some(cls => cls.includes('active') || cls.includes('selected'));
+            }
           }
           return {
             index,
