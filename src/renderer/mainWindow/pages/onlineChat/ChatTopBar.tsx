@@ -3,9 +3,9 @@ import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
 import {ChatRound, Copy, Earth, FileDownload, Pen2, Restart} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowDown, AltArrowUp} from '@solar-icons/react-perf/Linear';
 import {AltArrowLeft, ArrowRightUp} from '@solar-icons/react-perf/LineDuotone';
-import {AnimatePresence, motion} from 'framer-motion';
-import {memo, ReactNode} from 'react';
+import {memo} from 'react';
 
+import AnimateChild from '../../components/AnimateChild';
 import LynxTooltip from '../../components/LynxTooltip';
 import {ChatStep, Message} from './useOnlineChat';
 
@@ -25,28 +25,6 @@ interface ChatTopBarProps {
   showScrollBottom?: boolean;
   onScrollTop?: () => void;
   onScrollBottom?: () => void;
-}
-
-type AnimProp = {
-  children: ReactNode;
-  show: boolean;
-};
-
-function AnimateChild({show, children}: AnimProp) {
-  return (
-    <AnimatePresence mode="popLayout">
-      {show && (
-        <motion.div
-          layout={true}
-          transition={{duration: 0.1}}
-          exit={{translateY: 5, opacity: 0, scale: 0.7}}
-          animate={{translateY: 0, opacity: 1, scale: 1}}
-          initial={{translateY: 5, opacity: 0, scale: 0.7}}>
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
 }
 
 const ChatTopBar = memo(

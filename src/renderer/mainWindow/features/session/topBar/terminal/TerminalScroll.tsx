@@ -2,31 +2,11 @@ import {Button} from '@heroui/react';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {AltArrowDown, AltArrowUp} from '@solar-icons/react-perf/Linear';
 import {IDisposable} from '@xterm/xterm';
-import {AnimatePresence, motion} from 'framer-motion';
-import {ReactNode, RefObject, useEffect, useState} from 'react';
+import {RefObject, useEffect, useState} from 'react';
 
+import AnimateChild from '../../../../components/AnimateChild';
 import LynxTooltip from '../../../../components/LynxTooltip';
 import {XTermAPI} from '../../../../components/useXTerm';
-
-type AnimProp = {
-  children: ReactNode;
-  show: boolean;
-};
-function AnimateChild({show, children}: AnimProp) {
-  return (
-    <AnimatePresence mode="popLayout">
-      {show && (
-        <motion.div
-          layout={true}
-          exit={{translateY: 5, opacity: 0, scale: 0.7}}
-          animate={{translateY: 0, opacity: 1, scale: 1}}
-          initial={{translateY: 5, opacity: 0, scale: 0.7}}>
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
 
 type Props = {xtermRef: RefObject<XTermAPI | null>};
 
