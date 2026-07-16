@@ -23,7 +23,7 @@ const SCRIPT_EXECUTION_TIMEOUT_MS = 3000;
  * Handles creation, navigation, resizing, and IPC for each browser instance.
  */
 export default class BrowserManager {
-  private browsers: {id: string; view: WebContentsView}[] = [];
+  private browsers: {id: string; view: WebContentsView; visible?: boolean; hideMode?: 'detach' | 'offscreen'}[] = [];
   private readonly mainWindow: BrowserWindow;
   private lastViewSize: ElementResizeData | undefined = undefined;
 
@@ -92,7 +92,11 @@ export default class BrowserManager {
     const {x, y, width, height} = targetSize;
 
     this.browsers.forEach(browser => {
-      browser.view.setBounds({x: x || 0, y: y || 80, width, height});
+      if (browser.visible !== false) {
+        browser.view.setBounds({x: x || 0, y: y || 80, width, height});
+      } else if (browser.hideMode === 'offscreen') {
+        browser.view.setBounds({x: -9999, y: -9999, width: 800, height: 600});
+      }
     });
   }
 
@@ -303,7 +307,7 @@ export default class BrowserManager {
   /**
    * Creates a new browser view (tab) with the given ID.
    */
-  public createBrowser(id: string) {
+  public createBrowser(id: string, options?: {backgroundThrottling?: boolean}) {
     if (this.browsers.some(view => view.id === id)) return;
 
     const mainWindow = this.getMainWindow();
@@ -314,6 +318,7 @@ export default class BrowserManager {
       webPreferences: {
         session: this.getSession(),
         preload: path.join(__dirname, '../preload/webview.cjs'),
+        backgroundThrottling: options?.backgroundThrottling ?? true,
       },
     });
 
@@ -338,7 +343,7 @@ export default class BrowserManager {
     this.listenForLinkHover(webContents);
     this.listenForFindInPage(webContents);
 
-    this.browsers.push({id, view: newView});
+    this.browsers.push({id, view: newView, visible: true});
     mainWindow.contentView.addChildView(newView);
 
     // this.setBounds();
@@ -443,16 +448,31 @@ export default class BrowserManager {
   /**
    * Controls visibility of a browser view.
    */
-  public setVisible(id: string, visible: boolean) {
-    const view = this.getViewByID(id);
+  public setVisible(id: string, visible: boolean, hideMode?: 'detach' | 'offscreen') {
+    const browser = this.browsers.find(b => b.id === id);
     const mainWindow = this.getMainWindow();
-    if (isNil(view) || isNil(mainWindow)) return;
+    if (isNil(browser) || isNil(mainWindow)) return;
+
+    browser.visible = visible;
+    browser.hideMode = hideMode;
+
+    const view = browser.view;
 
     if (visible) {
-      mainWindow.contentView.addChildView(view);
+      if (!mainWindow.contentView.children.includes(view)) {
+        mainWindow.contentView.addChildView(view);
+      }
+      if (this.lastViewSize) {
+        const {x, y, width, height} = this.lastViewSize;
+        view.setBounds({x: x || 0, y: y || 80, width, height});
+      }
     } else {
-      mainWindow.contentView.removeChildView(view);
-      mainWindow.webContents.focus();
+      if (hideMode === 'offscreen') {
+        view.setBounds({x: -9999, y: -9999, width: 800, height: 600});
+      } else {
+        mainWindow.contentView.removeChildView(view);
+        mainWindow.webContents.focus();
+      }
     }
   }
 

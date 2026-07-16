@@ -69,8 +69,18 @@ export function useOnlineChat(tabID = 'online-chat') {
 
   // Clean up browser if unmounting page
   useEffect(() => {
-    const visible = activeTab === tabID && step === 'login';
-    browserIpc.send.setVisible(tabID, visible);
+    if (activeTab === tabID) {
+      if (step === 'login') {
+        browserIpc.send.setVisible(tabID, true);
+      } else if (step === 'chat') {
+        browserIpc.send.setVisible(tabID, false, 'offscreen');
+      } else {
+        browserIpc.send.setVisible(tabID, false);
+      }
+    } else {
+      const mode = step === 'chat' ? 'offscreen' : 'detach';
+      browserIpc.send.setVisible(tabID, false, mode);
+    }
   }, [tabID, activeTab, step]);
 
   const handleSelectCard = useCallback(
@@ -79,8 +89,8 @@ export function useOnlineChat(tabID = 'online-chat') {
       setStep('login');
       setIsPageLoaded(false);
 
-      // Initialize browser view
-      browserIpc.send.createBrowser(tabID);
+      // Initialize browser view with background throttling disabled
+      browserIpc.send.createBrowser(tabID, {backgroundThrottling: false});
       browserIpc.send.loadURL(tabID, card.onlineConfig.url);
       browserIpc.send.setVisible(tabID, true);
     },
@@ -244,7 +254,7 @@ export function useOnlineChat(tabID = 'online-chat') {
   }, [selectedCard, tabID]);
 
   const handleGoToChat = useCallback(() => {
-    browserIpc.send.setVisible(tabID, false);
+    browserIpc.send.setVisible(tabID, false, 'offscreen');
     setStep('chat');
     scrapeMessages();
   }, [tabID, scrapeMessages]);

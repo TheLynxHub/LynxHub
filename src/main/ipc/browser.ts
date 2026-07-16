@@ -57,7 +57,7 @@ export async function listenBrowser() {
   await listenForBrowserChannels(browserManager);
 
   // Creates new browser webview instance
-  browserIpc.on.createBrowser(id => browserManager.createBrowser(id));
+  browserIpc.on.createBrowser((id, options) => browserManager.createBrowser(id, options));
 
   // Removes browser webview instance
   browserIpc.on.removeBrowser(id => browserManager.removeBrowser(id));
@@ -66,7 +66,7 @@ export async function listenBrowser() {
   browserIpc.on.loadURL((id, url) => browserManager.loadURL(id, url));
 
   // Sets browser webview visibility
-  browserIpc.on.setVisible((id, visible) => browserManager.setVisible(id, visible));
+  browserIpc.on.setVisible((id, visible, hideMode) => browserManager.setVisible(id, visible, hideMode));
 
   // Finds text in page
   browserIpc.on.findInPage((id, value, options) => browserManager.findInPage(id, value, options));
@@ -179,13 +179,15 @@ export const browserIpc = {
   },
   on: {
     /** Listens for create browser request */
-    createBrowser: (callback: (id: string) => void) => lynxIpc.on(browserChannels.createBrowser, callback),
+    createBrowser: (callback: (id: string, options?: {backgroundThrottling?: boolean}) => void) =>
+      lynxIpc.on(browserChannels.createBrowser, callback),
     /** Listens for remove browser request */
     removeBrowser: (callback: (id: string) => void) => lynxIpc.on(browserChannels.removeBrowser, callback),
     /** Listens for load URL request */
     loadURL: (callback: (id: string, url: string) => void) => lynxIpc.on(browserChannels.loadURL, callback),
     /** Listens for visibility change request */
-    setVisible: (callback: (id: string, visible: boolean) => void) => lynxIpc.on(browserChannels.setVisible, callback),
+    setVisible: (callback: (id: string, visible: boolean, hideMode?: 'detach' | 'offscreen') => void) =>
+      lynxIpc.on(browserChannels.setVisible, callback),
     /** Listens for find in page request */
     findInPage: (callback: (id: string, value: string, options: FindInPageOptions) => void) =>
       lynxIpc.on(browserChannels.findInPage, callback),

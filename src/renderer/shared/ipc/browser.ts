@@ -27,7 +27,8 @@ const browserIpc = {
     resizeBrowserView: (data: ElementResizeData) => lynxIpc.send(browserChannels.resizeBrowserView, data),
 
     // Creates new browser webview instance
-    createBrowser: (id: string) => lynxIpc.send(browserChannels.createBrowser, id),
+    createBrowser: (id: string, options?: {backgroundThrottling?: boolean}) =>
+      lynxIpc.send(browserChannels.createBrowser, id, options),
 
     // Removes browser webview instance
     removeBrowser: (id: string) => lynxIpc.send(browserChannels.removeBrowser, id),
@@ -36,7 +37,8 @@ const browserIpc = {
     loadURL: (id: string, url: string) => lynxIpc.send(browserChannels.loadURL, id, url),
 
     // Sets browser webview visibility
-    setVisible: (id: string, visible: boolean) => lynxIpc.send(browserChannels.setVisible, id, visible),
+    setVisible: (id: string, visible: boolean, hideMode?: 'detach' | 'offscreen') =>
+      lynxIpc.send(browserChannels.setVisible, id, visible, hideMode),
 
     // Opens find in page dialog
     openFindInPage: (id: string, customPosition?: ContextMenuPosition) =>
