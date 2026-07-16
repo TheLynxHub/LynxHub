@@ -189,6 +189,9 @@ const markdownComponents: Components = {
       </a>
     );
   },
+  hr({node, animateText, ...props}: any) {
+    return <hr className="my-4.5 border-t border-border-secondary" {...props} />;
+  },
 };
 
 interface ChatBubbleProps {
