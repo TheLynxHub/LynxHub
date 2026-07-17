@@ -21,6 +21,7 @@ export interface OnlineChatModuleState {
   isPageLoaded: boolean;
   isHistoryLoading: boolean;
   isSending: boolean;
+  pendingActiveIndex?: number | null;
 }
 
 export interface OnlineChatState {
@@ -39,6 +40,7 @@ const initialModuleState: OnlineChatModuleState = {
   isPageLoaded: false,
   isHistoryLoading: false,
   isSending: false,
+  pendingActiveIndex: null,
 };
 
 const initialState: OnlineChatState = {

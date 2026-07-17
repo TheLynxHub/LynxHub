@@ -235,7 +235,10 @@ export function useOnlineChat(tabID = 'online-chat') {
 
       const viewId = `online-bg-${targetCardId}`;
       dispatch(
-        onlineChatActions.setModuleState({cardId: targetCardId, updates: {isHistoryLoading: true, messages: []}}),
+        onlineChatActions.setModuleState({
+          cardId: targetCardId,
+          updates: {isHistoryLoading: true, messages: [], pendingActiveIndex: index},
+        }),
       );
       dispatch(onlineChatActions.setActiveUniversalCardId(targetCardId));
 

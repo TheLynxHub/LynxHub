@@ -37,13 +37,14 @@ const ChatSidebar = memo(
           <div className="flex-1">
             {selectedCard?.id === 'universal' ? (
               <Dropdown>
-                <Dropdown.Trigger>
+                <Dropdown.Trigger className="w-full">
                   <Button
                     size="sm"
                     variant="secondary"
-                    className="w-full flex items-center justify-center gap-2 font-medium">
+                    className="flex items-center justify-center gap-2 font-medium"
+                    fullWidth>
                     <Pen2 className="size-4" />
-                    <span>New Chat</span>
+                    New Chat
                   </Button>
                 </Dropdown.Trigger>
                 <Dropdown.Popover placement="bottom start" className="min-w-44 bg-surface-secondary border-border">
@@ -70,9 +71,10 @@ const ChatSidebar = memo(
                 size="sm"
                 variant="secondary"
                 onPress={() => onNewChat()}
-                className="w-full flex items-center justify-center gap-2 font-medium">
+                className="flex items-center justify-center gap-2 font-medium"
+                fullWidth>
                 <Pen2 className="size-4" />
-                <span>New Chat</span>
+                New Chat
               </Button>
             ) : (
               <div className="flex items-center gap-2 py-1.5">
@@ -85,13 +87,13 @@ const ChatSidebar = memo(
           {selectedCard?.id === 'universal' && (
             <Popover>
               <Popover.Trigger>
-                <Button size="sm" variant="ghost" className="shrink-0" aria-label="Filter AIs" isIconOnly>
+                <Button size="sm" variant="tertiary" className="shrink-0" aria-label="Filter AIs" isIconOnly>
                   <Filter className="size-4 text-semi-muted" />
                 </Button>
               </Popover.Trigger>
               <Popover.Content>
                 <Popover.Dialog className="w-56 flex flex-col gap-2.5">
-                  <div className="text-xs font-bold text-muted border-b border-border pb-1">Filter AIs</div>
+                  <div className="text-xs font-bold text-muted border-b border-border pb-1">Filter AI</div>
                   {onlineCards
                     .filter(c => c.id !== 'universal')
                     .map(c => {

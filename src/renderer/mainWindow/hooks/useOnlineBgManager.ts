@@ -1,5 +1,5 @@
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
-import {onlineChatActions, useOnlineChatSelector} from '@lynx/redux/reducers/onlineChat';
+import {onlineChatActions, OnlineChatModuleState, useOnlineChatSelector} from '@lynx/redux/reducers/onlineChat';
 import {useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
 import browserIpc from '@lynx_shared/ipc/browser';
@@ -166,6 +166,14 @@ export function useOnlineBgManager() {
   const activeTab = useTabsState('activeTab');
   const bgChatEnabledCards = useOnlineChatSelector(state => state.bgChatEnabledCards);
   const activeUniversalCardId = useOnlineChatSelector(state => state.activeUniversalCardId);
+  const modules = useOnlineChatSelector(state => state.modules);
+
+  const modulesRef = useRef(modules);
+  useEffect(() => {
+    modulesRef.current = modules;
+  }, [modules]);
+
+  const ignoreCounterRef = useRef<{[cardId: string]: number}>({});
 
   const onlineCards = useMemo(() => allCards.filter(card => card.isOnline && card.id !== 'universal'), [allCards]);
 
@@ -274,16 +282,46 @@ export function useOnlineBgManager() {
             }
 
             isGeneratingRef.current[cardId] = isGenerating;
+
+            const moduleState = modulesRef.current[cardId];
+            const pendingActiveIndex = moduleState?.pendingActiveIndex;
+            const isHistoryLoading = moduleState?.isHistoryLoading;
+
+            if (isHistoryLoading && pendingActiveIndex !== null && pendingActiveIndex !== undefined) {
+              const prevMsgs = prevMessagesRef.current[cardId] || [];
+              const isSame = JSON.stringify(validMsgs) === JSON.stringify(prevMsgs);
+
+              if (isSame && validMsgs.length > 0) {
+                const currentIgnoreCount = (ignoreCounterRef.current[cardId] || 0) + 1;
+                ignoreCounterRef.current[cardId] = currentIgnoreCount;
+
+                if (currentIgnoreCount < 5) {
+                  // Ignore scrape: webview is still showing old messages
+                  return;
+                }
+              }
+            }
+
+            ignoreCounterRef.current[cardId] = 0;
+
+            const prevMsgs = prevMessagesRef.current[cardId] || [];
+            const isSame = JSON.stringify(validMsgs) === JSON.stringify(prevMsgs);
+            const updates: Partial<OnlineChatModuleState> = {
+              messages: validMsgs,
+              isGenerating,
+              isHistoryLoading: false,
+            };
+
+            if (!isSame) {
+              updates.pendingActiveIndex = null;
+            }
+
             prevMessagesRef.current[cardId] = validMsgs;
 
             dispatch(
               onlineChatActions.setModuleState({
                 cardId,
-                updates: {
-                  messages: validMsgs,
-                  isGenerating,
-                  isHistoryLoading: false,
-                },
+                updates,
               }),
             );
           }
@@ -305,6 +343,28 @@ export function useOnlineBgManager() {
                 .trim(),
               active: Boolean(item.active),
             }));
+
+            // Check if active item matches pendingActiveIndex to clear it
+            const activeItem = history.find((item: any) => item.active);
+            const activeIndex = activeItem ? activeItem.index : null;
+            const moduleState = modulesRef.current[cardId];
+
+            if (
+              moduleState &&
+              moduleState.pendingActiveIndex !== null &&
+              moduleState.pendingActiveIndex !== undefined
+            ) {
+              if (activeIndex === moduleState.pendingActiveIndex) {
+                dispatch(
+                  onlineChatActions.setModuleState({
+                    cardId,
+                    updates: {
+                      pendingActiveIndex: null,
+                    },
+                  }),
+                );
+              }
+            }
 
             dispatch(onlineChatActions.setModuleChatHistory({cardId, chatHistory: history}));
           }
