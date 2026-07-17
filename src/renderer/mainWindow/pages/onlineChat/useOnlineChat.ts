@@ -172,7 +172,6 @@ export function useOnlineChat(tabID = 'online-chat') {
           dispatch(onlineChatActions.setActiveUniversalCardId(null));
         }
 
-        dispatch(tabsActions.setTabTitle({tabID, title: 'Universal Chat'}));
         dispatch(
           tabsActions.setTabFavIcon({
             tabID,
@@ -184,7 +183,6 @@ export function useOnlineChat(tabID = 'online-chat') {
         setStep('login');
         dispatch(onlineChatActions.setActiveUniversalCardId(card.id));
 
-        dispatch(tabsActions.setTabTitle({tabID, title: card.title}));
         dispatch(
           tabsActions.setTabFavIcon({
             tabID,
@@ -213,7 +211,6 @@ export function useOnlineChat(tabID = 'online-chat') {
     setStep('select_module');
     dispatch(onlineChatActions.setActiveUniversalCardId(null));
 
-    dispatch(tabsActions.setTabTitle({tabID, title: 'Online Chat'}));
     dispatch(
       tabsActions.setTabFavIcon({
         tabID,
@@ -222,6 +219,30 @@ export function useOnlineChat(tabID = 'online-chat') {
       }),
     );
   }, [tabID, dispatch]);
+
+  // Synchronize tab title with active chat title or fallbacks
+  const tabs = useTabsState('tabs');
+  const currentTab = useMemo(() => tabs.find(t => t.id === tabID), [tabs, tabID]);
+  const currentTabTitle = currentTab?.title;
+
+  useEffect(() => {
+    let targetTitle = 'Online Chat';
+
+    if (step === 'login') {
+      targetTitle = selectedCard?.title || 'Online Chat';
+    } else if (step === 'chat') {
+      const activeItem = unifiedHistory.find(item => item.active);
+      if (activeItem && activeItem.title) {
+        targetTitle = activeItem.title;
+      } else {
+        targetTitle = selectedCard?.id === 'universal' ? 'Universal Chat' : selectedCard?.title || 'Online Chat';
+      }
+    }
+
+    if (targetTitle && targetTitle !== currentTabTitle) {
+      dispatch(tabsActions.setTabTitle({tabID, title: targetTitle}));
+    }
+  }, [tabID, step, selectedCard, unifiedHistory, currentTabTitle, dispatch]);
 
   const handleSelectHistoryItem = useCallback(
     async (index: number, cardId?: string) => {
