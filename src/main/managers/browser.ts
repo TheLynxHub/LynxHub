@@ -95,7 +95,10 @@ export default class BrowserManager {
       if (browser.visible !== false) {
         browser.view.setBounds({x: x || 0, y: y || 80, width, height});
       } else if (browser.hideMode === 'offscreen') {
-        browser.view.setBounds({x: -9999, y: -9999, width: 800, height: 600});
+        // Position mostly outside the window with 1px overlap so Chromium's compositor
+        // still paints the view. Extreme negative coords (e.g. -9999) cause culling and
+        // stop paint events; fully in-bounds coords make the view visually appear on top.
+        browser.view.setBounds({x: -799, y: -599, width: 800, height: 600});
       }
     });
   }
@@ -327,7 +330,9 @@ export default class BrowserManager {
 
     if (options?.backgroundThrottling === false) {
       webContents.setBackgroundThrottling(false);
-      newView.setBounds({x: -9999, y: -9999, width: 1024, height: 768});
+      // Position mostly outside the window with 1px overlap so Chromium's compositor
+      // still paints the view. Extreme negative coords cause culling and stop paint events.
+      newView.setBounds({x: -1023, y: -767, width: 1024, height: 768});
     }
 
     webContents.setUserAgent(getUserAgent());
@@ -348,10 +353,10 @@ export default class BrowserManager {
     this.listenForLinkHover(webContents);
     this.listenForFindInPage(webContents);
 
-    this.browsers.push({id, view: newView, visible: true});
-    mainWindow.contentView.addChildView(newView);
-
-    // this.setBounds();
+    const isBackground = options?.backgroundThrottling === false;
+    this.browsers.push({id, view: newView, visible: !isBackground, hideMode: isBackground ? 'offscreen' : undefined});
+    // Insert background views at z-index 0 (behind everything) so they're painted but hidden
+    mainWindow.contentView.addChildView(newView, isBackground ? 0 : undefined);
 
     this.setupWindowOpenHandler(webContents);
     RegisterHotkeys(webContents);
@@ -464,16 +469,21 @@ export default class BrowserManager {
     const view = browser.view;
 
     if (visible) {
-      if (!mainWindow.contentView.children.includes(view)) {
-        mainWindow.contentView.addChildView(view);
-      }
+      // Always re-add to bring the view to the top of the z-order.
+      // Offscreen views are kept as children at z-index 0, so we need to reorder them to the top.
+      mainWindow.contentView.addChildView(view);
       if (this.lastViewSize) {
         const {x, y, width, height} = this.lastViewSize;
         view.setBounds({x: x || 0, y: y || 80, width, height});
       }
     } else {
       if (hideMode === 'offscreen') {
-        view.setBounds({x: -9999, y: -9999, width: 800, height: 600});
+        // Position mostly outside the window with 1px overlap so Chromium's compositor
+        // still paints the view. Extreme negative coords cause culling and stop paint events.
+        view.setBounds({x: -799, y: -599, width: 800, height: 600});
+        // Ensure the view is behind everything (z-index 0) so it's hidden from the user.
+        // addChildView reorders the view if it's already attached, or adds it at index 0 if not.
+        mainWindow.contentView.addChildView(view, 0);
       } else {
         mainWindow.contentView.removeChildView(view);
         mainWindow.webContents.focus();
