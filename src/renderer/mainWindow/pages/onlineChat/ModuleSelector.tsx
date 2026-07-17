@@ -23,7 +23,7 @@ const ModuleSelector = memo(({onlineCards, onSelectCard, bgChatEnabledCards, onT
           return (
             <Card
               className={
-                'hover:scale-[1.02] cursor-pointer transition-all duration-200 w-77 h-42 border border-border bg-card'
+                'hover:scale-[1.02] cursor-pointer transition-all duration-200 w-77 h-45 border border-border bg-card'
               }
               key={card.id}
               onClick={() => onSelectCard(card)}>
@@ -48,11 +48,10 @@ const ModuleSelector = memo(({onlineCards, onSelectCard, bgChatEnabledCards, onT
                   <div className="text-xs text-muted line-clamp-2 leading-relaxed">{card.description}</div>
                 </div>
                 {!isUniversal && (
-                  <div
-                    onClick={e => e.stopPropagation()}
-                    className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+                  <div onClick={e => e.stopPropagation()} className="flex items-center justify-between mt-2 pt-2">
                     <span className="text-[11px] font-medium text-muted">Background Scrape</span>
                     <Checkbox
+                      variant="secondary"
                       isSelected={isBgEnabled}
                       id={`bg-toggle-${card.id}`}
                       onChange={() => onToggleBgChat(card.id)}
