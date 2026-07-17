@@ -80,7 +80,7 @@ export function useOnlineChat(tabID = 'online-chat') {
   const modules = useOnlineChatSelector(state => state.modules);
 
   const onlineCards = useMemo(() => {
-    const list = allCards.filter(card => card.isOnline);
+    const list = allCards.filter(card => card.isOnline && card.id !== 'universal');
     if (list.length > 0) {
       return [universalCard, ...list];
     }

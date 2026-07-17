@@ -484,6 +484,32 @@ const loadModules = async () => {
       });
     });
 
+    const hasOnlineCard = newAllCards.some(card => card.isOnline);
+    if (hasOnlineCard) {
+      const universalCard: CardData = {
+        id: 'universal',
+        title: 'Universal Chat',
+        description: 'Chat with all enabled background AIs in a unified interface, with aggregated thread history.',
+        isOnline: true,
+        logoUrl: '',
+        iconUrl: '',
+        developer: 'LynxHub',
+      };
+      newAllCards.push(universalCard);
+      const {arguments: args, methods, supportCustomArguments, ...cardWithoutInternals} = universalCard;
+      newCardDataWithPath.push({...cardWithoutInternals, routePath: 'textGen_page'});
+      newCardArguments.push({id: universalCard.id, arguments: args, supportCustomArguments});
+      newCardMethods.push({id: universalCard.id, methods});
+      newCardSearchIndex.push({id: universalCard.id, tokens: buildCardSearchTokens(universalCard)});
+
+      const existingModuleIndex = newAllModules.findIndex(m => m.routePath === 'textGen_page');
+      if (existingModuleIndex !== -1) {
+        newAllModules[existingModuleIndex].cards.push(universalCard);
+      } else {
+        newAllModules.push({routePath: 'textGen_page', cards: [universalCard]});
+      }
+    }
+
     await commitModuleState(
       newAllModules,
       newAllCards,

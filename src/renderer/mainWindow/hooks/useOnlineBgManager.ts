@@ -167,7 +167,7 @@ export function useOnlineBgManager() {
   const bgChatEnabledCards = useOnlineChatSelector(state => state.bgChatEnabledCards);
   const activeUniversalCardId = useOnlineChatSelector(state => state.activeUniversalCardId);
 
-  const onlineCards = useMemo(() => allCards.filter(card => card.isOnline), [allCards]);
+  const onlineCards = useMemo(() => allCards.filter(card => card.isOnline && card.id !== 'universal'), [allCards]);
 
   // Determine active AI Card ID
   const activeAiId = useMemo(() => {

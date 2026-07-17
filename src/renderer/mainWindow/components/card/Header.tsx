@@ -1,5 +1,6 @@
 import {Avatar, CardHeader, Description, Label, Spinner, Tooltip} from '@heroui/react';
 import {extractGitUrl, getCacheUrl, getFallbackString} from '@lynx_common/utils';
+import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
 import {ArrowDown} from '@solar-icons/react-perf/LineDuotone';
 import {AnimatePresence, motion} from 'framer-motion';
 import {memo, useMemo} from 'react';
@@ -45,12 +46,18 @@ export const CardHeaderContent = memo(({modifiedTitle, onTitleChange, updateAvai
     <CardHeader className="justify-between flex-row">
       <div className="inline-flex items-center gap-2">
         <Avatar className={`size-12 shrink-0 ${isInstalled && 'ring-accent ring-2'}`}>
-          <Avatar.Image
-            src={avatarSrc}
-            alt={modifiedTitle}
-            className={isInstalled ? 'p-0.5 rounded-full overflow-hidden' : ''}
-          />
-          <Avatar.Fallback>{getFallbackString(modifiedTitle)}</Avatar.Fallback>
+          {id === 'universal' ? (
+            <ChatRound className="size-6 text-accent" />
+          ) : (
+            <>
+              <Avatar.Image
+                src={avatarSrc}
+                alt={modifiedTitle}
+                className={isInstalled ? 'p-0.5 rounded-full overflow-hidden' : ''}
+              />
+              <Avatar.Fallback>{getFallbackString(modifiedTitle)}</Avatar.Fallback>
+            </>
+          )}
         </Avatar>
         <div className="flex flex-col">
           <Label
