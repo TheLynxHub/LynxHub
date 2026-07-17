@@ -3,6 +3,7 @@ import 'flowtoken/dist/styles.css';
 import {Button, Dropdown, InputGroup, Label, Link, ScrollShadow, TextField} from '@heroui/react';
 import {ChatRound, CodeFile, Copy, DocumentText} from '@solar-icons/react-perf/BoldDuotone';
 import {AnimatedMarkdown} from 'flowtoken';
+import {motion, useReducedMotion} from 'framer-motion';
 import {Send} from 'lucide-react';
 import {KeyboardEvent, memo, useCallback, useEffect, useRef, useState} from 'react';
 import ReactMarkdown, {Components} from 'react-markdown';
@@ -214,9 +215,17 @@ const ChatBubble = memo(({message, isLast, isGenerating}: ChatBubbleProps) => {
   }, [message.text]);
 
   const shouldAnimate = !isUser && isLast && isGenerating;
+  const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className={`group/msg flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <motion.div
+      transition={{
+        duration: shouldReduceMotion ? 0.1 : 0.2,
+        ease: shouldReduceMotion ? 'easeOut' : [0.215, 0.61, 0.355, 1],
+      }}
+      animate={{opacity: 1, y: 0}}
+      initial={{opacity: 0, y: shouldReduceMotion ? 0 : 12}}
+      className={`group/msg flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className="flex max-w-[85%] flex-col gap-1">
         <div
           className={`rounded-3xl px-4 py-3 text-sm ${
@@ -249,7 +258,7 @@ const ChatBubble = memo(({message, isLast, isGenerating}: ChatBubbleProps) => {
           <MessageCopyDropdown markdown={message.text} plainTextFallback={plainText} />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });
 
