@@ -76,7 +76,7 @@ const ChatTopBar = memo(
             <div className="flex items-center gap-x-3">
               {selectedCard.id === 'universal' ? (
                 <div className="flex items-center gap-x-2">
-                  <div className="p-1.5 bg-gradient-to-tr from-indigo-500 to-pink-500 rounded-lg">
+                  <div className="p-1.5 bg-surface-tertiary rounded-lg">
                     <ChatRound className="size-4 text-white" />
                   </div>
                   <span className="font-extrabold text-foreground text-sm leading-none">Universal Chat</span>
