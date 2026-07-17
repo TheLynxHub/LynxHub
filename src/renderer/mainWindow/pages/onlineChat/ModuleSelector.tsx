@@ -57,7 +57,7 @@ const ModuleSelector = memo(({onlineCards, onSelectCard, bgChatEnabledCards, onT
                       onChange={() => onToggleBgChat(card.id)}
                       aria-label={`Toggle background run for ${card.title}`}>
                       <Checkbox.Content>
-                        <Checkbox.Control>
+                        <Checkbox.Control className="size-5 rounded-full before:rounded-full">
                           <Checkbox.Indicator />
                         </Checkbox.Control>
                       </Checkbox.Content>
