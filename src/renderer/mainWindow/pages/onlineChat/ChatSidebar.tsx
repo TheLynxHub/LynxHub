@@ -90,9 +90,11 @@ const ChatSidebar = memo(
 
           {selectedCard?.id === 'universal' && (
             <Popover>
-              <Button size="sm" variant="ghost" className="shrink-0" aria-label="Filter AIs" isIconOnly>
-                <Filter className="size-4 text-semi-muted" />
-              </Button>
+              <Popover.Trigger>
+                <Button size="sm" variant="ghost" className="shrink-0" aria-label="Filter AIs" isIconOnly>
+                  <Filter className="size-4 text-semi-muted" />
+                </Button>
+              </Popover.Trigger>
               <Popover.Content>
                 <Popover.Dialog className="w-56 flex flex-col gap-2.5">
                   <div className="text-xs font-bold text-muted border-b border-border pb-1">Filter AIs</div>
