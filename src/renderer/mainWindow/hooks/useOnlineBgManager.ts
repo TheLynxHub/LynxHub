@@ -284,10 +284,9 @@ export function useOnlineBgManager() {
             isGeneratingRef.current[cardId] = isGenerating;
 
             const moduleState = modulesRef.current[cardId];
-            const pendingActiveIndex = moduleState?.pendingActiveIndex;
             const isHistoryLoading = moduleState?.isHistoryLoading;
 
-            if (isHistoryLoading && pendingActiveIndex !== null && pendingActiveIndex !== undefined) {
+            if (isHistoryLoading) {
               const prevMsgs = prevMessagesRef.current[cardId] || [];
               const isSame = JSON.stringify(validMsgs) === JSON.stringify(prevMsgs);
 

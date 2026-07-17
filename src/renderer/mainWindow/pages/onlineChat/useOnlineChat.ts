@@ -422,8 +422,17 @@ export function useOnlineChat(tabID = 'online-chat') {
       const viewId = `online-bg-${targetCardId}`;
       const {newChat, url} = card.onlineConfig;
 
-      dispatch(onlineChatActions.setModuleMessages({cardId: targetCardId, messages: []}));
-      dispatch(onlineChatActions.setModuleGenerating({cardId: targetCardId, isGenerating: false}));
+      dispatch(
+        onlineChatActions.setModuleState({
+          cardId: targetCardId,
+          updates: {
+            messages: [],
+            isGenerating: false,
+            isHistoryLoading: true,
+            pendingActiveIndex: null,
+          },
+        }),
+      );
 
       if (selectedCard?.id === 'universal') {
         dispatch(onlineChatActions.setActiveUniversalCardId(targetCardId));
