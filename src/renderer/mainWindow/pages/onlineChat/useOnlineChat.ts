@@ -2,9 +2,11 @@ import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import browserIpc from '@lynx_shared/ipc/browser';
 import filesIpc from '@lynx_shared/ipc/files';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useDispatch} from 'react-redux';
 
 import {topToast} from '../../layouts/ToastProviders';
-import {useTabsState} from '../../redux/reducers/tabs';
+import {tabsActions, useTabsState} from '../../redux/reducers/tabs';
+import {AppDispatch} from '../../redux/store';
 
 export type ChatStep = 'select_module' | 'login' | 'chat';
 
@@ -55,6 +57,7 @@ function formatChatToPlainText(messages: Message[], cardTitle: string): string {
 
 export function useOnlineChat(tabID = 'online-chat') {
   const activeTab = useTabsState('activeTab');
+  const dispatch = useDispatch<AppDispatch>();
   const allCards = useAllCardDataWithPath();
 
   const onlineCards = useMemo(() => allCards.filter(card => card.isOnline), [allCards]);
@@ -112,12 +115,21 @@ export function useOnlineChat(tabID = 'online-chat') {
       setIsGenerating(false);
       prevMessagesRef.current = [];
 
+      dispatch(tabsActions.setTabTitle({tabID, title: card.title}));
+      dispatch(
+        tabsActions.setTabFavIcon({
+          tabID,
+          show: !!(card.logoUrl || card.iconUrl),
+          url: card.logoUrl || card.iconUrl || '',
+        }),
+      );
+
       // Initialize browser view with background throttling disabled
       browserIpc.send.createBrowser(tabID, {backgroundThrottling: false});
       browserIpc.send.loadURL(tabID, card.onlineConfig.url);
       browserIpc.send.setVisible(tabID, true);
     },
-    [tabID],
+    [tabID, dispatch],
   );
 
   // Auto-select card if tab ID contains a card identifier
@@ -139,7 +151,16 @@ export function useOnlineChat(tabID = 'online-chat') {
     setChatHistory([]);
     setIsGenerating(false);
     prevMessagesRef.current = [];
-  }, [tabID]);
+
+    dispatch(tabsActions.setTabTitle({tabID, title: 'Online Chat'}));
+    dispatch(
+      tabsActions.setTabFavIcon({
+        tabID,
+        show: false,
+        url: '',
+      }),
+    );
+  }, [tabID, dispatch]);
 
   // Dynamic DOM scraping function
   const scrapeMessages = useCallback(async () => {

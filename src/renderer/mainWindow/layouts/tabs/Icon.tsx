@@ -97,7 +97,7 @@ const TabIcon = memo(({tab, currentView}: Props) => {
         <Avatar className="size-4 rounded-none bg-transparent">
           <Avatar.Image alt={title} onError={handleImgError} src={getCacheUrl(favIcon.url)} />
           <Avatar.Fallback className="bg-transparent">
-            <Earth />
+            {pageID === PageID.onlineChat ? <ChatRound className="size-full" /> : <Earth />}
           </Avatar.Fallback>
         </Avatar>
       );

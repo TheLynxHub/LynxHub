@@ -34,6 +34,8 @@ const LynxCard = memo(() => {
   const setMenuIsOpen = useCardStore(state => state.setMenuIsOpen);
   const id = useCardStore(state => state.id);
   const isOnline = useCardStore(state => state.isOnline);
+  const logoUrl = useCardStore(state => state.logoUrl);
+  const iconUrl = useCardStore(state => state.iconUrl);
 
   const dispatch = useDispatch<AppDispatch>();
   const installModal = useOverlayState();
@@ -80,7 +82,10 @@ const LynxCard = memo(() => {
                 pageID: PageID.onlineChat,
                 isLoading: false,
                 isTerminal: false,
-                favIcon: {show: false, url: ''},
+                favIcon: {
+                  show: !!(iconUrl || logoUrl),
+                  url: iconUrl || logoUrl || '',
+                },
               }),
             );
             return;
