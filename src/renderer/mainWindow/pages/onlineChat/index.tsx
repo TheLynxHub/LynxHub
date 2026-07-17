@@ -177,9 +177,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
               chatHistory={chatHistory}
               onlineCards={onlineCards}
               selectedCard={selectedCard}
-              onToggleBgChat={toggleBgChat}
               visibleModuleIds={visibleModuleIds}
-              bgChatEnabledCards={bgChatEnabledCards}
               onSetVisibleModuleIds={setVisibleModuleIds}
               onSelectHistoryItem={handleSelectHistoryItem}
             />

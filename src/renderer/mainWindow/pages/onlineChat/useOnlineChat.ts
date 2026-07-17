@@ -153,7 +153,15 @@ export function useOnlineChat(tabID = 'online-chat') {
       setSelectedCard(card);
       if (card.id === 'universal') {
         setStep('chat');
-        if (bgChatEnabledCards.length > 0) {
+
+        // Auto-enable all online AI cards for background scraping when entering Universal Chat
+        const allOnlineIds = onlineCards.filter(c => c.id !== 'universal').map(c => c.id);
+        if (bgChatEnabledCards.length === 0 && allOnlineIds.length > 0) {
+          dispatch(onlineChatActions.setBgChatEnabledCards(allOnlineIds));
+          dispatch(onlineChatActions.setVisibleModuleIds(allOnlineIds));
+          storageIpc.update('plugin', {bgChatEnabledCards: allOnlineIds});
+          dispatch(onlineChatActions.setActiveUniversalCardId(allOnlineIds[0]));
+        } else if (bgChatEnabledCards.length > 0) {
           dispatch(onlineChatActions.setActiveUniversalCardId(bgChatEnabledCards[0]));
         } else {
           dispatch(onlineChatActions.setActiveUniversalCardId(null));
@@ -181,7 +189,7 @@ export function useOnlineChat(tabID = 'online-chat') {
         );
       }
     },
-    [tabID, dispatch, bgChatEnabledCards],
+    [tabID, dispatch, bgChatEnabledCards, onlineCards],
   );
 
   // Auto-select card if tab ID contains a card identifier

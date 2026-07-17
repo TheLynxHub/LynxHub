@@ -17,10 +17,8 @@ interface ChatSidebarProps {
   onNewChat?: (cardId?: string) => void;
   selectedCard: any;
   onlineCards: any[];
-  bgChatEnabledCards: string[];
   visibleModuleIds: string[];
   onSetVisibleModuleIds: (ids: string[]) => void;
-  onToggleBgChat: (cardId: string) => void;
 }
 
 const ChatSidebar = memo(
@@ -30,12 +28,9 @@ const ChatSidebar = memo(
     onNewChat,
     selectedCard,
     onlineCards,
-    bgChatEnabledCards,
     visibleModuleIds,
     onSetVisibleModuleIds,
   }: ChatSidebarProps) => {
-    const hasBgEnabled = bgChatEnabledCards.length > 0;
-
     return (
       <div className="w-60 h-full bg-background/50 flex flex-col shrink-0 rounded-tr-2xl">
         <div className="px-3.5 pt-3 pb-1 flex items-center justify-between gap-2 shrink-0">
@@ -46,7 +41,6 @@ const ChatSidebar = memo(
                   <Button
                     size="sm"
                     variant="secondary"
-                    isDisabled={!hasBgEnabled}
                     className="w-full flex items-center justify-center gap-2 font-medium">
                     <Pen2 className="size-4" />
                     <span>New Chat</span>
@@ -58,7 +52,7 @@ const ChatSidebar = memo(
                       if (onNewChat) onNewChat(String(key));
                     }}>
                     {onlineCards
-                      .filter(c => c.id !== 'universal' && bgChatEnabledCards.includes(c.id))
+                      .filter(c => c.id !== 'universal')
                       .map(c => (
                         <Dropdown.Item id={c.id} key={c.id} textValue={`New Chat on ${c.title}`}>
                           <Avatar className="size-4 shrink-0 rounded-md">
@@ -141,11 +135,7 @@ const ChatSidebar = memo(
         <ScrollShadow className="flex-1 p-2 flex flex-col gap-y-1 overflow-y-auto">
           {chatHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-6 text-center h-40">
-              <span className="text-xs text-muted">
-                {selectedCard?.id === 'universal' && !hasBgEnabled
-                  ? 'No background scrapers enabled.'
-                  : 'No recent chats found'}
-              </span>
+              <span className="text-xs text-muted">No recent chats found</span>
             </div>
           ) : (
             chatHistory.map(item => {
