@@ -24,6 +24,8 @@ interface ChatTopBarProps {
   showScrollBottom?: boolean;
   onScrollTop?: () => void;
   onScrollBottom?: () => void;
+  activeUniversalCardId?: string | null;
+  onlineCards?: any[];
 }
 
 const ChatTopBar = memo(
@@ -42,7 +44,23 @@ const ChatTopBar = memo(
     showScrollBottom,
     onScrollTop,
     onScrollBottom,
+    activeUniversalCardId,
+    onlineCards,
   }: ChatTopBarProps) => {
+    const activeCard =
+      selectedCard?.id === 'universal' ? onlineCards?.find(c => c.id === activeUniversalCardId) : selectedCard;
+
+    const activeCardPill =
+      selectedCard?.id === 'universal' && activeCard ? (
+        <div className="flex items-center gap-x-2 border border-border bg-foreground/5 rounded-full px-2.5 py-1">
+          <Avatar className="size-4 shrink-0">
+            <Avatar.Image alt={activeCard.title} src={getCacheUrl(activeCard.logoUrl)} />
+            <Avatar.Fallback>{getFallbackString(activeCard.title)}</Avatar.Fallback>
+          </Avatar>
+          <span className="text-[10px] font-semibold text-muted leading-none">{activeCard.title}</span>
+        </div>
+      ) : null;
+
     return (
       <div className="h-12 inset-x-0 top-0 absolute bg-surface flex pl-4 pr-2 py-1 items-center justify-between z-10">
         {step === 'select_module' ? (
@@ -55,14 +73,25 @@ const ChatTopBar = memo(
             <Button size="sm" variant="ghost" className="shrink-0" onPress={onBackToSelect} isIconOnly>
               <AltArrowLeft className="size-5" />
             </Button>
-            <div className="flex items-center gap-x-2">
-              <Avatar className="size-9 shrink-0">
-                <Avatar.Image alt={selectedCard.title} src={getCacheUrl(selectedCard.logoUrl)} />
-                <Avatar.Fallback>{getFallbackString(selectedCard.title)}</Avatar.Fallback>
-              </Avatar>
-              <div className="flex items-center gap-2 leading-none">
-                <span className="font-bold text-foreground text-sm">{selectedCard?.title}</span>
-              </div>
+            <div className="flex items-center gap-x-3">
+              {selectedCard.id === 'universal' ? (
+                <div className="flex items-center gap-x-2">
+                  <div className="p-1.5 bg-gradient-to-tr from-indigo-500 to-pink-500 rounded-lg">
+                    <ChatRound className="size-4 text-white" />
+                  </div>
+                  <span className="font-extrabold text-foreground text-sm leading-none">Universal Chat</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-x-2">
+                  <Avatar className="size-9 shrink-0">
+                    <Avatar.Image alt={selectedCard.title} src={getCacheUrl(selectedCard.logoUrl)} />
+                    <Avatar.Fallback>{getFallbackString(selectedCard.title)}</Avatar.Fallback>
+                  </Avatar>
+                  <span className="font-bold text-foreground text-sm leading-none">{selectedCard?.title}</span>
+                </div>
+              )}
+
+              {activeCardPill}
             </div>
           </div>
         )}
@@ -132,7 +161,7 @@ const ChatTopBar = memo(
             </>
           )}
 
-          {step !== 'select_module' && (
+          {step !== 'select_module' && (selectedCard.id !== 'universal' || activeCard) && (
             <Button
               size="sm"
               onPress={step === 'chat' ? onShowWebpage : onGoToChat}

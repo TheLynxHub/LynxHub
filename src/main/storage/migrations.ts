@@ -47,6 +47,7 @@ export class StorageMigrationManager {
     [1.05, () => this.migrate_1_05()],
     [1.06, () => this.migrate_1_06()],
     [1.07, () => this.migrate_1_07()],
+    [1.08, () => this.migrate_1_08()],
   ]);
 
   constructor(
@@ -377,6 +378,12 @@ export class StorageMigrationManager {
   private migrate_1_07() {
     if (this.storage.data.terminal && this.storage.data.terminal.fontLoadTimeout === undefined) {
       this.storage.data.terminal.fontLoadTimeout = 3000;
+    }
+  }
+
+  private migrate_1_08() {
+    if (!this.storage.data.plugin.bgChatEnabledCards) {
+      this.storage.data.plugin.bgChatEnabledCards = [];
     }
   }
 }

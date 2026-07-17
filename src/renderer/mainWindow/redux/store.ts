@@ -10,6 +10,7 @@ import app from './reducers/app';
 import cards from './reducers/cards';
 import hotkeys from './reducers/hotkeys';
 import modals from './reducers/modals';
+import onlineChat from './reducers/onlineChat';
 import plugins from './reducers/plugins';
 import settings from './reducers/settings';
 import tabs from './reducers/tabs';
@@ -31,6 +32,7 @@ const staticReducers = {
   plugins,
   volume,
   trigger,
+  onlineChat,
 };
 
 const emptyHotkeyInput = {

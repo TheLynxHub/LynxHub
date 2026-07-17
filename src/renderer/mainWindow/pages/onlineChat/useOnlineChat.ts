@@ -1,10 +1,12 @@
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import browserIpc from '@lynx_shared/ipc/browser';
 import filesIpc from '@lynx_shared/ipc/files';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import storageIpc from '@lynx_shared/ipc/storage';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
 import {topToast} from '../../layouts/ToastProviders';
+import {onlineChatActions, useOnlineChatSelector} from '../../redux/reducers/onlineChat';
 import {tabsActions, useTabsState} from '../../redux/reducers/tabs';
 import {AppDispatch} from '../../redux/store';
 
@@ -26,7 +28,7 @@ function markdownToPlainText(markdown: string): string {
     .replace(/([*_])(.*?)\1/g, '$2')
     .replace(/~~(.*?)~~/g, '$1')
     .replace(/^>\s?/gm, '')
-    .replace(/^[-*+]\s+/gm, '')
+    .replace(/^[-\*+]\s+/gm, '')
     .replace(/^\d+\.\s+/gm, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
@@ -55,81 +57,131 @@ function formatChatToPlainText(messages: Message[], cardTitle: string): string {
   return header + body;
 }
 
+const universalCard: any = {
+  id: 'universal',
+  title: 'Universal Chat',
+  description: 'Chat with all enabled background AIs in a unified interface, with aggregated thread history.',
+  isOnline: true,
+  logoUrl: '',
+  onlineConfig: {
+    url: '',
+    selectors: {},
+  },
+};
+
 export function useOnlineChat(tabID = 'online-chat') {
   const activeTab = useTabsState('activeTab');
   const dispatch = useDispatch<AppDispatch>();
   const allCards = useAllCardDataWithPath();
 
-  const onlineCards = useMemo(() => allCards.filter(card => card.isOnline), [allCards]);
+  const bgChatEnabledCards = useOnlineChatSelector(state => state.bgChatEnabledCards);
+  const activeUniversalCardId = useOnlineChatSelector(state => state.activeUniversalCardId);
+  const visibleModuleIds = useOnlineChatSelector(state => state.visibleModuleIds);
+  const modules = useOnlineChatSelector(state => state.modules);
+
+  const onlineCards = useMemo(() => {
+    const list = allCards.filter(card => card.isOnline);
+    if (list.length > 0) {
+      return [universalCard, ...list];
+    }
+    return list;
+  }, [allCards]);
 
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const [step, setStep] = useState<ChatStep>('select_module');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [chatHistory, setChatHistory] = useState<{index: number; title: string; active: boolean}[]>([]);
-  const [isSending, setIsSending] = useState(false);
-  const [isPageLoaded, setIsPageLoaded] = useState(false);
-  const [isGenerating, setIsGeneratingState] = useState(false);
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
-  const isSwitchingRef = useRef(false);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Cleanup loading timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
+  const currentCardId = selectedCard?.id === 'universal' ? activeUniversalCardId : selectedCard?.id;
+  const currentModule = currentCardId ? modules[currentCardId] : null;
+
+  const messages = currentModule?.messages || [];
+  const isGenerating = currentModule?.isGenerating || false;
+  const isPageLoaded = currentModule?.isPageLoaded || false;
+  const isHistoryLoading = currentModule?.isHistoryLoading || false;
+  const isSending = currentModule?.isSending || false;
+
+  // Reconcile unified sidebar history
+  const unifiedHistory = useMemo(() => {
+    if (!selectedCard) return [];
+
+    if (selectedCard.id !== 'universal') {
+      const hist = currentModule?.chatHistory || [];
+      return hist.map(item => ({
+        ...item,
+        cardId: selectedCard.id,
+      }));
+    }
+
+    const merged: any[] = [];
+    visibleModuleIds.forEach(cardId => {
+      const mod = modules[cardId];
+      if (mod && mod.chatHistory) {
+        mod.chatHistory.forEach(item => {
+          merged.push({
+            ...item,
+            cardId,
+            active: item.active && activeUniversalCardId === cardId,
+          });
+        });
       }
-    };
-  }, []);
-  const isGeneratingRef = useRef(false);
-  const setIsGenerating = (val: boolean) => {
-    isGeneratingRef.current = val;
-    setIsGeneratingState(val);
-  };
+    });
+    return merged;
+  }, [selectedCard, currentModule, modules, visibleModuleIds, activeUniversalCardId]);
 
-  const lastNewChatTime = useRef<number>(0);
-  const prevMessagesRef = useRef<Message[]>([]);
-  const lastChangeTimeRef = useRef<number>(0);
-
-  // Clean up browser if unmounting page
+  // Handle visibility transitions
   useEffect(() => {
-    if (activeTab === tabID) {
+    if (!currentCardId || currentCardId === 'universal') return;
+
+    const viewId = `online-bg-${currentCardId}`;
+    const isTabFocused = activeTab === tabID;
+
+    if (isTabFocused) {
       if (step === 'login') {
-        browserIpc.send.setVisible(tabID, true);
+        browserIpc.send.setVisible(viewId, true);
       } else if (step === 'chat') {
-        browserIpc.send.setVisible(tabID, false, 'offscreen');
+        browserIpc.send.setVisible(viewId, false, 'offscreen');
       } else {
-        browserIpc.send.setVisible(tabID, false);
+        browserIpc.send.setVisible(viewId, false, 'detach');
       }
     } else {
-      const mode = step === 'chat' ? 'offscreen' : 'detach';
-      browserIpc.send.setVisible(tabID, false, mode);
+      const isBgEnabled = bgChatEnabledCards.includes(currentCardId);
+      browserIpc.send.setVisible(viewId, false, isBgEnabled ? 'offscreen' : 'detach');
     }
-  }, [tabID, activeTab, step]);
+  }, [tabID, activeTab, step, currentCardId, bgChatEnabledCards]);
 
   const handleSelectCard = useCallback(
     (card: any) => {
       setSelectedCard(card);
-      setStep('login');
-      setIsPageLoaded(false);
-      setIsGenerating(false);
-      prevMessagesRef.current = [];
+      if (card.id === 'universal') {
+        setStep('chat');
+        if (bgChatEnabledCards.length > 0) {
+          dispatch(onlineChatActions.setActiveUniversalCardId(bgChatEnabledCards[0]));
+        } else {
+          dispatch(onlineChatActions.setActiveUniversalCardId(null));
+        }
 
-      dispatch(tabsActions.setTabTitle({tabID, title: card.title}));
-      dispatch(
-        tabsActions.setTabFavIcon({
-          tabID,
-          show: !!(card.logoUrl || card.iconUrl),
-          url: card.logoUrl || card.iconUrl || '',
-        }),
-      );
+        dispatch(tabsActions.setTabTitle({tabID, title: 'Universal Chat'}));
+        dispatch(
+          tabsActions.setTabFavIcon({
+            tabID,
+            show: false,
+            url: '',
+          }),
+        );
+      } else {
+        setStep('login');
+        dispatch(onlineChatActions.setActiveUniversalCardId(card.id));
 
-      // Initialize browser view with background throttling disabled
-      browserIpc.send.createBrowser(tabID, {backgroundThrottling: false});
-      browserIpc.send.loadURL(tabID, card.onlineConfig.url);
-      browserIpc.send.setVisible(tabID, true);
+        dispatch(tabsActions.setTabTitle({tabID, title: card.title}));
+        dispatch(
+          tabsActions.setTabFavIcon({
+            tabID,
+            show: !!(card.logoUrl || card.iconUrl),
+            url: card.logoUrl || card.iconUrl || '',
+          }),
+        );
+      }
     },
-    [tabID, dispatch],
+    [tabID, dispatch, bgChatEnabledCards],
   );
 
   // Auto-select card if tab ID contains a card identifier
@@ -144,13 +196,9 @@ export function useOnlineChat(tabID = 'online-chat') {
   }, [tabID, onlineCards, selectedCard, handleSelectCard]);
 
   const handleBackToSelect = useCallback(() => {
-    browserIpc.send.removeBrowser(tabID);
     setSelectedCard(null);
     setStep('select_module');
-    setMessages([]);
-    setChatHistory([]);
-    setIsGenerating(false);
-    prevMessagesRef.current = [];
+    dispatch(onlineChatActions.setActiveUniversalCardId(null));
 
     dispatch(tabsActions.setTabTitle({tabID, title: 'Online Chat'}));
     dispatch(
@@ -162,256 +210,21 @@ export function useOnlineChat(tabID = 'online-chat') {
     );
   }, [tabID, dispatch]);
 
-  // Dynamic DOM scraping function
-  const scrapeMessages = useCallback(async () => {
-    if (isSwitchingRef.current) return;
-    if (!selectedCard || !selectedCard.onlineConfig) return;
-    if (Date.now() - lastNewChatTime.current < 2000) return;
-    const {selectors} = selectedCard.onlineConfig;
-
-    const script = `
-      (() => {
-        const userSel = ${JSON.stringify(selectors.userMessage)};
-        const assistantSel = ${JSON.stringify(selectors.assistantMessage)};
-        const textSel = ${JSON.stringify(selectors.messageText)};
-        
-        const htmlToMarkdown = (el) => {
-          if (!el) return '';
-          
-          const walk = (node) => {
-            if (node.nodeType === 3) {
-              return node.nodeValue || '';
-            }
-            if (node.nodeType !== 1) {
-              return '';
-            }
-            if (node.matches('.sr-only, .visually-hidden, [class*="sr-only"], [class*="visually-hidden"]')) {
-              return '';
-            }
-            const tag = node.tagName.toLowerCase();
-            
-            // Handle code blocks specially to avoid grabbing extra copy-button text
-            if (tag === 'pre') {
-              const codeEl = node.querySelector('code');
-              if (codeEl) {
-                const langClass = Array.from(codeEl.classList).find(c => c.startsWith('language-'));
-                const lang = langClass ? langClass.replace('language-', '') : '';
-                return '\\n\`\`\`' + lang + '\\n' + (codeEl.textContent || '') + '\\n\`\`\`\\n';
-              }
-              return '\\n\`\`\`\\n' + (node.textContent || '') + '\\n\`\`\`\\n';
-            }
-            
-            let children = '';
-            for (let i = 0; i < node.childNodes.length; i++) {
-              const child = node.childNodes[i];
-              if ((tag === 'ul' || tag === 'ol') && child.nodeType === 3 && !child.nodeValue.trim()) {
-                continue;
-              }
-              children += walk(child);
-            }
-            
-            switch (tag) {
-              case 'p': {
-                let isInsideLi = false;
-                let pNode = node.parentNode;
-                while (pNode) {
-                  if (pNode.tagName && pNode.tagName.toLowerCase() === 'li') {
-                    isInsideLi = true;
-                    break;
-                  }
-                  pNode = pNode.parentNode;
-                }
-                if (isInsideLi) {
-                  return children.trim();
-                }
-                return '\\n\\n' + children.trim() + '\\n\\n';
-              }
-              case 'h1': return '\\n\\n# ' + children.trim() + '\\n\\n';
-              case 'h2': return '\\n\\n## ' + children.trim() + '\\n\\n';
-              case 'h3': return '\\n\\n### ' + children.trim() + '\\n\\n';
-              case 'h4': return '\\n\\n#### ' + children.trim() + '\\n\\n';
-              case 'h5': return '\\n\\n##### ' + children.trim() + '\\n\\n';
-              case 'h6': return '\\n\\n###### ' + children.trim() + '\\n\\n';
-              case 'strong':
-              case 'b':
-                return ' **' + children.trim() + '** ';
-              case 'em':
-              case 'i':
-                return ' *' + children.trim() + '* ';
-              case 'code':
-                return ' \`' + children.trim() + '\` ';
-              case 'ul':
-                return '\\n' + children + '\\n';
-              case 'ol':
-                return '\\n' + children + '\\n';
-              case 'li': {
-                const isOrdered = node.parentNode && node.parentNode.tagName.toLowerCase() === 'ol';
-                if (isOrdered) {
-                  const lis = Array.from(node.parentNode.children).filter(c => c.tagName.toLowerCase() === 'li');
-                  const index = lis.indexOf(node) + 1;
-                  return '\\n' + index + '. ' + children.trim();
-                }
-                return '\\n- ' + children.trim();
-              }
-              case 'a':
-                return ' [' + children.trim() + '](' + (node.getAttribute('href') || '') + ') ';
-              case 'blockquote':
-                return (
-                  '\\n\\n> ' +
-                  children.trim().replace(/\\n/g, '\\n> ') +
-                  '\\n\\n'
-                );
-              case 'hr':
-                return '---';
-              case 'br':
-                return '\\n';
-              default:
-                return children;
-            }
-          };
-          
-          return walk(el)
-            .replace(/\\n{3,}/g, '\\n\\n')
-            .trim();
-        };
-
-        const elements = Array.from(document.querySelectorAll(\`\${userSel}, \${assistantSel}\`));
-        return elements.map(el => {
-          const isUser = el.matches(userSel) || el.closest(userSel) !== null;
-          const textEl = textSel ? el.querySelector(textSel) : el;
-          return {
-            sender: isUser ? 'user' : 'assistant',
-            text: htmlToMarkdown(textEl)
-          };
-        });
-      })()
-    `;
-
-    try {
-      const res = await browserIpc.invoke.executeJavaScript(tabID, script);
-      if (Array.isArray(res)) {
-        const validMsgs: Message[] = res
-          .map((m: any) => ({
-            sender: (m.sender === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
-            text: String(m.text || '').trim(),
-          }))
-          .filter(m => m.text.length > 0);
-
-        // Detect AI generation progress
-        const lastMsg = validMsgs[validMsgs.length - 1];
-        const prevLastMsg = prevMessagesRef.current[prevMessagesRef.current.length - 1];
-
-        if (lastMsg) {
-          if (lastMsg.sender === 'user') {
-            // Keep generating status as-is if the user recently sent a message
-          } else {
-            // Last message is from assistant
-            if (!prevLastMsg || prevLastMsg.sender === 'user' || prevLastMsg.text !== lastMsg.text) {
-              setIsGenerating(true);
-              lastChangeTimeRef.current = Date.now();
-            } else {
-              // Message text hasn't changed.
-              // If it hasn't changed for more than 3 seconds, we assume generation has finished.
-              if (isGeneratingRef.current && Date.now() - lastChangeTimeRef.current > 3000) {
-                setIsGenerating(false);
-              }
-            }
-          }
-        } else {
-          setIsGenerating(false);
-        }
-
-        if (validMsgs.length > 0) {
-          setIsHistoryLoading(false);
-        }
-        prevMessagesRef.current = validMsgs;
-        setMessages(validMsgs);
-      }
-    } catch (err) {
-      console.error('Failed to scrape background page:', err);
-    }
-  }, [selectedCard, tabID]);
-
-  const scrapeChatHistory = useCallback(async () => {
-    if (!selectedCard || !selectedCard.onlineConfig) return;
-    const {selectors} = selectedCard.onlineConfig;
-    if (!selectors.chatItem) {
-      setChatHistory([]);
-      return;
-    }
-
-    const script = `
-      (() => {
-        const itemSel = ${JSON.stringify(selectors.chatItem)};
-        const textSel = ${JSON.stringify(selectors.chatItemText || '')};
-        const activeSel = ${JSON.stringify(selectors.chatActiveItem || '')};
-        
-        const items = Array.from(document.querySelectorAll(itemSel));
-        return items.map((el, index) => {
-          const textEl = textSel ? el.querySelector(textSel) : el;
-          let isActive = false;
-          const href = el.getAttribute('href');
-          if (href) {
-            const currentPath = window.location.pathname;
-            const currentHref = window.location.href;
-            isActive = currentPath === href || currentHref.endsWith(href) || currentPath.endsWith(href);
-          }
-          if (!isActive) {
-            if (activeSel) {
-              isActive = el.matches(activeSel) || el.closest(activeSel) !== null;
-            } else {
-              isActive = el.getAttribute('aria-current') === 'page' || 
-                         el.classList.contains('active') ||
-                         el.getAttribute('aria-selected') === 'true' ||
-                         Array.from(el.classList).some(cls => cls.includes('active') || cls.includes('selected'));
-            }
-          }
-          return {
-            index,
-            title: textEl ? textEl.textContent.trim() : '',
-            active: isActive
-          };
-        });
-      })()
-    `;
-
-    try {
-      const res = await browserIpc.invoke.executeJavaScript(tabID, script);
-      if (Array.isArray(res)) {
-        const history = res.map((item: any) => ({
-          index: Number(item.index),
-          title: String(item.title || 'Untitled Chat')
-            .replace(/\n+/g, ' ')
-            .trim(),
-          active: Boolean(item.active),
-        }));
-        setChatHistory(history);
-      }
-    } catch (err) {
-      console.error('Failed to scrape chat history:', err);
-    }
-  }, [selectedCard, tabID]);
-
   const handleSelectHistoryItem = useCallback(
-    async (index: number) => {
-      if (!selectedCard || !selectedCard.onlineConfig) return;
-      const {selectors} = selectedCard.onlineConfig;
+    async (index: number, cardId?: string) => {
+      const targetCardId = cardId || currentCardId;
+      if (!targetCardId) return;
+
+      const card = onlineCards.find(c => c.id === targetCardId);
+      if (!card || !card.onlineConfig) return;
+      const {selectors} = card.onlineConfig;
       if (!selectors.chatItem) return;
 
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
-      setIsHistoryLoading(true);
-      setMessages([]);
-      isSwitchingRef.current = true;
-
-      setTimeout(() => {
-        isSwitchingRef.current = false;
-      }, 1000);
-
-      loadingTimeoutRef.current = setTimeout(() => {
-        setIsHistoryLoading(false);
-      }, 4000);
+      const viewId = `online-bg-${targetCardId}`;
+      dispatch(
+        onlineChatActions.setModuleState({cardId: targetCardId, updates: {isHistoryLoading: true, messages: []}}),
+      );
+      dispatch(onlineChatActions.setActiveUniversalCardId(targetCardId));
 
       const script = `
         (() => {
@@ -427,81 +240,52 @@ export function useOnlineChat(tabID = 'online-chat') {
       `;
 
       try {
-        await browserIpc.invoke.executeJavaScript(tabID, script);
-        setTimeout(scrapeMessages, 500);
-        setTimeout(scrapeChatHistory, 500);
+        await browserIpc.invoke.executeJavaScript(viewId, script);
       } catch (err) {
         console.error('Failed to select chat history item:', err);
       }
     },
-    [selectedCard, tabID, scrapeMessages, scrapeChatHistory],
+    [onlineCards, currentCardId, dispatch],
   );
 
   const handleGoToChat = useCallback(() => {
-    browserIpc.send.setVisible(tabID, false, 'offscreen');
+    if (!currentCardId) return;
+    browserIpc.send.setVisible(`online-bg-${currentCardId}`, false, 'offscreen');
     setStep('chat');
-    scrapeMessages();
-    scrapeChatHistory();
-  }, [tabID, scrapeMessages, scrapeChatHistory]);
+  }, [currentCardId]);
 
   const handleShowWebpage = useCallback(() => {
+    if (!currentCardId) return;
     setStep('login');
-    browserIpc.send.setVisible(tabID, true);
-  }, [tabID]);
+    browserIpc.send.setVisible(`online-bg-${currentCardId}`, true);
+  }, [currentCardId]);
 
   const handleRefresh = useCallback(() => {
-    setIsPageLoaded(false);
-    browserIpc.send.reload(tabID);
-  }, [tabID]);
+    if (!currentCardId) return;
+    dispatch(onlineChatActions.setModulePageLoaded({cardId: currentCardId, isPageLoaded: false}));
+    browserIpc.send.reload(`online-bg-${currentCardId}`);
+  }, [currentCardId, dispatch]);
 
-  // Monitor loading state of the browser page
-  useEffect(() => {
-    const offLoading = browserIpc.on.loading((id, isLoading) => {
-      if (id === tabID && !isLoading) {
-        setIsPageLoaded(true);
-      }
-    });
-
-    const offDomReady = browserIpc.on.domReady((id, isReady) => {
-      if (id === tabID && isReady) {
-        setIsPageLoaded(true);
-      }
-    });
-
-    return () => {
-      offLoading();
-      offDomReady();
-    };
-  }, [tabID]);
-
-  // Polling hook when in chat mode
-  useEffect(() => {
-    if (step !== 'chat' || !selectedCard) return;
-
-    scrapeMessages();
-    scrapeChatHistory();
-
-    const msgInterval = setInterval(scrapeMessages, 1000);
-    const historyInterval = setInterval(scrapeChatHistory, 2000);
-
-    return () => {
-      clearInterval(msgInterval);
-      clearInterval(historyInterval);
-    };
-  }, [step, selectedCard, scrapeMessages, scrapeChatHistory]);
-
-  // Send message using JS injection
   const handleSendMessage = useCallback(
     async (messageText: string) => {
-      if (!messageText.trim() || isSending || !selectedCard) return;
-      setIsSending(true);
-      setIsGenerating(true);
-      lastChangeTimeRef.current = Date.now();
+      if (!messageText.trim() || isSending || !currentCardId) return;
 
-      // Optimistically add message locally to feel faster
-      setMessages(prev => [...prev, {sender: 'user', text: messageText}]);
+      const card = onlineCards.find(c => c.id === currentCardId);
+      if (!card || !card.onlineConfig) return;
 
-      const {selectors} = selectedCard.onlineConfig;
+      const viewId = `online-bg-${currentCardId}`;
+      dispatch(onlineChatActions.setModuleSending({cardId: currentCardId, isSending: true}));
+      dispatch(onlineChatActions.setModuleGenerating({cardId: currentCardId, isGenerating: true}));
+
+      // Optimistically add locally
+      dispatch(
+        onlineChatActions.setModuleMessages({
+          cardId: currentCardId,
+          messages: [...messages, {sender: 'user', text: messageText}],
+        }),
+      );
+
+      const {selectors} = card.onlineConfig;
       const escapedMessage = messageText.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
       const script = `
@@ -558,15 +342,14 @@ export function useOnlineChat(tabID = 'online-chat') {
     `;
 
       try {
-        await browserIpc.invoke.executeJavaScript(tabID, script);
-        setTimeout(scrapeMessages, 600);
+        await browserIpc.invoke.executeJavaScript(viewId, script);
       } catch (err) {
         console.error('Failed to send message:', err);
       } finally {
-        setIsSending(false);
+        dispatch(onlineChatActions.setModuleSending({cardId: currentCardId, isSending: false}));
       }
     },
-    [isSending, selectedCard, scrapeMessages, tabID],
+    [isSending, currentCardId, onlineCards, messages, dispatch],
   );
 
   const handleCopyToClipboard = useCallback(
@@ -612,46 +395,71 @@ export function useOnlineChat(tabID = 'online-chat') {
     [messages, selectedCard],
   );
 
-  const handleNewChat = useCallback(async () => {
-    if (!selectedCard || !selectedCard.onlineConfig || !selectedCard.onlineConfig.newChat) return;
+  const handleNewChat = useCallback(
+    async (cardId?: string) => {
+      const targetCardId = cardId || currentCardId;
+      if (!targetCardId) return;
 
-    const {newChat, url} = selectedCard.onlineConfig;
-    setMessages([]);
-    setIsGenerating(false);
-    prevMessagesRef.current = [];
-    lastNewChatTime.current = Date.now();
+      const card = onlineCards.find(c => c.id === targetCardId);
+      if (!card || !card.onlineConfig || !card.onlineConfig.newChat) return;
 
-    if (newChat.action === 'click') {
-      const script = `
-        (() => {
-          const selectors = ${JSON.stringify(newChat.value.split(',').map(s => s.trim()))};
-          for (const selector of selectors) {
-            const btn = document.querySelector(selector);
-            if (btn) {
-              btn.click();
-              return true;
+      const viewId = `online-bg-${targetCardId}`;
+      const {newChat, url} = card.onlineConfig;
+
+      dispatch(onlineChatActions.setModuleMessages({cardId: targetCardId, messages: []}));
+      dispatch(onlineChatActions.setModuleGenerating({cardId: targetCardId, isGenerating: false}));
+
+      if (newChat.action === 'click') {
+        const script = `
+          (() => {
+            const selectors = ${JSON.stringify(newChat.value.split(',').map(s => s.trim()))};
+            for (const selector of selectors) {
+              const btn = document.querySelector(selector);
+              if (btn) {
+                btn.click();
+                return true;
+              }
             }
+            return false;
+          })()
+        `;
+        try {
+          const clicked = await browserIpc.invoke.executeJavaScript(viewId, script);
+          if (!clicked) {
+            console.warn('New chat button not found, falling back to page reload/navigation:', newChat.value);
+            dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
+            browserIpc.send.loadURL(viewId, url);
           }
-          return false;
-        })()
-      `;
-      try {
-        const clicked = await browserIpc.invoke.executeJavaScript(tabID, script);
-        if (!clicked) {
-          console.warn('New chat button not found, falling back to page reload/navigation:', newChat.value);
-          setIsPageLoaded(false);
-          browserIpc.send.loadURL(tabID, url);
+        } catch (err) {
+          console.error('Failed to click new chat button, falling back:', err);
+          dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
+          browserIpc.send.loadURL(viewId, url);
         }
-      } catch (err) {
-        console.error('Failed to click new chat button, falling back:', err);
-        setIsPageLoaded(false);
-        browserIpc.send.loadURL(tabID, url);
+      } else if (newChat.action === 'navigate') {
+        dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
+        browserIpc.send.loadURL(viewId, newChat.value);
       }
-    } else if (newChat.action === 'navigate') {
-      setIsPageLoaded(false);
-      browserIpc.send.loadURL(tabID, newChat.value);
-    }
-  }, [selectedCard, tabID]);
+    },
+    [currentCardId, onlineCards, dispatch],
+  );
+
+  const toggleBgChat = useCallback(
+    async (cardId: string) => {
+      const enabled = bgChatEnabledCards.includes(cardId);
+      const updated = enabled ? bgChatEnabledCards.filter(id => id !== cardId) : [...bgChatEnabledCards, cardId];
+      dispatch(onlineChatActions.setBgChatEnabledCards(updated));
+
+      // Update filters initially to include it when enabling
+      if (!enabled) {
+        dispatch(onlineChatActions.setVisibleModuleIds([...visibleModuleIds, cardId]));
+      } else {
+        dispatch(onlineChatActions.setVisibleModuleIds(visibleModuleIds.filter(id => id !== cardId)));
+      }
+
+      await storageIpc.update('plugin', {bgChatEnabledCards: updated});
+    },
+    [bgChatEnabledCards, visibleModuleIds, dispatch],
+  );
 
   return {
     selectedCard,
@@ -661,7 +469,7 @@ export function useOnlineChat(tabID = 'online-chat') {
     isPageLoaded,
     isGenerating,
     onlineCards,
-    chatHistory,
+    chatHistory: unifiedHistory,
     isHistoryLoading,
     handleSelectCard,
     handleSelectHistoryItem,
@@ -673,5 +481,12 @@ export function useOnlineChat(tabID = 'online-chat') {
     handleCopyToClipboard,
     handleSaveToFile,
     handleNewChat,
+    // Background Scraper settings/state properties
+    activeUniversalCardId,
+    setActiveUniversalCardId: (id: string | null) => dispatch(onlineChatActions.setActiveUniversalCardId(id)),
+    bgChatEnabledCards,
+    visibleModuleIds,
+    toggleBgChat,
+    setVisibleModuleIds: (ids: string[]) => dispatch(onlineChatActions.setVisibleModuleIds(ids)),
   };
 }

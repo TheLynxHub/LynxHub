@@ -1,6 +1,6 @@
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {memo, useCallback, useEffect, useRef, useState} from 'react';
+import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import Page from '../Page';
 import ChatArea from './ChatArea';
@@ -34,6 +34,11 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
     handleCopyToClipboard,
     handleSaveToFile,
     handleNewChat,
+    activeUniversalCardId,
+    bgChatEnabledCards,
+    visibleModuleIds,
+    toggleBgChat,
+    setVisibleModuleIds,
   } = useOnlineChat(tabID);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -41,6 +46,10 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
   const chatAreaRef = useRef<{scrollToTop: () => void; scrollToBottom: () => void}>(null);
 
   const [initialInputText, setInitialInputText] = useState('');
+
+  const activeCard = useMemo(() => {
+    return onlineCards.find(c => c.id === activeUniversalCardId);
+  }, [onlineCards, activeUniversalCardId]);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -61,7 +70,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
         {
           step,
           hasMessages: messages.length > 0,
-          hasNewChat: !!selectedCard?.onlineConfig?.newChat,
+          hasNewChat: !!selectedCard?.onlineConfig?.newChat || selectedCard?.id === 'universal',
           selectionText,
         },
         {x: e.clientX, y: e.clientY},
@@ -145,6 +154,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           step={step}
           messages={messages}
           onRefresh={handleRefresh}
+          onlineCards={onlineCards}
           selectedCard={selectedCard}
           isPageLoaded={isPageLoaded}
           onGoToChat={handleGoToChat}
@@ -156,17 +166,33 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           showScrollBottom={showScrollBottom}
           onScrollBottom={handleScrollBottom}
           onCopyToClipboard={handleCopyToClipboard}
+          activeUniversalCardId={activeUniversalCardId}
         />
         <div className="absolute inset-0 top-12! overflow-hidden flex flex-row">
-          {step === 'chat' && selectedCard?.onlineConfig?.selectors?.chatItem && (
+          {step === 'chat' && (selectedCard?.id === 'universal' || selectedCard?.onlineConfig?.selectors?.chatItem) && (
             <ChatSidebar
+              onNewChat={
+                selectedCard?.id === 'universal' || selectedCard?.onlineConfig?.newChat ? handleNewChat : undefined
+              }
               chatHistory={chatHistory}
+              onlineCards={onlineCards}
+              selectedCard={selectedCard}
+              onToggleBgChat={toggleBgChat}
+              visibleModuleIds={visibleModuleIds}
+              bgChatEnabledCards={bgChatEnabledCards}
+              onSetVisibleModuleIds={setVisibleModuleIds}
               onSelectHistoryItem={handleSelectHistoryItem}
-              onNewChat={selectedCard?.onlineConfig?.newChat ? handleNewChat : undefined}
             />
           )}
           <div className="flex-1 h-full relative overflow-hidden flex flex-col">
-            {step === 'select_module' && <ModuleSelector onlineCards={onlineCards} onSelectCard={handleSelectCard} />}
+            {step === 'select_module' && (
+              <ModuleSelector
+                onlineCards={onlineCards}
+                onToggleBgChat={toggleBgChat}
+                onSelectCard={handleSelectCard}
+                bgChatEnabledCards={bgChatEnabledCards}
+              />
+            )}
 
             {step === 'login' && (
               <div className="flex size-full flex-col overflow-hidden bg-white">
@@ -180,6 +206,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
               <ChatArea
                 messages={messages}
                 isSending={isSending}
+                activeCard={activeCard}
                 chatAreaRef={chatAreaRef}
                 isGenerating={isGenerating}
                 selectedCard={selectedCard}

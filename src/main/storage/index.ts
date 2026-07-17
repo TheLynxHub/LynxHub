@@ -27,7 +27,7 @@ class BaseStorage {
   private readonly migrationManager: StorageMigrationManager;
 
   private readonly DEFAULT_DATA: AppStorageData = {
-    storage: {version: 1.07},
+    storage: {version: 1.08},
     cards: {
       installedCards: [],
       autoUpdateCards: [],
@@ -128,7 +128,7 @@ class BaseStorage {
     notification: {
       readNotifs: [],
     },
-    plugin: {migrated: true, disabledCards: []},
+    plugin: {migrated: true, disabledCards: [], bgChatEnabledCards: []},
     performance: {
       forceColorProfile: 'default',
       highDpiSupport: false,

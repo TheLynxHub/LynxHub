@@ -26,6 +26,7 @@ interface ChatAreaProps {
   isHistoryLoading?: boolean;
   initialInput?: string;
   onConsumedInitialInput?: () => void;
+  activeCard?: any;
 }
 
 /** Unicode ranges for strong RTL scripts (Hebrew, Arabic, Syriac, Thaana, N'Ko, etc.). */
@@ -323,6 +324,7 @@ const ChatArea = memo(
     isHistoryLoading = false,
     initialInput,
     onConsumedInitialInput,
+    activeCard,
   }: ChatAreaProps) => {
     const [inputText, setInputText] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -446,8 +448,19 @@ const ChatArea = memo(
             ) : messages.length === 0 ? (
               <div className="flex flex-col text-semi-muted items-center justify-center flex-1 text-center gap-y-2">
                 <ChatRound className="size-12" />
-                <div className="font-semibold">Start a new conversation</div>
-                <div className="text-xs text-muted">Your chat history will sync here automatically.</div>
+                {selectedCard?.id === 'universal' && !activeCard ? (
+                  <>
+                    <div className="font-semibold">No background AIs active</div>
+                    <div className="text-xs text-muted max-w-sm">
+                      Please enable background run for AIs in the selection screen, then start a chat.
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="font-semibold">Start a new conversation</div>
+                    <div className="text-xs text-muted">Your chat history will sync here automatically.</div>
+                  </>
+                )}
               </div>
             ) : (
               <div className="space-y-4 flex-1">
@@ -471,13 +484,19 @@ const ChatArea = memo(
           <TextField name="message" aria-label="Message input" className="max-w-4xl mx-auto w-full">
             <InputGroup variant="secondary" className="p-2 rounded-2xl" fullWidth>
               <InputGroup.TextArea
+                placeholder={
+                  activeCard
+                    ? `Message ${activeCard.title}...`
+                    : selectedCard
+                      ? `Message ${selectedCard.title}...`
+                      : 'Message...'
+                }
                 rows={1}
                 ref={textareaRef}
                 value={inputText}
                 className="max-h-32 "
                 onKeyDown={handleKeyDown}
                 onChange={e => setInputText(e.target.value)}
-                placeholder={selectedCard ? `Message ${selectedCard.title}...` : 'Message...'}
               />
               <InputGroup.Suffix className="p-0.5 shrink-0 self-end">
                 <Button

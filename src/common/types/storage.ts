@@ -167,6 +167,7 @@ export type NotificationStorage = {
 export type PluginStorage = {
   migrated: boolean;
   disabledCards: string[];
+  bgChatEnabledCards?: string[];
 };
 
 /**
