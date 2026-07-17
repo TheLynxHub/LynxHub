@@ -1,5 +1,6 @@
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
-import {memo, useCallback, useRef, useState} from 'react';
+import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
+import {memo, useCallback, useEffect, useRef, useState} from 'react';
 
 import Page from '../Page';
 import ChatArea from './ChatArea';
@@ -39,6 +40,91 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
   const [showScrollBottom, setShowScrollBottom] = useState(false);
   const chatAreaRef = useRef<{scrollToTop: () => void; scrollToBottom: () => void}>(null);
 
+  const [initialInputText, setInitialInputText] = useState('');
+
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+      const selectionText = window.getSelection()?.toString().trim() || '';
+
+      if (step === 'select_module' && !selectionText) {
+        e.preventDefault();
+        return;
+      }
+      e.preventDefault();
+
+      contextMenuIpc.send.openOnlineChatMenu(
+        tabID,
+        {
+          step,
+          hasMessages: messages.length > 0,
+          hasNewChat: !!selectedCard?.onlineConfig?.newChat,
+          selectionText,
+        },
+        {x: e.clientX, y: e.clientY},
+      );
+    },
+    [tabID, step, messages.length, selectedCard],
+  );
+
+  useEffect(() => {
+    const offAction = contextMenuIpc.on.onlineChatAction((targetTabID, action, payload) => {
+      if (targetTabID !== tabID) return;
+
+      switch (action) {
+        case 'reload':
+          handleRefresh();
+          break;
+        case 'back':
+          handleBackToSelect();
+          break;
+        case 'toggle-webpage':
+          if (step === 'chat') {
+            handleShowWebpage();
+          } else if (step === 'login') {
+            handleGoToChat();
+          }
+          break;
+        case 'new-chat':
+          handleNewChat();
+          break;
+        case 'copy-markdown':
+          handleCopyToClipboard('markdown');
+          break;
+        case 'copy-text':
+          handleCopyToClipboard('text');
+          break;
+        case 'save-markdown':
+          handleSaveToFile('markdown');
+          break;
+        case 'save-text':
+          handleSaveToFile('text');
+          break;
+        case 'start-chat-with-selection':
+          if (payload) {
+            setInitialInputText(payload);
+            handleNewChat();
+          }
+          break;
+      }
+    });
+
+    return () => offAction();
+  }, [
+    tabID,
+    step,
+    handleRefresh,
+    handleBackToSelect,
+    handleShowWebpage,
+    handleGoToChat,
+    handleNewChat,
+    handleCopyToClipboard,
+    handleSaveToFile,
+  ]);
+
   const handleScrollStateChange = useCallback((showTop: boolean, showBottom: boolean) => {
     setShowScrollTop(showTop);
     setShowScrollBottom(showBottom);
@@ -54,7 +140,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
 
   return (
     <Page>
-      <div className="absolute inset-0 bg-surface overflow-hidden flex flex-col">
+      <div onContextMenu={handleContextMenu} className="absolute inset-0 bg-surface overflow-hidden flex flex-col">
         <ChatTopBar
           step={step}
           messages={messages}
@@ -97,9 +183,11 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
                 chatAreaRef={chatAreaRef}
                 isGenerating={isGenerating}
                 selectedCard={selectedCard}
+                initialInput={initialInputText}
                 onSendMessage={handleSendMessage}
                 isHistoryLoading={isHistoryLoading}
                 onScrollStateChange={handleScrollStateChange}
+                onConsumedInitialInput={() => setInitialInputText('')}
               />
             )}
           </div>

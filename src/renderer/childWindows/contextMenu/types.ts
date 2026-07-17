@@ -25,6 +25,14 @@ export type PromptWindow = {message: string; defaultValue?: string};
 export type AlertWindow = {message: string};
 export type ConfirmWindow = {message: string};
 
+export type OnlineChatMenuData = {
+  tabID: string;
+  step: 'select_module' | 'login' | 'chat';
+  hasMessages: boolean;
+  hasNewChat: boolean;
+  selectionText?: string;
+};
+
 export type ContextState = {
   activeLayout: MenuTypes | undefined;
   targetID: string;
@@ -39,6 +47,7 @@ export type ContextState = {
   alertWindow: AlertWindow;
   confirmWindow: ConfirmWindow;
   downloads: DownloadItemInfo[];
+  onlineChatMenu: OnlineChatMenuData;
 };
 
 export type NavBtnProps = {icon?: ReactNode; onPress?: () => void; className?: string; isDisabled?: boolean};

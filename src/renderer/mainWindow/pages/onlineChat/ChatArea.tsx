@@ -24,6 +24,8 @@ interface ChatAreaProps {
   } | null>;
   onScrollStateChange?: (showTop: boolean, showBottom: boolean) => void;
   isHistoryLoading?: boolean;
+  initialInput?: string;
+  onConsumedInitialInput?: () => void;
 }
 
 /** Unicode ranges for strong RTL scripts (Hebrew, Arabic, Syriac, Thaana, N'Ko, etc.). */
@@ -319,8 +321,21 @@ const ChatArea = memo(
     chatAreaRef,
     onScrollStateChange,
     isHistoryLoading = false,
+    initialInput,
+    onConsumedInitialInput,
   }: ChatAreaProps) => {
     const [inputText, setInputText] = useState('');
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+      if (initialInput) {
+        setInputText(initialInput);
+        onConsumedInitialInput?.();
+        requestAnimationFrame(() => {
+          textareaRef.current?.focus();
+        });
+      }
+    }, [initialInput, onConsumedInitialInput]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -457,6 +472,7 @@ const ChatArea = memo(
             <InputGroup variant="secondary" className="p-2 rounded-2xl" fullWidth>
               <InputGroup.TextArea
                 rows={1}
+                ref={textareaRef}
                 value={inputText}
                 className="max-h-32 "
                 onKeyDown={handleKeyDown}

@@ -141,6 +141,17 @@ export default function useShowEvents() {
       );
     });
 
+    // Online Chat Menu
+    const offOnlineChatMenu = contextMenuIpc.on.onlineChatMenu((tabID, data) => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'onlineChatMenu',
+          value: {tabID, ...data},
+          layout: MenuTypes.OnlineChatMenu,
+        }),
+      );
+    });
+
     // Prompt Dialog
     const offPrompt = windowDialogsIpc.promptShow((message: string, defaultValue?: string) => {
       dispatch(
@@ -210,6 +221,7 @@ export default function useShowEvents() {
       offTerminateTab();
       offVolume();
       OffDownloads();
+      offOnlineChatMenu();
       offPrompt();
       offAlert();
       offConfirm();

@@ -41,6 +41,22 @@ const contextMenuIpc = {
     // Removes browser tab
     removeTab: (tabId: string) => lynxIpc.send(contextMenuChannels.removeTab, tabId),
 
+    // Opens custom right click context menu for online chat
+    openOnlineChatMenu: (
+      tabID: string,
+      data: {
+        step: 'select_module' | 'login' | 'chat';
+        hasMessages: boolean;
+        hasNewChat: boolean;
+        selectionText?: string;
+      },
+      customPosition?: ContextMenuPosition,
+    ) => lynxIpc.send(contextMenuChannels.openOnlineChatMenu, tabID, data, customPosition),
+
+    // Triggers action from online chat context menu
+    onlineChatAction: (tabID: string, action: string, data?: string) =>
+      lynxIpc.send(contextMenuChannels.onlineChatAction, tabID, action, data),
+
     rightClickItems: {
       copy: (id: number) => lynxIpc.send(contextMenuChannels.copy, id),
 
@@ -132,6 +148,23 @@ const contextMenuIpc = {
     // Listens for tab removal events
     removeTab: (callback: (tabId: string) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onRemoveTab, callback),
+
+    // Listens for showing online chat menu
+    onlineChatMenu: (
+      callback: (
+        tabID: string,
+        data: {
+          step: 'select_module' | 'login' | 'chat';
+          hasMessages: boolean;
+          hasNewChat: boolean;
+          selectionText?: string;
+        },
+      ) => void,
+    ): (() => void) => lynxIpc.on(contextMenuChannels.onOnlineChatMenu, callback),
+
+    // Listens for actions triggered from online chat context menu
+    onlineChatAction: (callback: (tabID: string, action: string, data?: string) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onOnlineChatAction, callback),
   },
 };
 

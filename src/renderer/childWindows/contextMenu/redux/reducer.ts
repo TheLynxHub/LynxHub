@@ -53,6 +53,13 @@ const initialState: ContextState = {
     message: '',
   },
   downloads: [],
+  onlineChatMenu: {
+    tabID: '',
+    step: 'select_module',
+    hasMessages: false,
+    hasNewChat: false,
+    selectionText: '',
+  },
 };
 
 const appSlice = createSlice({

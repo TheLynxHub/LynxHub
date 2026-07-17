@@ -6,7 +6,7 @@ import {ptyWrite} from '@lynx_main/ipc/methods/pty';
 import {changeWindowState} from '@lynx_main/ipc/methods/windowUtils';
 import BrowserManager from '@lynx_main/managers/browser';
 import classHolder from '@lynx_main/managers/classHolder';
-import {BrowserWindow, ContextMenuParams, dialog} from 'electron';
+import {BrowserWindow, clipboard, ContextMenuParams, dialog} from 'electron';
 
 import {applicationIpc} from './application';
 import {browserIpc} from './browser';
@@ -82,6 +82,26 @@ export default async function listenContextMenu() {
   contextMenuIpc.on.relaunchAI(id => contextMenuIpc.send.onRelaunchAI(id));
   contextMenuIpc.on.stopAI(id => contextMenuIpc.send.onStopAI(id));
   contextMenuIpc.on.removeTab(tabID => contextMenuIpc.send.onRemoveTab(tabID));
+
+  // Online Chat Menu Actions
+  contextMenuIpc.on.openOnlineChatMenu((tabID, data, customPosition) => {
+    contextMenuManager.setCustomContextPosition(customPosition);
+    contextMenuIpc.send.onOnlineChatMenu(tabID, data);
+    contextMenuManager.showContextMenu();
+  });
+
+  contextMenuIpc.on.onlineChatAction((tabID, action, payload) => {
+    if (action === 'copy-selection' && typeof payload === 'string') {
+      clipboard.writeText(payload);
+      return;
+    }
+    if (action === 'search-web' && typeof payload === 'string') {
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(payload)}`;
+      applicationIpc.send.onNewTab(searchUrl);
+      return;
+    }
+    contextMenuIpc.send.onOnlineChatAction(tabID, action, payload);
+  });
 }
 
 /**
@@ -271,6 +291,12 @@ export const contextMenuIpc = {
     onCloseApp: () => sendToContextMenu(contextMenuChannels.onCloseApp),
     /** Sends downloads event to context menu */
     onDownloads: () => sendToContextMenu(contextMenuChannels.onDownloads),
+    /** Sends online chat menu show request to context menu renderer */
+    onOnlineChatMenu: (tabID: string, data: any) =>
+      sendToContextMenu(contextMenuChannels.onOnlineChatMenu, tabID, data),
+    /** Sends online chat action back to main window renderer */
+    onOnlineChatAction: (tabID: string, action: string, payload?: string) =>
+      sendToMain(contextMenuChannels.onOnlineChatAction, tabID, action, payload),
   },
   on: {
     /** Listens for show ready request from renderer */
@@ -328,6 +354,12 @@ export const contextMenuIpc = {
       lynxIpc.on(contextMenuChannels.openTerminateTab, callback),
     /** Listens for open close app request */
     openCloseApp: (callback: () => void) => lynxIpc.on(contextMenuChannels.openCloseApp, callback),
+    /** Listens for open online chat menu request from main window */
+    openOnlineChatMenu: (callback: (tabID: string, data: any, customPosition?: {x: number; y: number}) => void) =>
+      lynxIpc.on(contextMenuChannels.openOnlineChatMenu, callback),
+    /** Listens for online chat action from context menu renderer */
+    onlineChatAction: (callback: (tabID: string, action: string, payload?: string) => void) =>
+      lynxIpc.on(contextMenuChannels.onlineChatAction, callback),
   },
   handle: {},
 };
