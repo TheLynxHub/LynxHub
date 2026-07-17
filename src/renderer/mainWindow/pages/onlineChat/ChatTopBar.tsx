@@ -26,6 +26,8 @@ interface ChatTopBarProps {
   onScrollBottom?: () => void;
   activeUniversalCardId?: string | null;
   onlineCards?: any[];
+  bgChatEnabledCards?: string[];
+  onSelectActiveCard?: (id: string | null) => void;
 }
 
 const ChatTopBar = memo(
@@ -46,19 +48,54 @@ const ChatTopBar = memo(
     onScrollBottom,
     activeUniversalCardId,
     onlineCards,
+    bgChatEnabledCards = [],
+    onSelectActiveCard,
   }: ChatTopBarProps) => {
     const activeCard =
       selectedCard?.id === 'universal' ? onlineCards?.find(c => c.id === activeUniversalCardId) : selectedCard;
 
     const activeCardPill =
       selectedCard?.id === 'universal' && activeCard ? (
-        <div className="flex items-center gap-x-2 border border-border bg-foreground/5 rounded-full px-2.5 py-1">
-          <Avatar className="size-4 shrink-0">
-            <Avatar.Image alt={activeCard.title} src={getCacheUrl(activeCard.logoUrl)} />
-            <Avatar.Fallback>{getFallbackString(activeCard.title)}</Avatar.Fallback>
-          </Avatar>
-          <span className="text-[10px] font-semibold text-muted leading-none">{activeCard.title}</span>
-        </div>
+        <Dropdown>
+          <Dropdown.Trigger>
+            <Button
+              className={
+                'h-7 px-2.5 border border-border bg-foreground/5 rounded-full ' +
+                'flex items-center gap-x-1.5 hover:bg-foreground/10 text-muted ' +
+                'font-semibold text-[10px] leading-none shrink-0'
+              }
+              size="sm"
+              variant="ghost"
+              aria-label="Select Active AI">
+              <Avatar className="size-4 shrink-0 rounded-md">
+                <Avatar.Image alt={activeCard.title} src={getCacheUrl(activeCard.logoUrl)} />
+                <Avatar.Fallback className="text-[8px]">{getFallbackString(activeCard.title)}</Avatar.Fallback>
+              </Avatar>
+              <span>{activeCard.title}</span>
+              <AltArrowDown className="size-3.5 opacity-60 shrink-0" />
+            </Button>
+          </Dropdown.Trigger>
+          <Dropdown.Popover placement="bottom start" className="min-w-44 bg-surface-secondary border-border">
+            <Dropdown.Menu
+              onAction={key => {
+                if (onSelectActiveCard && key) {
+                  onSelectActiveCard(String(key));
+                }
+              }}>
+              {onlineCards
+                ?.filter(c => c.id !== 'universal' && bgChatEnabledCards.includes(c.id))
+                .map(c => (
+                  <Dropdown.Item id={c.id} key={c.id} textValue={c.title}>
+                    <Avatar className="size-4 shrink-0 rounded-md">
+                      <Avatar.Image alt={c.title} src={getCacheUrl(c.logoUrl)} />
+                      <Avatar.Fallback className="text-[8px]">{getFallbackString(c.title)}</Avatar.Fallback>
+                    </Avatar>
+                    <Label className="ml-2">{c.title}</Label>
+                  </Dropdown.Item>
+                ))}
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown>
       ) : null;
 
     return (

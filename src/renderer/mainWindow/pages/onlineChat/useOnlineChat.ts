@@ -146,6 +146,11 @@ export function useOnlineChat(tabID = 'online-chat') {
       const isBgEnabled = bgChatEnabledCards.includes(currentCardId);
       browserIpc.send.setVisible(viewId, false, isBgEnabled ? 'offscreen' : 'detach');
     }
+
+    return () => {
+      const isBgEnabled = bgChatEnabledCards.includes(currentCardId);
+      browserIpc.send.setVisible(viewId, false, isBgEnabled ? 'offscreen' : 'detach');
+    };
   }, [tabID, activeTab, step, currentCardId, bgChatEnabledCards]);
 
   const handleSelectCard = useCallback(
@@ -416,6 +421,10 @@ export function useOnlineChat(tabID = 'online-chat') {
 
       dispatch(onlineChatActions.setModuleMessages({cardId: targetCardId, messages: []}));
       dispatch(onlineChatActions.setModuleGenerating({cardId: targetCardId, isGenerating: false}));
+
+      if (selectedCard?.id === 'universal') {
+        dispatch(onlineChatActions.setActiveUniversalCardId(targetCardId));
+      }
 
       if (newChat.action === 'click') {
         const script = `

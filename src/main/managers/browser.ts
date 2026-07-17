@@ -325,6 +325,11 @@ export default class BrowserManager {
     const webContents = newView.webContents;
     newView.setBackgroundColor('#ffffff');
 
+    if (options?.backgroundThrottling === false) {
+      webContents.setBackgroundThrottling(false);
+      newView.setBounds({x: -9999, y: -9999, width: 1024, height: 768});
+    }
+
     webContents.setUserAgent(getUserAgent());
     webContents.setZoomFactor(storageManager.getData('cards').zoomFactor);
 

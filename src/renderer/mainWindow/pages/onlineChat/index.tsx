@@ -39,6 +39,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
     visibleModuleIds,
     toggleBgChat,
     setVisibleModuleIds,
+    setActiveUniversalCardId,
   } = useOnlineChat(tabID);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -165,8 +166,10 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           onBackToSelect={handleBackToSelect}
           showScrollBottom={showScrollBottom}
           onScrollBottom={handleScrollBottom}
+          bgChatEnabledCards={bgChatEnabledCards}
           onCopyToClipboard={handleCopyToClipboard}
           activeUniversalCardId={activeUniversalCardId}
+          onSelectActiveCard={setActiveUniversalCardId}
         />
         <div className="absolute inset-0 top-12! overflow-hidden flex flex-row">
           {step === 'chat' && (selectedCard?.id === 'universal' || selectedCard?.onlineConfig?.selectors?.chatItem) && (
