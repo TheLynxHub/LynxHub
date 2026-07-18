@@ -19,7 +19,7 @@ export default function listenSpotlightChat() {
   });
 
   // Store online cards list sent by main window
-  lynxIpc.on(spotlightChatChannels.setOnlineCards, (_event, cards) => {
+  lynxIpc.on(spotlightChatChannels.setOnlineCards, cards => {
     cachedOnlineCards = cards;
     // Also forward to spotlight window if open
     const spotlightWin = classHolder.spotlightChatWindow;
@@ -34,7 +34,7 @@ export default function listenSpotlightChat() {
   });
 
   // Store & sync state from main window to spotlight window
-  lynxIpc.on(spotlightChatChannels.syncState, (_event, state) => {
+  lynxIpc.on(spotlightChatChannels.syncState, state => {
     cachedOnlineChatState = state;
     const spotlightWin = classHolder.spotlightChatWindow;
     if (spotlightWin && !spotlightWin.isDestroyed()) {
@@ -48,19 +48,19 @@ export default function listenSpotlightChat() {
   });
 
   // Forward actions from spotlight window to main window
-  lynxIpc.on(spotlightChatChannels.sendMessage, (_event, cardId: string, text: string) => {
+  lynxIpc.on(spotlightChatChannels.sendMessage, (cardId: string, text: string) => {
     classHolder.appManager?.sendMessage(spotlightChatChannels.sendMessage, cardId, text);
   });
 
-  lynxIpc.on(spotlightChatChannels.selectThread, (_event, cardId: string, index: number) => {
+  lynxIpc.on(spotlightChatChannels.selectThread, (cardId: string, index: number) => {
     classHolder.appManager?.sendMessage(spotlightChatChannels.selectThread, cardId, index);
   });
 
-  lynxIpc.on(spotlightChatChannels.newChat, (_event, cardId: string) => {
+  lynxIpc.on(spotlightChatChannels.newChat, (cardId: string) => {
     classHolder.appManager?.sendMessage(spotlightChatChannels.newChat, cardId);
   });
 
-  lynxIpc.on(spotlightChatChannels.openLogin, (_event, cardId: string) => {
+  lynxIpc.on(spotlightChatChannels.openLogin, (cardId: string) => {
     const mainWindow = classHolder.appManager?.getMainWindow();
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
@@ -69,5 +69,9 @@ export default function listenSpotlightChat() {
     }
     classHolder.appManager?.sendMessage(spotlightChatChannels.openLogin, cardId);
     CloseSpotlightWindow();
+  });
+
+  lynxIpc.on(spotlightChatChannels.setActiveCard, (cardId: string) => {
+    classHolder.appManager?.sendMessage(spotlightChatChannels.setActiveCard, cardId);
   });
 }

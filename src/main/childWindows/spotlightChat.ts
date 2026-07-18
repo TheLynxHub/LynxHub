@@ -116,6 +116,9 @@ function setupWindowListeners(window: BrowserWindow) {
   window.once('ready-to-show', () => {
     window.show();
     window.focus();
+    if (is.dev) {
+      window.webContents.openDevTools({mode: 'detach'});
+    }
   });
 
   window.on('closed', () => {

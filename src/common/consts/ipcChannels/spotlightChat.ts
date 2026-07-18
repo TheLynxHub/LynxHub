@@ -8,4 +8,5 @@ export const spotlightChatChannels = {
   setOnlineCards: 'spotlightChat:set-online-cards',
   closeSpotlight: 'spotlightChat:close',
   openLogin: 'spotlightChat:open-login',
+  setActiveCard: 'spotlightChat:set-active-card',
 } as const;

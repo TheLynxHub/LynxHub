@@ -10,6 +10,18 @@ import {onlineChatActions} from '../redux/reducers/onlineChat';
 import {tabsActions} from '../redux/reducers/tabs';
 import {AppDispatch, RootState} from '../redux/store';
 
+const universalCard: any = {
+  id: 'universal',
+  title: 'Universal Chat',
+  description: 'Chat with all enabled background AIs in a unified interface, with aggregated thread history.',
+  isOnline: true,
+  logoUrl: '',
+  onlineConfig: {
+    url: '',
+    selectors: {},
+  },
+};
+
 export function useSpotlightSync() {
   const dispatch = useDispatch<AppDispatch>();
   const allCards = useAllCardDataWithPath();
@@ -17,11 +29,16 @@ export function useSpotlightSync() {
   const bgChatEnabledCards = onlineChat.bgChatEnabledCards || [];
 
   const onlineCards = useMemo(() => {
-    return allCards.filter(card => card.isOnline && card.id !== 'universal');
+    const list = allCards.filter(card => card.isOnline && card.id !== 'universal');
+    if (list.length > 0) {
+      return [universalCard, ...list];
+    }
+    return list;
   }, [allCards]);
 
   // 1. Sync onlineCards list to spotlight window
   useEffect(() => {
+    console.log('useSpotlightSync: syncing onlineCards, count:', onlineCards.length, onlineCards);
     if (onlineCards.length > 0) {
       spotlightChatIpc.setOnlineCards(onlineCards);
     }
@@ -48,7 +65,7 @@ export function useSpotlightSync() {
   // 3. Listen to commands from spotlight
   useEffect(() => {
     // A. Send Message
-    const offSendMessage = spotlightChatIpc.onSendMessage(async (_event, cardId, text) => {
+    const offSendMessage = spotlightChatIpc.onSendMessage(async (cardId, text) => {
       handleEnsureBgChatEnabled(cardId);
 
       const card = onlineCards.find(c => c.id === cardId);
@@ -134,7 +151,7 @@ export function useSpotlightSync() {
     });
 
     // B. Select Thread
-    const offSelectThread = spotlightChatIpc.onSelectThread(async (_event, cardId, index) => {
+    const offSelectThread = spotlightChatIpc.onSelectThread(async (cardId, index) => {
       handleEnsureBgChatEnabled(cardId);
 
       const card = onlineCards.find(c => c.id === cardId);
@@ -142,6 +159,7 @@ export function useSpotlightSync() {
       const {selectors} = card.onlineConfig;
       if (!selectors.chatItem) return;
 
+      dispatch(onlineChatActions.setActiveUniversalCardId(cardId));
       dispatch(
         onlineChatActions.setModuleState({
           cardId,
@@ -170,7 +188,7 @@ export function useSpotlightSync() {
     });
 
     // C. New Chat
-    const offNewChat = spotlightChatIpc.onNewChat(async (_event, cardId) => {
+    const offNewChat = spotlightChatIpc.onNewChat(async cardId => {
       handleEnsureBgChatEnabled(cardId);
 
       const card = onlineCards.find(c => c.id === cardId);
@@ -179,6 +197,7 @@ export function useSpotlightSync() {
       const viewId = `online-bg-${cardId}`;
       const {newChat} = card.onlineConfig;
 
+      dispatch(onlineChatActions.setActiveUniversalCardId(cardId));
       dispatch(
         onlineChatActions.setModuleState({
           cardId,
@@ -208,7 +227,7 @@ export function useSpotlightSync() {
     });
 
     // D. Open Login (Navigates main window tab and focuses it)
-    const offOpenLogin = spotlightChatIpc.onOpenLogin((_event, cardId) => {
+    const offOpenLogin = spotlightChatIpc.onOpenLogin(cardId => {
       const card = onlineCards.find(c => c.id === cardId);
       if (!card) return;
 
@@ -227,11 +246,20 @@ export function useSpotlightSync() {
       );
     });
 
+    // E. Set Active Card
+    const offSetActiveCard = spotlightChatIpc.onSetActiveCard(cardId => {
+      if (cardId && cardId !== 'universal') {
+        handleEnsureBgChatEnabled(cardId);
+        dispatch(onlineChatActions.setActiveUniversalCardId(cardId));
+      }
+    });
+
     return () => {
       offSendMessage();
       offSelectThread();
       offNewChat();
       offOpenLogin();
+      offSetActiveCard();
     };
   }, [onlineCards, onlineChat, handleEnsureBgChatEnabled, dispatch]);
 }

@@ -15,13 +15,14 @@ const spotlightChatIpc = {
   selectThread: (cardId: string, index: number) => lynxIpc.send(spotlightChatChannels.selectThread, cardId, index),
   newChat: (cardId: string) => lynxIpc.send(spotlightChatChannels.newChat, cardId),
   openLogin: (cardId: string) => lynxIpc.send(spotlightChatChannels.openLogin, cardId),
-  onSendMessage: (callback: (event: any, cardId: string, text: string) => void) =>
+  setActiveCard: (cardId: string) => lynxIpc.send(spotlightChatChannels.setActiveCard, cardId),
+  onSendMessage: (callback: (cardId: string, text: string) => void) =>
     lynxIpc.on(spotlightChatChannels.sendMessage, callback),
-  onSelectThread: (callback: (event: any, cardId: string, index: number) => void) =>
+  onSelectThread: (callback: (cardId: string, index: number) => void) =>
     lynxIpc.on(spotlightChatChannels.selectThread, callback),
-  onNewChat: (callback: (event: any, cardId: string) => void) => lynxIpc.on(spotlightChatChannels.newChat, callback),
-  onOpenLogin: (callback: (event: any, cardId: string) => void) =>
-    lynxIpc.on(spotlightChatChannels.openLogin, callback),
+  onNewChat: (callback: (cardId: string) => void) => lynxIpc.on(spotlightChatChannels.newChat, callback),
+  onOpenLogin: (callback: (cardId: string) => void) => lynxIpc.on(spotlightChatChannels.openLogin, callback),
+  onSetActiveCard: (callback: (cardId: string) => void) => lynxIpc.on(spotlightChatChannels.setActiveCard, callback),
 };
 
 export default spotlightChatIpc;

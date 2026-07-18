@@ -213,6 +213,11 @@ export function useOnlineBgManager() {
       targetCardIds.add(activeAiId);
     }
 
+    // Add active universal AI if set (for Spotlight Chat or Universal Mode sync)
+    if (activeUniversalCardId && onlineCards.some(c => c.id === activeUniversalCardId)) {
+      targetCardIds.add(activeUniversalCardId);
+    }
+
     // Add all background-enabled AIs
     bgChatEnabledCards.forEach(id => {
       if (onlineCards.some(c => c.id === id)) {
