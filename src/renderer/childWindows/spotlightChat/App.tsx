@@ -1,8 +1,8 @@
-import {Button, Dropdown, Input, ScrollShadow, Spinner} from '@heroui/react';
+import {Button, CloseButton, Dropdown, Input, ScrollShadow, Spinner} from '@heroui/react';
 import spotlightChatIpc from '@lynx_shared/ipc/spotlightChat';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {AddCircle, ArrowRight, UserId} from '@solar-icons/react-perf/BoldDuotone';
-import {CloseCircle, Magnifier} from '@solar-icons/react-perf/Linear';
+import {ArrowRight, ChatRound, UserId} from '@solar-icons/react-perf/BoldDuotone';
+import {Plus} from 'lucide-react';
 import {KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 export default function SpotlightApp() {
@@ -180,18 +180,11 @@ export default function SpotlightApp() {
 
   return (
     <div
-      className={
-        'flex flex-col h-screen w-screen bg-background border border-divider/50 ' +
-        'rounded-2xl overflow-hidden select-none font-sans'
-      }>
+      className={'flex flex-col h-screen w-screen bg-surface overflow-hidden select-none font-Nunito text-foreground'}>
       {/* Header bar */}
-      <div
-        className={
-          'flex flex-row items-center justify-between px-4 py-2 ' +
-          'border-b border-divider/30 gap-x-2 bg-surface draggable'
-        }>
-        <div className="flex flex-row items-center flex-1 gap-x-2 notDraggable">
-          <Magnifier className="text-muted-foreground size-5 shrink-0" />
+      <div className={'flex flex-row items-center justify-between py-3 px-4 gap-x-2 draggable'}>
+        <div className="flex flex-row items-center flex-1 gap-x-2">
+          <ChatRound className="text-semi-muted size-5 shrink-0" />
           <Input
             placeholder={
               isLoginRequired
@@ -202,9 +195,9 @@ export default function SpotlightApp() {
             variant="secondary"
             aria-label="chat_input"
             onKeyDown={handleKeyDown}
+            className="flex-1 notDraggable"
             disabled={isLoginRequired || isSending}
             onChange={e => setInputText(e.target.value)}
-            className="flex-1 text-sm bg-transparent border-0 focus:outline-none"
           />
         </div>
 
@@ -212,10 +205,8 @@ export default function SpotlightApp() {
           {activeCard && (
             <Dropdown>
               <Dropdown.Trigger>
-                <Button size="sm" variant="secondary" className="px-3 py-1 font-semibold rounded-lg text-xs">
-                  {activeCard.logoUrl && (
-                    <img alt="" src={activeCard.logoUrl} className="size-3.5 rounded shrink-0 mr-1.5" />
-                  )}
+                <Button size="sm" variant="secondary">
+                  {activeCard.logoUrl && <img alt="" src={activeCard.logoUrl} className="size-3.5 shrink-0" />}
                   {activeCard.title}
                 </Button>
               </Dropdown.Trigger>
@@ -230,7 +221,7 @@ export default function SpotlightApp() {
                       key={card.id}
                       className="flex flex-row items-center text-xs">
                       <div className="flex items-center gap-x-2">
-                        {card.logoUrl && <img alt="" src={card.logoUrl} className="size-4 rounded" />}
+                        {card.logoUrl && <img alt="" src={card.logoUrl} className="size-4" />}
                         <span>{card.title}</span>
                       </div>
                     </Dropdown.Item>
@@ -240,26 +231,21 @@ export default function SpotlightApp() {
             </Dropdown>
           )}
 
-          <Button size="sm" variant="ghost" onPress={() => spotlightChatIpc.closeSpotlight()} isIconOnly>
-            <CloseCircle className="text-muted-foreground size-5" />
-          </Button>
+          <CloseButton onPress={() => spotlightChatIpc.closeSpotlight()} />
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex flex-row flex-1 overflow-hidden bg-background">
+      <div className="flex flex-row flex-1 overflow-hidden">
         {/* Sidebar for Recents */}
-        <div className="w-[200px] border-r border-divider/20 flex flex-col shrink-0 bg-surface/30 draggable">
-          <div
-            className={
-              'flex items-center justify-between px-3 py-2 ' + 'border-b border-divider/10 bg-surface/50 notDraggable'
-            }>
-            <span className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase">Recents</span>
+        <div className="w-50 flex flex-col shrink-0 draggable bg-surface-secondary rounded-tr-2xl overflow-hidden">
+          <div className={'flex items-center justify-between px-3 py-2 bg-surface/50 draggable'}>
+            <span className="text-[8pt] font-bold text-semi-muted tracking-wider uppercase">Recents</span>
             {activeCardId === 'universal' ? (
               <Dropdown>
                 <Dropdown.Trigger>
-                  <Button size="sm" variant="ghost" className="h-6 w-6" isIconOnly>
-                    <AddCircle className="size-4 text-primary" />
+                  <Button size="sm" variant="ghost" className="size-7 notDraggable" isIconOnly>
+                    <Plus className="size-3.5" />
                   </Button>
                 </Dropdown.Trigger>
                 <Dropdown.Popover placement="bottom end" className="min-w-44 bg-surface-secondary border-border">
@@ -281,39 +267,43 @@ export default function SpotlightApp() {
                 </Dropdown.Popover>
               </Dropdown>
             ) : (
-              <Button size="sm" variant="ghost" className="h-6 w-6" onPress={() => handleNewChat()} isIconOnly>
-                <AddCircle className="size-4 text-primary" />
+              <Button
+                size="sm"
+                variant="ghost"
+                className="notDraggable size-7"
+                onPress={() => handleNewChat()}
+                isIconOnly>
+                <Plus className="size-3.5" />
               </Button>
             )}
           </div>
 
-          <ScrollShadow className="flex-1 p-1.5 gap-y-1">
+          <ScrollShadow className="flex-1 py-2 px-0.5 flex flex-col gap-y-0.5">
             {isHistoryLoading ? (
-              <div className="flex items-center justify-center py-8 notDraggable">
-                <Spinner size="sm" />
+              <div className="flex items-center justify-center py-8 draggable">
+                <Spinner size="md" />
               </div>
             ) : chatHistory.length === 0 ? (
-              <div className="text-center py-8 text-xs text-muted-foreground notDraggable">No recent chats</div>
+              <div className="text-center py-8 text-xs text-semi-muted draggable">No recent chats</div>
             ) : (
               chatHistory.map((item: any) => {
                 const card = onlineCards.find(c => c.id === item.cardId);
                 return (
-                  <button
+                  <Button
                     className={
-                      'w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition-all ' +
-                      `flex flex-row items-center gap-x-2 group notDraggable ${
-                        item.active
-                          ? 'bg-primary/10 text-primary font-semibold'
-                          : 'hover:bg-content2 text-foreground/80'
-                      }`
+                      'justify-start text-xs transition-all h-7 shrink-0 rounded-xl ' +
+                      `group notDraggable ${item.active ? 'bg-accent/10 text-accent font-semibold' : ''}`
                     }
+                    size="sm"
+                    variant="ghost"
                     key={`${item.cardId}-${item.index}`}
-                    onClick={() => handleSelectThread(item.index, item.cardId)}>
+                    onPress={() => handleSelectThread(item.index, item.cardId)}
+                    fullWidth>
                     {activeCardId === 'universal' && card?.logoUrl && (
                       <img alt="" src={card.logoUrl} className="size-3.5 rounded shrink-0" />
                     )}
-                    <span className="truncate flex-1 pr-1">{item.title || 'Untitled Chat'}</span>
-                  </button>
+                    {item.title || 'Untitled Chat'}
+                  </Button>
                 );
               })
             )}
@@ -321,39 +311,37 @@ export default function SpotlightApp() {
         </div>
 
         {/* Chat History View */}
-        <div className="flex-1 flex flex-col overflow-hidden relative">
-          {isLoginRequired ? (
-            <div className="flex flex-col items-center justify-center flex-1 p-8 text-center bg-background">
-              <div className="p-4 rounded-full bg-primary/5 mb-4">
-                <UserId className="size-10 text-primary" />
+        <div className="flex-1 flex flex-col overflow-hidden relative draggable">
+          {!isLoginRequired ? (
+            <div className="flex flex-col items-center justify-center flex-1 p-8 text-center">
+              <div className="p-4 rounded-full bg-accent/5 mb-4">
+                <UserId className="size-10 text-accent" />
               </div>
               <h3 className="text-sm font-semibold mb-1">Authentication Required</h3>
-              <p className="text-xs text-muted-foreground max-w-xs mb-4">
+              <p className="text-xs text-semi-muted max-w-xs mb-4">
                 Please log in to your {currentCard?.title || 'AI'} account in LynxHub to enable chat access.
               </p>
-              <Button size="sm" variant="primary" className="font-semibold" onPress={handleOpenLogin}>
+              <Button size="sm" variant="primary" onPress={handleOpenLogin} className="font-semibold notDraggable">
                 Login in LynxHub
-                <ArrowRight className="size-3.5 ml-1" />
+                <ArrowRight />
               </Button>
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center flex-1 text-center p-8">
-              <span className="text-xs text-muted-foreground">
-                Ask {currentCard?.title || 'AI'} anything to get started
-              </span>
+            <div className="flex flex-col items-center justify-center flex-1 text-center p-8 draggable">
+              <span className="text-xs text-semi-muted">Ask {currentCard?.title || 'AI'} anything to get started</span>
             </div>
           ) : (
             <ScrollShadow className="flex-1 p-4 flex flex-col gap-y-3">
               {messages.map((msg, index) => (
                 <div
-                  className={`flex flex-col max-w-[85%] ${
+                  className={`flex flex-col max-w-[85%] notDraggable select-text ${
                     msg.sender === 'user' ? 'self-end items-end' : 'self-start items-start'
                   }`}
                   key={index}>
                   <div
                     className={`px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
                       msg.sender === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-tr-none'
+                        ? 'bg-accent text-accent-foreground rounded-tr-none'
                         : 'bg-content2 text-foreground border border-divider/10 rounded-tl-none'
                     }`}>
                     {msg.text}
@@ -368,7 +356,7 @@ export default function SpotlightApp() {
                       'border-divider/10 rounded-tl-none flex items-center gap-x-2'
                     }>
                     <Spinner size="sm" color="current" />
-                    <span className="text-[10px] text-muted-foreground">Thinking...</span>
+                    <span className="text-[10px] text-semi-muted">Thinking...</span>
                   </div>
                 </div>
               )}

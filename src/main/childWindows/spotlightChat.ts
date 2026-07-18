@@ -70,9 +70,10 @@ export function RegisterSpotlightHotkey() {
 const WINDOW_CONFIG: BrowserWindowConstructorOptions = {
   frame: false,
   show: false,
-  height: 480,
-  width: 680,
-  resizable: false,
+  height: 577,
+  width: 977,
+  minHeight: 480,
+  minWidth: 680,
   maximizable: false,
   minimizable: false,
   skipTaskbar: true,
@@ -93,8 +94,8 @@ function createSpotlightWindow() {
   const activeDisplay = screen.getDisplayNearestPoint(cursorPos);
   const {x, y, width, height} = activeDisplay.bounds;
 
-  const winWidth = 680;
-  const winHeight = 480;
+  const winWidth = 977;
+  const winHeight = 577;
   const winX = Math.round(x + (width - winWidth) / 2);
   const winY = Math.round(y + (height - winHeight) / 2);
 
@@ -116,9 +117,6 @@ function setupWindowListeners(window: BrowserWindow) {
   window.once('ready-to-show', () => {
     window.show();
     window.focus();
-    if (is.dev) {
-      window.webContents.openDevTools({mode: 'detach'});
-    }
   });
 
   window.on('closed', () => {

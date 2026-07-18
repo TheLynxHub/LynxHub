@@ -1,4 +1,4 @@
-import '@lynx_shared/styles.css';
+import '@lynx/index.css';
 
 import {createRoot} from 'react-dom/client';
 
