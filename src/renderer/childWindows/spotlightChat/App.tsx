@@ -1,4 +1,4 @@
-import {Button, CloseButton, Dropdown, Input, ScrollShadow, Spinner} from '@heroui/react';
+import {Button, CloseButton, Dropdown, InputGroup, ScrollShadow, Spinner} from '@heroui/react';
 import ToastProviders from '@lynx/layouts/ToastProviders';
 import {ChatBubble, TypingIndicatorBubble} from '@lynx_shared/components/ChatBubble';
 import spotlightChatIpc from '@lynx_shared/ipc/spotlightChat';
@@ -190,8 +190,9 @@ export default function SpotlightApp() {
   }, [inputText, currentCardId, isSending, isGenerating]);
 
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
         handleSend();
       }
     },
@@ -230,20 +231,21 @@ export default function SpotlightApp() {
       <div className={'flex flex-row items-center justify-between py-3 px-4 gap-x-2 draggable'}>
         <div className="flex flex-row items-center flex-1 gap-x-2">
           <ChatRound className="text-semi-muted size-5 shrink-0" />
-          <Input
-            placeholder={
-              isLoginRequired
-                ? `Login required for ${currentCard?.title || 'AI'}`
-                : `Message ${currentCard?.title || 'AI'}...`
-            }
-            value={inputText}
-            variant="secondary"
-            aria-label="chat_input"
-            onKeyDown={handleKeyDown}
-            className="flex-1 notDraggable"
-            disabled={isLoginRequired || isSending}
-            onChange={e => setInputText(e.target.value)}
-          />
+          <InputGroup variant="secondary" className=" rounded-2xl notDraggable" fullWidth>
+            <InputGroup.TextArea
+              placeholder={
+                isLoginRequired
+                  ? `Login required for ${currentCard?.title || 'AI'}`
+                  : `Message ${currentCard?.title || 'AI'}...`
+              }
+              rows={1}
+              value={inputText}
+              className="max-h-32"
+              onKeyDown={handleKeyDown}
+              onChange={e => setInputText(e.target.value)}
+              autoFocus
+            />
+          </InputGroup>
         </div>
 
         <div className="flex flex-row items-center gap-x-2 notDraggable">

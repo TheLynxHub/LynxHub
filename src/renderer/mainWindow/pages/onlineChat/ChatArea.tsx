@@ -207,7 +207,7 @@ const ChatArea = memo(
                 rows={1}
                 ref={textareaRef}
                 value={inputText}
-                className="max-h-32 "
+                className="max-h-32"
                 onKeyDown={handleKeyDown}
                 onChange={e => setInputText(e.target.value)}
               />
