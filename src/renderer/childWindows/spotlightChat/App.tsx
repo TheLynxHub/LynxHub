@@ -251,11 +251,17 @@ export default function SpotlightApp() {
             <Dropdown>
               <Dropdown.Trigger>
                 <Button size="sm" variant="secondary">
-                  {activeCard.logoUrl && <img alt="" src={activeCard.logoUrl} className="size-3.5 shrink-0" />}
+                  {activeCard.logoUrl ? (
+                    <img alt="" className="size-4" src={activeCard.logoUrl} />
+                  ) : activeCard.title === 'Universal Chat' ? (
+                    <ChatRound className="size-4" />
+                  ) : (
+                    <div className="hidden" />
+                  )}
                   {activeCard.title}
                 </Button>
               </Dropdown.Trigger>
-              <Dropdown.Popover>
+              <Dropdown.Popover className="bg-surface-secondary notDraggable">
                 <Dropdown.Menu aria-label="AI Selector">
                   {onlineCards.map(card => (
                     <Dropdown.Item
@@ -266,8 +272,14 @@ export default function SpotlightApp() {
                       key={card.id}
                       className="flex flex-row items-center text-xs">
                       <div className="flex items-center gap-x-2">
-                        {card.logoUrl && <img alt="" src={card.logoUrl} className="size-4" />}
-                        <span>{card.title}</span>
+                        {card.logoUrl ? (
+                          <img alt="" src={card.logoUrl} className="size-4" />
+                        ) : card.title === 'Universal Chat' ? (
+                          <ChatRound className="size-4" />
+                        ) : (
+                          <div className="hidden" />
+                        )}
+                        {card.title}
                       </div>
                     </Dropdown.Item>
                   ))}
