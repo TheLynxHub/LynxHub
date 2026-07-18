@@ -19,7 +19,7 @@ export default function SpotlightShowTaskbar() {
     [dispatch],
   );
 
-  const titleText = 'Show Spotlight in Taskbar';
+  const titleText = 'Show in Taskbar';
   const descriptionText = 'Show the Spotlight Chat window in the system taskbar when visible.';
 
   return (

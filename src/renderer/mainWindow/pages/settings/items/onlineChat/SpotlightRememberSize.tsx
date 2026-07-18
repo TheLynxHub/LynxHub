@@ -19,7 +19,7 @@ export default function SpotlightRememberSize() {
     [dispatch],
   );
 
-  const titleText = 'Remember Spotlight Size';
+  const titleText = 'Remember Size';
   const descriptionText = 'Remember the size of the Spotlight Chat window and open it at the same size next time.';
 
   return (

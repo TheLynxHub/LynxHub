@@ -1,5 +1,5 @@
 import SettingsSection from '@lynx/components/SettingsSection';
-import {ChatSquare} from '@solar-icons/react-perf/BoldDuotone';
+import {WindowFrame} from '@solar-icons/react-perf/BoldDuotone';
 
 import SpotlightAlwaysOnTop from './SpotlightAlwaysOnTop';
 import SpotlightRememberPosition from './SpotlightRememberPosition';
@@ -14,11 +14,13 @@ export const SettingsOnlineChatId = 'settings_online_chat_elem';
  */
 export default function SettingsOnlineChat() {
   return (
-    <SettingsSection title="Online Chat" id={SettingsOnlineChatId} icon={<ChatSquare className="size-5" />}>
-      <SpotlightAlwaysOnTop />
-      <SpotlightShowTaskbar />
-      <SpotlightRememberSize />
-      <SpotlightRememberPosition />
-    </SettingsSection>
+    <>
+      <SettingsSection title="Spotlight" id={SettingsOnlineChatId} icon={<WindowFrame className="size-5" />}>
+        <SpotlightAlwaysOnTop />
+        <SpotlightShowTaskbar />
+        <SpotlightRememberSize />
+        <SpotlightRememberPosition />
+      </SettingsSection>
+    </>
   );
 }

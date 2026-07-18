@@ -19,7 +19,7 @@ export default function SpotlightAlwaysOnTop() {
     [dispatch],
   );
 
-  const titleText = 'Spotlight Always on Top';
+  const titleText = 'Always on Top';
   const descriptionText = 'Keep the Spotlight Chat window float above other windows when visible.';
 
   return (

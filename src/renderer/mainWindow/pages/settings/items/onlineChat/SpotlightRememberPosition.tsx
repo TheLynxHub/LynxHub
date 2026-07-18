@@ -19,7 +19,7 @@ export default function SpotlightRememberPosition() {
     [dispatch],
   );
 
-  const titleText = 'Remember Spotlight Position';
+  const titleText = 'Remember Position';
   const descriptionText =
     'Remember the position of the Spotlight Chat window and open it at the same location. ' +
     'If disabled, always opens centered on the active display.';
