@@ -85,24 +85,68 @@ const WINDOW_CONFIG: BrowserWindowConstructorOptions = {
   },
 };
 
+const DEFAULT_WIDTH = 977;
+const DEFAULT_HEIGHT = 577;
+
+function saveSpotlightBounds(win: BrowserWindow) {
+  if (!win || win.isDestroyed()) return;
+  const storageManager = classHolder.storageManager;
+  const appConfig = storageManager?.getData('app');
+  if (!appConfig) return;
+
+  const bounds = win.getBounds();
+  const update: any = {};
+
+  if (appConfig.spotlightRememberSize) {
+    update.spotlightLastSize = {
+      width: bounds.width,
+      height: bounds.height,
+    };
+  }
+
+  if (appConfig.spotlightRememberPosition) {
+    update.spotlightLastPosition = {
+      x: bounds.x,
+      y: bounds.y,
+    };
+  }
+
+  if (Object.keys(update).length > 0) {
+    storageManager.updateData('app', update);
+  }
+}
+
 function createSpotlightWindow() {
   const storageManager = classHolder.storageManager;
-  const spotlightAlwaysOnTop = storageManager?.getData('app')?.spotlightAlwaysOnTop ?? true;
+  const appConfig = storageManager?.getData('app');
+  const spotlightAlwaysOnTop = appConfig?.spotlightAlwaysOnTop ?? true;
+  const spotlightShowTaskbar = appConfig?.spotlightShowTaskbar ?? false;
+
   const win = new BrowserWindow({
     ...WINDOW_CONFIG,
     alwaysOnTop: spotlightAlwaysOnTop,
+    skipTaskbar: !spotlightShowTaskbar,
   });
   classHolder.spotlightChatWindow = win;
 
-  // Center it on active display
+  // Center it on active display OR load position/size
   const cursorPos = screen.getCursorScreenPoint();
   const activeDisplay = screen.getDisplayNearestPoint(cursorPos);
   const {x, y, width, height} = activeDisplay.bounds;
 
-  const winWidth = 977;
-  const winHeight = 577;
-  const winX = Math.round(x + (width - winWidth) / 2);
-  const winY = Math.round(y + (height - winHeight) / 2);
+  let winWidth = DEFAULT_WIDTH;
+  let winHeight = DEFAULT_HEIGHT;
+  if (appConfig?.spotlightRememberSize && appConfig?.spotlightLastSize) {
+    winWidth = appConfig.spotlightLastSize.width;
+    winHeight = appConfig.spotlightLastSize.height;
+  }
+
+  let winX = Math.round(x + (width - winWidth) / 2);
+  let winY = Math.round(y + (height - winHeight) / 2);
+  if (appConfig?.spotlightRememberPosition && appConfig?.spotlightLastPosition) {
+    winX = appConfig.spotlightLastPosition.x;
+    winY = appConfig.spotlightLastPosition.y;
+  }
 
   win.setBounds({x: winX, y: winY, width: winWidth, height: winHeight});
 
@@ -124,6 +168,10 @@ function setupWindowListeners(window: BrowserWindow) {
     window.focus();
   });
 
+  window.on('close', () => {
+    saveSpotlightBounds(window);
+  });
+
   window.on('closed', () => {
     classHolder.spotlightChatWindow = undefined;
   });
@@ -137,17 +185,39 @@ export function ToggleSpotlightWindow() {
   }
 
   if (win.isVisible()) {
+    saveSpotlightBounds(win);
     win.hide();
   } else {
-    // Re-center on active monitor
+    const storageManager = classHolder.storageManager;
+    const appConfig = storageManager?.getData('app');
+
+    // Re-center on active monitor OR restore last bounds
     const cursorPos = screen.getCursorScreenPoint();
     const activeDisplay = screen.getDisplayNearestPoint(cursorPos);
     const {x, y, width, height} = activeDisplay.bounds;
 
-    const winWidth = 680;
-    const winHeight = 480;
-    const winX = Math.round(x + (width - winWidth) / 2);
-    const winY = Math.round(y + (height - winHeight) / 2);
+    const currentBounds = win.getBounds();
+    let winWidth = currentBounds.width;
+    let winHeight = currentBounds.height;
+
+    if (appConfig?.spotlightRememberSize && appConfig?.spotlightLastSize) {
+      winWidth = appConfig.spotlightLastSize.width;
+      winHeight = appConfig.spotlightLastSize.height;
+    } else if (!appConfig?.spotlightRememberSize) {
+      winWidth = DEFAULT_WIDTH;
+      winHeight = DEFAULT_HEIGHT;
+    }
+
+    let winX: number;
+    let winY: number;
+
+    if (appConfig?.spotlightRememberPosition && appConfig?.spotlightLastPosition) {
+      winX = appConfig.spotlightLastPosition.x;
+      winY = appConfig.spotlightLastPosition.y;
+    } else {
+      winX = Math.round(x + (width - winWidth) / 2);
+      winY = Math.round(y + (height - winHeight) / 2);
+    }
 
     win.setBounds({x: winX, y: winY, width: winWidth, height: winHeight});
     win.show();

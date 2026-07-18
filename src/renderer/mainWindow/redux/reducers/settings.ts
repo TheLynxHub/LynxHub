@@ -29,6 +29,9 @@ const initialState: SettingState = {
   searchWords: [],
   selectedSection: '',
   spotlightAlwaysOnTop: true,
+  spotlightShowTaskbar: false,
+  spotlightRememberSize: false,
+  spotlightRememberPosition: false,
 };
 
 const settingsSlice = createSlice({

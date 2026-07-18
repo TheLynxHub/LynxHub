@@ -52,6 +52,12 @@ export default function listenStorage() {
           win.setAlwaysOnTop((updateData as any).spotlightAlwaysOnTop);
         }
       }
+      if ((updateData as any).spotlightShowTaskbar !== undefined) {
+        const win = classHolder.spotlightChatWindow;
+        if (win && !win.isDestroyed()) {
+          win.setSkipTaskbar(!(updateData as any).spotlightShowTaskbar);
+        }
+      }
     }
     return res;
   });

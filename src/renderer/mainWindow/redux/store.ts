@@ -128,6 +128,9 @@ const buildPreloadedState = (): PreloadState | undefined => {
       searchWords: [],
       selectedSection: '',
       spotlightAlwaysOnTop: storage.app.spotlightAlwaysOnTop ?? true,
+      spotlightShowTaskbar: storage.app.spotlightShowTaskbar ?? false,
+      spotlightRememberSize: storage.app.spotlightRememberSize ?? false,
+      spotlightRememberPosition: storage.app.spotlightRememberPosition ?? false,
     },
     terminal: storage.terminal,
     volume: {

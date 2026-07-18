@@ -84,6 +84,9 @@ export type SettingState = {
   searchWords: string[];
   selectedSection: string;
   spotlightAlwaysOnTop: boolean;
+  spotlightShowTaskbar: boolean;
+  spotlightRememberSize: boolean;
+  spotlightRememberPosition: boolean;
 };
 
 export type TerminalState = StorageTypes['terminal'];

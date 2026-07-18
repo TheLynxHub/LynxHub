@@ -87,6 +87,11 @@ class BaseStorage {
       imageCacheIntervalDays: 30,
       imageCacheMaxSize: 536870912,
       spotlightAlwaysOnTop: true,
+      spotlightShowTaskbar: false,
+      spotlightRememberSize: false,
+      spotlightRememberPosition: false,
+      spotlightLastSize: undefined,
+      spotlightLastPosition: undefined,
     },
     terminal: {
       outputColor: false,

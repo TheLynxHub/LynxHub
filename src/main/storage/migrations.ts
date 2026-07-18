@@ -394,8 +394,19 @@ export class StorageMigrationManager {
   }
 
   private migrate_1_10() {
-    if (this.storage.data.app && this.storage.data.app.spotlightAlwaysOnTop === undefined) {
-      this.storage.data.app.spotlightAlwaysOnTop = true;
+    if (this.storage.data.app) {
+      if (this.storage.data.app.spotlightAlwaysOnTop === undefined) {
+        this.storage.data.app.spotlightAlwaysOnTop = true;
+      }
+      if (this.storage.data.app.spotlightShowTaskbar === undefined) {
+        this.storage.data.app.spotlightShowTaskbar = false;
+      }
+      if (this.storage.data.app.spotlightRememberSize === undefined) {
+        this.storage.data.app.spotlightRememberSize = false;
+      }
+      if (this.storage.data.app.spotlightRememberPosition === undefined) {
+        this.storage.data.app.spotlightRememberPosition = false;
+      }
     }
   }
 }

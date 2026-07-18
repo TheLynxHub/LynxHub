@@ -107,6 +107,11 @@ export type AppConfigStorage = {
   imageCacheIntervalDays: number;
   imageCacheMaxSize: number;
   spotlightAlwaysOnTop: boolean;
+  spotlightShowTaskbar: boolean;
+  spotlightRememberSize: boolean;
+  spotlightRememberPosition: boolean;
+  spotlightLastSize?: {width: number; height: number};
+  spotlightLastPosition?: {x: number; y: number};
 };
 
 /**
