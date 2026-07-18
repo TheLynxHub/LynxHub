@@ -10,6 +10,7 @@
 
 [![GitHub Release][github-release-shield]](https://github.com/KindaBrazy/LynxHub/releases)
 [![GitHub Release Date][github-release-date-shield]](https://github.com/KindaBrazy/LynxHub/releases)
+[![GitHub Downloads (all assets, all releases)][github-downloads-shield]](https://github.com/KindaBrazy/LynxHub/releases)
 
 [![Website][website-shield]](https://lynxhub.app)
 [![Docs][docs-shield]](https://docs.lynxhub.app)
@@ -89,7 +90,7 @@ LynxHub consolidates your AI workflow into a single, unified workspace.
 ### 2. Download LynxHub
 
 | Channel          | Version                                                         | Release Date |
-| ---------------- |-----------------------------------------------------------------|--------------|
+| ---------------- | --------------------------------------------------------------- | ------------ |
 | **Insider**      | [V3.5.6](https://www.patreon.com/collection/1557749)            | 2026-07-13   |
 | **Early Access** | [V3.5.6](https://www.patreon.com/collection/714004)             | 2026-07-13   |
 | **Public**       | [V3.5.5](https://github.com/KindaBrazy/LynxHub/releases/latest) | 2026-07-18   |
