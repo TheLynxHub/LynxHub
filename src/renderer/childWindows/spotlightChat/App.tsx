@@ -1,4 +1,6 @@
 import {Button, CloseButton, Dropdown, Input, ScrollShadow, Spinner} from '@heroui/react';
+import ToastProviders from '@lynx/layouts/ToastProviders';
+import {ChatBubble, TypingIndicatorBubble} from '@lynx_shared/components/ChatBubble';
 import spotlightChatIpc from '@lynx_shared/ipc/spotlightChat';
 import storageIpc from '@lynx_shared/ipc/storage';
 import {ArrowRight, ChatRound, UserId} from '@solar-icons/react-perf/BoldDuotone';
@@ -278,7 +280,7 @@ export default function SpotlightApp() {
             )}
           </div>
 
-          <ScrollShadow className="flex-1 py-2 px-0.5 flex flex-col gap-y-0.5">
+          <ScrollShadow className="flex-1 py-2 px-0.5">
             {isHistoryLoading ? (
               <div className="flex items-center justify-center py-8 draggable">
                 <Spinner size="md" />
@@ -286,26 +288,28 @@ export default function SpotlightApp() {
             ) : chatHistory.length === 0 ? (
               <div className="text-center py-8 text-xs text-semi-muted draggable">No recent chats</div>
             ) : (
-              chatHistory.map((item: any) => {
-                const card = onlineCards.find(c => c.id === item.cardId);
-                return (
-                  <Button
-                    className={
-                      'justify-start text-xs transition-all h-7 shrink-0 rounded-xl ' +
-                      `group notDraggable ${item.active ? 'bg-accent/10 text-accent font-semibold' : ''}`
-                    }
-                    size="sm"
-                    variant="ghost"
-                    key={`${item.cardId}-${item.index}`}
-                    onPress={() => handleSelectThread(item.index, item.cardId)}
-                    fullWidth>
-                    {activeCardId === 'universal' && card?.logoUrl && (
-                      <img alt="" src={card.logoUrl} className="size-3.5 rounded shrink-0" />
-                    )}
-                    {item.title || 'Untitled Chat'}
-                  </Button>
-                );
-              })
+              <div className="notDraggable size-full flex flex-col gap-y-0.5">
+                {chatHistory.map((item: any) => {
+                  const card = onlineCards.find(c => c.id === item.cardId);
+                  return (
+                    <Button
+                      className={
+                        'justify-start text-xs transition-all h-7 shrink-0 rounded-xl ' +
+                        `group notDraggable ${item.active ? 'bg-accent/10 text-accent font-semibold' : ''}`
+                      }
+                      size="sm"
+                      variant="ghost"
+                      key={`${item.cardId}-${item.index}`}
+                      onPress={() => handleSelectThread(item.index, item.cardId)}
+                      fullWidth>
+                      {activeCardId === 'universal' && card?.logoUrl && (
+                        <img alt="" src={card.logoUrl} className="size-3.5 rounded shrink-0" />
+                      )}
+                      {item.title || 'Untitled Chat'}
+                    </Button>
+                  );
+                })}
+              </div>
             )}
           </ScrollShadow>
         </div>
@@ -331,38 +335,24 @@ export default function SpotlightApp() {
               <span className="text-xs text-semi-muted">Ask {currentCard?.title || 'AI'} anything to get started</span>
             </div>
           ) : (
-            <ScrollShadow className="flex-1 p-4 flex flex-col gap-y-3">
-              {messages.map((msg, index) => (
-                <div
-                  className={`flex flex-col max-w-[85%] notDraggable select-text ${
-                    msg.sender === 'user' ? 'self-end items-end' : 'self-start items-start'
-                  }`}
-                  key={index}>
-                  <div
-                    className={`px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
-                      msg.sender === 'user' ? 'bg-surface-secondary rounded-tr-md' : 'bg-content2 rounded-tl-md'
-                    }`}>
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-              {isGenerating && (
-                <div className="flex flex-col self-start items-start max-w-[85%]">
-                  <div
-                    className={
-                      'px-3 py-2 rounded-2xl bg-content2 text-foreground border ' +
-                      'border-divider/10 rounded-tl-none flex items-center gap-x-2'
-                    }>
-                    <Spinner size="sm" color="current" />
-                    <span className="text-[10px] text-semi-muted">Thinking...</span>
-                  </div>
-                </div>
-              )}
+            <ScrollShadow className="flex-1 p-4 notDraggable flex flex-col gap-y-3">
+              <div className="space-y-4 flex-1">
+                {messages.map((msg, index) => (
+                  <ChatBubble
+                    key={index}
+                    message={msg}
+                    isGenerating={isGenerating}
+                    isLast={index === messages.length - 1}
+                  />
+                ))}
+                {isGenerating && messages[messages.length - 1]?.sender === 'user' && <TypingIndicatorBubble />}
+              </div>
               <div ref={messagesEndRef} />
             </ScrollShadow>
           )}
         </div>
       </div>
+      <ToastProviders />
     </div>
   );
 }
