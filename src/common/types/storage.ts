@@ -106,6 +106,7 @@ export type AppConfigStorage = {
   lastPromoShownActiveDaysCount?: number;
   imageCacheIntervalDays: number;
   imageCacheMaxSize: number;
+  spotlightAlwaysOnTop: boolean;
 };
 
 /**

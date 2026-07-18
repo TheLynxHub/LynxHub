@@ -312,7 +312,7 @@ export default function SpotlightApp() {
 
         {/* Chat History View */}
         <div className="flex-1 flex flex-col overflow-hidden relative draggable">
-          {!isLoginRequired ? (
+          {isLoginRequired ? (
             <div className="flex flex-col items-center justify-center flex-1 p-8 text-center">
               <div className="p-4 rounded-full bg-accent/5 mb-4">
                 <UserId className="size-10 text-accent" />

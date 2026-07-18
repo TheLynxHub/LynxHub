@@ -83,6 +83,7 @@ export type SettingState = {
   searchValue: string;
   searchWords: string[];
   selectedSection: string;
+  spotlightAlwaysOnTop: boolean;
 };
 
 export type TerminalState = StorageTypes['terminal'];

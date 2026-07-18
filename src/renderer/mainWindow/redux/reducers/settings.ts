@@ -28,6 +28,7 @@ const initialState: SettingState = {
   searchValue: '',
   searchWords: [],
   selectedSection: '',
+  spotlightAlwaysOnTop: true,
 };
 
 const settingsSlice = createSlice({

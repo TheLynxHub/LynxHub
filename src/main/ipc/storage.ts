@@ -40,10 +40,18 @@ export default function listenStorage() {
   // Updates storage data partially
   storageIpc.handle.update((key, updateData) => {
     const res = storageManager.updateData(key, updateData);
-    if (key === 'app' && (updateData as any).hotkeys) {
-      import('../childWindows/spotlightChat').then(({RegisterSpotlightHotkey}) => {
-        RegisterSpotlightHotkey();
-      });
+    if (key === 'app') {
+      if ((updateData as any).hotkeys) {
+        import('../childWindows/spotlightChat').then(({RegisterSpotlightHotkey}) => {
+          RegisterSpotlightHotkey();
+        });
+      }
+      if ((updateData as any).spotlightAlwaysOnTop !== undefined) {
+        const win = classHolder.spotlightChatWindow;
+        if (win && !win.isDestroyed()) {
+          win.setAlwaysOnTop((updateData as any).spotlightAlwaysOnTop);
+        }
+      }
     }
     return res;
   });

@@ -5,6 +5,7 @@ import {Terminal_Icon} from '@lynx_assets/icons';
 import {SettingPage_Icon} from '@lynx_assets/icons/pages';
 import {
   Card as CardIcon,
+  ChatSquare,
   Database,
   Earth,
   Keyboard,
@@ -76,6 +77,11 @@ const groupSections: GroupProps[] = [
         title: 'Browser',
         icon: <Earth className="size-4 shrink-0" />,
         elementId: settingsSectionId.SettingsBrowserId,
+      },
+      {
+        title: 'Online Chat',
+        icon: <ChatSquare className="size-4 shrink-0" />,
+        elementId: settingsSectionId.SettingsOnlineChatId,
       },
       {
         title: 'Hotkeys',

@@ -86,7 +86,12 @@ const WINDOW_CONFIG: BrowserWindowConstructorOptions = {
 };
 
 function createSpotlightWindow() {
-  const win = new BrowserWindow({...WINDOW_CONFIG});
+  const storageManager = classHolder.storageManager;
+  const spotlightAlwaysOnTop = storageManager?.getData('app')?.spotlightAlwaysOnTop ?? true;
+  const win = new BrowserWindow({
+    ...WINDOW_CONFIG,
+    alwaysOnTop: spotlightAlwaysOnTop,
+  });
   classHolder.spotlightChatWindow = win;
 
   // Center it on active display

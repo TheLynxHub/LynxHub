@@ -49,6 +49,7 @@ export class StorageMigrationManager {
     [1.07, () => this.migrate_1_07()],
     [1.08, () => this.migrate_1_08()],
     [1.09, () => this.migrate_1_09()],
+    [1.1, () => this.migrate_1_10()],
   ]);
 
   constructor(
@@ -390,5 +391,11 @@ export class StorageMigrationManager {
 
   private migrate_1_09() {
     this.mergeDefaultHotkeys();
+  }
+
+  private migrate_1_10() {
+    if (this.storage.data.app && this.storage.data.app.spotlightAlwaysOnTop === undefined) {
+      this.storage.data.app.spotlightAlwaysOnTop = true;
+    }
   }
 }
