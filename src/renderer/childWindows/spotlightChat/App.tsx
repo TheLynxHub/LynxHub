@@ -340,9 +340,7 @@ export default function SpotlightApp() {
                   key={index}>
                   <div
                     className={`px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
-                      msg.sender === 'user'
-                        ? 'bg-accent text-accent-foreground rounded-tr-none'
-                        : 'bg-content2 text-foreground border border-divider/10 rounded-tl-none'
+                      msg.sender === 'user' ? 'bg-surface-secondary rounded-tr-md' : 'bg-content2 rounded-tl-md'
                     }`}>
                     {msg.text}
                   </div>
