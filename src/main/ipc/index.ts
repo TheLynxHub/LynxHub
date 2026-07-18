@@ -8,6 +8,7 @@ import listenGit from './gitIpc';
 import listenModules, {listenModuleApi} from './plugins/modules';
 import listenPlugins from './plugins/plugins';
 import listenPty from './pty';
+import listenSpotlightChat from './spotlightChat';
 import listenStatics from './statics';
 import listenStorage, {listenStorageUtils} from './storage';
 import listenUserImages from './userImages';
@@ -39,6 +40,7 @@ export async function listenToIpcChannels() {
   listenStorage();
   listenStorageUtils();
   listenActions();
+  listenSpotlightChat();
 
   await listenApplication();
   listenFiles();

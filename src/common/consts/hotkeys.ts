@@ -28,13 +28,18 @@ export const Hotkey_Names = {
   terminalQuick4: 'terminalQuick4',
   terminalQuick5: 'terminalQuick5',
   terminalQuick6: 'terminalQuick6',
+  spotlightChat: 'spotlightChat',
 } as const;
 
 /**
  * Grouping of hotkeys for display in settings/help.
  */
 export const Hotkey_Sections: readonly {kind: string; title: string; includes: string[]}[] = [
-  {kind: 'app', title: 'Application', includes: [Hotkey_Names.fullscreen, Hotkey_Names.toggleNav]},
+  {
+    kind: 'app',
+    title: 'Application',
+    includes: [Hotkey_Names.fullscreen, Hotkey_Names.toggleNav, Hotkey_Names.spotlightChat],
+  },
   {
     kind: 'tab',
     title: 'Tab',
@@ -95,6 +100,7 @@ export const Hotkey_Titles = {
   terminalQuick4: 'Terminal Quick Command 4',
   terminalQuick5: 'Terminal Quick Command 5',
   terminalQuick6: 'Terminal Quick Command 6',
+  spotlightChat: 'Toggle Spotlight Chat',
 } as const;
 
 /**
@@ -123,6 +129,7 @@ export const Hotkey_Desc = {
   terminalQuick4: 'Executes the fourth configured terminal quick command in the active terminal.',
   terminalQuick5: 'Executes the fifth configured terminal quick command in the active terminal.',
   terminalQuick6: 'Executes the sixth configured terminal quick command in the active terminal.',
+  spotlightChat: 'Show/hide the spotlight quick online chat window.',
 } as const;
 
 /**
@@ -131,6 +138,14 @@ export const Hotkey_Desc = {
  */
 export const Get_Default_Hotkeys = (): LynxHotkey[] => {
   return [
+    {
+      name: Hotkey_Names.spotlightChat,
+      meta: false,
+      alt: true,
+      control: false,
+      shift: false,
+      key: ' ', // Alt+Space
+    },
     {
       name: Hotkey_Names.fullscreen,
       meta: false,

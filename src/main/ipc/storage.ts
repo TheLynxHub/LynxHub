@@ -38,7 +38,15 @@ export default function listenStorage() {
   storageIpc.handle.getAll(() => storageManager.getAll());
 
   // Updates storage data partially
-  storageIpc.handle.update((key, updateData) => storageManager.updateData(key, updateData));
+  storageIpc.handle.update((key, updateData) => {
+    const res = storageManager.updateData(key, updateData);
+    if (key === 'app' && (updateData as any).hotkeys) {
+      import('../childWindows/spotlightChat').then(({RegisterSpotlightHotkey}) => {
+        RegisterSpotlightHotkey();
+      });
+    }
+    return res;
+  });
 
   // Clears all storage data
   storageIpc.handle.clear(() => storageManager.clearStorage());

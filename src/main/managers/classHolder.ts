@@ -43,6 +43,7 @@ class ClassHolder {
   private _shareScreenManager?: ShareScreenManager;
 
   private _toastWindow?: BrowserWindow;
+  private _spotlightChatWindow?: BrowserWindow;
 
   private readonly _appStartTime: number;
   private _isOnline: boolean = true;
@@ -194,6 +195,9 @@ class ClassHolder {
   set toastWindow(value: ClassHolder['_toastWindow']) {
     this._toastWindow = value;
   }
+  set spotlightChatWindow(value: ClassHolder['_spotlightChatWindow']) {
+    this._spotlightChatWindow = value;
+  }
 
   // ----------------> Getters
   get appStartTime(): number {
@@ -240,6 +244,9 @@ class ClassHolder {
   }
   get toastWindow() {
     return this._toastWindow;
+  }
+  get spotlightChatWindow() {
+    return this._spotlightChatWindow;
   }
 }
 
