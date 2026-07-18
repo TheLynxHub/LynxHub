@@ -13,6 +13,10 @@ export default function SpotlightApp() {
   const [inputText, setInputText] = useState('');
   const [syncedState, setSyncedState] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const prevMessagesCount = useRef<number>(0);
+  const isNearBottomRef = useRef<boolean>(true);
 
   // Sync Theme
   useEffect(() => {
@@ -135,10 +139,49 @@ export default function SpotlightApp() {
   const isHistoryLoading = moduleState?.isHistoryLoading || false;
   const isSending = moduleState?.isSending || false;
 
-  // Auto-scroll messages to bottom
+  const scrollToBottom = useCallback(() => {
+    const el = scrollRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    } else {
+      messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
+    }
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (el) {
+      const {scrollTop, scrollHeight, clientHeight} = el;
+      // User is near bottom if scroll position is within 100px of maximum
+      isNearBottomRef.current = scrollTop + clientHeight >= scrollHeight - 100;
+    }
+  }, []);
+
+  // Monitor size changes to auto-scroll if user is already near bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
-  }, [messages]);
+    const scrollEl = scrollRef.current;
+    const contentEl = contentRef.current;
+    if (!scrollEl || !contentEl) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (isNearBottomRef.current) {
+        scrollEl.scrollTop = scrollEl.scrollHeight;
+      }
+    });
+    resizeObserver.observe(contentEl);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // Auto-scroll on new message added
+  useEffect(() => {
+    if (messages.length > prevMessagesCount.current) {
+      scrollToBottom();
+    }
+    prevMessagesCount.current = messages.length;
+  }, [messages, scrollToBottom]);
 
   const handleSend = useCallback(() => {
     if (!inputText.trim() || isSending || isGenerating || !currentCardId) return;
@@ -335,19 +378,24 @@ export default function SpotlightApp() {
               <span className="text-xs text-semi-muted">Ask {currentCard?.title || 'AI'} anything to get started</span>
             </div>
           ) : (
-            <ScrollShadow className="flex-1 p-4 notDraggable flex flex-col gap-y-3">
-              <div className="space-y-4 flex-1">
-                {messages.map((msg, index) => (
-                  <ChatBubble
-                    key={index}
-                    message={msg}
-                    isGenerating={isGenerating}
-                    isLast={index === messages.length - 1}
-                  />
-                ))}
-                {isGenerating && messages[messages.length - 1]?.sender === 'user' && <TypingIndicatorBubble />}
+            <ScrollShadow
+              ref={scrollRef}
+              onScroll={handleScroll}
+              className="flex-1 p-4 notDraggable flex flex-col gap-y-3">
+              <div ref={contentRef} className="flex flex-col gap-y-3 flex-1">
+                <div className="space-y-4 flex-1">
+                  {messages.map((msg, index) => (
+                    <ChatBubble
+                      key={index}
+                      message={msg}
+                      isGenerating={isGenerating}
+                      isLast={index === messages.length - 1}
+                    />
+                  ))}
+                  {isGenerating && messages[messages.length - 1]?.sender === 'user' && <TypingIndicatorBubble />}
+                </div>
+                <div ref={messagesEndRef} />
               </div>
-              <div ref={messagesEndRef} />
             </ScrollShadow>
           )}
         </div>
