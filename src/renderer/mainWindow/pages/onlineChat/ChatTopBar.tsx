@@ -28,6 +28,7 @@ interface ChatTopBarProps {
   onlineCards?: any[];
   bgChatEnabledCards?: string[];
   onSelectActiveCard?: (id: string | null) => void;
+  showBackButton?: boolean;
 }
 
 const ChatTopBar = memo(
@@ -50,6 +51,7 @@ const ChatTopBar = memo(
     onlineCards,
     bgChatEnabledCards = [],
     onSelectActiveCard,
+    showBackButton = true,
   }: ChatTopBarProps) => {
     const activeCard =
       selectedCard?.id === 'universal' ? onlineCards?.find(c => c.id === activeUniversalCardId) : selectedCard;
@@ -107,9 +109,11 @@ const ChatTopBar = memo(
           </div>
         ) : (
           <div className="flex items-center gap-x-1">
-            <Button size="sm" variant="ghost" className="shrink-0" onPress={onBackToSelect} isIconOnly>
-              <AltArrowLeft className="size-5" />
-            </Button>
+            {showBackButton && (
+              <Button size="sm" variant="ghost" className="shrink-0" onPress={onBackToSelect} isIconOnly>
+                <AltArrowLeft className="size-5" />
+              </Button>
+            )}
             <div className="flex items-center gap-x-3">
               {selectedCard.id === 'universal' ? (
                 <div className="flex items-center gap-x-2">

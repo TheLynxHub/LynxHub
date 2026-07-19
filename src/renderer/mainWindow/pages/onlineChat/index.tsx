@@ -170,6 +170,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           onCopyToClipboard={handleCopyToClipboard}
           activeUniversalCardId={activeUniversalCardId}
           onSelectActiveCard={setActiveUniversalCardId}
+          showBackButton={!tabID.startsWith('online-chat-')}
         />
         <div className="absolute inset-0 top-12! overflow-hidden flex flex-row">
           {step === 'chat' && (selectedCard?.id === 'universal' || selectedCard?.onlineConfig?.selectors?.chatItem) && (

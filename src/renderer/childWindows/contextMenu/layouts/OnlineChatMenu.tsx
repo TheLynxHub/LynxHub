@@ -53,11 +53,13 @@ const OnlineChatMenu = memo(function OnlineChatMenu() {
             icon={<Restart className="size-4" />}
             onPress={() => triggerAction('reload')}
           />
-          <ActionButton
-            title="Back to Select"
-            onPress={() => triggerAction('back')}
-            icon={<AltArrowLeft className="size-4" />}
-          />
+          {!tabID?.startsWith('online-chat-') && (
+            <ActionButton
+              title="Back to Select"
+              onPress={() => triggerAction('back')}
+              icon={<AltArrowLeft className="size-4" />}
+            />
+          )}
           <ActionButton
             onPress={() => triggerAction('toggle-webpage')}
             title={step === 'chat' ? 'View Source Webpage' : 'Show Chatting'}
