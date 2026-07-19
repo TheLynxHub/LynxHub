@@ -1,11 +1,14 @@
 import {Button, CloseButton, Dropdown, InputGroup, ScrollShadow, Spinner} from '@heroui/react';
-import ToastProviders from '@lynx/layouts/ToastProviders';
+import ToastProviders, {topToast} from '@lynx/layouts/ToastProviders';
+import {formatChatToMarkdown, formatChatToPlainText} from '@lynx/pages/onlineChat/useOnlineChat';
 import {ChatBubble, TypingIndicatorBubble} from '@lynx_shared/components/ChatBubble';
+import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
+import filesIpc from '@lynx_shared/ipc/files';
 import spotlightChatIpc from '@lynx_shared/ipc/spotlightChat';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {ArrowRight, ChatRound, UserId} from '@solar-icons/react-perf/BoldDuotone';
+import {ArrowRight, ChatRound, Copy, Earth, FileDownload, UserId} from '@solar-icons/react-perf/BoldDuotone';
 import {Plus} from 'lucide-react';
-import {KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {KeyboardEvent, MouseEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 export default function SpotlightApp() {
   const [onlineCards, setOnlineCards] = useState<any[]>([]);
@@ -17,6 +20,10 @@ export default function SpotlightApp() {
   const contentRef = useRef<HTMLDivElement>(null);
   const prevMessagesCount = useRef<number>(0);
   const isNearBottomRef = useRef<boolean>(true);
+
+  const [menuPosition, setMenuPosition] = useState<{x: number; y: number} | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [selectionText, setSelectionText] = useState('');
 
   // Sync Theme
   useEffect(() => {
@@ -219,6 +226,114 @@ export default function SpotlightApp() {
     if (currentCardId) spotlightChatIpc.openLogin(currentCardId);
   }, [currentCardId]);
 
+  const handleCopyToClipboard = useCallback(
+    async (format: 'markdown' | 'text') => {
+      if (messages.length === 0) return;
+      const formatted =
+        format === 'markdown'
+          ? formatChatToMarkdown(messages, currentCard?.title || 'AI')
+          : formatChatToPlainText(messages, currentCard?.title || 'AI');
+      try {
+        await navigator.clipboard.writeText(formatted);
+        topToast.success(`Copied chat as ${format}`, {timeout: 1500});
+      } catch (err) {
+        console.error('Failed to copy chat:', err);
+        topToast.danger('Failed to copy chat', {timeout: 2000});
+      }
+    },
+    [messages, currentCard],
+  );
+
+  const handleSaveToFile = useCallback(
+    async (format: 'markdown' | 'text') => {
+      if (messages.length === 0) return;
+      const formatted =
+        format === 'markdown'
+          ? formatChatToMarkdown(messages, currentCard?.title || 'AI')
+          : formatChatToPlainText(messages, currentCard?.title || 'AI');
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const cardName = currentCard?.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'chat';
+      const defaultFilename = `chat-${cardName}-${dateStr}.${format === 'markdown' ? 'md' : 'txt'}`;
+
+      try {
+        const result = await filesIpc.saveToFile(formatted, defaultFilename);
+        if (result) {
+          topToast.success('Saved chat successfully', {timeout: 1500});
+        }
+      } catch (err) {
+        console.error('Failed to save chat:', err);
+        topToast.danger('Failed to save chat', {timeout: 2000});
+      }
+    },
+    [messages, currentCard],
+  );
+
+  const handleContextMenu = useCallback(
+    (e: MouseEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+      const selText = window.getSelection()?.toString().trim() || '';
+
+      const hasMessages = messages.length > 0;
+      const hasNewChat = !!currentCard?.onlineConfig?.newChat || currentCardId === 'universal';
+
+      if (!selText && !hasMessages && !hasNewChat) {
+        return;
+      }
+
+      e.preventDefault();
+      setSelectionText(selText);
+      setMenuPosition({x: e.clientX, y: e.clientY});
+      setIsMenuOpen(true);
+    },
+    [messages.length, currentCard, currentCardId],
+  );
+
+  const handleMenuAction = useCallback(
+    async (key: any) => {
+      setIsMenuOpen(false);
+
+      switch (key) {
+        case 'copy-selection':
+          if (selectionText) {
+            await navigator.clipboard.writeText(selectionText);
+            topToast.success('Copied selection', {timeout: 1500});
+          }
+          break;
+        case 'search-web':
+          if (selectionText) {
+            contextMenuIpc.send.onlineChatAction('spotlight-chat', 'search-web', selectionText);
+          }
+          break;
+        case 'start-chat-with-selection':
+          if (selectionText) {
+            setInputText(selectionText);
+            handleNewChat();
+          }
+          break;
+        case 'new-chat':
+          handleNewChat();
+          break;
+        case 'copy-markdown':
+          handleCopyToClipboard('markdown');
+          break;
+        case 'copy-text':
+          handleCopyToClipboard('text');
+          break;
+        case 'save-markdown':
+          handleSaveToFile('markdown');
+          break;
+        case 'save-text':
+          handleSaveToFile('text');
+          break;
+      }
+    },
+    [selectionText, handleNewChat, handleCopyToClipboard, handleSaveToFile],
+  );
+
   const isLoginRequired = useMemo(() => {
     // If card is loaded but we have no messages and no history, they need to log in
     return isPageLoaded && messages.length === 0 && chatHistory.length === 0;
@@ -226,6 +341,7 @@ export default function SpotlightApp() {
 
   return (
     <div
+      onContextMenu={handleContextMenu}
       className={'flex flex-col h-screen w-screen bg-surface overflow-hidden select-none font-Nunito text-foreground'}>
       {/* Header bar */}
       <div className={'flex flex-row items-center justify-between py-3 px-4 gap-x-2 draggable'}>
@@ -414,6 +530,88 @@ export default function SpotlightApp() {
           )}
         </div>
       </div>
+      {menuPosition && (
+        <div
+          style={{
+            position: 'absolute',
+            left: menuPosition.x,
+            top: menuPosition.y,
+          }}
+          className="size-px pointer-events-none opacity-0">
+          <Dropdown isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <Dropdown.Trigger>
+              <button aria-label="Context Menu Trigger" className="pointer-events-none size-px" />
+            </Dropdown.Trigger>
+            <Dropdown.Popover className="bg-surface-secondary border-border min-w-56 notDraggable">
+              <Dropdown.Menu onAction={handleMenuAction} aria-label="Chat Context Menu">
+                {selectionText ? (
+                  <Dropdown.Section>
+                    <Dropdown.Item id="copy-selection" textValue="Copy Selection">
+                      <div className="flex items-center gap-x-2 text-xs">
+                        <Copy className="size-4 shrink-0" />
+                        <span>Copy Selection</span>
+                      </div>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="search-web" textValue="Search Web">
+                      <div className="flex items-center gap-x-2 text-xs">
+                        <Earth className="size-4 shrink-0" />
+                        <span>Search Web</span>
+                      </div>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="start-chat-with-selection" textValue="Start New Chat with Selection">
+                      <div className="flex items-center gap-x-2 text-xs">
+                        <ChatRound className="size-4 text-accent shrink-0" />
+                        <span>Start New Chat with Selection</span>
+                      </div>
+                    </Dropdown.Item>
+                  </Dropdown.Section>
+                ) : (
+                  <Dropdown.Section>
+                    {((currentCardId !== 'universal' && !!currentCard?.onlineConfig?.newChat) ||
+                      currentCardId === 'universal') && (
+                      <Dropdown.Item id="new-chat" textValue="New Chat">
+                        <div className="flex items-center gap-x-2 text-xs">
+                          <ChatRound className="size-4 text-accent shrink-0" />
+                          <span>New Chat</span>
+                        </div>
+                      </Dropdown.Item>
+                    )}
+                  </Dropdown.Section>
+                )}
+
+                {messages.length > 0 && (
+                  <Dropdown.Section>
+                    <Dropdown.Item id="copy-markdown" textValue="Copy as Markdown">
+                      <div className="flex items-center gap-x-2 text-xs">
+                        <Copy className="size-4 text-muted shrink-0" />
+                        <span>Copy as Markdown</span>
+                      </div>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="copy-text" textValue="Copy as Plain Text">
+                      <div className="flex items-center gap-x-2 text-xs">
+                        <Copy className="size-4 text-muted shrink-0" />
+                        <span>Copy as Plain Text</span>
+                      </div>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="save-markdown" textValue="Save as Markdown (.md)">
+                      <div className="flex items-center gap-x-2 text-xs">
+                        <FileDownload className="size-4 text-muted shrink-0" />
+                        <span>Save as Markdown (.md)</span>
+                      </div>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="save-text" textValue="Save as Plain Text (.txt)">
+                      <div className="flex items-center gap-x-2 text-xs">
+                        <FileDownload className="size-4 text-muted shrink-0" />
+                        <span>Save as Plain Text (.txt)</span>
+                      </div>
+                    </Dropdown.Item>
+                  </Dropdown.Section>
+                )}
+              </Dropdown.Menu>
+            </Dropdown.Popover>
+          </Dropdown>
+        </div>
+      )}
       <ToastProviders />
     </div>
   );

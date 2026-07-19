@@ -18,7 +18,7 @@ export interface Message {
   text: string;
 }
 
-function markdownToPlainText(markdown: string): string {
+export function markdownToPlainText(markdown: string): string {
   return markdown
     .replace(/```[\s\S]*?```/g, block => block.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, ''))
     .replace(/`([^`]+)`/g, '$1')
@@ -35,7 +35,7 @@ function markdownToPlainText(markdown: string): string {
     .trim();
 }
 
-function formatChatToMarkdown(messages: Message[], cardTitle: string): string {
+export function formatChatToMarkdown(messages: Message[], cardTitle: string): string {
   const header = `# Chat with ${cardTitle}\n\n`;
   const body = messages
     .map(msg => {
@@ -46,7 +46,7 @@ function formatChatToMarkdown(messages: Message[], cardTitle: string): string {
   return header + body;
 }
 
-function formatChatToPlainText(messages: Message[], cardTitle: string): string {
+export function formatChatToPlainText(messages: Message[], cardTitle: string): string {
   const header = `Chat with ${cardTitle}\n\n`;
   const body = messages
     .map(msg => {
