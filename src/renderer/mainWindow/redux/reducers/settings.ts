@@ -28,13 +28,13 @@ const initialState: SettingState = {
   searchValue: '',
   searchWords: [],
   selectedSection: '',
-  spotlightAlwaysOnTop: true,
-  spotlightShowTaskbar: false,
-  spotlightRememberSize: false,
-  spotlightRememberPosition: false,
-  disableSpotlight: false,
-  spotlightKeepInBackground: true,
-  onlineChatMaxWidth: 'default',
+  floatChatAlwaysOnTop: true,
+  floatChatShowTaskbar: false,
+  floatChatRememberSize: false,
+  floatChatRememberPosition: false,
+  disableFloatChat: false,
+  floatChatKeepInBackground: true,
+  chatBridgeMaxWidth: 'default',
 };
 
 const settingsSlice = createSlice({

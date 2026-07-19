@@ -37,10 +37,10 @@ function hotkeyToAccelerator(hotkey: LynxHotkey): string {
   return parts.join('+');
 }
 
-export function RegisterSpotlightHotkey() {
+export function RegisterFloatChatHotkey() {
   const storageManager = classHolder.storageManager;
   const appConfig = storageManager?.getData('app');
-  const disableSpotlight = appConfig?.disableSpotlight ?? false;
+  const disableFloatChat = appConfig?.disableFloatChat ?? false;
 
   if (currentHotkeyStr) {
     try {
@@ -51,23 +51,23 @@ export function RegisterSpotlightHotkey() {
     currentHotkeyStr = '';
   }
 
-  if (disableSpotlight) {
+  if (disableFloatChat) {
     return;
   }
 
   const hotkeys = appConfig?.hotkeys || [];
-  const spotlightHotkey = hotkeys.find(h => h.name === 'spotlightChat');
+  const floatChatHotkey = hotkeys.find(h => h.name === 'floatChat');
 
-  if (!spotlightHotkey || !spotlightHotkey.key) {
+  if (!floatChatHotkey || !floatChatHotkey.key) {
     return;
   }
 
-  const accel = hotkeyToAccelerator(spotlightHotkey);
+  const accel = hotkeyToAccelerator(floatChatHotkey);
   if (!accel) return;
 
   try {
     const success = globalShortcut.register(accel, () => {
-      ToggleSpotlightWindow();
+      ToggleFloatChatWindow();
     });
     if (success) {
       currentHotkeyStr = accel;
@@ -100,7 +100,7 @@ const WINDOW_CONFIG: BrowserWindowConstructorOptions = {
 const DEFAULT_WIDTH = 977;
 const DEFAULT_HEIGHT = 577;
 
-function saveSpotlightBounds(win: BrowserWindow) {
+function saveFloatChatBounds(win: BrowserWindow) {
   if (!win || win.isDestroyed()) return;
   const storageManager = classHolder.storageManager;
   const appConfig = storageManager?.getData('app');
@@ -109,15 +109,15 @@ function saveSpotlightBounds(win: BrowserWindow) {
   const bounds = win.getBounds();
   const update: any = {};
 
-  if (appConfig.spotlightRememberSize) {
-    update.spotlightLastSize = {
+  if (appConfig.floatChatRememberSize) {
+    update.floatChatLastSize = {
       width: bounds.width,
       height: bounds.height,
     };
   }
 
-  if (appConfig.spotlightRememberPosition) {
-    update.spotlightLastPosition = {
+  if (appConfig.floatChatRememberPosition) {
+    update.floatChatLastPosition = {
       x: bounds.x,
       y: bounds.y,
     };
@@ -128,21 +128,21 @@ function saveSpotlightBounds(win: BrowserWindow) {
   }
 }
 
-function createSpotlightWindow() {
+function createFloatChatWindow() {
   const storageManager = classHolder.storageManager;
   const appConfig = storageManager?.getData('app');
-  if (appConfig?.disableSpotlight) {
+  if (appConfig?.disableFloatChat) {
     return;
   }
-  const spotlightAlwaysOnTop = appConfig?.spotlightAlwaysOnTop ?? true;
-  const spotlightShowTaskbar = appConfig?.spotlightShowTaskbar ?? false;
+  const floatChatAlwaysOnTop = appConfig?.floatChatAlwaysOnTop ?? true;
+  const floatChatShowTaskbar = appConfig?.floatChatShowTaskbar ?? false;
 
   const win = new BrowserWindow({
     ...WINDOW_CONFIG,
-    alwaysOnTop: spotlightAlwaysOnTop,
-    skipTaskbar: !spotlightShowTaskbar,
+    alwaysOnTop: floatChatAlwaysOnTop,
+    skipTaskbar: !floatChatShowTaskbar,
   });
-  classHolder.spotlightChatWindow = win;
+  classHolder.floatChatWindow = win;
 
   // Center it on active display OR load position/size
   const cursorPos = screen.getCursorScreenPoint();
@@ -151,16 +151,16 @@ function createSpotlightWindow() {
 
   let winWidth = DEFAULT_WIDTH;
   let winHeight = DEFAULT_HEIGHT;
-  if (appConfig?.spotlightRememberSize && appConfig?.spotlightLastSize) {
-    winWidth = appConfig.spotlightLastSize.width;
-    winHeight = appConfig.spotlightLastSize.height;
+  if (appConfig?.floatChatRememberSize && appConfig?.floatChatLastSize) {
+    winWidth = appConfig.floatChatLastSize.width;
+    winHeight = appConfig.floatChatLastSize.height;
   }
 
   let winX = Math.round(x + (width - winWidth) / 2);
   let winY = Math.round(y + (height - winHeight) / 2);
-  if (appConfig?.spotlightRememberPosition && appConfig?.spotlightLastPosition) {
-    winX = appConfig.spotlightLastPosition.x;
-    winY = appConfig.spotlightLastPosition.y;
+  if (appConfig?.floatChatRememberPosition && appConfig?.floatChatLastPosition) {
+    winX = appConfig.floatChatLastPosition.x;
+    winY = appConfig.floatChatLastPosition.y;
   }
 
   win.setBounds({x: winX, y: winY, width: winWidth, height: winHeight});
@@ -171,9 +171,9 @@ function createSpotlightWindow() {
 
 function loadWindowContent(window: BrowserWindow) {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    window.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/spotlightChat.html`);
+    window.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/floatChat.html`);
   } else {
-    window.loadFile(path.join(__dirname, `../renderer/spotlightChat.html`));
+    window.loadFile(path.join(__dirname, `../renderer/floatChat.html`));
   }
 }
 
@@ -184,48 +184,48 @@ function setupWindowListeners(window: BrowserWindow) {
   });
 
   window.on('show', () => {
-    window.webContents.send('spotlight:window-shown');
+    window.webContents.send('floatChat:window-shown');
   });
 
   window.on('close', e => {
     const storageManager = classHolder.storageManager;
     const appConfig = storageManager?.getData('app');
-    const keepInBackground = appConfig?.spotlightKeepInBackground ?? true;
+    const keepInBackground = appConfig?.floatChatKeepInBackground ?? true;
     if (keepInBackground && !isAppQuitting) {
       e.preventDefault();
-      saveSpotlightBounds(window);
+      saveFloatChatBounds(window);
       window.hide();
-      classHolder.browserManager?.handleSpotlightHidden();
+      classHolder.browserManager?.handleFloatChatHidden();
     } else {
-      saveSpotlightBounds(window);
-      classHolder.browserManager?.handleSpotlightHidden();
+      saveFloatChatBounds(window);
+      classHolder.browserManager?.handleFloatChatHidden();
     }
   });
 
   window.on('closed', () => {
-    classHolder.spotlightChatWindow = undefined;
+    classHolder.floatChatWindow = undefined;
   });
 }
 
-export function ToggleSpotlightWindow() {
+export function ToggleFloatChatWindow() {
   const storageManager = classHolder.storageManager;
   const appConfig = storageManager?.getData('app');
-  if (appConfig?.disableSpotlight) {
+  if (appConfig?.disableFloatChat) {
     return;
   }
 
-  const win = classHolder.spotlightChatWindow;
+  const win = classHolder.floatChatWindow;
   if (!win || win.isDestroyed()) {
-    createSpotlightWindow();
+    createFloatChatWindow();
     return;
   }
 
   if (win.isVisible()) {
-    saveSpotlightBounds(win);
-    const keepInBackground = appConfig?.spotlightKeepInBackground ?? true;
+    saveFloatChatBounds(win);
+    const keepInBackground = appConfig?.floatChatKeepInBackground ?? true;
     if (keepInBackground) {
       win.hide();
-      classHolder.browserManager?.handleSpotlightHidden();
+      classHolder.browserManager?.handleFloatChatHidden();
     } else {
       win.close();
     }
@@ -239,10 +239,10 @@ export function ToggleSpotlightWindow() {
     let winWidth = currentBounds.width;
     let winHeight = currentBounds.height;
 
-    if (appConfig?.spotlightRememberSize && appConfig?.spotlightLastSize) {
-      winWidth = appConfig.spotlightLastSize.width;
-      winHeight = appConfig.spotlightLastSize.height;
-    } else if (!appConfig?.spotlightRememberSize) {
+    if (appConfig?.floatChatRememberSize && appConfig?.floatChatLastSize) {
+      winWidth = appConfig.floatChatLastSize.width;
+      winHeight = appConfig.floatChatLastSize.height;
+    } else if (!appConfig?.floatChatRememberSize) {
       winWidth = DEFAULT_WIDTH;
       winHeight = DEFAULT_HEIGHT;
     }
@@ -250,9 +250,9 @@ export function ToggleSpotlightWindow() {
     let winX: number;
     let winY: number;
 
-    if (appConfig?.spotlightRememberPosition && appConfig?.spotlightLastPosition) {
-      winX = appConfig.spotlightLastPosition.x;
-      winY = appConfig.spotlightLastPosition.y;
+    if (appConfig?.floatChatRememberPosition && appConfig?.floatChatLastPosition) {
+      winX = appConfig.floatChatLastPosition.x;
+      winY = appConfig.floatChatLastPosition.y;
     } else {
       winX = Math.round(x + (width - winWidth) / 2);
       winY = Math.round(y + (height - winHeight) / 2);
@@ -264,8 +264,8 @@ export function ToggleSpotlightWindow() {
   }
 }
 
-export function CloseSpotlightWindow(force = false) {
-  const win = classHolder.spotlightChatWindow;
+export function CloseFloatChatWindow(force = false) {
+  const win = classHolder.floatChatWindow;
   if (win && !win.isDestroyed()) {
     if (force) {
       win.destroy();

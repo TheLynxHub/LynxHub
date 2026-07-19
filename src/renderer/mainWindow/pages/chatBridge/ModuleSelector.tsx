@@ -16,8 +16,8 @@ const ModuleSelector = memo(({onlineCards, onSelectCard, bgChatEnabledCards, onT
       <div className="text-sm font-semibold text-muted pl-1">Select Chat Mode or AI Service</div>
       <div className="flex flex-wrap gap-4">
         {onlineCards.map(card => {
-          const isUniversal = card.id === 'universal';
-          const avatarUrl = isUniversal ? '' : getCacheUrl(card.logoUrl || card.iconUrl);
+          const isUnified = card.id === 'unified';
+          const avatarUrl = isUnified ? '' : getCacheUrl(card.logoUrl || card.iconUrl);
           const isBgEnabled = bgChatEnabledCards.includes(card.id);
 
           return (
@@ -30,7 +30,7 @@ const ModuleSelector = memo(({onlineCards, onSelectCard, bgChatEnabledCards, onT
               <Card.Content className="flex flex-col h-full justify-between p-3.5">
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
-                    {isUniversal ? (
+                    {isUnified ? (
                       <div className="size-10 shrink-0 flex items-center justify-center bg-accent-soft rounded-full">
                         <ChatRound className="size-5 text-accent" />
                       </div>
@@ -42,12 +42,12 @@ const ModuleSelector = memo(({onlineCards, onSelectCard, bgChatEnabledCards, onT
                     )}
                     <div>
                       <div className="font-bold text-sm text-foreground leading-snug">{card.title}</div>
-                      {!isUniversal && <div className="text-[10px] text-muted">{card.developer}</div>}
+                      {!isUnified && <div className="text-[10px] text-muted">{card.developer}</div>}
                     </div>
                   </div>
                   <div className="text-xs text-muted line-clamp-2 leading-relaxed">{card.description}</div>
                 </div>
-                {!isUniversal && (
+                {!isUnified && (
                   <div onClick={e => e.stopPropagation()} className="flex items-center justify-between mt-2 pt-2">
                     <span className="text-[11px] font-medium text-muted">Background Scrape</span>
                     <Checkbox

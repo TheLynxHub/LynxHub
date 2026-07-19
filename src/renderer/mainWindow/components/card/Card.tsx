@@ -77,9 +77,9 @@ const LynxCard = memo(() => {
             storageUtilsIpc.invoke.recentlyUsedCards('update', id);
             dispatch(
               tabsActions.addTab({
-                id: `online-chat-${id}`,
+                id: `chat-bridge-${id}`,
                 title: title,
-                pageID: PageID.onlineChat,
+                pageID: PageID.chatBridge,
                 isLoading: false,
                 isTerminal: false,
                 favIcon: {

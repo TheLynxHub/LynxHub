@@ -41,8 +41,8 @@ const contextMenuIpc = {
     // Removes browser tab
     removeTab: (tabId: string) => lynxIpc.send(contextMenuChannels.removeTab, tabId),
 
-    // Opens custom right click context menu for online chat
-    openOnlineChatMenu: (
+    // Opens custom right click context menu for chat bridge
+    openChatBridgeMenu: (
       tabID: string,
       data: {
         step: 'select_module' | 'login' | 'chat';
@@ -51,11 +51,11 @@ const contextMenuIpc = {
         selectionText?: string;
       },
       customPosition?: ContextMenuPosition,
-    ) => lynxIpc.send(contextMenuChannels.openOnlineChatMenu, tabID, data, customPosition),
+    ) => lynxIpc.send(contextMenuChannels.openChatBridgeMenu, tabID, data, customPosition),
 
-    // Triggers action from online chat context menu
-    onlineChatAction: (tabID: string, action: string, data?: string) =>
-      lynxIpc.send(contextMenuChannels.onlineChatAction, tabID, action, data),
+    // Triggers action from chat bridge context menu
+    chatBridgeAction: (tabID: string, action: string, data?: string) =>
+      lynxIpc.send(contextMenuChannels.chatBridgeAction, tabID, action, data),
 
     rightClickItems: {
       copy: (id: number) => lynxIpc.send(contextMenuChannels.copy, id),
@@ -149,8 +149,8 @@ const contextMenuIpc = {
     removeTab: (callback: (tabId: string) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onRemoveTab, callback),
 
-    // Listens for showing online chat menu
-    onlineChatMenu: (
+    // Listens for showing chat bridge menu
+    onChatBridgeMenu: (
       callback: (
         tabID: string,
         data: {
@@ -160,11 +160,11 @@ const contextMenuIpc = {
           selectionText?: string;
         },
       ) => void,
-    ): (() => void) => lynxIpc.on(contextMenuChannels.onOnlineChatMenu, callback),
+    ): (() => void) => lynxIpc.on(contextMenuChannels.onChatBridgeMenu, callback),
 
-    // Listens for actions triggered from online chat context menu
-    onlineChatAction: (callback: (tabID: string, action: string, data?: string) => void): (() => void) =>
-      lynxIpc.on(contextMenuChannels.onOnlineChatAction, callback),
+    // Listens for actions triggered from chat bridge context menu
+    chatBridgeAction: (callback: (tabID: string, action: string, data?: string) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onChatBridgeAction, callback),
   },
 };
 

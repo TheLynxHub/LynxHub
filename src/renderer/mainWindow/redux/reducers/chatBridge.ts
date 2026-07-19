@@ -3,7 +3,7 @@ import {useSelector} from 'react-redux';
 
 import {RootState} from '../store';
 
-export interface OnlineChatMessage {
+export interface ChatBridgeMessage {
   sender: 'user' | 'assistant';
   text: string;
 }
@@ -14,9 +14,9 @@ export interface ScrapedChatHistoryItem {
   active: boolean;
 }
 
-export interface OnlineChatModuleState {
+export interface ChatBridgeModuleState {
   chatHistory: ScrapedChatHistoryItem[];
-  messages: OnlineChatMessage[];
+  messages: ChatBridgeMessage[];
   isGenerating: boolean;
   isPageLoaded: boolean;
   isHistoryLoading: boolean;
@@ -24,16 +24,16 @@ export interface OnlineChatModuleState {
   pendingActiveIndex?: number | null;
 }
 
-export interface OnlineChatState {
+export interface ChatBridgeState {
   modules: {
-    [cardId: string]: OnlineChatModuleState;
+    [cardId: string]: ChatBridgeModuleState;
   };
   bgChatEnabledCards: string[];
-  activeUniversalCardId: string | null;
+  activeUnifiedCardId: string | null;
   visibleModuleIds: string[];
 }
 
-const initialModuleState: OnlineChatModuleState = {
+const initialModuleState: ChatBridgeModuleState = {
   chatHistory: [],
   messages: [],
   isGenerating: false,
@@ -43,22 +43,22 @@ const initialModuleState: OnlineChatModuleState = {
   pendingActiveIndex: null,
 };
 
-const initialState: OnlineChatState = {
+const initialState: ChatBridgeState = {
   modules: {},
   bgChatEnabledCards: [],
-  activeUniversalCardId: null,
+  activeUnifiedCardId: null,
   visibleModuleIds: [],
 };
 
-const onlineChatSlice = createSlice({
-  name: 'onlineChat',
+const chatBridgeSlice = createSlice({
+  name: 'chatBridge',
   initialState,
   reducers: {
     setBgChatEnabledCards: (state, action: PayloadAction<string[]>) => {
       state.bgChatEnabledCards = action.payload;
     },
-    setActiveUniversalCardId: (state, action: PayloadAction<string | null>) => {
-      state.activeUniversalCardId = action.payload;
+    setActiveUnifiedCardId: (state, action: PayloadAction<string | null>) => {
+      state.activeUnifiedCardId = action.payload;
     },
     setVisibleModuleIds: (state, action: PayloadAction<string[]>) => {
       state.visibleModuleIds = action.payload;
@@ -69,7 +69,7 @@ const onlineChatSlice = createSlice({
         state.modules[cardId] = {...initialModuleState};
       }
     },
-    setModuleState: (state, action: PayloadAction<{cardId: string; updates: Partial<OnlineChatModuleState>}>) => {
+    setModuleState: (state, action: PayloadAction<{cardId: string; updates: Partial<ChatBridgeModuleState>}>) => {
       const {cardId, updates} = action.payload;
       if (!state.modules[cardId]) {
         state.modules[cardId] = {...initialModuleState};
@@ -79,7 +79,7 @@ const onlineChatSlice = createSlice({
         ...updates,
       };
     },
-    setModuleMessages: (state, action: PayloadAction<{cardId: string; messages: OnlineChatMessage[]}>) => {
+    setModuleMessages: (state, action: PayloadAction<{cardId: string; messages: ChatBridgeMessage[]}>) => {
       const {cardId, messages} = action.payload;
       if (!state.modules[cardId]) {
         state.modules[cardId] = {...initialModuleState};
@@ -124,9 +124,9 @@ const onlineChatSlice = createSlice({
   },
 });
 
-export const useOnlineChatSelector = <T>(selector: (state: OnlineChatState) => T): T =>
-  useSelector((state: RootState) => selector(state.onlineChat));
+export const useChatBridgeSelector = <T>(selector: (state: ChatBridgeState) => T): T =>
+  useSelector((state: RootState) => selector(state.chatBridge));
 
-export const onlineChatActions = onlineChatSlice.actions;
+export const chatBridgeActions = chatBridgeSlice.actions;
 
-export default onlineChatSlice.reducer;
+export default chatBridgeSlice.reducer;

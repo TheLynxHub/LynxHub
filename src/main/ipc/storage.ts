@@ -41,24 +41,24 @@ export default function listenStorage() {
   storageIpc.handle.update((key, updateData) => {
     const res = storageManager.updateData(key, updateData);
     if (key === 'app') {
-      if ((updateData as any).hotkeys || (updateData as any).disableSpotlight !== undefined) {
-        import('../childWindows/spotlightChat').then(({RegisterSpotlightHotkey, CloseSpotlightWindow}) => {
-          RegisterSpotlightHotkey();
-          if ((updateData as any).disableSpotlight) {
-            CloseSpotlightWindow(true);
+      if ((updateData as any).hotkeys || (updateData as any).disableFloatChat !== undefined) {
+        import('../childWindows/floatChat').then(({RegisterFloatChatHotkey, CloseFloatChatWindow}) => {
+          RegisterFloatChatHotkey();
+          if ((updateData as any).disableFloatChat) {
+            CloseFloatChatWindow(true);
           }
         });
       }
-      if ((updateData as any).spotlightAlwaysOnTop !== undefined) {
-        const win = classHolder.spotlightChatWindow;
+      if ((updateData as any).floatChatAlwaysOnTop !== undefined) {
+        const win = classHolder.floatChatWindow;
         if (win && !win.isDestroyed()) {
-          win.setAlwaysOnTop((updateData as any).spotlightAlwaysOnTop);
+          win.setAlwaysOnTop((updateData as any).floatChatAlwaysOnTop);
         }
       }
-      if ((updateData as any).spotlightShowTaskbar !== undefined) {
-        const win = classHolder.spotlightChatWindow;
+      if ((updateData as any).floatChatShowTaskbar !== undefined) {
+        const win = classHolder.floatChatWindow;
         if (win && !win.isDestroyed()) {
-          win.setSkipTaskbar(!(updateData as any).spotlightShowTaskbar);
+          win.setSkipTaskbar(!(updateData as any).floatChatShowTaskbar);
         }
       }
     }

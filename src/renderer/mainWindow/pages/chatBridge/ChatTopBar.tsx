@@ -7,7 +7,7 @@ import {memo} from 'react';
 
 import AnimateChild from '../../components/AnimateChild';
 import LynxTooltip from '../../components/LynxTooltip';
-import {ChatStep, Message} from './useOnlineChat';
+import {ChatStep, Message} from './useChatBridge';
 
 interface ChatTopBarProps {
   step: ChatStep;
@@ -24,7 +24,7 @@ interface ChatTopBarProps {
   showScrollBottom?: boolean;
   onScrollTop?: () => void;
   onScrollBottom?: () => void;
-  activeUniversalCardId?: string | null;
+  activeUnifiedCardId?: string | null;
   onlineCards?: any[];
   bgChatEnabledCards?: string[];
   onSelectActiveCard?: (id: string | null) => void;
@@ -47,17 +47,17 @@ const ChatTopBar = memo(
     showScrollBottom,
     onScrollTop,
     onScrollBottom,
-    activeUniversalCardId,
+    activeUnifiedCardId,
     onlineCards,
     bgChatEnabledCards = [],
     onSelectActiveCard,
     showBackButton = true,
   }: ChatTopBarProps) => {
     const activeCard =
-      selectedCard?.id === 'universal' ? onlineCards?.find(c => c.id === activeUniversalCardId) : selectedCard;
+      selectedCard?.id === 'unified' ? onlineCards?.find(c => c.id === activeUnifiedCardId) : selectedCard;
 
     const activeCardPill =
-      selectedCard?.id === 'universal' && activeCard ? (
+      selectedCard?.id === 'unified' && activeCard ? (
         <Dropdown>
           <Dropdown.Trigger>
             <Button
@@ -85,7 +85,7 @@ const ChatTopBar = memo(
                 }
               }}>
               {onlineCards
-                ?.filter(c => c.id !== 'universal' && bgChatEnabledCards.includes(c.id))
+                ?.filter(c => c.id !== 'unified' && bgChatEnabledCards.includes(c.id))
                 .map(c => (
                   <Dropdown.Item id={c.id} key={c.id} textValue={c.title}>
                     <Avatar className="size-4 shrink-0 rounded-md">
@@ -105,7 +105,7 @@ const ChatTopBar = memo(
         {step === 'select_module' ? (
           <div className="flex items-center gap-x-2">
             <ChatRound className="size-5" />
-            <span className="font-bold text-foreground text-sm">Online Chat</span>
+            <span className="font-bold text-foreground text-sm">Chat Bridge</span>
           </div>
         ) : (
           <div className="flex items-center gap-x-1">
@@ -115,12 +115,12 @@ const ChatTopBar = memo(
               </Button>
             )}
             <div className="flex items-center gap-x-3">
-              {selectedCard.id === 'universal' ? (
+              {selectedCard.id === 'unified' ? (
                 <div className="flex items-center gap-x-2">
                   <div className="p-1.5 bg-surface-tertiary rounded-lg">
                     <ChatRound className="size-4 text-white" />
                   </div>
-                  <span className="font-extrabold text-foreground text-sm leading-none">Universal Chat</span>
+                  <span className="font-extrabold text-foreground text-sm leading-none">Unified Chat</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-x-2">
@@ -202,7 +202,7 @@ const ChatTopBar = memo(
             </>
           )}
 
-          {step !== 'select_module' && (selectedCard.id !== 'universal' || activeCard) && (
+          {step !== 'select_module' && (selectedCard.id !== 'unified' || activeCard) && (
             <Button
               size="sm"
               onPress={step === 'chat' ? onShowWebpage : onGoToChat}

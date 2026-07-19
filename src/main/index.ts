@@ -163,9 +163,9 @@ async function initializeLynxHub(): Promise<void> {
 
   listenToIpcChannels();
 
-  // Register global system hotkey for spotlight chat
-  import('./childWindows/spotlightChat').then(({RegisterSpotlightHotkey}) => {
-    RegisterSpotlightHotkey();
+  // Register global system hotkey for float chat
+  import('./childWindows/floatChat').then(({RegisterFloatChatHotkey}) => {
+    RegisterFloatChatHotkey();
   });
 
   Auth();

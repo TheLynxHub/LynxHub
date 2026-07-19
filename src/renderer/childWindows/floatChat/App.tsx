@@ -1,18 +1,18 @@
 import {Button, CloseButton, Dropdown, InputGroup, ScrollShadow, Spinner} from '@heroui/react';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import ToastProviders, {topToast} from '@lynx/layouts/ToastProviders';
-import {formatChatToMarkdown, formatChatToPlainText} from '@lynx/pages/onlineChat/useOnlineChat';
+import {formatChatToMarkdown, formatChatToPlainText} from '@lynx/pages/chatBridge/useChatBridge';
 import {ChatBubble, TypingIndicatorBubble} from '@lynx_shared/components/ChatBubble';
 import browserIpc from '@lynx_shared/ipc/browser';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import filesIpc from '@lynx_shared/ipc/files';
-import spotlightChatIpc from '@lynx_shared/ipc/spotlightChat';
+import floatChatIpc from '@lynx_shared/ipc/floatChat';
 import storageIpc from '@lynx_shared/ipc/storage';
 import {ChatRound, Copy, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
 import {Plus} from 'lucide-react';
 import {KeyboardEvent, MouseEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-export default function SpotlightApp() {
+export default function FloatChatApp() {
   const [onlineCards, setOnlineCards] = useState<any[]>([]);
   const [activeCardId, setActiveCardId] = useState<string>('chatgpt');
   const [inputText, setInputText] = useState('');
@@ -28,7 +28,7 @@ export default function SpotlightApp() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectionText, setSelectionText] = useState('');
 
-  const [onlineChatMaxWidth, setOnlineChatMaxWidth] = useState<string>('default');
+  const [chatBridgeMaxWidth, setChatBridgeMaxWidth] = useState<string>('default');
 
   // Sync Theme & Settings
   useEffect(() => {
@@ -41,8 +41,8 @@ export default function SpotlightApp() {
           document.documentElement.classList.toggle('dark', isDark);
           document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
         }
-        if (app.onlineChatMaxWidth) {
-          setOnlineChatMaxWidth(app.onlineChatMaxWidth);
+        if (app.chatBridgeMaxWidth) {
+          setChatBridgeMaxWidth(app.chatBridgeMaxWidth);
         }
       }
     });
@@ -50,43 +50,43 @@ export default function SpotlightApp() {
 
   // Fetch initial caches & set up listeners
   useEffect(() => {
-    spotlightChatIpc.getOnlineCards().then(cards => {
+    floatChatIpc.getOnlineCards().then(cards => {
       console.log('App.tsx: getOnlineCards returned:', cards);
       if (cards && cards.length > 0) {
         setOnlineCards(cards);
         setActiveCardId(prev => {
           const next = cards.some(c => c.id === prev) ? prev : cards[0].id;
-          spotlightChatIpc.setActiveCard(next);
+          floatChatIpc.setActiveCard(next);
           return next;
         });
       }
     });
 
-    spotlightChatIpc.getCachedState().then(state => {
+    floatChatIpc.getCachedState().then(state => {
       console.log('App.tsx: getCachedState returned:', state);
       if (state) setSyncedState(state);
     });
 
-    const offCards = spotlightChatIpc.onSetOnlineCards(cards => {
+    const offCards = floatChatIpc.onSetOnlineCards(cards => {
       console.log('App.tsx: onSetOnlineCards received:', cards);
       if (cards && cards.length > 0) {
         setOnlineCards(cards);
         setActiveCardId(prev => {
           const next = cards.some(c => c.id === prev) ? prev : cards[0].id;
-          spotlightChatIpc.setActiveCard(next);
+          floatChatIpc.setActiveCard(next);
           return next;
         });
       }
     });
 
-    const offState = spotlightChatIpc.onSyncState(state => {
+    const offState = floatChatIpc.onSyncState(state => {
       if (state) setSyncedState(state);
     });
 
     // Close on Escape pressed anywhere in window
     const handleGlobalKeyDown = (e: any) => {
       if (e.key === 'Escape') {
-        spotlightChatIpc.closeSpotlight();
+        floatChatIpc.closeFloatChat();
       }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
@@ -103,11 +103,11 @@ export default function SpotlightApp() {
   }, [onlineCards, activeCardId]);
 
   const currentCardId = useMemo(() => {
-    if (activeCardId !== 'universal') return activeCardId;
-    if (syncedState?.activeUniversalCardId) return syncedState.activeUniversalCardId;
-    const firstNonUniversal = onlineCards.find(c => c.id !== 'universal');
-    return firstNonUniversal ? firstNonUniversal.id : null;
-  }, [activeCardId, syncedState?.activeUniversalCardId, onlineCards]);
+    if (activeCardId !== 'unified') return activeCardId;
+    if (syncedState?.activeUnifiedCardId) return syncedState.activeUnifiedCardId;
+    const firstNonUnified = onlineCards.find(c => c.id !== 'unified');
+    return firstNonUnified ? firstNonUnified.id : null;
+  }, [activeCardId, syncedState?.activeUnifiedCardId, onlineCards]);
 
   const currentCard = useMemo(() => {
     return onlineCards.find(c => c.id === currentCardId);
@@ -122,7 +122,7 @@ export default function SpotlightApp() {
   }, [moduleState]);
 
   const chatHistory = useMemo(() => {
-    if (activeCardId !== 'universal') {
+    if (activeCardId !== 'unified') {
       const hist = moduleState?.chatHistory || [];
       return hist.map((item: any) => ({
         ...item,
@@ -130,10 +130,10 @@ export default function SpotlightApp() {
       }));
     }
 
-    // Universal Mode - merge history from all background-enabled modules
+    // Unified Mode - merge history from all background-enabled modules
     const merged: any[] = [];
     const visibleModuleIds = syncedState?.visibleModuleIds || [];
-    const activeUniversalCardId = syncedState?.activeUniversalCardId || null;
+    const activeUnifiedCardId = syncedState?.activeUnifiedCardId || null;
     const modules = syncedState?.modules || {};
 
     visibleModuleIds.forEach((cardId: string) => {
@@ -143,7 +143,7 @@ export default function SpotlightApp() {
           merged.push({
             ...item,
             cardId,
-            active: item.active && activeUniversalCardId === cardId,
+            active: item.active && activeUnifiedCardId === cardId,
           });
         });
       }
@@ -202,7 +202,7 @@ export default function SpotlightApp() {
 
   const handleSend = useCallback(() => {
     if (!inputText.trim() || isSending || isGenerating || !currentCardId) return;
-    spotlightChatIpc.sendMessage(currentCardId, inputText);
+    floatChatIpc.sendMessage(currentCardId, inputText);
     setInputText('');
   }, [inputText, currentCardId, isSending, isGenerating]);
 
@@ -219,7 +219,7 @@ export default function SpotlightApp() {
   const handleSelectThread = useCallback(
     (index: number, cardId?: string) => {
       const targetCardId = cardId || activeCardId;
-      spotlightChatIpc.selectThread(targetCardId, index);
+      floatChatIpc.selectThread(targetCardId, index);
     },
     [activeCardId],
   );
@@ -227,7 +227,7 @@ export default function SpotlightApp() {
   const handleNewChat = useCallback(
     (cardId?: string) => {
       const targetCardId = cardId || currentCardId;
-      if (targetCardId) spotlightChatIpc.newChat(targetCardId);
+      if (targetCardId) floatChatIpc.newChat(targetCardId);
     },
     [currentCardId],
   );
@@ -284,7 +284,7 @@ export default function SpotlightApp() {
       const selText = window.getSelection()?.toString().trim() || '';
 
       const hasMessages = messages.length > 0;
-      const hasNewChat = !!currentCard?.onlineConfig?.newChat || currentCardId === 'universal';
+      const hasNewChat = !!currentCard?.onlineConfig?.newChat || currentCardId === 'unified';
 
       if (!selText && !hasMessages && !hasNewChat) {
         return;
@@ -311,7 +311,7 @@ export default function SpotlightApp() {
           break;
         case 'search-web':
           if (selectionText) {
-            contextMenuIpc.send.onlineChatAction('spotlight-chat', 'search-web', selectionText);
+            contextMenuIpc.send.chatBridgeAction('float-chat', 'search-web', selectionText);
           }
           break;
         case 'start-chat-with-selection':
@@ -354,9 +354,9 @@ export default function SpotlightApp() {
     }
   }, [isLoginRequired]);
 
-  // Handle webview visibility for the active card in Spotlight
+  // Handle webview visibility for the active card in Float Chat
   useEffect(() => {
-    if (!currentCardId || currentCardId === 'universal') return;
+    if (!currentCardId || currentCardId === 'unified') return;
 
     const viewId = `online-bg-${currentCardId}`;
 
@@ -373,13 +373,13 @@ export default function SpotlightApp() {
 
   // Listen for window shown events to re-trigger setVisible and sync app settings
   useEffect(() => {
-    const offWindowShown = spotlightChatIpc.onWindowShown(() => {
+    const offWindowShown = floatChatIpc.onWindowShown(() => {
       if (step === 'login' && currentCardId) {
         browserIpc.send.setVisible(`online-bg-${currentCardId}`, true);
       }
       storageIpc.get('app').then(app => {
-        if (app?.onlineChatMaxWidth) {
-          setOnlineChatMaxWidth(app.onlineChatMaxWidth);
+        if (app?.chatBridgeMaxWidth) {
+          setChatBridgeMaxWidth(app.chatBridgeMaxWidth);
         }
       });
     });
@@ -425,7 +425,7 @@ export default function SpotlightApp() {
                 <Button size="sm" variant="secondary">
                   {activeCard.logoUrl ? (
                     <img alt="" className="size-4" src={activeCard.logoUrl} />
-                  ) : activeCard.title === 'Universal Chat' ? (
+                  ) : activeCard.title === 'Unified Chat' ? (
                     <ChatRound className="size-4" />
                   ) : (
                     <div className="hidden" />
@@ -439,14 +439,14 @@ export default function SpotlightApp() {
                     <Dropdown.Item
                       onPress={() => {
                         setActiveCardId(card.id);
-                        spotlightChatIpc.setActiveCard(card.id);
+                        floatChatIpc.setActiveCard(card.id);
                       }}
                       key={card.id}
                       className="flex flex-row items-center text-xs">
                       <div className="flex items-center gap-x-2">
                         {card.logoUrl ? (
                           <img alt="" src={card.logoUrl} className="size-4" />
-                        ) : card.title === 'Universal Chat' ? (
+                        ) : card.title === 'Unified Chat' ? (
                           <ChatRound className="size-4" />
                         ) : (
                           <div className="hidden" />
@@ -460,7 +460,7 @@ export default function SpotlightApp() {
             </Dropdown>
           )}
 
-          {activeCard && activeCardId !== 'universal' && (
+          {activeCard && activeCardId !== 'unified' && (
             <div className="flex flex-row items-center gap-x-1.5">
               {step === 'login' && (
                 <Button
@@ -489,7 +489,7 @@ export default function SpotlightApp() {
             </div>
           )}
 
-          <CloseButton onPress={() => spotlightChatIpc.closeSpotlight()} />
+          <CloseButton onPress={() => floatChatIpc.closeFloatChat()} />
         </div>
       </div>
 
@@ -500,7 +500,7 @@ export default function SpotlightApp() {
           <div className="w-50 flex flex-col shrink-0 draggable bg-surface-secondary rounded-tr-2xl overflow-hidden">
             <div className={'flex items-center justify-between px-3 py-2 bg-surface/50 draggable'}>
               <span className="text-[8pt] font-bold text-semi-muted tracking-wider uppercase">Recents</span>
-              {activeCardId === 'universal' ? (
+              {activeCardId === 'unified' ? (
                 <Dropdown>
                   <Dropdown.Trigger>
                     <Button size="sm" variant="ghost" className="size-7 notDraggable" isIconOnly>
@@ -513,7 +513,7 @@ export default function SpotlightApp() {
                         handleNewChat(String(key));
                       }}>
                       {onlineCards
-                        .filter(c => c.id !== 'universal')
+                        .filter(c => c.id !== 'unified')
                         .map(c => (
                           <Dropdown.Item id={c.id} key={c.id} textValue={`New Chat on ${c.title}`}>
                             <div className="flex items-center gap-x-2">
@@ -559,7 +559,7 @@ export default function SpotlightApp() {
                         key={`${item.cardId}-${item.index}`}
                         onPress={() => handleSelectThread(item.index, item.cardId)}
                         fullWidth>
-                        {activeCardId === 'universal' && card?.logoUrl && (
+                        {activeCardId === 'unified' && card?.logoUrl && (
                           <img alt="" src={card.logoUrl} className="size-3.5 rounded shrink-0" />
                         )}
                         {item.title || 'Untitled Chat'}
@@ -588,11 +588,11 @@ export default function SpotlightApp() {
             <ScrollShadow ref={scrollRef} onScroll={handleScroll} className="flex-1 w-full notDraggable">
               <div
                 className={`${
-                  onlineChatMaxWidth === 'small'
+                  chatBridgeMaxWidth === 'small'
                     ? 'max-w-2xl'
-                    : onlineChatMaxWidth === 'wide'
+                    : chatBridgeMaxWidth === 'wide'
                       ? 'max-w-6xl'
-                      : onlineChatMaxWidth === 'full'
+                      : chatBridgeMaxWidth === 'full'
                         ? 'max-w-full'
                         : 'max-w-4xl'
                 } mx-auto w-full flex flex-col gap-y-3 flex-1 p-4`}
@@ -651,8 +651,8 @@ export default function SpotlightApp() {
                   </Dropdown.Section>
                 ) : (
                   <Dropdown.Section>
-                    {((currentCardId !== 'universal' && !!currentCard?.onlineConfig?.newChat) ||
-                      currentCardId === 'universal') && (
+                    {((currentCardId !== 'unified' && !!currentCard?.onlineConfig?.newChat) ||
+                      currentCardId === 'unified') && (
                       <Dropdown.Item id="new-chat" textValue="New Chat">
                         <div className="flex items-center gap-x-2 text-xs">
                           <ChatRound className="size-4 text-accent shrink-0" />

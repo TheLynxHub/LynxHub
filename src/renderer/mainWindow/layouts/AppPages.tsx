@@ -1,11 +1,11 @@
 import SessionView from '@lynx/features/session';
 import Agents from '@lynx/pages/agents';
 import AudioGenerationPage from '@lynx/pages/audio';
+import ChatBridgePage from '@lynx/pages/chatBridge';
 import DashboardPage from '@lynx/pages/dashboard';
 import GamesPage from '@lynx/pages/games';
 import HomePage from '@lynx/pages/home';
 import ImageGenerationPage from '@lynx/pages/image';
-import OnlineChatPage from '@lynx/pages/onlineChat';
 import OthersPage from '@lynx/pages/others';
 import PluginsPage from '@lynx/pages/plugins';
 import SettingsPage from '@lynx/pages/settings';
@@ -28,7 +28,7 @@ const PageComponents = {
   [PageID.dashboard]: DashboardPage,
   [PageID.plugins]: PluginsPage,
   [PageID.settings]: SettingsPage,
-  [PageID.onlineChat]: OnlineChatPage,
+  [PageID.chatBridge]: ChatBridgePage,
 };
 
 import ptyIpc from '@lynx_shared/ipc/pty';

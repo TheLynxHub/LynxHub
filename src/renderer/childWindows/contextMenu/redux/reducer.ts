@@ -53,7 +53,7 @@ const initialState: ContextState = {
     message: '',
   },
   downloads: [],
-  onlineChatMenu: {
+  chatBridgeMenu: {
     tabID: '',
     step: 'select_module',
     hasMessages: false,

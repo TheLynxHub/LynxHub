@@ -47,8 +47,8 @@ export const contextMenuChannels = {
   openTerminateTab: 'context:open-terminate-tab',
   openCloseApp: 'context:open-close-app',
 
-  openOnlineChatMenu: 'context:open-online-chat-menu',
-  onOnlineChatMenu: 'context:on-online-chat-menu',
-  onlineChatAction: 'context:online-chat-action',
-  onOnlineChatAction: 'context:on-online-chat-action',
+  openChatBridgeMenu: 'context:open-chat-bridge-menu',
+  onChatBridgeMenu: 'context:on-chat-bridge-menu',
+  chatBridgeAction: 'context:chat-bridge-action',
+  onChatBridgeAction: 'context:on-chat-bridge-action',
 } as const;

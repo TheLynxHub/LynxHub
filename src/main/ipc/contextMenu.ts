@@ -83,14 +83,14 @@ export default async function listenContextMenu() {
   contextMenuIpc.on.stopAI(id => contextMenuIpc.send.onStopAI(id));
   contextMenuIpc.on.removeTab(tabID => contextMenuIpc.send.onRemoveTab(tabID));
 
-  // Online Chat Menu Actions
-  contextMenuIpc.on.openOnlineChatMenu((tabID, data, customPosition) => {
+  // Chat Bridge Menu Actions
+  contextMenuIpc.on.openChatBridgeMenu((tabID, data, customPosition) => {
     contextMenuManager.setCustomContextPosition(customPosition);
-    contextMenuIpc.send.onOnlineChatMenu(tabID, data);
+    contextMenuIpc.send.onChatBridgeMenu(tabID, data);
     contextMenuManager.showContextMenu();
   });
 
-  contextMenuIpc.on.onlineChatAction((tabID, action, payload) => {
+  contextMenuIpc.on.chatBridgeAction((tabID, action, payload) => {
     if (action === 'copy-selection' && typeof payload === 'string') {
       clipboard.writeText(payload);
       return;
@@ -100,7 +100,7 @@ export default async function listenContextMenu() {
       applicationIpc.send.onNewTab(searchUrl);
       return;
     }
-    contextMenuIpc.send.onOnlineChatAction(tabID, action, payload);
+    contextMenuIpc.send.onChatBridgeAction(tabID, action, payload);
   });
 }
 
@@ -291,12 +291,12 @@ export const contextMenuIpc = {
     onCloseApp: () => sendToContextMenu(contextMenuChannels.onCloseApp),
     /** Sends downloads event to context menu */
     onDownloads: () => sendToContextMenu(contextMenuChannels.onDownloads),
-    /** Sends online chat menu show request to context menu renderer */
-    onOnlineChatMenu: (tabID: string, data: any) =>
-      sendToContextMenu(contextMenuChannels.onOnlineChatMenu, tabID, data),
-    /** Sends online chat action back to main window renderer */
-    onOnlineChatAction: (tabID: string, action: string, payload?: string) =>
-      sendToMain(contextMenuChannels.onOnlineChatAction, tabID, action, payload),
+    /** Sends chat bridge menu show request to context menu renderer */
+    onChatBridgeMenu: (tabID: string, data: any) =>
+      sendToContextMenu(contextMenuChannels.onChatBridgeMenu, tabID, data),
+    /** Sends chat bridge action back to main window renderer */
+    onChatBridgeAction: (tabID: string, action: string, payload?: string) =>
+      sendToMain(contextMenuChannels.onChatBridgeAction, tabID, action, payload),
   },
   on: {
     /** Listens for show ready request from renderer */
@@ -354,12 +354,12 @@ export const contextMenuIpc = {
       lynxIpc.on(contextMenuChannels.openTerminateTab, callback),
     /** Listens for open close app request */
     openCloseApp: (callback: () => void) => lynxIpc.on(contextMenuChannels.openCloseApp, callback),
-    /** Listens for open online chat menu request from main window */
-    openOnlineChatMenu: (callback: (tabID: string, data: any, customPosition?: {x: number; y: number}) => void) =>
-      lynxIpc.on(contextMenuChannels.openOnlineChatMenu, callback),
-    /** Listens for online chat action from context menu renderer */
-    onlineChatAction: (callback: (tabID: string, action: string, payload?: string) => void) =>
-      lynxIpc.on(contextMenuChannels.onlineChatAction, callback),
+    /** Listens for open chat bridge menu request from main window */
+    openChatBridgeMenu: (callback: (tabID: string, data: any, customPosition?: {x: number; y: number}) => void) =>
+      lynxIpc.on(contextMenuChannels.openChatBridgeMenu, callback),
+    /** Listens for chat bridge action from context menu renderer */
+    chatBridgeAction: (callback: (tabID: string, action: string, payload?: string) => void) =>
+      lynxIpc.on(contextMenuChannels.chatBridgeAction, callback),
   },
   handle: {},
 };

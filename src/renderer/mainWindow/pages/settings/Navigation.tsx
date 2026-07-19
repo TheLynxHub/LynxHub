@@ -79,9 +79,9 @@ const groupSections: GroupProps[] = [
         elementId: settingsSectionId.SettingsBrowserId,
       },
       {
-        title: 'Online Chat',
+        title: 'Chat Bridge',
         icon: <ChatSquare className="size-4 shrink-0" />,
-        elementId: settingsSectionId.SettingsOnlineChatId,
+        elementId: settingsSectionId.SettingsChatBridgeId,
       },
       {
         title: 'Hotkeys',

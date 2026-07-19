@@ -8,14 +8,14 @@ import Separator from './right_click/Separator';
 import {ActionButton, createActionHandler} from './right_click/Utils';
 
 /**
- * Context menu layout specifically for the custom Online Chat Page.
+ * Context menu layout specifically for the custom Chat Bridge Page.
  */
-const OnlineChatMenu = memo(function OnlineChatMenu() {
-  const {tabID, step, hasMessages, hasNewChat, selectionText} = useContextState('onlineChatMenu');
+const ChatBridgeMenu = memo(function ChatBridgeMenu() {
+  const {tabID, step, hasMessages, hasNewChat, selectionText} = useContextState('chatBridgeMenu');
 
   const triggerAction = (action: string, payload?: string) => {
     return createActionHandler(() => {
-      contextMenuIpc.send.onlineChatAction(tabID, action, payload);
+      contextMenuIpc.send.chatBridgeAction(tabID, action, payload);
     })();
   };
 
@@ -53,7 +53,7 @@ const OnlineChatMenu = memo(function OnlineChatMenu() {
             icon={<Restart className="size-4" />}
             onPress={() => triggerAction('reload')}
           />
-          {!tabID?.startsWith('online-chat-') && (
+          {!tabID?.startsWith('chat-bridge-') && (
             <ActionButton
               title="Back to Select"
               onPress={() => triggerAction('back')}
@@ -107,4 +107,4 @@ const OnlineChatMenu = memo(function OnlineChatMenu() {
   );
 });
 
-export default OnlineChatMenu;
+export default ChatBridgeMenu;

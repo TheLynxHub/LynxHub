@@ -7,29 +7,29 @@ import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
 
-export default function SpotlightShowTaskbar() {
-  const spotlightShowTaskbar = useSettingsState('spotlightShowTaskbar');
-  const disableSpotlight = useSettingsState('disableSpotlight');
+export default function FloatChatShowTaskbar() {
+  const floatChatShowTaskbar = useSettingsState('floatChatShowTaskbar');
+  const disableFloatChat = useSettingsState('disableFloatChat');
   const dispatch = useDispatch<AppDispatch>();
 
   const onShowTaskbarChange = useCallback(
     (selected: boolean) => {
-      storageIpc.update('app', {spotlightShowTaskbar: selected});
-      dispatch(settingsActions.setSettingsState({key: 'spotlightShowTaskbar', value: selected}));
+      storageIpc.update('app', {floatChatShowTaskbar: selected});
+      dispatch(settingsActions.setSettingsState({key: 'floatChatShowTaskbar', value: selected}));
     },
     [dispatch],
   );
 
   const titleText = 'Show in Taskbar';
-  const descriptionText = 'Show the Spotlight Chat window in the system taskbar when visible.';
+  const descriptionText = 'Show the Float Chat window in the system taskbar when visible.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'spotlight', 'chat', 'taskbar', 'show']}>
+    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'float', 'chat', 'taskbar', 'show']}>
       <LynxSwitch
         title={titleText}
         description={descriptionText}
-        isDisabled={disableSpotlight}
-        enabled={spotlightShowTaskbar}
+        isDisabled={disableFloatChat}
+        enabled={floatChatShowTaskbar}
         onEnabledChange={onShowTaskbarChange}
       />
     </SettingsFilterItem>

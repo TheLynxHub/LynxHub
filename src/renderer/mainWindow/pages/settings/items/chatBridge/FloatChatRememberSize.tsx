@@ -7,30 +7,29 @@ import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
 
-export default function SpotlightRememberSize() {
-  const spotlightRememberSize = useSettingsState('spotlightRememberSize');
-  const disableSpotlight = useSettingsState('disableSpotlight');
+export default function FloatChatRememberSize() {
+  const floatChatRememberSize = useSettingsState('floatChatRememberSize');
+  const disableFloatChat = useSettingsState('disableFloatChat');
   const dispatch = useDispatch<AppDispatch>();
 
   const onRememberSizeChange = useCallback(
     (selected: boolean) => {
-      storageIpc.update('app', {spotlightRememberSize: selected});
-      dispatch(settingsActions.setSettingsState({key: 'spotlightRememberSize', value: selected}));
+      storageIpc.update('app', {floatChatRememberSize: selected});
+      dispatch(settingsActions.setSettingsState({key: 'floatChatRememberSize', value: selected}));
     },
     [dispatch],
   );
 
   const titleText = 'Remember Size';
-  const descriptionText = 'Remember the size of the Spotlight Chat window and open it at the same size next time.';
+  const descriptionText = 'Remember the size of the Float Chat window and open it at the same size next time.';
 
   return (
-    <SettingsFilterItem
-      searchTexts={[titleText, descriptionText, 'spotlight', 'chat', 'remember', 'size', 'dimensions']}>
+    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'float', 'chat', 'remember', 'size', 'dimensions']}>
       <LynxSwitch
         title={titleText}
         description={descriptionText}
-        isDisabled={disableSpotlight}
-        enabled={spotlightRememberSize}
+        isDisabled={disableFloatChat}
+        enabled={floatChatRememberSize}
         onEnabledChange={onRememberSizeChange}
       />
     </SettingsFilterItem>

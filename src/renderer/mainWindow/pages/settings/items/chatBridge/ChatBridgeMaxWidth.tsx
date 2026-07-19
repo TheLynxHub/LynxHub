@@ -10,26 +10,26 @@ import SettingsSearchHighlight from '../../SettingsSearchHighlight';
 
 type MaxWidthOption = 'default' | 'wide' | 'full' | 'small';
 
-export default function ChatMaxWidth() {
-  const onlineChatMaxWidth = useSettingsState('onlineChatMaxWidth') || 'default';
+export default function ChatBridgeMaxWidth() {
+  const chatBridgeMaxWidth = useSettingsState('chatBridgeMaxWidth') || 'default';
   const dispatch = useDispatch<AppDispatch>();
 
   const onChange = useCallback(
     (key: Key | null) => {
       if (!key || typeof key === 'number') return;
       const value = key as MaxWidthOption;
-      storageIpc.update('app', {onlineChatMaxWidth: value});
-      dispatch(settingsActions.setSettingsState({key: 'onlineChatMaxWidth', value}));
+      storageIpc.update('app', {chatBridgeMaxWidth: value});
+      dispatch(settingsActions.setSettingsState({key: 'chatBridgeMaxWidth', value}));
     },
     [dispatch],
   );
 
   const titleText = 'Chat Maximum Width';
-  const descriptionText = 'Select how wide online chat messages and input controls can expand.';
+  const descriptionText = 'Select how wide chat bridge messages and input controls can expand.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'chat', 'width', 'max', 'size', 'online']}>
-      <Select onChange={onChange} value={onlineChatMaxWidth}>
+    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'chat', 'width', 'max', 'size', 'bridge']}>
+      <Select onChange={onChange} value={chatBridgeMaxWidth}>
         <Label>
           <SettingsSearchHighlight text={titleText} />
         </Label>

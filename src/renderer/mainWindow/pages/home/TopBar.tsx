@@ -46,13 +46,13 @@ export default function HomeTopBar() {
     addRunningEmpty('both');
   };
 
-  const handleNewOnlineChat = () => {
-    AddBreadcrumb_Renderer(`New Online Chat Tab`);
+  const handleNewChatBridge = () => {
+    AddBreadcrumb_Renderer(`New Chat Bridge Tab`);
     dispatch(
       tabsActions.addTab({
-        id: 'online-chat',
-        title: 'Online Chat',
-        pageID: PageID.onlineChat,
+        id: 'chat-bridge',
+        title: 'Chat Bridge',
+        pageID: PageID.chatBridge,
         isLoading: false,
         isTerminal: false,
         favIcon: {show: false, url: ''},
@@ -72,7 +72,7 @@ export default function HomeTopBar() {
         animate={{scale: 1, translateY: 0, opacity: 1}}
         initial={{scale: 0.96, translateY: -10, opacity: 0}}>
         <motion.div transition={{delay: 0.05}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
-          <Button size="sm" variant="tertiary" onPress={handleNewOnlineChat}>
+          <Button size="sm" variant="tertiary" onPress={handleNewChatBridge}>
             <ChatRound />
             Chat
           </Button>

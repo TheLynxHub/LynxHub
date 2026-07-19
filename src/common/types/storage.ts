@@ -106,15 +106,15 @@ export type AppConfigStorage = {
   lastPromoShownActiveDaysCount?: number;
   imageCacheIntervalDays: number;
   imageCacheMaxSize: number;
-  spotlightAlwaysOnTop: boolean;
-  spotlightShowTaskbar: boolean;
-  spotlightRememberSize: boolean;
-  spotlightRememberPosition: boolean;
-  spotlightLastSize?: {width: number; height: number};
-  spotlightLastPosition?: {x: number; y: number};
-  disableSpotlight: boolean;
-  spotlightKeepInBackground: boolean;
-  onlineChatMaxWidth: 'default' | 'wide' | 'full' | 'small';
+  floatChatAlwaysOnTop: boolean;
+  floatChatShowTaskbar: boolean;
+  floatChatRememberSize: boolean;
+  floatChatRememberPosition: boolean;
+  floatChatLastSize?: {width: number; height: number};
+  floatChatLastPosition?: {x: number; y: number};
+  disableFloatChat: boolean;
+  floatChatKeepInBackground: boolean;
+  chatBridgeMaxWidth: 'default' | 'wide' | 'full' | 'small';
 };
 
 /**

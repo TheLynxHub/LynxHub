@@ -1,5 +1,5 @@
 import {useAllCardDataWithPath} from '@lynx/plugins/modules';
-import {onlineChatActions, OnlineChatModuleState, useOnlineChatSelector} from '@lynx/redux/reducers/onlineChat';
+import {chatBridgeActions, ChatBridgeModuleState, useChatBridgeSelector} from '@lynx/redux/reducers/chatBridge';
 import {useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
 import browserIpc from '@lynx_shared/ipc/browser';
@@ -13,9 +13,9 @@ export function useOnlineBgManager() {
   const dispatch = useDispatch<AppDispatch>();
   const allCards = useAllCardDataWithPath();
   const activeTab = useTabsState('activeTab');
-  const bgChatEnabledCards = useOnlineChatSelector(state => state.bgChatEnabledCards);
-  const activeUniversalCardId = useOnlineChatSelector(state => state.activeUniversalCardId);
-  const modules = useOnlineChatSelector(state => state.modules);
+  const bgChatEnabledCards = useChatBridgeSelector(state => state.bgChatEnabledCards);
+  const activeUnifiedCardId = useChatBridgeSelector(state => state.activeUnifiedCardId);
+  const modules = useChatBridgeSelector(state => state.modules);
 
   const modulesRef = useRef(modules);
   useEffect(() => {
@@ -24,18 +24,18 @@ export function useOnlineBgManager() {
 
   const ignoreCounterRef = useRef<{[cardId: string]: number}>({});
 
-  const onlineCards = useMemo(() => allCards.filter(card => card.isOnline && card.id !== 'universal'), [allCards]);
+  const onlineCards = useMemo(() => allCards.filter(card => card.isOnline && card.id !== 'unified'), [allCards]);
 
   // Determine active AI Card ID
   const activeAiId = useMemo(() => {
-    if (activeTab?.startsWith('online-chat-')) {
-      return activeTab.replace('online-chat-', '');
+    if (activeTab?.startsWith('chat-bridge-')) {
+      return activeTab.replace('chat-bridge-', '');
     }
-    if (activeTab === 'online-chat') {
-      return activeUniversalCardId;
+    if (activeTab === 'chat-bridge') {
+      return activeUnifiedCardId;
     }
     return null;
-  }, [activeTab, activeUniversalCardId]);
+  }, [activeTab, activeUnifiedCardId]);
 
   const loadedViews = useRef<Set<string>>(new Set());
   const activeIntervals = useRef<{[cardId: string]: NodeJS.Timeout[]}>({});
@@ -47,8 +47,8 @@ export function useOnlineBgManager() {
   useEffect(() => {
     storageIpc.get('plugin').then(plugin => {
       if (plugin?.bgChatEnabledCards) {
-        dispatch(onlineChatActions.setBgChatEnabledCards(plugin.bgChatEnabledCards));
-        dispatch(onlineChatActions.setVisibleModuleIds(plugin.bgChatEnabledCards));
+        dispatch(chatBridgeActions.setBgChatEnabledCards(plugin.bgChatEnabledCards));
+        dispatch(chatBridgeActions.setVisibleModuleIds(plugin.bgChatEnabledCards));
       }
     });
   }, [dispatch]);
@@ -62,9 +62,9 @@ export function useOnlineBgManager() {
       targetCardIds.add(activeAiId);
     }
 
-    // Add active universal AI if set (for Spotlight Chat or Universal Mode sync)
-    if (activeUniversalCardId && onlineCards.some(c => c.id === activeUniversalCardId)) {
-      targetCardIds.add(activeUniversalCardId);
+    // Add active unified AI if set (for Float Chat or Unified Mode sync)
+    if (activeUnifiedCardId && onlineCards.some(c => c.id === activeUnifiedCardId)) {
+      targetCardIds.add(activeUnifiedCardId);
     }
 
     // Add all background-enabled AIs
@@ -159,7 +159,7 @@ export function useOnlineBgManager() {
 
             const prevMsgs = prevMessagesRef.current[cardId] || [];
             const isSame = JSON.stringify(validMsgs) === JSON.stringify(prevMsgs);
-            const updates: Partial<OnlineChatModuleState> = {
+            const updates: Partial<ChatBridgeModuleState> = {
               messages: validMsgs,
               isGenerating,
               isHistoryLoading: false,
@@ -172,7 +172,7 @@ export function useOnlineBgManager() {
             prevMessagesRef.current[cardId] = validMsgs;
 
             dispatch(
-              onlineChatActions.setModuleState({
+              chatBridgeActions.setModuleState({
                 cardId,
                 updates,
               }),
@@ -209,7 +209,7 @@ export function useOnlineBgManager() {
             ) {
               if (activeIndex === moduleState.pendingActiveIndex) {
                 dispatch(
-                  onlineChatActions.setModuleState({
+                  chatBridgeActions.setModuleState({
                     cardId,
                     updates: {
                       pendingActiveIndex: null,
@@ -219,7 +219,7 @@ export function useOnlineBgManager() {
               }
             }
 
-            dispatch(onlineChatActions.setModuleChatHistory({cardId, chatHistory: history}));
+            dispatch(chatBridgeActions.setModuleChatHistory({cardId, chatHistory: history}));
           }
         } catch (err) {
           console.error(`Failed to scrape chat history for ${cardId}:`, err);
@@ -262,14 +262,14 @@ export function useOnlineBgManager() {
     const offLoading = browserIpc.on.loading((id, isLoading) => {
       if (id.startsWith('online-bg-') && !isLoading) {
         const cardId = id.replace('online-bg-', '');
-        dispatch(onlineChatActions.setModulePageLoaded({cardId, isPageLoaded: true}));
+        dispatch(chatBridgeActions.setModulePageLoaded({cardId, isPageLoaded: true}));
       }
     });
 
     const offDomReady = browserIpc.on.domReady((id, isReady) => {
       if (id.startsWith('online-bg-') && isReady) {
         const cardId = id.replace('online-bg-', '');
-        dispatch(onlineChatActions.setModulePageLoaded({cardId, isPageLoaded: true}));
+        dispatch(chatBridgeActions.setModulePageLoaded({cardId, isPageLoaded: true}));
       }
     });
 

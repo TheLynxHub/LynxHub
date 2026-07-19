@@ -10,7 +10,7 @@ import {getUserAgent, getWindowColor, RelaunchApp} from '@lynx_main/utils';
 import {app, BrowserWindow, BrowserWindowConstructorOptions, shell, WebContents} from 'electron';
 
 import icon from '../../../resources/icon.png?asset';
-import {CloseSpotlightWindow} from '../childWindows/spotlightChat';
+import {CloseFloatChatWindow} from '../childWindows/floatChat';
 
 type Listener = () => void;
 
@@ -153,8 +153,8 @@ export default class MainWindowManager {
 
     mainWindow.on('close', () => {
       this.mainWindow = undefined;
-      // Close/destroy the spotlight window when the main window closes
-      CloseSpotlightWindow(true);
+      // Close/destroy the float window when the main window closes
+      CloseFloatChatWindow(true);
     });
 
     mainWindow.on('minimize', this.handleMinimize);

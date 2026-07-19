@@ -57,7 +57,7 @@ const getPageIcon = (pageID: string) => {
       return <PluginPage_Icon className="size-full" />;
     case PageID.settings:
       return <SettingPage_Icon className="size-full" />;
-    case PageID.onlineChat:
+    case PageID.chatBridge:
       return <ChatRound className="size-full" />;
     default: {
       const customPage = (extensionsData.router.pages || []).find(p => p.id === pageID);
@@ -97,7 +97,7 @@ const TabIcon = memo(({tab, currentView}: Props) => {
         <Avatar className="size-4 rounded-none bg-transparent">
           <Avatar.Image alt={title} onError={handleImgError} src={getCacheUrl(favIcon.url)} />
           <Avatar.Fallback className="bg-transparent">
-            {pageID === PageID.onlineChat ? <ChatRound className="size-full" /> : <Earth />}
+            {pageID === PageID.chatBridge ? <ChatRound className="size-full" /> : <Earth />}
           </Avatar.Fallback>
         </Avatar>
       );

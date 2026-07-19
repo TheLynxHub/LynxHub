@@ -6,7 +6,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
 import {topToast} from '../../layouts/ToastProviders';
-import {onlineChatActions, useOnlineChatSelector} from '../../redux/reducers/onlineChat';
+import {chatBridgeActions, useChatBridgeSelector} from '../../redux/reducers/chatBridge';
 import {tabsActions, useTabsState} from '../../redux/reducers/tabs';
 import {AppDispatch} from '../../redux/store';
 import {resolveOnlineScript} from '../../utils/onlineChatScripts';
@@ -58,9 +58,9 @@ export function formatChatToPlainText(messages: Message[], cardTitle: string): s
   return header + body;
 }
 
-const universalCard: any = {
-  id: 'universal',
-  title: 'Universal Chat',
+const unifiedCard: any = {
+  id: 'unified',
+  title: 'Unified Chat',
   description: 'Chat with all enabled background AIs in a unified interface, with aggregated thread history.',
   isOnline: true,
   logoUrl: '',
@@ -70,20 +70,20 @@ const universalCard: any = {
   },
 };
 
-export function useOnlineChat(tabID = 'online-chat') {
+export function useChatBridge(tabID = 'chat-bridge') {
   const activeTab = useTabsState('activeTab');
   const dispatch = useDispatch<AppDispatch>();
   const allCards = useAllCardDataWithPath();
 
-  const bgChatEnabledCards = useOnlineChatSelector(state => state.bgChatEnabledCards);
-  const activeUniversalCardId = useOnlineChatSelector(state => state.activeUniversalCardId);
-  const visibleModuleIds = useOnlineChatSelector(state => state.visibleModuleIds);
-  const modules = useOnlineChatSelector(state => state.modules);
+  const bgChatEnabledCards = useChatBridgeSelector(state => state.bgChatEnabledCards);
+  const activeUnifiedCardId = useChatBridgeSelector(state => state.activeUnifiedCardId);
+  const visibleModuleIds = useChatBridgeSelector(state => state.visibleModuleIds);
+  const modules = useChatBridgeSelector(state => state.modules);
 
   const onlineCards = useMemo(() => {
-    const list = allCards.filter(card => card.isOnline && card.id !== 'universal');
+    const list = allCards.filter(card => card.isOnline && card.id !== 'unified');
     if (list.length > 0) {
-      return [universalCard, ...list];
+      return [unifiedCard, ...list];
     }
     return list;
   }, [allCards]);
@@ -91,7 +91,7 @@ export function useOnlineChat(tabID = 'online-chat') {
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const [step, setStep] = useState<ChatStep>('select_module');
 
-  const currentCardId = selectedCard?.id === 'universal' ? activeUniversalCardId : selectedCard?.id;
+  const currentCardId = selectedCard?.id === 'unified' ? activeUnifiedCardId : selectedCard?.id;
   const currentModule = currentCardId ? modules[currentCardId] : null;
 
   const messages = currentModule?.messages || [];
@@ -104,7 +104,7 @@ export function useOnlineChat(tabID = 'online-chat') {
   const unifiedHistory = useMemo(() => {
     if (!selectedCard) return [];
 
-    if (selectedCard.id !== 'universal') {
+    if (selectedCard.id !== 'unified') {
       const hist = currentModule?.chatHistory || [];
       return hist.map(item => ({
         ...item,
@@ -120,17 +120,17 @@ export function useOnlineChat(tabID = 'online-chat') {
           merged.push({
             ...item,
             cardId,
-            active: item.active && activeUniversalCardId === cardId,
+            active: item.active && activeUnifiedCardId === cardId,
           });
         });
       }
     });
     return merged;
-  }, [selectedCard, currentModule, modules, visibleModuleIds, activeUniversalCardId]);
+  }, [selectedCard, currentModule, modules, visibleModuleIds, activeUnifiedCardId]);
 
   // Handle visibility transitions
   useEffect(() => {
-    if (!currentCardId || currentCardId === 'universal') return;
+    if (!currentCardId || currentCardId === 'unified') return;
 
     const viewId = `online-bg-${currentCardId}`;
     const isTabFocused = activeTab === tabID;
@@ -157,20 +157,20 @@ export function useOnlineChat(tabID = 'online-chat') {
   const handleSelectCard = useCallback(
     (card: any) => {
       setSelectedCard(card);
-      if (card.id === 'universal') {
+      if (card.id === 'unified') {
         setStep('chat');
 
-        // Auto-enable all online AI cards for background scraping when entering Universal Chat
-        const allOnlineIds = onlineCards.filter(c => c.id !== 'universal').map(c => c.id);
+        // Auto-enable all online AI cards for background scraping when entering Unified Chat
+        const allOnlineIds = onlineCards.filter(c => c.id !== 'unified').map(c => c.id);
         if (bgChatEnabledCards.length === 0 && allOnlineIds.length > 0) {
-          dispatch(onlineChatActions.setBgChatEnabledCards(allOnlineIds));
-          dispatch(onlineChatActions.setVisibleModuleIds(allOnlineIds));
+          dispatch(chatBridgeActions.setBgChatEnabledCards(allOnlineIds));
+          dispatch(chatBridgeActions.setVisibleModuleIds(allOnlineIds));
           storageIpc.update('plugin', {bgChatEnabledCards: allOnlineIds});
-          dispatch(onlineChatActions.setActiveUniversalCardId(allOnlineIds[0]));
+          dispatch(chatBridgeActions.setActiveUnifiedCardId(allOnlineIds[0]));
         } else if (bgChatEnabledCards.length > 0) {
-          dispatch(onlineChatActions.setActiveUniversalCardId(bgChatEnabledCards[0]));
+          dispatch(chatBridgeActions.setActiveUnifiedCardId(bgChatEnabledCards[0]));
         } else {
-          dispatch(onlineChatActions.setActiveUniversalCardId(null));
+          dispatch(chatBridgeActions.setActiveUnifiedCardId(null));
         }
 
         dispatch(
@@ -182,7 +182,7 @@ export function useOnlineChat(tabID = 'online-chat') {
         );
       } else {
         setStep('login');
-        dispatch(onlineChatActions.setActiveUniversalCardId(card.id));
+        dispatch(chatBridgeActions.setActiveUnifiedCardId(card.id));
 
         dispatch(
           tabsActions.setTabFavIcon({
@@ -198,8 +198,8 @@ export function useOnlineChat(tabID = 'online-chat') {
 
   // Auto-select card if tab ID contains a card identifier
   useEffect(() => {
-    if (tabID.startsWith('online-chat-')) {
-      const cardId = tabID.replace('online-chat-', '');
+    if (tabID.startsWith('chat-bridge-')) {
+      const cardId = tabID.replace('chat-bridge-', '');
       const foundCard = onlineCards.find(c => c.id === cardId);
       if (foundCard && (!selectedCard || selectedCard.id !== cardId)) {
         handleSelectCard(foundCard);
@@ -210,7 +210,7 @@ export function useOnlineChat(tabID = 'online-chat') {
   const handleBackToSelect = useCallback(() => {
     setSelectedCard(null);
     setStep('select_module');
-    dispatch(onlineChatActions.setActiveUniversalCardId(null));
+    dispatch(chatBridgeActions.setActiveUnifiedCardId(null));
 
     dispatch(
       tabsActions.setTabFavIcon({
@@ -227,16 +227,16 @@ export function useOnlineChat(tabID = 'online-chat') {
   const currentTabTitle = currentTab?.title;
 
   useEffect(() => {
-    let targetTitle = 'Online Chat';
+    let targetTitle = 'Chat Bridge';
 
     if (step === 'login') {
-      targetTitle = selectedCard?.title || 'Online Chat';
+      targetTitle = selectedCard?.title || 'Chat Bridge';
     } else if (step === 'chat') {
       const activeItem = unifiedHistory.find(item => item.active);
       if (activeItem && activeItem.title) {
         targetTitle = activeItem.title;
       } else {
-        targetTitle = selectedCard?.id === 'universal' ? 'Universal Chat' : selectedCard?.title || 'Online Chat';
+        targetTitle = selectedCard?.id === 'unified' ? 'Unified Chat' : selectedCard?.title || 'Chat Bridge';
       }
     }
 
@@ -257,12 +257,12 @@ export function useOnlineChat(tabID = 'online-chat') {
 
       const viewId = `online-bg-${targetCardId}`;
       dispatch(
-        onlineChatActions.setModuleState({
+        chatBridgeActions.setModuleState({
           cardId: targetCardId,
           updates: {isHistoryLoading: true, messages: [], pendingActiveIndex: index},
         }),
       );
-      dispatch(onlineChatActions.setActiveUniversalCardId(targetCardId));
+      dispatch(chatBridgeActions.setActiveUnifiedCardId(targetCardId));
 
       const script = resolveOnlineScript('selectThread', card, {index});
 
@@ -289,7 +289,7 @@ export function useOnlineChat(tabID = 'online-chat') {
 
   const handleRefresh = useCallback(() => {
     if (!currentCardId) return;
-    dispatch(onlineChatActions.setModulePageLoaded({cardId: currentCardId, isPageLoaded: false}));
+    dispatch(chatBridgeActions.setModulePageLoaded({cardId: currentCardId, isPageLoaded: false}));
     browserIpc.send.reload(`online-bg-${currentCardId}`);
   }, [currentCardId, dispatch]);
 
@@ -301,12 +301,12 @@ export function useOnlineChat(tabID = 'online-chat') {
       if (!card || !card.onlineConfig) return;
 
       const viewId = `online-bg-${currentCardId}`;
-      dispatch(onlineChatActions.setModuleSending({cardId: currentCardId, isSending: true}));
-      dispatch(onlineChatActions.setModuleGenerating({cardId: currentCardId, isGenerating: true}));
+      dispatch(chatBridgeActions.setModuleSending({cardId: currentCardId, isSending: true}));
+      dispatch(chatBridgeActions.setModuleGenerating({cardId: currentCardId, isGenerating: true}));
 
       // Optimistically add locally
       dispatch(
-        onlineChatActions.setModuleMessages({
+        chatBridgeActions.setModuleMessages({
           cardId: currentCardId,
           messages: [...messages, {sender: 'user', text: messageText}],
         }),
@@ -319,7 +319,7 @@ export function useOnlineChat(tabID = 'online-chat') {
       } catch (err) {
         console.error('Failed to send message:', err);
       } finally {
-        dispatch(onlineChatActions.setModuleSending({cardId: currentCardId, isSending: false}));
+        dispatch(chatBridgeActions.setModuleSending({cardId: currentCardId, isSending: false}));
       }
     },
     [isSending, currentCardId, onlineCards, messages, dispatch],
@@ -380,7 +380,7 @@ export function useOnlineChat(tabID = 'online-chat') {
       const {newChat, url} = card.onlineConfig;
 
       dispatch(
-        onlineChatActions.setModuleState({
+        chatBridgeActions.setModuleState({
           cardId: targetCardId,
           updates: {
             messages: [],
@@ -391,8 +391,8 @@ export function useOnlineChat(tabID = 'online-chat') {
         }),
       );
 
-      if (selectedCard?.id === 'universal') {
-        dispatch(onlineChatActions.setActiveUniversalCardId(targetCardId));
+      if (selectedCard?.id === 'unified') {
+        dispatch(chatBridgeActions.setActiveUnifiedCardId(targetCardId));
       }
 
       const hasCustomNewChat = !!card.onlineConfig.scripts?.newChat;
@@ -404,18 +404,18 @@ export function useOnlineChat(tabID = 'online-chat') {
           const clicked = await browserIpc.invoke.executeJavaScript(viewId, script);
           if (!clicked && !hasCustomNewChat && newChat) {
             console.warn('New chat button not found, falling back to page reload/navigation:', newChat.value);
-            dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
+            dispatch(chatBridgeActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
             browserIpc.send.loadURL(viewId, url);
           }
         } catch (err) {
           console.error('Failed to click new chat button, falling back:', err);
           if (!hasCustomNewChat && newChat) {
-            dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
+            dispatch(chatBridgeActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
             browserIpc.send.loadURL(viewId, url);
           }
         }
       } else if (newChat && newChat.action === 'navigate') {
-        dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
+        dispatch(chatBridgeActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
         browserIpc.send.loadURL(viewId, newChat.value);
       }
     },
@@ -426,13 +426,13 @@ export function useOnlineChat(tabID = 'online-chat') {
     async (cardId: string) => {
       const enabled = bgChatEnabledCards.includes(cardId);
       const updated = enabled ? bgChatEnabledCards.filter(id => id !== cardId) : [...bgChatEnabledCards, cardId];
-      dispatch(onlineChatActions.setBgChatEnabledCards(updated));
+      dispatch(chatBridgeActions.setBgChatEnabledCards(updated));
 
       // Update filters initially to include it when enabling
       if (!enabled) {
-        dispatch(onlineChatActions.setVisibleModuleIds([...visibleModuleIds, cardId]));
+        dispatch(chatBridgeActions.setVisibleModuleIds([...visibleModuleIds, cardId]));
       } else {
-        dispatch(onlineChatActions.setVisibleModuleIds(visibleModuleIds.filter(id => id !== cardId)));
+        dispatch(chatBridgeActions.setVisibleModuleIds(visibleModuleIds.filter(id => id !== cardId)));
       }
 
       await storageIpc.update('plugin', {bgChatEnabledCards: updated});
@@ -461,11 +461,11 @@ export function useOnlineChat(tabID = 'online-chat') {
     handleSaveToFile,
     handleNewChat,
     // Background Scraper settings/state properties
-    activeUniversalCardId,
-    setActiveUniversalCardId: (id: string | null) => dispatch(onlineChatActions.setActiveUniversalCardId(id)),
+    activeUnifiedCardId,
+    setActiveUnifiedCardId: (id: string | null) => dispatch(chatBridgeActions.setActiveUnifiedCardId(id)),
     bgChatEnabledCards,
     visibleModuleIds,
     toggleBgChat,
-    setVisibleModuleIds: (ids: string[]) => dispatch(onlineChatActions.setVisibleModuleIds(ids)),
+    setVisibleModuleIds: (ids: string[]) => dispatch(chatBridgeActions.setVisibleModuleIds(ids)),
   };
 }

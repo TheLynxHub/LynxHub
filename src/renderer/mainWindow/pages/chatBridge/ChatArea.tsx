@@ -7,7 +7,7 @@ import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
 import {Send} from 'lucide-react';
 import {KeyboardEvent, memo, RefObject, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {Message} from './useOnlineChat';
+import {Message} from './useChatBridge';
 
 const maxWidthMap = {
   small: {messages: 'max-w-2xl', input: 'max-w-xl'},
@@ -159,8 +159,8 @@ const ChatArea = memo(
       }
     };
 
-    const onlineChatMaxWidth = useSettingsState('onlineChatMaxWidth') || 'default';
-    const widthClasses = useMemo(() => maxWidthMap[onlineChatMaxWidth] || maxWidthMap.default, [onlineChatMaxWidth]);
+    const chatBridgeMaxWidth = useSettingsState('chatBridgeMaxWidth') || 'default';
+    const widthClasses = useMemo(() => maxWidthMap[chatBridgeMaxWidth] || maxWidthMap.default, [chatBridgeMaxWidth]);
 
     return (
       <div className="flex size-full flex-col overflow-hidden bg-surface">
@@ -172,7 +172,7 @@ const ChatArea = memo(
             ) : messages.length === 0 ? (
               <div className="flex flex-col text-semi-muted items-center justify-center flex-1 text-center gap-y-2">
                 <ChatRound className="size-12" />
-                {selectedCard?.id === 'universal' && !activeCard ? (
+                {selectedCard?.id === 'unified' && !activeCard ? (
                   <>
                     <div className="font-semibold">No background AIs active</div>
                     <div className="text-xs text-muted max-w-sm">

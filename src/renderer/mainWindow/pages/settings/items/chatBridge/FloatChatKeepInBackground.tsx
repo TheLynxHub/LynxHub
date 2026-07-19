@@ -7,22 +7,22 @@ import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
 
-export default function SpotlightKeepInBackground() {
-  const spotlightKeepInBackground = useSettingsState('spotlightKeepInBackground');
-  const disableSpotlight = useSettingsState('disableSpotlight');
+export default function FloatChatKeepInBackground() {
+  const floatChatKeepInBackground = useSettingsState('floatChatKeepInBackground');
+  const disableFloatChat = useSettingsState('disableFloatChat');
   const dispatch = useDispatch<AppDispatch>();
 
   const onKeepInBackgroundChange = useCallback(
     (selected: boolean) => {
-      storageIpc.update('app', {spotlightKeepInBackground: selected});
-      dispatch(settingsActions.setSettingsState({key: 'spotlightKeepInBackground', value: selected}));
+      storageIpc.update('app', {floatChatKeepInBackground: selected});
+      dispatch(settingsActions.setSettingsState({key: 'floatChatKeepInBackground', value: selected}));
     },
     [dispatch],
   );
 
   const titleText = 'Keep in Background';
   const descriptionText =
-    'Keep the Spotlight window loaded in the background for instant retrieval. ' +
+    'Keep the Float Chat window loaded in the background for instant retrieval. ' +
     'If disabled, window is closed/recreated on every hotkey press to prevent memory usage.';
 
   return (
@@ -30,7 +30,7 @@ export default function SpotlightKeepInBackground() {
       searchTexts={[
         titleText,
         descriptionText,
-        'spotlight',
+        'float',
         'chat',
         'background',
         'keep',
@@ -41,8 +41,8 @@ export default function SpotlightKeepInBackground() {
       <LynxSwitch
         title={titleText}
         description={descriptionText}
-        isDisabled={disableSpotlight}
-        enabled={spotlightKeepInBackground}
+        isDisabled={disableFloatChat}
+        enabled={floatChatKeepInBackground}
         onEnabledChange={onKeepInBackgroundChange}
       />
     </SettingsFilterItem>

@@ -8,9 +8,9 @@ import {createReduxEnhancer} from '@sentry/react';
 import {actionLoggerMiddleware} from './middleware/actionLogger';
 import app from './reducers/app';
 import cards from './reducers/cards';
+import chatBridge from './reducers/chatBridge';
 import hotkeys from './reducers/hotkeys';
 import modals from './reducers/modals';
-import onlineChat from './reducers/onlineChat';
 import plugins from './reducers/plugins';
 import settings from './reducers/settings';
 import tabs from './reducers/tabs';
@@ -32,7 +32,7 @@ const staticReducers = {
   plugins,
   volume,
   trigger,
-  onlineChat,
+  chatBridge,
 };
 
 const emptyHotkeyInput = {
@@ -127,13 +127,13 @@ const buildPreloadedState = (): PreloadState | undefined => {
       searchValue: '',
       searchWords: [],
       selectedSection: '',
-      spotlightAlwaysOnTop: storage.app.spotlightAlwaysOnTop ?? true,
-      spotlightShowTaskbar: storage.app.spotlightShowTaskbar ?? false,
-      spotlightRememberSize: storage.app.spotlightRememberSize ?? false,
-      spotlightRememberPosition: storage.app.spotlightRememberPosition ?? false,
-      disableSpotlight: storage.app.disableSpotlight ?? false,
-      spotlightKeepInBackground: storage.app.spotlightKeepInBackground ?? true,
-      onlineChatMaxWidth: storage.app.onlineChatMaxWidth ?? 'default',
+      floatChatAlwaysOnTop: storage.app.floatChatAlwaysOnTop ?? true,
+      floatChatShowTaskbar: storage.app.floatChatShowTaskbar ?? false,
+      floatChatRememberSize: storage.app.floatChatRememberSize ?? false,
+      floatChatRememberPosition: storage.app.floatChatRememberPosition ?? false,
+      disableFloatChat: storage.app.disableFloatChat ?? false,
+      floatChatKeepInBackground: storage.app.floatChatKeepInBackground ?? true,
+      chatBridgeMaxWidth: storage.app.chatBridgeMaxWidth ?? 'default',
     },
     terminal: storage.terminal,
     volume: {

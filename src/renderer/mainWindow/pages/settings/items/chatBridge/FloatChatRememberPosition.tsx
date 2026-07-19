@@ -7,32 +7,31 @@ import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
 
-export default function SpotlightRememberPosition() {
-  const spotlightRememberPosition = useSettingsState('spotlightRememberPosition');
-  const disableSpotlight = useSettingsState('disableSpotlight');
+export default function FloatChatRememberPosition() {
+  const floatChatRememberPosition = useSettingsState('floatChatRememberPosition');
+  const disableFloatChat = useSettingsState('disableFloatChat');
   const dispatch = useDispatch<AppDispatch>();
 
   const onRememberPositionChange = useCallback(
     (selected: boolean) => {
-      storageIpc.update('app', {spotlightRememberPosition: selected});
-      dispatch(settingsActions.setSettingsState({key: 'spotlightRememberPosition', value: selected}));
+      storageIpc.update('app', {floatChatRememberPosition: selected});
+      dispatch(settingsActions.setSettingsState({key: 'floatChatRememberPosition', value: selected}));
     },
     [dispatch],
   );
 
   const titleText = 'Remember Position';
   const descriptionText =
-    'Remember the position of the Spotlight Chat window and open it at the same location. ' +
+    'Remember the position of the Float Chat window and open it at the same location. ' +
     'If disabled, always opens centered on the active display.';
 
   return (
-    <SettingsFilterItem
-      searchTexts={[titleText, descriptionText, 'spotlight', 'chat', 'remember', 'position', 'location']}>
+    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'float', 'chat', 'remember', 'position', 'location']}>
       <LynxSwitch
         title={titleText}
         description={descriptionText}
-        isDisabled={disableSpotlight}
-        enabled={spotlightRememberPosition}
+        isDisabled={disableFloatChat}
+        enabled={floatChatRememberPosition}
         onEnabledChange={onRememberPositionChange}
       />
     </SettingsFilterItem>

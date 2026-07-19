@@ -7,13 +7,13 @@ import ChatArea from './ChatArea';
 import ChatSidebar from './ChatSidebar';
 import ChatTopBar from './ChatTopBar';
 import ModuleSelector from './ModuleSelector';
-import {useOnlineChat} from './useOnlineChat';
+import {useChatBridge} from './useChatBridge';
 
 interface Props {
   tabID?: string;
 }
 
-const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
+const ChatBridgePage = memo(({tabID = 'chat-bridge'}: Props) => {
   const {
     selectedCard,
     step,
@@ -34,13 +34,13 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
     handleCopyToClipboard,
     handleSaveToFile,
     handleNewChat,
-    activeUniversalCardId,
+    activeUnifiedCardId,
     bgChatEnabledCards,
     visibleModuleIds,
     toggleBgChat,
     setVisibleModuleIds,
-    setActiveUniversalCardId,
-  } = useOnlineChat(tabID);
+    setActiveUnifiedCardId,
+  } = useChatBridge(tabID);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
@@ -49,8 +49,8 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
   const [initialInputText, setInitialInputText] = useState('');
 
   const activeCard = useMemo(() => {
-    return onlineCards.find(c => c.id === activeUniversalCardId);
-  }, [onlineCards, activeUniversalCardId]);
+    return onlineCards.find(c => c.id === activeUnifiedCardId);
+  }, [onlineCards, activeUnifiedCardId]);
 
   const handleContextMenu = useCallback(
     (e: MouseEvent) => {
@@ -66,12 +66,12 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
       }
       e.preventDefault();
 
-      contextMenuIpc.send.openOnlineChatMenu(
+      contextMenuIpc.send.openChatBridgeMenu(
         tabID,
         {
           step,
           hasMessages: messages.length > 0,
-          hasNewChat: !!selectedCard?.onlineConfig?.newChat || selectedCard?.id === 'universal',
+          hasNewChat: !!selectedCard?.onlineConfig?.newChat || selectedCard?.id === 'unified',
           selectionText,
         },
         {x: e.clientX, y: e.clientY},
@@ -81,7 +81,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
   );
 
   useEffect(() => {
-    const offAction = contextMenuIpc.on.onlineChatAction((targetTabID, action, payload) => {
+    const offAction = contextMenuIpc.on.chatBridgeAction((targetTabID, action, payload) => {
       if (targetTabID !== tabID) return;
 
       switch (action) {
@@ -168,15 +168,15 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
           onScrollBottom={handleScrollBottom}
           bgChatEnabledCards={bgChatEnabledCards}
           onCopyToClipboard={handleCopyToClipboard}
-          activeUniversalCardId={activeUniversalCardId}
-          onSelectActiveCard={setActiveUniversalCardId}
-          showBackButton={!tabID.startsWith('online-chat-')}
+          activeUnifiedCardId={activeUnifiedCardId}
+          onSelectActiveCard={setActiveUnifiedCardId}
+          showBackButton={!tabID.startsWith('chat-bridge-')}
         />
         <div className="absolute inset-0 top-12! overflow-hidden flex flex-row">
-          {step === 'chat' && (selectedCard?.id === 'universal' || selectedCard?.onlineConfig?.selectors?.chatItem) && (
+          {step === 'chat' && (selectedCard?.id === 'unified' || selectedCard?.onlineConfig?.selectors?.chatItem) && (
             <ChatSidebar
               onNewChat={
-                selectedCard?.id === 'universal' || selectedCard?.onlineConfig?.newChat ? handleNewChat : undefined
+                selectedCard?.id === 'unified' || selectedCard?.onlineConfig?.newChat ? handleNewChat : undefined
               }
               chatHistory={chatHistory}
               onlineCards={onlineCards}
@@ -226,6 +226,6 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
   );
 });
 
-OnlineChatPage.displayName = 'OnlineChatPage';
+ChatBridgePage.displayName = 'ChatBridgePage';
 
-export default OnlineChatPage;
+export default ChatBridgePage;

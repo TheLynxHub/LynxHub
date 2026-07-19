@@ -395,26 +395,26 @@ export class StorageMigrationManager {
 
   private migrate_1_10() {
     if (this.storage.data.app) {
-      if (this.storage.data.app.spotlightAlwaysOnTop === undefined) {
-        this.storage.data.app.spotlightAlwaysOnTop = true;
+      if (this.storage.data.app.floatChatAlwaysOnTop === undefined) {
+        this.storage.data.app.floatChatAlwaysOnTop = true;
       }
-      if (this.storage.data.app.spotlightShowTaskbar === undefined) {
-        this.storage.data.app.spotlightShowTaskbar = false;
+      if (this.storage.data.app.floatChatShowTaskbar === undefined) {
+        this.storage.data.app.floatChatShowTaskbar = false;
       }
-      if (this.storage.data.app.spotlightRememberSize === undefined) {
-        this.storage.data.app.spotlightRememberSize = false;
+      if (this.storage.data.app.floatChatRememberSize === undefined) {
+        this.storage.data.app.floatChatRememberSize = false;
       }
-      if (this.storage.data.app.spotlightRememberPosition === undefined) {
-        this.storage.data.app.spotlightRememberPosition = false;
+      if (this.storage.data.app.floatChatRememberPosition === undefined) {
+        this.storage.data.app.floatChatRememberPosition = false;
       }
-      if (this.storage.data.app.disableSpotlight === undefined) {
-        this.storage.data.app.disableSpotlight = false;
+      if (this.storage.data.app.disableFloatChat === undefined) {
+        this.storage.data.app.disableFloatChat = false;
       }
-      if (this.storage.data.app.spotlightKeepInBackground === undefined) {
-        this.storage.data.app.spotlightKeepInBackground = true;
+      if (this.storage.data.app.floatChatKeepInBackground === undefined) {
+        this.storage.data.app.floatChatKeepInBackground = true;
       }
-      if (this.storage.data.app.onlineChatMaxWidth === undefined) {
-        this.storage.data.app.onlineChatMaxWidth = 'default';
+      if (this.storage.data.app.chatBridgeMaxWidth === undefined) {
+        this.storage.data.app.chatBridgeMaxWidth = 'default';
       }
     }
   }

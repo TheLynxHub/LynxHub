@@ -511,10 +511,10 @@ export default class BrowserManager {
             const {x, y, width, height} = this.lastViewSize;
             view.setBounds({x: x || 0, y: y || 80, width, height});
           } else {
-            // Fallback default bounds for spotlight/other windows
+            // Fallback default bounds for float chat/other windows
             const bounds = destWindow.getBounds();
-            const isSpotlight = destWindow === classHolder.spotlightChatWindow;
-            if (isSpotlight) {
+            const isFloatChat = destWindow === classHolder.floatChatWindow;
+            if (isFloatChat) {
               view.setBounds({x: 0, y: 48, width: bounds.width, height: bounds.height - 48});
             } else {
               view.setBounds({x: 200, y: 48, width: bounds.width - 200, height: bounds.height - 48});
@@ -688,19 +688,19 @@ export default class BrowserManager {
     );
   }
 
-  public handleSpotlightHidden() {
-    const spotlightWin = classHolder.spotlightChatWindow;
-    if (!spotlightWin) return;
+  public handleFloatChatHidden() {
+    const floatWin = classHolder.floatChatWindow;
+    if (!floatWin) return;
 
     const mainWindow = this.getMainWindow();
     if (!mainWindow || mainWindow.isDestroyed()) return;
 
     this.browsers.forEach(browser => {
-      if (browser.attachedWindow === spotlightWin) {
+      if (browser.attachedWindow === floatWin) {
         try {
-          spotlightWin.contentView.removeChildView(browser.view);
+          floatWin.contentView.removeChildView(browser.view);
         } catch (e) {
-          console.warn('Failed to remove view from spotlight on hide:', e);
+          console.warn('Failed to remove view from float window on hide:', e);
         }
         browser.attachedWindow = undefined;
         browser.visible = false;
@@ -711,7 +711,7 @@ export default class BrowserManager {
             mainWindow.contentView.addChildView(browser.view, 0);
             browser.attachedWindow = mainWindow;
           } catch (e) {
-            console.warn('Failed to restore background view to main window on spotlight hide:', e);
+            console.warn('Failed to restore background view to main window on float window hide:', e);
           }
         }
       }

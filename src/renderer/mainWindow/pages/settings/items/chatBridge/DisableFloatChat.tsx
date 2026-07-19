@@ -7,27 +7,27 @@ import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
 
-export default function DisableSpotlight() {
-  const disableSpotlight = useSettingsState('disableSpotlight');
+export default function DisableFloatChat() {
+  const disableFloatChat = useSettingsState('disableFloatChat');
   const dispatch = useDispatch<AppDispatch>();
 
   const onDisableChange = useCallback(
     (selected: boolean) => {
-      storageIpc.update('app', {disableSpotlight: selected});
-      dispatch(settingsActions.setSettingsState({key: 'disableSpotlight', value: selected}));
+      storageIpc.update('app', {disableFloatChat: selected});
+      dispatch(settingsActions.setSettingsState({key: 'disableFloatChat', value: selected}));
     },
     [dispatch],
   );
 
-  const titleText = 'Disable Spotlight completely';
+  const titleText = 'Disable Float Chat completely';
   const descriptionText =
-    'Disable the global system hotkey, loading of window, and all related Spotlight Chat functionality.';
+    'Disable the global system hotkey, loading of window, and all related Float Chat functionality.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'spotlight', 'chat', 'disable', 'off']}>
+    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'float', 'chat', 'disable', 'off']}>
       <LynxSwitch
         title={titleText}
-        enabled={disableSpotlight}
+        enabled={disableFloatChat}
         description={descriptionText}
         onEnabledChange={onDisableChange}
       />

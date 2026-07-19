@@ -35,7 +35,7 @@ const ChatSidebar = memo(
       <div className="w-60 h-full bg-background/50 flex flex-col shrink-0 rounded-tr-2xl">
         <div className="px-3.5 pt-3 pb-1 flex items-center justify-between gap-2 shrink-0">
           <div className="flex-1">
-            {selectedCard?.id === 'universal' ? (
+            {selectedCard?.id === 'unified' ? (
               <Dropdown>
                 <Dropdown.Trigger className="w-full">
                   <Button
@@ -53,7 +53,7 @@ const ChatSidebar = memo(
                       if (onNewChat) onNewChat(String(key));
                     }}>
                     {onlineCards
-                      .filter(c => c.id !== 'universal')
+                      .filter(c => c.id !== 'unified')
                       .map(c => (
                         <Dropdown.Item id={c.id} key={c.id} textValue={`New Chat on ${c.title}`}>
                           <Avatar className="size-4 shrink-0 rounded-md">
@@ -84,7 +84,7 @@ const ChatSidebar = memo(
             )}
           </div>
 
-          {selectedCard?.id === 'universal' && (
+          {selectedCard?.id === 'unified' && (
             <Popover>
               <Popover.Trigger>
                 <Button size="sm" variant="tertiary" className="shrink-0" aria-label="Filter AIs" isIconOnly>
@@ -95,7 +95,7 @@ const ChatSidebar = memo(
                 <Popover.Dialog className="w-56 flex flex-col gap-2.5">
                   <div className="text-xs font-bold text-muted border-b border-border pb-1">Filter AI</div>
                   {onlineCards
-                    .filter(c => c.id !== 'universal')
+                    .filter(c => c.id !== 'unified')
                     .map(c => {
                       const isVisible = visibleModuleIds.includes(c.id);
 
@@ -170,7 +170,7 @@ const ChatSidebar = memo(
                   )}
 
                   <div className="relative z-10 flex items-center gap-2 w-full">
-                    {selectedCard?.id === 'universal' && card ? (
+                    {selectedCard?.id === 'unified' && card ? (
                       <Avatar className="size-4 shrink-0 rounded-md">
                         <Avatar.Image alt={card.title} src={getCacheUrl(card.logoUrl)} />
                         <Avatar.Fallback className="text-[8px]">{getFallbackString(card.title)}</Avatar.Fallback>

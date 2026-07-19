@@ -141,13 +141,13 @@ export default function useShowEvents() {
       );
     });
 
-    // Online Chat Menu
-    const offOnlineChatMenu = contextMenuIpc.on.onlineChatMenu((tabID, data) => {
+    // Chat Bridge Menu
+    const offChatBridgeMenu = contextMenuIpc.on.onChatBridgeMenu((tabID, data) => {
       dispatch(
         contextActions.showLayout({
-          key: 'onlineChatMenu',
+          key: 'chatBridgeMenu',
           value: {tabID, ...data},
-          layout: MenuTypes.OnlineChatMenu,
+          layout: MenuTypes.ChatBridgeMenu,
         }),
       );
     });
@@ -221,7 +221,7 @@ export default function useShowEvents() {
       offTerminateTab();
       offVolume();
       OffDownloads();
-      offOnlineChatMenu();
+      offChatBridgeMenu();
       offPrompt();
       offAlert();
       offConfirm();

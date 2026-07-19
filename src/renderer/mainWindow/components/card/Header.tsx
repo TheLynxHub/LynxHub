@@ -46,7 +46,7 @@ export const CardHeaderContent = memo(({modifiedTitle, onTitleChange, updateAvai
     <CardHeader className="justify-between flex-row">
       <div className="inline-flex items-center gap-2">
         <Avatar className={`size-12 shrink-0 ${isInstalled && 'ring-accent ring-2'}`}>
-          {id === 'universal' ? (
+          {id === 'unified' ? (
             <ChatRound className="size-6 text-accent" />
           ) : (
             <>

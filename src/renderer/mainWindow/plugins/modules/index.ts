@@ -486,27 +486,27 @@ const loadModules = async () => {
 
     const hasOnlineCard = newAllCards.some(card => card.isOnline);
     if (hasOnlineCard) {
-      const universalCard: CardData = {
-        id: 'universal',
-        title: 'Universal Chat',
+      const unifiedCard: CardData = {
+        id: 'unified',
+        title: 'Unified Chat',
         description: 'Chat with all enabled background AIs in a unified interface, with aggregated thread history.',
         isOnline: true,
         logoUrl: '',
         iconUrl: '',
         developer: 'LynxHub',
       };
-      newAllCards.push(universalCard);
-      const {arguments: args, methods, supportCustomArguments, ...cardWithoutInternals} = universalCard;
+      newAllCards.push(unifiedCard);
+      const {arguments: args, methods, supportCustomArguments, ...cardWithoutInternals} = unifiedCard;
       newCardDataWithPath.push({...cardWithoutInternals, routePath: 'textGen_page'});
-      newCardArguments.push({id: universalCard.id, arguments: args, supportCustomArguments});
-      newCardMethods.push({id: universalCard.id, methods});
-      newCardSearchIndex.push({id: universalCard.id, tokens: buildCardSearchTokens(universalCard)});
+      newCardArguments.push({id: unifiedCard.id, arguments: args, supportCustomArguments});
+      newCardMethods.push({id: unifiedCard.id, methods});
+      newCardSearchIndex.push({id: unifiedCard.id, tokens: buildCardSearchTokens(unifiedCard)});
 
       const existingModuleIndex = newAllModules.findIndex(m => m.routePath === 'textGen_page');
       if (existingModuleIndex !== -1) {
-        newAllModules[existingModuleIndex].cards.push(universalCard);
+        newAllModules[existingModuleIndex].cards.push(unifiedCard);
       } else {
-        newAllModules.push({routePath: 'textGen_page', cards: [universalCard]});
+        newAllModules.push({routePath: 'textGen_page', cards: [unifiedCard]});
       }
     }
 

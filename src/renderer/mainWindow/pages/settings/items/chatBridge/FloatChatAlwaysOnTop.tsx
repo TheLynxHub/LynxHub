@@ -7,29 +7,29 @@ import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
 
-export default function SpotlightAlwaysOnTop() {
-  const spotlightAlwaysOnTop = useSettingsState('spotlightAlwaysOnTop');
-  const disableSpotlight = useSettingsState('disableSpotlight');
+export default function FloatChatAlwaysOnTop() {
+  const floatChatAlwaysOnTop = useSettingsState('floatChatAlwaysOnTop');
+  const disableFloatChat = useSettingsState('disableFloatChat');
   const dispatch = useDispatch<AppDispatch>();
 
   const onAlwaysOnTopChange = useCallback(
     (selected: boolean) => {
-      storageIpc.update('app', {spotlightAlwaysOnTop: selected});
-      dispatch(settingsActions.setSettingsState({key: 'spotlightAlwaysOnTop', value: selected}));
+      storageIpc.update('app', {floatChatAlwaysOnTop: selected});
+      dispatch(settingsActions.setSettingsState({key: 'floatChatAlwaysOnTop', value: selected}));
     },
     [dispatch],
   );
 
   const titleText = 'Always on Top';
-  const descriptionText = 'Keep the Spotlight Chat window float above other windows when visible.';
+  const descriptionText = 'Keep the Float Chat window float above other windows when visible.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'spotlight', 'chat', 'always on top', 'top']}>
+    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'float', 'chat', 'always on top', 'top']}>
       <LynxSwitch
         title={titleText}
         description={descriptionText}
-        isDisabled={disableSpotlight}
-        enabled={spotlightAlwaysOnTop}
+        isDisabled={disableFloatChat}
+        enabled={floatChatAlwaysOnTop}
         onEnabledChange={onAlwaysOnTopChange}
       />
     </SettingsFilterItem>
