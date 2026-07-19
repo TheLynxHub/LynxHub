@@ -562,8 +562,10 @@ export default class BrowserManager {
     this.withWebContents(id, wc => wc.setZoomFactor(factor));
   }
 
-  public reload(id: string) {
-    this.setVisible(id, true);
+  public reload(id: string, targetWindow?: BrowserWindow) {
+    const browser = this.browsers.find(b => b.id === id);
+    const windowToAttach = targetWindow || browser?.attachedWindow || this.getMainWindow();
+    this.setVisible(id, true, undefined, windowToAttach);
     this.withWebContents(id, wc => wc.reload());
     browserIpc.send.onClearFailed(id);
   }

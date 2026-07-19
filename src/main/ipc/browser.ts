@@ -82,7 +82,10 @@ export async function listenBrowser() {
   browserIpc.on.setZoomFactor((id, factor) => browserManager.setZoomFactor(id, factor));
 
   // Reloads current page
-  browserIpc.on.reload(id => browserManager.reload(id));
+  lynxIpc.onEvent(browserChannels.reload, (event, id) => {
+    const sender = event.sender ? BrowserWindow.fromWebContents(event.sender) || undefined : undefined;
+    browserManager.reload(id, sender);
+  });
 
   // Focus on current paage
   browserIpc.on.focus(id => browserManager.focus(id));
