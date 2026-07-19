@@ -25,10 +25,9 @@ export default function ChatBridgeMaxWidth() {
   );
 
   const titleText = 'Chat Maximum Width';
-  const descriptionText = 'Select how wide chat bridge messages and input controls can expand.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'chat', 'width', 'max', 'size', 'bridge']}>
+    <SettingsFilterItem searchTexts={[titleText, 'chat', 'width', 'max', 'size', 'bridge']}>
       <Select onChange={onChange} value={chatBridgeMaxWidth}>
         <Label>
           <SettingsSearchHighlight text={titleText} />
@@ -37,7 +36,6 @@ export default function ChatBridgeMaxWidth() {
           <Select.Value />
           <Select.Indicator />
         </Select.Trigger>
-        <Description>{descriptionText}</Description>
         <Select.Popover>
           <ListBox>
             <ListBox.Item id="small" textValue="Small (Compact)">

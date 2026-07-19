@@ -95,6 +95,8 @@ class BaseStorage {
       disableFloatChat: false,
       floatChatKeepInBackground: true,
       chatBridgeMaxWidth: 'default',
+      bridgeDefaultView: 'custom',
+      floatDefaultView: 'custom',
     },
     terminal: {
       outputColor: false,

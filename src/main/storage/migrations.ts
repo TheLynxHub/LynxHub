@@ -416,6 +416,12 @@ export class StorageMigrationManager {
       if (this.storage.data.app.chatBridgeMaxWidth === undefined) {
         this.storage.data.app.chatBridgeMaxWidth = 'default';
       }
+      if (this.storage.data.app.bridgeDefaultView === undefined) {
+        this.storage.data.app.bridgeDefaultView = 'custom';
+      }
+      if (this.storage.data.app.floatDefaultView === undefined) {
+        this.storage.data.app.floatDefaultView = 'custom';
+      }
     }
   }
 }

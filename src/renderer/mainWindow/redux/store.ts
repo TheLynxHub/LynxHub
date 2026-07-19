@@ -134,6 +134,8 @@ const buildPreloadedState = (): PreloadState | undefined => {
       disableFloatChat: storage.app.disableFloatChat ?? false,
       floatChatKeepInBackground: storage.app.floatChatKeepInBackground ?? true,
       chatBridgeMaxWidth: storage.app.chatBridgeMaxWidth ?? 'default',
+      bridgeDefaultView: storage.app.bridgeDefaultView ?? 'custom',
+      floatDefaultView: storage.app.floatDefaultView ?? 'custom',
     },
     terminal: storage.terminal,
     volume: {

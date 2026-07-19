@@ -115,6 +115,8 @@ export type AppConfigStorage = {
   disableFloatChat: boolean;
   floatChatKeepInBackground: boolean;
   chatBridgeMaxWidth: 'default' | 'wide' | 'full' | 'small';
+  bridgeDefaultView: 'webview' | 'custom';
+  floatDefaultView: 'webview' | 'custom';
 };
 
 /**

@@ -18,6 +18,7 @@ export default function FloatChatApp() {
   const [inputText, setInputText] = useState('');
   const [syncedState, setSyncedState] = useState<any>(null);
   const [step, setStep] = useState<'chat' | 'login'>('chat');
+  const [hasSetInitialStep, setHasSetInitialStep] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -44,6 +45,14 @@ export default function FloatChatApp() {
         if (app.chatBridgeMaxWidth) {
           setChatBridgeMaxWidth(app.chatBridgeMaxWidth);
         }
+        if (app.floatDefaultView) {
+          setStep(app.floatDefaultView === 'webview' ? 'login' : 'chat');
+          setHasSetInitialStep(true);
+        } else {
+          setHasSetInitialStep(true);
+        }
+      } else {
+        setHasSetInitialStep(true);
       }
     });
   }, []);
@@ -350,14 +359,20 @@ export default function FloatChatApp() {
     return isPageLoaded && messages.length === 0 && chatHistory.length === 0;
   }, [isPageLoaded, messages, chatHistory]);
 
-  // Automatically switch to login step if login is required
+  const prevIsLoginRequired = useRef<boolean | null>(null);
+
+  // Automatically switch to login step if login is required, or transition to chat on login completion
   useEffect(() => {
+    if (!hasSetInitialStep) return;
+
     if (isLoginRequired) {
       setStep('login');
-    } else {
+    } else if (prevIsLoginRequired.current === true) {
+      // Transitioned from login required to not login required -> switch to chat
       setStep('chat');
     }
-  }, [isLoginRequired]);
+    prevIsLoginRequired.current = isLoginRequired;
+  }, [isLoginRequired, hasSetInitialStep]);
 
   const lastStepRef = useRef(step);
   const lastCardIdRef = useRef(currentCardId);

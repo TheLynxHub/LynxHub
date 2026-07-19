@@ -35,6 +35,8 @@ const initialState: SettingState = {
   disableFloatChat: false,
   floatChatKeepInBackground: true,
   chatBridgeMaxWidth: 'default',
+  bridgeDefaultView: 'custom',
+  floatDefaultView: 'custom',
 };
 
 const settingsSlice = createSlice({

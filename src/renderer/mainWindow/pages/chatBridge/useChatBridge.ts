@@ -7,6 +7,7 @@ import {useDispatch} from 'react-redux';
 
 import {topToast} from '../../layouts/ToastProviders';
 import {chatBridgeActions, useChatBridgeSelector} from '../../redux/reducers/chatBridge';
+import {useSettingsState} from '../../redux/reducers/settings';
 import {tabsActions, useTabsState} from '../../redux/reducers/tabs';
 import {AppDispatch} from '../../redux/store';
 import {resolveOnlineScript} from '../../utils/onlineChatScripts';
@@ -87,6 +88,8 @@ export function useChatBridge(tabID = 'chat-bridge') {
     }
     return list;
   }, [allCards]);
+
+  const bridgeDefaultView = useSettingsState('bridgeDefaultView') || 'custom';
 
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const [step, setStep] = useState<ChatStep>('select_module');
@@ -217,7 +220,7 @@ export function useChatBridge(tabID = 'chat-bridge') {
           }),
         );
       } else {
-        setStep('login');
+        setStep(bridgeDefaultView === 'custom' ? 'chat' : 'login');
         dispatch(chatBridgeActions.setActiveUnifiedCardId(card.id));
 
         dispatch(
@@ -229,7 +232,7 @@ export function useChatBridge(tabID = 'chat-bridge') {
         );
       }
     },
-    [tabID, dispatch, bgChatEnabledCards, onlineCards],
+    [tabID, dispatch, bgChatEnabledCards, onlineCards, bridgeDefaultView],
   );
 
   // Auto-select card if tab ID contains a card identifier
