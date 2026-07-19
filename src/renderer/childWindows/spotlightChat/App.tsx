@@ -573,11 +573,8 @@ export default function SpotlightApp() {
               <span className="text-xs text-semi-muted">Ask {currentCard?.title || 'AI'} anything to get started</span>
             </div>
           ) : (
-            <ScrollShadow
-              ref={scrollRef}
-              onScroll={handleScroll}
-              className="flex-1 p-4 notDraggable flex flex-col gap-y-3">
-              <div ref={contentRef} className="flex flex-col gap-y-3 flex-1">
+            <ScrollShadow ref={scrollRef} onScroll={handleScroll} className="flex-1 w-full notDraggable">
+              <div ref={contentRef} className="max-w-6xl mx-auto w-full flex flex-col gap-y-3 flex-1 p-4">
                 <div className="space-y-4 flex-1">
                   {messages.map((msg, index) => (
                     <ChatBubble
