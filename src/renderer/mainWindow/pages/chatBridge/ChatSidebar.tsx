@@ -1,8 +1,8 @@
 import {Avatar, Button, Checkbox, Dropdown, Label, Popover, ScrollShadow, SearchField} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound, Filter, Pen2} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRound, Filter, Pen2, Pin} from '@solar-icons/react-perf/BoldDuotone';
+import {AltArrowDown, AltArrowRight} from '@solar-icons/react-perf/Linear';
 import {motion} from 'framer-motion';
-import {ChevronDown, ChevronRight, Pin} from 'lucide-react';
 import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 interface ChatHistoryItem {
@@ -437,7 +437,7 @@ const ChatSidebar = memo(
                             </Avatar>
                             <span>{card.title}</span>
                           </div>
-                          {isCollapsed ? <ChevronRight className="size-3" /> : <ChevronDown className="size-3" />}
+                          {isCollapsed ? <AltArrowRight className="size-3" /> : <AltArrowDown className="size-3" />}
                         </button>
 
                         {!isCollapsed && providerItems.map(item => renderThreadItem(item))}

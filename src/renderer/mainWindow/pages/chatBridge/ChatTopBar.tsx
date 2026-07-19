@@ -1,8 +1,8 @@
 import {Avatar, Button, Dropdown, Label} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound, Copy, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRound, Copy, Diskette, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowDown, AltArrowUp} from '@solar-icons/react-perf/Linear';
-import {AltArrowLeft, AltArrowRight, ArrowRightUp} from '@solar-icons/react-perf/LineDuotone';
+import {AltArrowLeft, AltArrowRight} from '@solar-icons/react-perf/LineDuotone';
 import {memo} from 'react';
 
 import AnimateChild from '../../components/AnimateChild';
@@ -165,7 +165,7 @@ const ChatTopBar = memo(
             <Dropdown>
               <Dropdown.Trigger>
                 <Button size="sm" variant="ghost" className="shrink-0" aria-label="Export chat" isIconOnly>
-                  <ArrowRightUp className="size-4" />
+                  <Diskette className="size-4" />
                 </Button>
               </Dropdown.Trigger>
               <Dropdown.Popover placement="bottom end" className="min-w-48 bg-surface-secondary border-border">

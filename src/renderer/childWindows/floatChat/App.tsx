@@ -8,9 +8,9 @@ import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import filesIpc from '@lynx_shared/ipc/files';
 import floatChatIpc from '@lynx_shared/ipc/floatChat';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {ChatRound, Copy, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
-import {AltArrowLeft, AltArrowRight} from '@solar-icons/react-perf/LineDuotone';
-import {ChevronDown, ChevronRight, Pin, Plus} from 'lucide-react';
+import {ChatRound, Copy, Earth, FileDownload, Pin, Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {AltArrowDown, AltArrowLeft, AltArrowRight} from '@solar-icons/react-perf/LineDuotone';
+import {Plus} from 'lucide-react';
 import {KeyboardEvent, MouseEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 export default function FloatChatApp() {
@@ -883,7 +883,7 @@ export default function FloatChatApp() {
                                 )}
                                 <span>{card.title}</span>
                               </div>
-                              {isCollapsed ? <ChevronRight className="size-3" /> : <ChevronDown className="size-3" />}
+                              {isCollapsed ? <AltArrowRight className="size-3" /> : <AltArrowDown className="size-3" />}
                             </button>
                             {!isCollapsed && providerItems.map(item => renderThreadItem(item))}
                           </div>
