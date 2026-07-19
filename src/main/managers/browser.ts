@@ -98,7 +98,7 @@ export default class BrowserManager {
         // Position mostly outside the window with 1px overlap so Chromium's compositor
         // still paints the view. Extreme negative coords (e.g. -9999) cause culling and
         // stop paint events; fully in-bounds coords make the view visually appear on top.
-        browser.view.setBounds({x: -799, y: -599, width: 800, height: 600});
+        browser.view.setBounds({x: -1439, y: -899, width: 1440, height: 900});
       }
     });
   }
@@ -332,7 +332,7 @@ export default class BrowserManager {
       webContents.setBackgroundThrottling(false);
       // Position mostly outside the window with 1px overlap so Chromium's compositor
       // still paints the view. Extreme negative coords cause culling and stop paint events.
-      newView.setBounds({x: -1023, y: -767, width: 1024, height: 768});
+      newView.setBounds({x: -1439, y: -899, width: 1440, height: 900});
     }
 
     webContents.setUserAgent(getUserAgent());
@@ -480,7 +480,7 @@ export default class BrowserManager {
       if (hideMode === 'offscreen') {
         // Position mostly outside the window with 1px overlap so Chromium's compositor
         // still paints the view. Extreme negative coords cause culling and stop paint events.
-        view.setBounds({x: -799, y: -599, width: 800, height: 600});
+        view.setBounds({x: -1439, y: -899, width: 1440, height: 900});
         // Ensure the view is behind everything (z-index 0) so it's hidden from the user.
         // addChildView reorders the view if it's already attached, or adds it at index 0 if not.
         mainWindow.contentView.addChildView(view, 0);
