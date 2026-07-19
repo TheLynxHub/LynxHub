@@ -1,8 +1,8 @@
-import {Button, CloseButton, Dropdown, InputGroup, ScrollShadow, Spinner} from '@heroui/react';
+import {Button, CloseButton, Dropdown, InputGroup, ScrollShadow} from '@heroui/react';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import ToastProviders, {topToast} from '@lynx/layouts/ToastProviders';
 import {formatChatToMarkdown, formatChatToPlainText} from '@lynx/pages/chatBridge/useChatBridge';
-import {ChatBubble, TypingIndicatorBubble} from '@lynx_shared/components/ChatBubble';
+import {ChatBubble, ChatSkeleton, TypingIndicatorBubble} from '@lynx_shared/components/ChatBubble';
 import browserIpc from '@lynx_shared/ipc/browser';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import filesIpc from '@lynx_shared/ipc/files';
@@ -538,11 +538,7 @@ export default function FloatChatApp() {
             </div>
 
             <ScrollShadow className="flex-1 py-2 px-0.5">
-              {isHistoryLoading ? (
-                <div className="flex items-center justify-center py-8 draggable">
-                  <Spinner size="md" />
-                </div>
-              ) : chatHistory.length === 0 ? (
+              {chatHistory.length === 0 ? (
                 <div className="text-center py-8 text-xs text-semi-muted draggable">No recent chats</div>
               ) : (
                 <div className="notDraggable size-full flex flex-col gap-y-0.5">
@@ -579,6 +575,10 @@ export default function FloatChatApp() {
               <div className="flex-1 relative w-full bg-white">
                 <BrowserViewPlaceholder />
               </div>
+            </div>
+          ) : isHistoryLoading ? (
+            <div className="p-4 flex-1 overflow-hidden notDraggable">
+              <ChatSkeleton />
             </div>
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center flex-1 text-center p-8 draggable">
