@@ -1,6 +1,6 @@
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {memo, MouseEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import Page from '../Page';
 import ChatArea from './ChatArea';
@@ -53,7 +53,7 @@ const OnlineChatPage = memo(({tabID = 'online-chat'}: Props) => {
   }, [onlineCards, activeUniversalCardId]);
 
   const handleContextMenu = useCallback(
-    (e: React.MouseEvent) => {
+    (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
         return;

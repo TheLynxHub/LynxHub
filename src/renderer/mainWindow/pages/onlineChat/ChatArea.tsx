@@ -4,7 +4,7 @@ import {Button, InputGroup, ScrollShadow, TextField} from '@heroui/react';
 import {ChatBubble, ChatSkeleton, TypingIndicatorBubble} from '@lynx_shared/components/ChatBubble';
 import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
 import {Send} from 'lucide-react';
-import {KeyboardEvent, memo, useCallback, useEffect, useRef, useState} from 'react';
+import {KeyboardEvent, memo, RefObject, useCallback, useEffect, useRef, useState} from 'react';
 
 import {Message} from './useOnlineChat';
 
@@ -14,7 +14,7 @@ interface ChatAreaProps {
   isSending: boolean;
   isGenerating: boolean;
   onSendMessage: (messageText: string) => void;
-  chatAreaRef?: React.RefObject<{
+  chatAreaRef?: RefObject<{
     scrollToTop: () => void;
     scrollToBottom: () => void;
   } | null>;

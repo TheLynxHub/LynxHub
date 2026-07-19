@@ -28,7 +28,7 @@ function markdownToPlainText(markdown: string): string {
     .replace(/([*_])(.*?)\1/g, '$2')
     .replace(/~~(.*?)~~/g, '$1')
     .replace(/^>\s?/gm, '')
-    .replace(/^[-\*+]\s+/gm, '')
+    .replace(/^[-*+]\s+/gm, '')
     .replace(/^\d+\.\s+/gm, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
