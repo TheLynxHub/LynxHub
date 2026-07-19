@@ -2,7 +2,7 @@ import {Avatar, Button, Dropdown, Label} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
 import {ChatRound, Copy, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
 import {AltArrowDown, AltArrowUp} from '@solar-icons/react-perf/Linear';
-import {AltArrowLeft, ArrowRightUp} from '@solar-icons/react-perf/LineDuotone';
+import {AltArrowLeft, AltArrowRight, ArrowRightUp} from '@solar-icons/react-perf/LineDuotone';
 import {memo} from 'react';
 
 import AnimateChild from '../../components/AnimateChild';
@@ -29,6 +29,8 @@ interface ChatTopBarProps {
   bgChatEnabledCards?: string[];
   onSelectActiveCard?: (id: string | null) => void;
   showBackButton?: boolean;
+  isSidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
 }
 
 const ChatTopBar = memo(
@@ -52,6 +54,8 @@ const ChatTopBar = memo(
     bgChatEnabledCards = [],
     onSelectActiveCard,
     showBackButton = true,
+    isSidebarCollapsed = false,
+    onToggleSidebar,
   }: ChatTopBarProps) => {
     const activeCard =
       selectedCard?.id === 'unified' ? onlineCards?.find(c => c.id === activeUnifiedCardId) : selectedCard;
@@ -112,6 +116,17 @@ const ChatTopBar = memo(
             {showBackButton && (
               <Button size="sm" variant="ghost" className="shrink-0" onPress={onBackToSelect} isIconOnly>
                 <AltArrowLeft className="size-5" />
+              </Button>
+            )}
+            {step === 'chat' && onToggleSidebar && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="shrink-0"
+                onPress={onToggleSidebar}
+                aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                isIconOnly>
+                {isSidebarCollapsed ? <AltArrowRight className="size-4" /> : <AltArrowLeft className="size-4" />}
               </Button>
             )}
             <div className="flex items-center gap-x-3">

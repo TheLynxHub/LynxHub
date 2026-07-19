@@ -2,9 +2,12 @@ import {Button} from '@heroui/react';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import browserIpc from '@lynx_shared/ipc/browser';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
+import storageIpc from '@lynx_shared/ipc/storage';
 import {Earth} from '@solar-icons/react-perf/BoldDuotone';
 import {memo, MouseEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useDispatch} from 'react-redux';
 
+import {settingsActions, useSettingsState} from '../../redux/reducers/settings';
 import Page from '../Page';
 import ChatArea from './ChatArea';
 import ChatSidebar from './ChatSidebar';
@@ -51,6 +54,37 @@ const ChatBridgePage = memo(({tabID = 'chat-bridge'}: Props) => {
   const chatAreaRef = useRef<{scrollToTop: () => void; scrollToBottom: () => void}>(null);
 
   const [initialInputText, setInitialInputText] = useState('');
+
+  const dispatch = useDispatch();
+  const chatSidebarCollapsed = useSettingsState('chatSidebarCollapsed') ?? false;
+  const chatSidebarWidth = useSettingsState('chatSidebarWidth') ?? 240;
+  const pinnedThreads = useSettingsState('pinnedThreads') ?? [];
+
+  const handleToggleSidebar = useCallback(() => {
+    const nextVal = !chatSidebarCollapsed;
+    dispatch(settingsActions.setSettingsState({key: 'chatSidebarCollapsed', value: nextVal}));
+    storageIpc.update('app', {chatSidebarCollapsed: nextVal});
+  }, [chatSidebarCollapsed, dispatch]);
+
+  const handleResizeSidebar = useCallback(
+    (newWidth: number) => {
+      dispatch(settingsActions.setSettingsState({key: 'chatSidebarWidth', value: newWidth}));
+      storageIpc.update('app', {chatSidebarWidth: newWidth});
+    },
+    [dispatch],
+  );
+
+  const handleTogglePinThread = useCallback(
+    (cardId: string, title: string) => {
+      const pinKey = `${cardId}::${title}`;
+      const isPinned = pinnedThreads.includes(pinKey);
+      const nextPinned = isPinned ? pinnedThreads.filter(k => k !== pinKey) : [...pinnedThreads, pinKey];
+
+      dispatch(settingsActions.setSettingsState({key: 'pinnedThreads', value: nextPinned}));
+      storageIpc.update('app', {pinnedThreads: nextPinned});
+    },
+    [pinnedThreads, dispatch],
+  );
 
   const activeCard = useMemo(() => {
     return onlineCards.find(c => c.id === activeUnifiedCardId);
@@ -170,9 +204,11 @@ const ChatBridgePage = memo(({tabID = 'chat-bridge'}: Props) => {
           onBackToSelect={handleBackToSelect}
           showScrollBottom={showScrollBottom}
           onScrollBottom={handleScrollBottom}
+          onToggleSidebar={handleToggleSidebar}
           bgChatEnabledCards={bgChatEnabledCards}
           onCopyToClipboard={handleCopyToClipboard}
           activeUnifiedCardId={activeUnifiedCardId}
+          isSidebarCollapsed={chatSidebarCollapsed}
           onSelectActiveCard={setActiveUnifiedCardId}
           showBackButton={!tabID.startsWith('chat-bridge-')}
         />
@@ -185,7 +221,12 @@ const ChatBridgePage = memo(({tabID = 'chat-bridge'}: Props) => {
               chatHistory={chatHistory}
               onlineCards={onlineCards}
               selectedCard={selectedCard}
+              pinnedThreads={pinnedThreads}
+              onResize={handleResizeSidebar}
+              sidebarWidth={chatSidebarWidth}
+              isCollapsed={chatSidebarCollapsed}
               visibleModuleIds={visibleModuleIds}
+              onTogglePin={handleTogglePinThread}
               onSetVisibleModuleIds={setVisibleModuleIds}
               onSelectHistoryItem={handleSelectHistoryItem}
             />

@@ -92,6 +92,11 @@ export type SettingState = {
   chatBridgeMaxWidth: 'default' | 'wide' | 'full' | 'small';
   bridgeDefaultView: 'webview' | 'custom';
   floatDefaultView: 'webview' | 'custom';
+  chatSidebarCollapsed: boolean;
+  chatSidebarWidth: number;
+  floatChatSidebarCollapsed: boolean;
+  floatChatSidebarWidth: number;
+  pinnedThreads: string[];
 };
 
 export type TerminalState = StorageTypes['terminal'];

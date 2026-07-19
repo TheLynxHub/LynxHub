@@ -97,6 +97,11 @@ class BaseStorage {
       chatBridgeMaxWidth: 'default',
       bridgeDefaultView: 'custom',
       floatDefaultView: 'custom',
+      chatSidebarCollapsed: false,
+      chatSidebarWidth: 240,
+      floatChatSidebarCollapsed: false,
+      floatChatSidebarWidth: 200,
+      pinnedThreads: [],
     },
     terminal: {
       outputColor: false,

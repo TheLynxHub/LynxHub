@@ -136,6 +136,11 @@ const buildPreloadedState = (): PreloadState | undefined => {
       chatBridgeMaxWidth: storage.app.chatBridgeMaxWidth ?? 'default',
       bridgeDefaultView: storage.app.bridgeDefaultView ?? 'custom',
       floatDefaultView: storage.app.floatDefaultView ?? 'custom',
+      chatSidebarCollapsed: storage.app.chatSidebarCollapsed ?? false,
+      chatSidebarWidth: storage.app.chatSidebarWidth ?? 240,
+      floatChatSidebarCollapsed: storage.app.floatChatSidebarCollapsed ?? false,
+      floatChatSidebarWidth: storage.app.floatChatSidebarWidth ?? 200,
+      pinnedThreads: storage.app.pinnedThreads ?? [],
     },
     terminal: storage.terminal,
     volume: {

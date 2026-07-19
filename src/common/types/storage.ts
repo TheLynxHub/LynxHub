@@ -117,6 +117,11 @@ export type AppConfigStorage = {
   chatBridgeMaxWidth: 'default' | 'wide' | 'full' | 'small';
   bridgeDefaultView: 'webview' | 'custom';
   floatDefaultView: 'webview' | 'custom';
+  chatSidebarCollapsed: boolean;
+  chatSidebarWidth: number;
+  floatChatSidebarCollapsed: boolean;
+  floatChatSidebarWidth: number;
+  pinnedThreads: string[];
 };
 
 /**

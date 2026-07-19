@@ -422,6 +422,21 @@ export class StorageMigrationManager {
       if (this.storage.data.app.floatDefaultView === undefined) {
         this.storage.data.app.floatDefaultView = 'custom';
       }
+      if (this.storage.data.app.chatSidebarCollapsed === undefined) {
+        this.storage.data.app.chatSidebarCollapsed = false;
+      }
+      if (this.storage.data.app.chatSidebarWidth === undefined) {
+        this.storage.data.app.chatSidebarWidth = 240;
+      }
+      if (this.storage.data.app.floatChatSidebarCollapsed === undefined) {
+        this.storage.data.app.floatChatSidebarCollapsed = false;
+      }
+      if (this.storage.data.app.floatChatSidebarWidth === undefined) {
+        this.storage.data.app.floatChatSidebarWidth = 200;
+      }
+      if (this.storage.data.app.pinnedThreads === undefined) {
+        this.storage.data.app.pinnedThreads = [];
+      }
     }
   }
 }

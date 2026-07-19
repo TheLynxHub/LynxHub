@@ -1,4 +1,4 @@
-import {Button, CloseButton, Dropdown, InputGroup, ScrollShadow} from '@heroui/react';
+import {Button, CloseButton, Dropdown, InputGroup, ScrollShadow, SearchField} from '@heroui/react';
 import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import ToastProviders, {topToast} from '@lynx/layouts/ToastProviders';
 import {formatChatToMarkdown, formatChatToPlainText} from '@lynx/pages/chatBridge/useChatBridge';
@@ -9,7 +9,8 @@ import filesIpc from '@lynx_shared/ipc/files';
 import floatChatIpc from '@lynx_shared/ipc/floatChat';
 import storageIpc from '@lynx_shared/ipc/storage';
 import {ChatRound, Copy, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
-import {Plus} from 'lucide-react';
+import {AltArrowLeft, AltArrowRight} from '@solar-icons/react-perf/LineDuotone';
+import {ChevronDown, ChevronRight, Pin, Plus} from 'lucide-react';
 import {KeyboardEvent, MouseEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 export default function FloatChatApp() {
@@ -31,6 +32,13 @@ export default function FloatChatApp() {
 
   const [chatBridgeMaxWidth, setChatBridgeMaxWidth] = useState<string>('default');
 
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(200);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [pinnedThreads, setPinnedThreads] = useState<string[]>([]);
+  const [collapsedProviders, setCollapsedProviders] = useState<Record<string, boolean>>({});
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+
   // Sync Theme & Settings
   useEffect(() => {
     storageIpc.get('app').then(app => {
@@ -44,6 +52,15 @@ export default function FloatChatApp() {
         }
         if (app.chatBridgeMaxWidth) {
           setChatBridgeMaxWidth(app.chatBridgeMaxWidth);
+        }
+        if (app.floatChatSidebarCollapsed !== undefined) {
+          setIsSidebarCollapsed(app.floatChatSidebarCollapsed);
+        }
+        if (app.floatChatSidebarWidth !== undefined) {
+          setSidebarWidth(app.floatChatSidebarWidth);
+        }
+        if (app.pinnedThreads !== undefined) {
+          setPinnedThreads(app.pinnedThreads);
         }
         if (app.floatDefaultView) {
           setStep(app.floatDefaultView === 'webview' ? 'login' : 'chat');
@@ -246,6 +263,210 @@ export default function FloatChatApp() {
     [currentCardId],
   );
 
+  const handleTogglePin = useCallback((cardId: string, title: string) => {
+    const pinKey = `${cardId}::${title}`;
+    setPinnedThreads(prev => {
+      const isPinned = prev.includes(pinKey);
+      const next = isPinned ? prev.filter(k => k !== pinKey) : [...prev, pinKey];
+      storageIpc.update('app', {pinnedThreads: next});
+      return next;
+    });
+  }, []);
+
+  const sidebarWidthRef = useRef(sidebarWidth);
+  useEffect(() => {
+    sidebarWidthRef.current = sidebarWidth;
+  }, [sidebarWidth]);
+
+  const floatSidebarRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = sidebarWidthRef.current;
+
+    const handleMouseMove = (moveEvent: globalThis.MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const newWidth = Math.max(140, Math.min(350, startWidth + deltaX));
+      if (floatSidebarRef.current) {
+        floatSidebarRef.current.style.width = `${newWidth}px`;
+        floatSidebarRef.current.style.transition = 'none';
+      }
+    };
+
+    const handleMouseUp = (upEvent: globalThis.MouseEvent) => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+
+      const deltaX = upEvent.clientX - startX;
+      const finalWidth = Math.max(140, Math.min(350, startWidth + deltaX));
+
+      if (floatSidebarRef.current) {
+        floatSidebarRef.current.style.transition = '';
+      }
+      setSidebarWidth(finalWidth);
+      storageIpc.update('app', {floatChatSidebarWidth: finalWidth});
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, []);
+
+  // Search and grouping logic
+  const filteredHistory = useMemo(() => {
+    if (!searchQuery.trim()) return chatHistory;
+    const q = searchQuery.toLowerCase();
+    return chatHistory.filter((item: any) => item.title.toLowerCase().includes(q));
+  }, [chatHistory, searchQuery]);
+
+  const groupedHistory = useMemo(() => {
+    const pinned: any[] = [];
+    const unpinned: any[] = [];
+
+    filteredHistory.forEach((item: any) => {
+      const cId = item.cardId || activeCardId;
+      const pinKey = `${cId}::${item.title}`;
+      if (pinnedThreads.includes(pinKey)) {
+        pinned.push(item);
+      } else {
+        unpinned.push(item);
+      }
+    });
+
+    const groups: Record<string, any[]> = {};
+    if (activeCardId === 'unified') {
+      unpinned.forEach((item: any) => {
+        const cId = item.cardId || 'unknown';
+        if (!groups[cId]) groups[cId] = [];
+        groups[cId].push(item);
+      });
+    }
+
+    return {pinned, unpinned, groups};
+  }, [filteredHistory, activeCardId, pinnedThreads]);
+
+  const visibleItemsFlat = useMemo(() => {
+    const flat: any[] = [];
+    groupedHistory.pinned.forEach(item => flat.push(item));
+    if (activeCardId === 'unified') {
+      onlineCards
+        .filter(c => c.id !== 'unified')
+        .forEach(card => {
+          const isProviderCollapsed = collapsedProviders[card.id];
+          const items = groupedHistory.groups[card.id] || [];
+          if (!isProviderCollapsed && items.length > 0) {
+            items.forEach(item => flat.push(item));
+          }
+        });
+    } else {
+      groupedHistory.unpinned.forEach(item => flat.push(item));
+    }
+    return flat;
+  }, [groupedHistory, activeCardId, onlineCards, collapsedProviders]);
+
+  // Sync focusedIndex focus to DOM element
+  useEffect(() => {
+    if (focusedIndex >= 0 && focusedIndex < visibleItemsFlat.length) {
+      const item = visibleItemsFlat[focusedIndex];
+      const cId = item.cardId || activeCardId;
+      const el = document.getElementById(`fc-thread-${cId}-${item.index}`);
+      el?.focus({preventScroll: false});
+    }
+  }, [focusedIndex, visibleItemsFlat, activeCardId]);
+
+  const handleSidebarKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const isSearchFocused = document.activeElement?.getAttribute('placeholder') === 'Search chats...';
+
+      if (isSearchFocused) {
+        if (e.key === 'ArrowDown' && visibleItemsFlat.length > 0) {
+          e.preventDefault();
+          setFocusedIndex(0);
+        }
+        return;
+      }
+
+      if (visibleItemsFlat.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocusedIndex(prev => (prev + 1) % visibleItemsFlat.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocusedIndex(prev => {
+          if (prev <= 0) {
+            const searchInput = document.querySelector('input[placeholder="Search chats..."]') as HTMLInputElement;
+            searchInput?.focus();
+            return -1;
+          }
+          return prev - 1;
+        });
+      } else if (e.key === 'Enter') {
+        if (focusedIndex >= 0 && focusedIndex < visibleItemsFlat.length) {
+          e.preventDefault();
+          const item = visibleItemsFlat[focusedIndex];
+          handleSelectThread(item.index, item.cardId);
+        }
+      }
+    },
+    [visibleItemsFlat, focusedIndex, handleSelectThread],
+  );
+
+  const toggleProviderCollapse = useCallback((cardId: string) => {
+    setCollapsedProviders(prev => ({...prev, [cardId]: !prev[cardId]}));
+  }, []);
+
+  const renderThreadItem = (item: any) => {
+    const isSelected = item.active;
+    const cId = item.cardId || activeCardId;
+    const card = onlineCards.find(c => c.id === cId);
+    const pinKey = `${cId}::${item.title}`;
+    const isPinned = pinnedThreads.includes(pinKey);
+    const isFocused =
+      focusedIndex >= 0 &&
+      visibleItemsFlat[focusedIndex]?.index === item.index &&
+      visibleItemsFlat[focusedIndex]?.cardId === item.cardId;
+
+    return (
+      <button
+        className={
+          'relative w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl text-left shrink-0 ' +
+          'transition duration-200 cursor-pointer overflow-hidden group ' +
+          'focus-visible:outline-none focus:outline-none ' +
+          `${isSelected ? 'bg-accent/10 text-accent font-semibold' : 'text-foreground hover:bg-foreground/5'} ` +
+          `${isFocused ? 'ring-2 ring-accent/30' : ''}`
+        }
+        key={`${cId}-${item.index}`}
+        id={`fc-thread-${cId}-${item.index}`}
+        onClick={() => handleSelectThread(item.index, item.cardId)}>
+        <div className="relative z-10 flex items-center gap-2 w-full overflow-hidden">
+          {activeCardId === 'unified' && card?.logoUrl ? (
+            <img alt="" src={card.logoUrl} className="size-3.5 rounded shrink-0" />
+          ) : (
+            <ChatRound className={`size-3.5 shrink-0 ${isSelected ? 'text-accent' : 'text-muted'}`} />
+          )}
+          <span className="text-xs truncate flex-1">{item.title || 'Untitled Chat'}</span>
+
+          {/* Pin toggle button on hover */}
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              handleTogglePin(cId, item.title);
+            }}
+            className={
+              'opacity-0 group-hover:opacity-100 hover:text-accent p-0.5 ' +
+              `transition-opacity duration-150 cursor-pointer shrink-0 z-20 ${
+                isPinned ? 'opacity-100 text-accent' : 'text-semi-muted'
+              }`
+            }
+            aria-label={isPinned ? 'Unpin' : 'Pin'}>
+            <Pin className={`size-3 ${isPinned ? 'fill-accent' : ''}`} />
+          </button>
+        </div>
+      </button>
+    );
+  };
+
   const handleCopyToClipboard = useCallback(
     async (format: 'markdown' | 'text') => {
       if (messages.length === 0) return;
@@ -443,6 +664,24 @@ export default function FloatChatApp() {
       {/* Header bar */}
       <div className={'flex flex-row items-center justify-between py-3 px-4 gap-x-2 draggable'}>
         <div className="flex flex-row items-center flex-1 gap-x-2">
+          {step === 'chat' && (
+            <Button
+              onPress={() => {
+                const nextVal = !isSidebarCollapsed;
+                setIsSidebarCollapsed(nextVal);
+                storageIpc.update('app', {floatChatSidebarCollapsed: nextVal});
+              }}
+              size="sm"
+              variant="ghost"
+              className="notDraggable size-7 mr-1 shrink-0"
+              isIconOnly>
+              {isSidebarCollapsed ? (
+                <AltArrowRight className="size-4 text-semi-muted" />
+              ) : (
+                <AltArrowLeft className="size-4 text-semi-muted" />
+              )}
+            </Button>
+          )}
           <ChatRound className="text-semi-muted size-5 shrink-0 mb-0.5" />
           {step === 'chat' ? (
             <InputGroup variant="secondary" className=" rounded-2xl notDraggable" fullWidth>
@@ -544,8 +783,17 @@ export default function FloatChatApp() {
       <div className="flex flex-row flex-1 overflow-hidden">
         {/* Sidebar for Recents */}
         {step !== 'login' && (
-          <div className="w-50 flex flex-col shrink-0 draggable bg-surface-secondary rounded-tr-2xl overflow-hidden">
-            <div className={'flex items-center justify-between px-3 py-2 bg-surface/50 draggable'}>
+          <div
+            className={
+              'flex flex-col shrink-0 draggable bg-surface-secondary rounded-tr-2xl overflow-hidden ' +
+              'relative border-r border-border/10 transition-[width] duration-200 ease-in-out ' +
+              'select-none focus:outline-none'
+            }
+            tabIndex={0}
+            ref={floatSidebarRef}
+            onKeyDown={handleSidebarKeyDown}
+            style={{width: isSidebarCollapsed ? 0 : sidebarWidth}}>
+            <div className={'flex items-center justify-between px-3 py-2 bg-surface/50 draggable shrink-0'}>
               <span className="text-[8pt] font-bold text-semi-muted tracking-wider uppercase">Recents</span>
               {activeCardId === 'unified' ? (
                 <Dropdown>
@@ -584,34 +832,85 @@ export default function FloatChatApp() {
               )}
             </div>
 
-            <ScrollShadow className="flex-1 py-2 px-0.5">
-              {chatHistory.length === 0 ? (
-                <div className="text-center py-8 text-xs text-semi-muted draggable">No recent chats</div>
+            {/* Search Input in Float Sidebar */}
+            <SearchField
+              value={searchQuery}
+              onChange={setSearchQuery}
+              aria-label="Search chats"
+              className="notDraggable p-1">
+              <SearchField.Group>
+                <SearchField.SearchIcon />
+                <SearchField.Input placeholder="Search chats..." />
+                {searchQuery && <SearchField.ClearButton className="absolute right-0" />}
+              </SearchField.Group>
+            </SearchField>
+
+            <ScrollShadow className="flex-1 py-2 px-0.5 overflow-y-auto">
+              {filteredHistory.length === 0 ? (
+                <div className="text-center py-8 text-xs text-semi-muted draggable">No chats found</div>
               ) : (
-                <div className="notDraggable size-full flex flex-col gap-y-0.5">
-                  {chatHistory.map((item: any) => {
-                    const card = onlineCards.find(c => c.id === item.cardId);
-                    return (
-                      <Button
-                        className={
-                          'justify-start text-xs transition-all h-7 shrink-0 rounded-xl ' +
-                          `group notDraggable ${item.active ? 'bg-accent/10 text-accent font-semibold' : ''}`
-                        }
-                        size="sm"
-                        variant="ghost"
-                        key={`${item.cardId}-${item.index}`}
-                        onPress={() => handleSelectThread(item.index, item.cardId)}
-                        fullWidth>
-                        {activeCardId === 'unified' && card?.logoUrl && (
-                          <img alt="" src={card.logoUrl} className="size-3.5 rounded shrink-0" />
-                        )}
-                        {item.title || 'Untitled Chat'}
-                      </Button>
-                    );
-                  })}
+                <div className="notDraggable size-full flex flex-col gap-y-2">
+                  {/* Pinned Section */}
+                  {groupedHistory.pinned.length > 0 && (
+                    <div className="flex flex-col gap-y-0.5">
+                      <div className="px-2 pb-1 text-[8px] font-bold text-accent uppercase tracking-wider">Pinned</div>
+                      {groupedHistory.pinned.map(item => renderThreadItem(item))}
+                    </div>
+                  )}
+
+                  {/* Recents / Groups Section */}
+                  {activeCardId === 'unified' ? (
+                    onlineCards
+                      .filter(c => c.id !== 'unified')
+                      .map(card => {
+                        const providerItems = groupedHistory.groups[card.id] || [];
+                        if (providerItems.length === 0) return null;
+
+                        const isCollapsed = collapsedProviders[card.id] ?? false;
+
+                        return (
+                          <div key={card.id} className="flex flex-col gap-y-0.5">
+                            <button
+                              className={
+                                'flex items-center justify-between px-2 py-1 text-[8px] font-bold text-muted ' +
+                                'hover:text-foreground uppercase tracking-wider ' +
+                                'cursor-pointer w-full text-left font-Nunito'
+                              }
+                              onClick={() => toggleProviderCollapse(card.id)}>
+                              <div className="flex items-center gap-1.5">
+                                {card.logoUrl && (
+                                  <img alt="" src={card.logoUrl} className="size-3 rounded-sm shrink-0" />
+                                )}
+                                <span>{card.title}</span>
+                              </div>
+                              {isCollapsed ? <ChevronRight className="size-3" /> : <ChevronDown className="size-3" />}
+                            </button>
+                            {!isCollapsed && providerItems.map(item => renderThreadItem(item))}
+                          </div>
+                        );
+                      })
+                  ) : (
+                    <div className="flex flex-col gap-y-0.5">
+                      {groupedHistory.pinned.length > 0 && groupedHistory.unpinned.length > 0 && (
+                        <div className="px-2 pb-1 text-[8px] font-bold text-muted uppercase tracking-wider">
+                          Recents
+                        </div>
+                      )}
+                      {groupedHistory.unpinned.map(item => renderThreadItem(item))}
+                    </div>
+                  )}
                 </div>
               )}
             </ScrollShadow>
+
+            {/* Resize Drag Handle */}
+            <div
+              className={
+                'absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-accent/40 ' +
+                'active:bg-accent transition-colors z-30 notDraggable'
+              }
+              onMouseDown={handleMouseDown}
+            />
           </div>
         )}
 
