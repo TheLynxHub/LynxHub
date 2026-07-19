@@ -290,6 +290,10 @@ export default class BrowserManager {
 
   private listenForLinkHover(webContents: WebContents) {
     webContents.on('update-target-url', (_, url) => {
+      const browser = this.browsers.find(b => b.view.webContents === webContents);
+      if (browser && browser.attachedWindow === classHolder.floatChatWindow) {
+        return;
+      }
       const {linkPreviewManager} = classHolder;
       linkPreviewManager?.updateUrl(url);
     });
