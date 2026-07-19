@@ -1,12 +1,14 @@
 import {Button, CloseButton, Dropdown, InputGroup, ScrollShadow, Spinner} from '@heroui/react';
+import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPlaceholder';
 import ToastProviders, {topToast} from '@lynx/layouts/ToastProviders';
 import {formatChatToMarkdown, formatChatToPlainText} from '@lynx/pages/onlineChat/useOnlineChat';
 import {ChatBubble, TypingIndicatorBubble} from '@lynx_shared/components/ChatBubble';
+import browserIpc from '@lynx_shared/ipc/browser';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import filesIpc from '@lynx_shared/ipc/files';
 import spotlightChatIpc from '@lynx_shared/ipc/spotlightChat';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {ArrowRight, ChatRound, Copy, Earth, FileDownload, UserId} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRound, Copy, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
 import {Plus} from 'lucide-react';
 import {KeyboardEvent, MouseEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
@@ -15,6 +17,7 @@ export default function SpotlightApp() {
   const [activeCardId, setActiveCardId] = useState<string>('chatgpt');
   const [inputText, setInputText] = useState('');
   const [syncedState, setSyncedState] = useState<any>(null);
+  const [step, setStep] = useState<'chat' | 'login'>('chat');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -222,10 +225,6 @@ export default function SpotlightApp() {
     [currentCardId],
   );
 
-  const handleOpenLogin = useCallback(() => {
-    if (currentCardId) spotlightChatIpc.openLogin(currentCardId);
-  }, [currentCardId]);
-
   const handleCopyToClipboard = useCallback(
     async (format: 'markdown' | 'text') => {
       if (messages.length === 0) return;
@@ -318,16 +317,16 @@ export default function SpotlightApp() {
           handleNewChat();
           break;
         case 'copy-markdown':
-          handleCopyToClipboard('markdown');
+          void handleCopyToClipboard('markdown');
           break;
         case 'copy-text':
-          handleCopyToClipboard('text');
+          void handleCopyToClipboard('text');
           break;
         case 'save-markdown':
-          handleSaveToFile('markdown');
+          void handleSaveToFile('markdown');
           break;
         case 'save-text':
-          handleSaveToFile('text');
+          void handleSaveToFile('text');
           break;
       }
     },
@@ -339,6 +338,45 @@ export default function SpotlightApp() {
     return isPageLoaded && messages.length === 0 && chatHistory.length === 0;
   }, [isPageLoaded, messages, chatHistory]);
 
+  // Automatically switch to login step if login is required
+  useEffect(() => {
+    if (isLoginRequired) {
+      setStep('login');
+    } else {
+      setStep('chat');
+    }
+  }, [isLoginRequired]);
+
+  // Handle webview visibility for the active card in Spotlight
+  useEffect(() => {
+    if (!currentCardId || currentCardId === 'universal') return;
+
+    const viewId = `online-bg-${currentCardId}`;
+
+    if (step === 'login') {
+      browserIpc.send.setVisible(viewId, true);
+    } else {
+      browserIpc.send.setVisible(viewId, false, 'offscreen');
+    }
+
+    return () => {
+      browserIpc.send.setVisible(viewId, false, 'offscreen');
+    };
+  }, [currentCardId, step]);
+
+  // Listen for window shown events to re-trigger setVisible if needed
+  useEffect(() => {
+    const offWindowShown = spotlightChatIpc.onWindowShown(() => {
+      if (step === 'login' && currentCardId) {
+        browserIpc.send.setVisible(`online-bg-${currentCardId}`, true);
+      }
+    });
+
+    return () => {
+      offWindowShown();
+    };
+  }, [currentCardId, step]);
+
   return (
     <div
       onContextMenu={handleContextMenu}
@@ -346,26 +384,30 @@ export default function SpotlightApp() {
       {/* Header bar */}
       <div className={'flex flex-row items-center justify-between py-3 px-4 gap-x-2 draggable'}>
         <div className="flex flex-row items-center flex-1 gap-x-2">
-          <ChatRound className="text-semi-muted size-5 shrink-0" />
-          <InputGroup variant="secondary" className=" rounded-2xl notDraggable" fullWidth>
-            <InputGroup.TextArea
-              placeholder={
-                isLoginRequired
-                  ? `Login required for ${currentCard?.title || 'AI'}`
-                  : `Message ${currentCard?.title || 'AI'}...`
-              }
-              rows={1}
-              value={inputText}
-              className="max-h-32"
-              onKeyDown={handleKeyDown}
-              onChange={e => setInputText(e.target.value)}
-              autoFocus
-            />
-          </InputGroup>
+          <ChatRound className="text-semi-muted size-5 shrink-0 mb-0.5" />
+          {step === 'chat' ? (
+            <InputGroup variant="secondary" className=" rounded-2xl notDraggable" fullWidth>
+              <InputGroup.TextArea
+                placeholder={
+                  isLoginRequired
+                    ? `Login required for ${currentCard?.title || 'AI'}`
+                    : `Message ${currentCard?.title || 'AI'}...`
+                }
+                rows={1}
+                value={inputText}
+                className="max-h-32"
+                onKeyDown={handleKeyDown}
+                onChange={e => setInputText(e.target.value)}
+                autoFocus
+              />
+            </InputGroup>
+          ) : activeCard ? (
+            <span className="text-[0.9rem] font-semibold">{activeCard.title}</span>
+          ) : null}
         </div>
 
         <div className="flex flex-row items-center gap-x-2 notDraggable">
-          {activeCard && (
+          {activeCard && step === 'chat' && (
             <Dropdown>
               <Dropdown.Trigger>
                 <Button size="sm" variant="secondary">
@@ -406,6 +448,35 @@ export default function SpotlightApp() {
             </Dropdown>
           )}
 
+          {activeCard && activeCardId !== 'universal' && (
+            <div className="flex flex-row items-center gap-x-1.5">
+              {step === 'login' && (
+                <Button
+                  onPress={() => {
+                    if (currentCardId) {
+                      browserIpc.send.reload(`online-bg-${currentCardId}`);
+                    }
+                  }}
+                  size="sm"
+                  variant="secondary"
+                  isIconOnly>
+                  <Restart className="size-4 text-semi-muted" />
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="secondary"
+                onPress={() => setStep(prev => (prev === 'chat' ? 'login' : 'chat'))}
+                isIconOnly>
+                {step === 'chat' ? (
+                  <Earth className="size-4 text-semi-muted" />
+                ) : (
+                  <ChatRound className="size-4 text-semi-muted" />
+                )}
+              </Button>
+            </div>
+          )}
+
           <CloseButton onPress={() => spotlightChatIpc.closeSpotlight()} />
         </div>
       </div>
@@ -413,95 +484,89 @@ export default function SpotlightApp() {
       {/* Main Content Area */}
       <div className="flex flex-row flex-1 overflow-hidden">
         {/* Sidebar for Recents */}
-        <div className="w-50 flex flex-col shrink-0 draggable bg-surface-secondary rounded-tr-2xl overflow-hidden">
-          <div className={'flex items-center justify-between px-3 py-2 bg-surface/50 draggable'}>
-            <span className="text-[8pt] font-bold text-semi-muted tracking-wider uppercase">Recents</span>
-            {activeCardId === 'universal' ? (
-              <Dropdown>
-                <Dropdown.Trigger>
-                  <Button size="sm" variant="ghost" className="size-7 notDraggable" isIconOnly>
-                    <Plus className="size-3.5" />
-                  </Button>
-                </Dropdown.Trigger>
-                <Dropdown.Popover placement="bottom end" className="min-w-44 bg-surface-secondary border-border">
-                  <Dropdown.Menu
-                    onAction={key => {
-                      handleNewChat(String(key));
-                    }}>
-                    {onlineCards
-                      .filter(c => c.id !== 'universal')
-                      .map(c => (
-                        <Dropdown.Item id={c.id} key={c.id} textValue={`New Chat on ${c.title}`}>
-                          <div className="flex items-center gap-x-2">
-                            {c.logoUrl && <img alt="" src={c.logoUrl} className="size-4 rounded shrink-0" />}
-                            <span className="text-xs">{c.title}</span>
-                          </div>
-                        </Dropdown.Item>
-                      ))}
-                  </Dropdown.Menu>
-                </Dropdown.Popover>
-              </Dropdown>
-            ) : (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="notDraggable size-7"
-                onPress={() => handleNewChat()}
-                isIconOnly>
-                <Plus className="size-3.5" />
-              </Button>
-            )}
-          </div>
-
-          <ScrollShadow className="flex-1 py-2 px-0.5">
-            {isHistoryLoading ? (
-              <div className="flex items-center justify-center py-8 draggable">
-                <Spinner size="md" />
-              </div>
-            ) : chatHistory.length === 0 ? (
-              <div className="text-center py-8 text-xs text-semi-muted draggable">No recent chats</div>
-            ) : (
-              <div className="notDraggable size-full flex flex-col gap-y-0.5">
-                {chatHistory.map((item: any) => {
-                  const card = onlineCards.find(c => c.id === item.cardId);
-                  return (
-                    <Button
-                      className={
-                        'justify-start text-xs transition-all h-7 shrink-0 rounded-xl ' +
-                        `group notDraggable ${item.active ? 'bg-accent/10 text-accent font-semibold' : ''}`
-                      }
-                      size="sm"
-                      variant="ghost"
-                      key={`${item.cardId}-${item.index}`}
-                      onPress={() => handleSelectThread(item.index, item.cardId)}
-                      fullWidth>
-                      {activeCardId === 'universal' && card?.logoUrl && (
-                        <img alt="" src={card.logoUrl} className="size-3.5 rounded shrink-0" />
-                      )}
-                      {item.title || 'Untitled Chat'}
+        {step !== 'login' && (
+          <div className="w-50 flex flex-col shrink-0 draggable bg-surface-secondary rounded-tr-2xl overflow-hidden">
+            <div className={'flex items-center justify-between px-3 py-2 bg-surface/50 draggable'}>
+              <span className="text-[8pt] font-bold text-semi-muted tracking-wider uppercase">Recents</span>
+              {activeCardId === 'universal' ? (
+                <Dropdown>
+                  <Dropdown.Trigger>
+                    <Button size="sm" variant="ghost" className="size-7 notDraggable" isIconOnly>
+                      <Plus className="size-3.5" />
                     </Button>
-                  );
-                })}
-              </div>
-            )}
-          </ScrollShadow>
-        </div>
+                  </Dropdown.Trigger>
+                  <Dropdown.Popover placement="bottom end" className="min-w-44 bg-surface-secondary border-border">
+                    <Dropdown.Menu
+                      onAction={key => {
+                        handleNewChat(String(key));
+                      }}>
+                      {onlineCards
+                        .filter(c => c.id !== 'universal')
+                        .map(c => (
+                          <Dropdown.Item id={c.id} key={c.id} textValue={`New Chat on ${c.title}`}>
+                            <div className="flex items-center gap-x-2">
+                              {c.logoUrl && <img alt="" src={c.logoUrl} className="size-4 rounded shrink-0" />}
+                              <span className="text-xs">{c.title}</span>
+                            </div>
+                          </Dropdown.Item>
+                        ))}
+                    </Dropdown.Menu>
+                  </Dropdown.Popover>
+                </Dropdown>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="notDraggable size-7"
+                  onPress={() => handleNewChat()}
+                  isIconOnly>
+                  <Plus className="size-3.5" />
+                </Button>
+              )}
+            </div>
+
+            <ScrollShadow className="flex-1 py-2 px-0.5">
+              {isHistoryLoading ? (
+                <div className="flex items-center justify-center py-8 draggable">
+                  <Spinner size="md" />
+                </div>
+              ) : chatHistory.length === 0 ? (
+                <div className="text-center py-8 text-xs text-semi-muted draggable">No recent chats</div>
+              ) : (
+                <div className="notDraggable size-full flex flex-col gap-y-0.5">
+                  {chatHistory.map((item: any) => {
+                    const card = onlineCards.find(c => c.id === item.cardId);
+                    return (
+                      <Button
+                        className={
+                          'justify-start text-xs transition-all h-7 shrink-0 rounded-xl ' +
+                          `group notDraggable ${item.active ? 'bg-accent/10 text-accent font-semibold' : ''}`
+                        }
+                        size="sm"
+                        variant="ghost"
+                        key={`${item.cardId}-${item.index}`}
+                        onPress={() => handleSelectThread(item.index, item.cardId)}
+                        fullWidth>
+                        {activeCardId === 'universal' && card?.logoUrl && (
+                          <img alt="" src={card.logoUrl} className="size-3.5 rounded shrink-0" />
+                        )}
+                        {item.title || 'Untitled Chat'}
+                      </Button>
+                    );
+                  })}
+                </div>
+              )}
+            </ScrollShadow>
+          </div>
+        )}
 
         {/* Chat History View */}
         <div className="flex-1 flex flex-col overflow-hidden relative draggable">
-          {isLoginRequired ? (
-            <div className="flex flex-col items-center justify-center flex-1 p-8 text-center">
-              <div className="p-4 rounded-full bg-accent/5 mb-4">
-                <UserId className="size-10 text-accent" />
+          {step === 'login' ? (
+            <div className="flex size-full flex-col overflow-hidden bg-white notDraggable">
+              <div className="flex-1 relative w-full bg-white">
+                <BrowserViewPlaceholder />
               </div>
-              <h3 className="text-sm font-semibold mb-1">Authentication Required</h3>
-              <p className="text-xs text-semi-muted max-w-xs mb-4">
-                Please log in to your {currentCard?.title || 'AI'} account in LynxHub to enable chat access.
-              </p>
-              <Button size="sm" variant="primary" onPress={handleOpenLogin} className="font-semibold notDraggable">
-                Login in LynxHub
-                <ArrowRight />
-              </Button>
             </div>
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center flex-1 text-center p-8 draggable">

@@ -183,6 +183,10 @@ function setupWindowListeners(window: BrowserWindow) {
     window.focus();
   });
 
+  window.on('show', () => {
+    window.webContents.send('spotlight:window-shown');
+  });
+
   window.on('close', e => {
     const storageManager = classHolder.storageManager;
     const appConfig = storageManager?.getData('app');
@@ -191,8 +195,10 @@ function setupWindowListeners(window: BrowserWindow) {
       e.preventDefault();
       saveSpotlightBounds(window);
       window.hide();
+      classHolder.browserManager?.handleSpotlightHidden();
     } else {
       saveSpotlightBounds(window);
+      classHolder.browserManager?.handleSpotlightHidden();
     }
   });
 
@@ -219,6 +225,7 @@ export function ToggleSpotlightWindow() {
     const keepInBackground = appConfig?.spotlightKeepInBackground ?? true;
     if (keepInBackground) {
       win.hide();
+      classHolder.browserManager?.handleSpotlightHidden();
     } else {
       win.close();
     }

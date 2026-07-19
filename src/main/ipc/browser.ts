@@ -5,7 +5,7 @@ import {toMs} from '@lynx_common/utils';
 import BrowserManager from '@lynx_main/managers/browser';
 import classHolder from '@lynx_main/managers/classHolder';
 import {getUserAgent} from '@lynx_main/utils';
-import {FindInPageOptions} from 'electron';
+import {BrowserWindow, FindInPageOptions} from 'electron';
 
 import BrowserDownloadManager from '../childWindows/browserDownloadManager';
 import {listenForBrowserChannels} from './contextMenu';
@@ -52,6 +52,7 @@ export async function listenBrowser() {
   browserIpcInitialized = true;
 
   const browserManager: BrowserManager = new BrowserManager(mainWindow);
+  classHolder.browserManager = browserManager;
   classHolder.browserDownloadManager = new BrowserDownloadManager(browserManager.getSession(), mainWindow);
 
   await listenForBrowserChannels(browserManager);
@@ -66,7 +67,10 @@ export async function listenBrowser() {
   browserIpc.on.loadURL((id, url) => browserManager.loadURL(id, url));
 
   // Sets browser webview visibility
-  browserIpc.on.setVisible((id, visible, hideMode) => browserManager.setVisible(id, visible, hideMode));
+  lynxIpc.onEvent(browserChannels.setVisible, (event, id, visible, hideMode) => {
+    const sender = event.sender ? BrowserWindow.fromWebContents(event.sender) || undefined : undefined;
+    browserManager.setVisible(id, visible, hideMode, sender);
+  });
 
   // Finds text in page
   browserIpc.on.findInPage((id, value, options) => browserManager.findInPage(id, value, options));
@@ -112,7 +116,10 @@ export async function listenBrowser() {
   browserIpc.on.updateTabVolume((tabId, volume) => browserIpc.send.onTabVolumeUpdate(tabId, volume));
   browserIpc.on.updateTabMuted((tabId, muted) => browserIpc.send.onTabMutedUpdate(tabId, muted));
 
-  browserIpc.on.resizeBrowserView(data => browserManager.resizeViews(data));
+  lynxIpc.onEvent(browserChannels.resizeBrowserView, (event, data) => {
+    const sender = event.sender ? BrowserWindow.fromWebContents(event.sender) || undefined : undefined;
+    browserManager.resizeViews(data, sender);
+  });
 
   // Clears browser cache - remove existing handler first to prevent duplicate registration
   browserIpc.handle.clearCache(() => browserManager.clearCache());

@@ -15,6 +15,7 @@ import BrowserDownloadManager from '../childWindows/browserDownloadManager';
 import ContextMenuManager from '../childWindows/contextMenu';
 import LinkPreviewManager from '../childWindows/linkPreview';
 import ShareScreenManager from '../childWindows/shareScreen';
+import BrowserManager from './browser';
 import StaticsManager from './statics';
 import TrayManager from './tray';
 
@@ -41,6 +42,7 @@ class ClassHolder {
   private _linkPreviewManager?: LinkPreviewManager;
   private _browserDownloadManager?: BrowserDownloadManager;
   private _shareScreenManager?: ShareScreenManager;
+  private _browserManager?: BrowserManager;
 
   private _toastWindow?: BrowserWindow;
   private _spotlightChatWindow?: BrowserWindow;
@@ -198,6 +200,9 @@ class ClassHolder {
   set spotlightChatWindow(value: ClassHolder['_spotlightChatWindow']) {
     this._spotlightChatWindow = value;
   }
+  set browserManager(value: BrowserManager | undefined) {
+    this._browserManager = value;
+  }
 
   // ----------------> Getters
   get appStartTime(): number {
@@ -247,6 +252,9 @@ class ClassHolder {
   }
   get spotlightChatWindow() {
     return this._spotlightChatWindow;
+  }
+  get browserManager() {
+    return this._browserManager;
   }
 }
 

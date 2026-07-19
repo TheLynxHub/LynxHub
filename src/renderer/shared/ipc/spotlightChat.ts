@@ -23,6 +23,7 @@ const spotlightChatIpc = {
   onNewChat: (callback: (cardId: string) => void) => lynxIpc.on(spotlightChatChannels.newChat, callback),
   onOpenLogin: (callback: (cardId: string) => void) => lynxIpc.on(spotlightChatChannels.openLogin, callback),
   onSetActiveCard: (callback: (cardId: string) => void) => lynxIpc.on(spotlightChatChannels.setActiveCard, callback),
+  onWindowShown: (callback: () => void) => lynxIpc.on('spotlight:window-shown', callback),
 };
 
 export default spotlightChatIpc;

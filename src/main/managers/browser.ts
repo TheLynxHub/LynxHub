@@ -23,7 +23,14 @@ const SCRIPT_EXECUTION_TIMEOUT_MS = 3000;
  * Handles creation, navigation, resizing, and IPC for each browser instance.
  */
 export default class BrowserManager {
-  private browsers: {id: string; view: WebContentsView; visible?: boolean; hideMode?: 'detach' | 'offscreen'}[] = [];
+  private browsers: {
+    id: string;
+    view: WebContentsView;
+    visible?: boolean;
+    hideMode?: 'detach' | 'offscreen';
+    attachedWindow?: BrowserWindow;
+    lastBounds?: {x: number; y: number; width: number; height: number};
+  }[] = [];
   private readonly mainWindow: BrowserWindow;
   private lastViewSize: ElementResizeData | undefined = undefined;
 
@@ -74,31 +81,32 @@ export default class BrowserManager {
     }
   }
 
-  public resizeViews(data?: ElementResizeData) {
+  public resizeViews(data?: ElementResizeData, senderWindow?: BrowserWindow) {
+    const mainWindow = this.getMainWindow();
+    const targetWindow = senderWindow || mainWindow;
+    if (!targetWindow || targetWindow.isDestroyed()) return;
+
     let targetSize: ElementResizeData | undefined = undefined;
 
     if (data) {
       targetSize = data;
-      this.lastViewSize = data;
-    } else if (this.lastViewSize) {
+      if (targetWindow === mainWindow) {
+        this.lastViewSize = data;
+      }
+    } else if (targetWindow === mainWindow && this.lastViewSize) {
       targetSize = this.lastViewSize;
     }
 
     if (!targetSize) {
-      console.warn('Failed to get valid resizing data resize the browser view');
       return;
     }
 
     const {x, y, width, height} = targetSize;
 
     this.browsers.forEach(browser => {
-      if (browser.visible !== false) {
+      if (browser.attachedWindow === targetWindow && browser.visible !== false) {
         browser.view.setBounds({x: x || 0, y: y || 80, width, height});
-      } else if (browser.hideMode === 'offscreen') {
-        // Position mostly outside the window with 1px overlap so Chromium's compositor
-        // still paints the view. Extreme negative coords (e.g. -9999) cause culling and
-        // stop paint events; fully in-bounds coords make the view visually appear on top.
-        browser.view.setBounds({x: -1439, y: -899, width: 1440, height: 900});
+        browser.lastBounds = {x: x || 0, y: y || 80, width, height};
       }
     });
   }
@@ -354,7 +362,13 @@ export default class BrowserManager {
     this.listenForFindInPage(webContents);
 
     const isBackground = options?.backgroundThrottling === false;
-    this.browsers.push({id, view: newView, visible: !isBackground, hideMode: isBackground ? 'offscreen' : undefined});
+    this.browsers.push({
+      id,
+      view: newView,
+      visible: !isBackground,
+      hideMode: isBackground ? 'offscreen' : undefined,
+      attachedWindow: mainWindow,
+    });
     // Insert background views at z-index 0 (behind everything) so they're painted but hidden
     mainWindow.contentView.addChildView(newView, isBackground ? 0 : undefined);
 
@@ -405,13 +419,16 @@ export default class BrowserManager {
     if (browserIndex === -1) return;
 
     const browser = this.browsers[browserIndex];
-    const mainWindow = this.getMainWindow();
 
     // Remove from array first to prevent any callbacks from accessing stale data
     this.browsers.splice(browserIndex, 1);
 
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.contentView.removeChildView(browser.view);
+    if (browser.attachedWindow && !browser.attachedWindow.isDestroyed()) {
+      try {
+        browser.attachedWindow.contentView.removeChildView(browser.view);
+      } catch (e) {
+        console.warn('Failed to remove view from attached window on destroy:', e);
+      }
     }
 
     const webContents = browser.view.webContents;
@@ -458,7 +475,7 @@ export default class BrowserManager {
   /**
    * Controls visibility of a browser view.
    */
-  public setVisible(id: string, visible: boolean, hideMode?: 'detach' | 'offscreen') {
+  public setVisible(id: string, visible: boolean, hideMode?: 'detach' | 'offscreen', targetWindow?: BrowserWindow) {
     const browser = this.browsers.find(b => b.id === id);
     const mainWindow = this.getMainWindow();
     if (isNil(browser) || isNil(mainWindow)) return;
@@ -467,26 +484,64 @@ export default class BrowserManager {
     browser.hideMode = hideMode;
 
     const view = browser.view;
+    const destWindow = visible ? targetWindow || mainWindow : undefined;
 
-    if (visible) {
-      // Always re-add to bring the view to the top of the z-order.
-      // Offscreen views are kept as children at z-index 0, so we need to reorder them to the top.
-      mainWindow.contentView.addChildView(view);
-      if (this.lastViewSize) {
-        const {x, y, width, height} = this.lastViewSize;
-        view.setBounds({x: x || 0, y: y || 80, width, height});
+    // If it's attached to a different window, detach it first
+    if (browser.attachedWindow && browser.attachedWindow !== destWindow) {
+      if (!browser.attachedWindow.isDestroyed()) {
+        try {
+          browser.attachedWindow.contentView.removeChildView(view);
+        } catch (e) {
+          console.warn('Failed to remove child view:', e);
+        }
+      }
+      browser.attachedWindow = undefined;
+    }
+
+    if (visible && destWindow) {
+      if (!destWindow.isDestroyed()) {
+        try {
+          destWindow.contentView.addChildView(view);
+          browser.attachedWindow = destWindow;
+
+          // Apply last bounds for this view if we have them, or layout defaults
+          if (browser.lastBounds) {
+            view.setBounds(browser.lastBounds);
+          } else if (destWindow === mainWindow && this.lastViewSize) {
+            const {x, y, width, height} = this.lastViewSize;
+            view.setBounds({x: x || 0, y: y || 80, width, height});
+          } else {
+            // Fallback default bounds for spotlight/other windows
+            const bounds = destWindow.getBounds();
+            const isSpotlight = destWindow === classHolder.spotlightChatWindow;
+            if (isSpotlight) {
+              view.setBounds({x: 0, y: 48, width: bounds.width, height: bounds.height - 48});
+            } else {
+              view.setBounds({x: 200, y: 48, width: bounds.width - 200, height: bounds.height - 48});
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to add child view:', e);
+        }
       }
     } else {
       if (hideMode === 'offscreen') {
         // Position mostly outside the window with 1px overlap so Chromium's compositor
-        // still paints the view. Extreme negative coords cause culling and stop paint events.
+        // still paints the view. Extreme negative coords (e.g. -9999) cause culling and
+        // stop paint events; fully in-bounds coords make the view visually appear on top.
         view.setBounds({x: -1439, y: -899, width: 1440, height: 900});
         // Ensure the view is behind everything (z-index 0) so it's hidden from the user.
         // addChildView reorders the view if it's already attached, or adds it at index 0 if not.
-        mainWindow.contentView.addChildView(view, 0);
+        if (!mainWindow.isDestroyed()) {
+          try {
+            mainWindow.contentView.addChildView(view, 0);
+            browser.attachedWindow = mainWindow;
+          } catch (e) {
+            console.warn('Failed to add offscreen child view to main window:', e);
+          }
+        }
       } else {
-        mainWindow.contentView.removeChildView(view);
-        mainWindow.webContents.focus();
+        browser.attachedWindow = undefined;
       }
     }
   }
@@ -629,5 +684,35 @@ export default class BrowserManager {
         null,
       ) ?? null
     );
+  }
+
+  public handleSpotlightHidden() {
+    const spotlightWin = classHolder.spotlightChatWindow;
+    if (!spotlightWin) return;
+
+    const mainWindow = this.getMainWindow();
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+
+    this.browsers.forEach(browser => {
+      if (browser.attachedWindow === spotlightWin) {
+        try {
+          spotlightWin.contentView.removeChildView(browser.view);
+        } catch (e) {
+          console.warn('Failed to remove view from spotlight on hide:', e);
+        }
+        browser.attachedWindow = undefined;
+        browser.visible = false;
+
+        if (browser.hideMode === 'offscreen') {
+          browser.view.setBounds({x: -1439, y: -899, width: 1440, height: 900});
+          try {
+            mainWindow.contentView.addChildView(browser.view, 0);
+            browser.attachedWindow = mainWindow;
+          } catch (e) {
+            console.warn('Failed to restore background view to main window on spotlight hide:', e);
+          }
+        }
+      }
+    });
   }
 }
