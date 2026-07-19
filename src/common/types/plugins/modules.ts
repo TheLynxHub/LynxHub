@@ -525,6 +525,14 @@ export type CardData = {
   developer?: string;
 };
 
+export interface OnlineScriptsConfig {
+  scrapeMessages?: string;
+  scrapeHistory?: string;
+  sendMessage?: string;
+  selectThread?: string;
+  newChat?: string;
+}
+
 export interface OnlineConfig {
   url: string;
   selectors: {
@@ -541,6 +549,7 @@ export interface OnlineConfig {
     action: 'click' | 'navigate';
     value: string;
   };
+  scripts?: OnlineScriptsConfig;
 }
 
 /**

@@ -9,6 +9,7 @@ import {topToast} from '../../layouts/ToastProviders';
 import {onlineChatActions, useOnlineChatSelector} from '../../redux/reducers/onlineChat';
 import {tabsActions, useTabsState} from '../../redux/reducers/tabs';
 import {AppDispatch} from '../../redux/store';
+import {resolveOnlineScript} from '../../utils/onlineChatScripts';
 
 export type ChatStep = 'select_module' | 'login' | 'chat';
 
@@ -263,18 +264,7 @@ export function useOnlineChat(tabID = 'online-chat') {
       );
       dispatch(onlineChatActions.setActiveUniversalCardId(targetCardId));
 
-      const script = `
-        (() => {
-          const itemSel = ${JSON.stringify(selectors.chatItem)};
-          const items = Array.from(document.querySelectorAll(itemSel));
-          const item = items[${index}];
-          if (item) {
-            item.click();
-            return true;
-          }
-          return false;
-        })()
-      `;
+      const script = resolveOnlineScript('selectThread', card, {index});
 
       try {
         await browserIpc.invoke.executeJavaScript(viewId, script);
@@ -322,61 +312,7 @@ export function useOnlineChat(tabID = 'online-chat') {
         }),
       );
 
-      const {selectors} = card.onlineConfig;
-      const escapedMessage = messageText.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
-
-      const script = `
-      (() => {
-        const inputSel = ${JSON.stringify(selectors.input)};
-        const sendButtonSel = ${JSON.stringify(selectors.sendButton)};
-        const inputEl = document.querySelector(inputSel);
-        if (!inputEl) return false;
-        
-        inputEl.focus();
-        
-        if (inputEl.tagName === 'INPUT' || inputEl.tagName === 'TEXTAREA') {
-          const valueSetter = Object.getOwnPropertyDescriptor(inputEl.constructor.prototype, 'value') ||
-                              Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value') ||
-                              Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-          if (valueSetter && valueSetter.set) {
-            valueSetter.set.call(inputEl, \`\${${JSON.stringify(escapedMessage)}}\`);
-          } else {
-            inputEl.value = \`\${${JSON.stringify(escapedMessage)}}\`;
-          }
-          inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-          inputEl.dispatchEvent(new Event('change', { bubbles: true }));
-        } else {
-          try {
-            inputEl.focus();
-            document.execCommand('selectAll', false, null);
-            document.execCommand('delete', false, null);
-            document.execCommand('insertText', false, \`\${${JSON.stringify(escapedMessage)}}\`);
-          } catch (e) {
-            inputEl.innerHTML = \`\${${JSON.stringify(escapedMessage)}}\`;
-          }
-          inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-          inputEl.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        
-        setTimeout(() => {
-          const sendBtn = document.querySelector(sendButtonSel);
-          if (sendBtn) {
-            sendBtn.click();
-          } else {
-            const enterEvent = new KeyboardEvent('keydown', {
-              key: 'Enter',
-              code: 'Enter',
-              keyCode: 13,
-              which: 13,
-              bubbles: true,
-              cancelable: true
-            });
-            inputEl.dispatchEvent(enterEvent);
-          }
-        }, 150);
-        return true;
-      })()
-    `;
+      const script = resolveOnlineScript('sendMessage', card, {messageText});
 
       try {
         await browserIpc.invoke.executeJavaScript(viewId, script);
@@ -438,7 +374,7 @@ export function useOnlineChat(tabID = 'online-chat') {
       if (!targetCardId) return;
 
       const card = onlineCards.find(c => c.id === targetCardId);
-      if (!card || !card.onlineConfig || !card.onlineConfig.newChat) return;
+      if (!card || !card.onlineConfig) return;
 
       const viewId = `online-bg-${targetCardId}`;
       const {newChat, url} = card.onlineConfig;
@@ -459,38 +395,31 @@ export function useOnlineChat(tabID = 'online-chat') {
         dispatch(onlineChatActions.setActiveUniversalCardId(targetCardId));
       }
 
-      if (newChat.action === 'click') {
-        const script = `
-          (() => {
-            const selectors = ${JSON.stringify(newChat.value.split(',').map(s => s.trim()))};
-            for (const selector of selectors) {
-              const btn = document.querySelector(selector);
-              if (btn) {
-                btn.click();
-                return true;
-              }
-            }
-            return false;
-          })()
-        `;
+      const hasCustomNewChat = !!card.onlineConfig.scripts?.newChat;
+      const isClickAction = newChat?.action === 'click';
+
+      if (hasCustomNewChat || isClickAction) {
+        const script = resolveOnlineScript('newChat', card);
         try {
           const clicked = await browserIpc.invoke.executeJavaScript(viewId, script);
-          if (!clicked) {
+          if (!clicked && !hasCustomNewChat && newChat) {
             console.warn('New chat button not found, falling back to page reload/navigation:', newChat.value);
             dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
             browserIpc.send.loadURL(viewId, url);
           }
         } catch (err) {
           console.error('Failed to click new chat button, falling back:', err);
-          dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
-          browserIpc.send.loadURL(viewId, url);
+          if (!hasCustomNewChat && newChat) {
+            dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
+            browserIpc.send.loadURL(viewId, url);
+          }
         }
-      } else if (newChat.action === 'navigate') {
+      } else if (newChat && newChat.action === 'navigate') {
         dispatch(onlineChatActions.setModulePageLoaded({cardId: targetCardId, isPageLoaded: false}));
         browserIpc.send.loadURL(viewId, newChat.value);
       }
     },
-    [currentCardId, onlineCards, dispatch],
+    [currentCardId, onlineCards, dispatch, selectedCard],
   );
 
   const toggleBgChat = useCallback(

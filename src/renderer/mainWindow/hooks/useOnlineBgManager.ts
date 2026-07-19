@@ -7,158 +7,7 @@ import storageIpc from '@lynx_shared/ipc/storage';
 import {useEffect, useMemo, useRef} from 'react';
 import {useDispatch} from 'react-redux';
 
-// Static DOM scraping scripts
-const getScrapeMessagesScript = (selectors: any) => `
-  (() => {
-    const userSel = ${JSON.stringify(selectors.userMessage)};
-    const assistantSel = ${JSON.stringify(selectors.assistantMessage)};
-    const textSel = ${JSON.stringify(selectors.messageText)};
-    
-    const htmlToMarkdown = (el) => {
-      if (!el) return '';
-      
-      const walk = (node) => {
-        if (node.nodeType === 3) {
-          return node.nodeValue || '';
-        }
-        if (node.nodeType !== 1) {
-          return '';
-        }
-        if (node.matches('.sr-only, .visually-hidden, [class*="sr-only"], [class*="visually-hidden"]')) {
-          return '';
-        }
-        const tag = node.tagName.toLowerCase();
-        
-        if (tag === 'pre') {
-          const codeEl = node.querySelector('code');
-          if (codeEl) {
-            const langClass = Array.from(codeEl.classList).find(c => c.startsWith('language-'));
-            const lang = langClass ? langClass.replace('language-', '') : '';
-            return '\\n\`\`\`' + lang + '\\n' + (codeEl.textContent || '') + '\\n\`\`\`\\n';
-          }
-          return '\\n\`\`\`\\n' + (node.textContent || '') + '\\n\`\`\`\\n';
-        }
-        
-        let children = '';
-        for (let i = 0; i < node.childNodes.length; i++) {
-          const child = node.childNodes[i];
-          if ((tag === 'ul' || tag === 'ol') && child.nodeType === 3 && !child.nodeValue.trim()) {
-            continue;
-          }
-          children += walk(child);
-        }
-        
-        switch (tag) {
-          case 'p': {
-            let isInsideLi = false;
-            let pNode = node.parentNode;
-            while (pNode) {
-              if (pNode.tagName && pNode.tagName.toLowerCase() === 'li') {
-                isInsideLi = true;
-                break;
-              }
-              pNode = pNode.parentNode;
-            }
-            if (isInsideLi) {
-              return children.trim();
-            }
-            return '\\n\\n' + children.trim() + '\\n\\n';
-          }
-          case 'h1': return '\\n\\n# ' + children.trim() + '\\n\\n';
-          case 'h2': return '\\n\\n## ' + children.trim() + '\\n\\n';
-          case 'h3': return '\\n\\n### ' + children.trim() + '\\n\\n';
-          case 'h4': return '\\n\\n#### ' + children.trim() + '\\n\\n';
-          case 'h5': return '\\n\\n##### ' + children.trim() + '\\n\\n';
-          case 'h6': return '\\n\\n###### ' + children.trim() + '\\n\\n';
-          case 'strong':
-          case 'b':
-            return ' **' + children.trim() + '** ';
-          case 'em':
-          case 'i':
-            return ' *' + children.trim() + '* ';
-          case 'code':
-            return ' \`' + children.trim() + '\` ';
-          case 'ul':
-            return '\\n' + children + '\\n';
-          case 'ol':
-            return '\\n' + children + '\\n';
-          case 'li': {
-            const isOrdered = node.parentNode && node.parentNode.tagName.toLowerCase() === 'ol';
-            if (isOrdered) {
-              const lis = Array.from(node.parentNode.children).filter(c => c.tagName.toLowerCase() === 'li');
-              const index = lis.indexOf(node) + 1;
-              return '\\n' + index + '. ' + children.trim();
-            }
-            return '\\n- ' + children.trim();
-          }
-          case 'a':
-            return ' [' + children.trim() + '](' + (node.getAttribute('href') || '') + ') ';
-          case 'blockquote':
-            return (
-              '\\n\\n> ' +
-              children.trim().replace(/\\n/g, '\\n> ') +
-              '\\n\\n'
-            );
-          case 'hr':
-            return '---';
-          case 'br':
-            return '\\n';
-          default:
-            return children;
-        }
-      };
-      
-      return walk(el)
-        .replace(/\\n{3,}/g, '\\n\\n')
-        .trim();
-    };
-
-    const elements = Array.from(document.querySelectorAll(\`\${userSel}, \${assistantSel}\`));
-    return elements.map(el => {
-      const isUser = el.matches(userSel) || el.closest(userSel) !== null;
-      const textEl = textSel ? el.querySelector(textSel) : el;
-      return {
-        sender: isUser ? 'user' : 'assistant',
-        text: htmlToMarkdown(textEl)
-      };
-    });
-  })()
-`;
-
-const getScrapeHistoryScript = (selectors: any) => `
-  (() => {
-    const itemSel = ${JSON.stringify(selectors.chatItem)};
-    const textSel = ${JSON.stringify(selectors.chatItemText || '')};
-    const activeSel = ${JSON.stringify(selectors.chatActiveItem || '')};
-    
-    const items = Array.from(document.querySelectorAll(itemSel));
-    return items.map((el, index) => {
-      const textEl = textSel ? el.querySelector(textSel) : el;
-      let isActive = false;
-      const href = el.getAttribute('href');
-      if (href) {
-        const currentPath = window.location.pathname;
-        const currentHref = window.location.href;
-        isActive = currentPath === href || currentHref.endsWith(href) || currentPath.endsWith(href);
-      }
-      if (!isActive) {
-        if (activeSel) {
-          isActive = el.matches(activeSel) || el.closest(activeSel) !== null;
-        } else {
-          isActive = el.getAttribute('aria-current') === 'page' || 
-                     el.classList.contains('active') ||
-                     el.getAttribute('aria-selected') === 'true' ||
-                     Array.from(el.classList).some(cls => cls.includes('active') || cls.includes('selected'));
-        }
-      }
-      return {
-        index,
-        title: textEl ? textEl.textContent.trim() : '',
-        active: isActive
-      };
-    });
-  })()
-`;
+import {resolveOnlineScript} from '../utils/onlineChatScripts';
 
 export function useOnlineBgManager() {
   const dispatch = useDispatch<AppDispatch>();
@@ -253,7 +102,7 @@ export function useOnlineBgManager() {
 
       // Scraping Functions
       const runScrapeMessages = async () => {
-        const script = getScrapeMessagesScript(selectors);
+        const script = resolveOnlineScript('scrapeMessages', card);
         try {
           const res = await browserIpc.invoke.executeJavaScript(viewId, script);
           if (Array.isArray(res)) {
@@ -336,7 +185,7 @@ export function useOnlineBgManager() {
 
       const runScrapeHistory = async () => {
         if (!selectors.chatItem) return;
-        const script = getScrapeHistoryScript(selectors);
+        const script = resolveOnlineScript('scrapeHistory', card);
         try {
           const res = await browserIpc.invoke.executeJavaScript(viewId, script);
           if (Array.isArray(res)) {

@@ -9,6 +9,7 @@ import {useAllCardDataWithPath} from '../plugins/modules';
 import {onlineChatActions} from '../redux/reducers/onlineChat';
 import {tabsActions} from '../redux/reducers/tabs';
 import {AppDispatch, RootState} from '../redux/store';
+import {resolveOnlineScript} from '../utils/onlineChatScripts';
 
 const universalCard: any = {
   id: 'universal',
@@ -85,61 +86,7 @@ export function useSpotlightSync() {
       dispatch(onlineChatActions.setModuleSending({cardId, isSending: true}));
       dispatch(onlineChatActions.setModuleGenerating({cardId, isGenerating: true}));
 
-      const {selectors} = card.onlineConfig;
-      const escapedMessage = text.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
-
-      const script = `
-        (() => {
-          const inputSel = ${JSON.stringify(selectors.input)};
-          const sendButtonSel = ${JSON.stringify(selectors.sendButton)};
-          const inputEl = document.querySelector(inputSel);
-          if (!inputEl) return false;
-          
-          inputEl.focus();
-          
-          if (inputEl.tagName === 'INPUT' || inputEl.tagName === 'TEXTAREA') {
-            const valueSetter = Object.getOwnPropertyDescriptor(inputEl.constructor.prototype, 'value') ||
-                                Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value') ||
-                                Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-            if (valueSetter && valueSetter.set) {
-              valueSetter.set.call(inputEl, \`\${${JSON.stringify(escapedMessage)}}\`);
-            } else {
-              inputEl.value = \`\${${JSON.stringify(escapedMessage)}}\`;
-            }
-            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-            inputEl.dispatchEvent(new Event('change', { bubbles: true }));
-          } else {
-            try {
-              inputEl.focus();
-              document.execCommand('selectAll', false, null);
-              document.execCommand('delete', false, null);
-              document.execCommand('insertText', false, \`\${${JSON.stringify(escapedMessage)}}\`);
-            } catch (e) {
-              inputEl.innerHTML = \`\${${JSON.stringify(escapedMessage)}}\`;
-            }
-            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-            inputEl.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-          
-          setTimeout(() => {
-            const sendBtn = document.querySelector(sendButtonSel);
-            if (sendBtn) {
-              sendBtn.click();
-            } else {
-              const enterEvent = new KeyboardEvent('keydown', {
-                key: 'Enter',
-                code: 'Enter',
-                keyCode: 13,
-                which: 13,
-                bubbles: true,
-                cancelable: true
-              });
-              inputEl.dispatchEvent(enterEvent);
-            }
-          }, 150);
-          return true;
-        })()
-      `;
+      const script = resolveOnlineScript('sendMessage', card, {messageText: text});
 
       try {
         await browserIpc.invoke.executeJavaScript(viewId, script);
@@ -167,18 +114,7 @@ export function useSpotlightSync() {
         }),
       );
 
-      const script = `
-        (() => {
-          const itemSel = ${JSON.stringify(selectors.chatItem)};
-          const items = Array.from(document.querySelectorAll(itemSel));
-          const item = items[${index}];
-          if (item) {
-            item.click();
-            return true;
-          }
-          return false;
-        })()
-      `;
+      const script = resolveOnlineScript('selectThread', card, {index});
 
       try {
         await browserIpc.invoke.executeJavaScript(`online-bg-${cardId}`, script);
@@ -192,7 +128,7 @@ export function useSpotlightSync() {
       handleEnsureBgChatEnabled(cardId);
 
       const card = onlineCards.find(c => c.id === cardId);
-      if (!card || !card.onlineConfig || !card.onlineConfig.newChat) return;
+      if (!card || !card.onlineConfig) return;
 
       const viewId = `online-bg-${cardId}`;
       const {newChat} = card.onlineConfig;
@@ -205,23 +141,17 @@ export function useSpotlightSync() {
         }),
       );
 
-      if (newChat.action === 'click') {
-        const script = `
-          (() => {
-            const btn = document.querySelector(${JSON.stringify(newChat.value)});
-            if (btn) {
-              btn.click();
-              return true;
-            }
-            return false;
-          })()
-        `;
+      const hasCustomNewChat = !!card.onlineConfig.scripts?.newChat;
+      const isClickAction = newChat?.action === 'click';
+
+      if (hasCustomNewChat || isClickAction) {
+        const script = resolveOnlineScript('newChat', card);
         try {
           await browserIpc.invoke.executeJavaScript(viewId, script);
         } catch (err) {
           console.error('Failed to start new chat from Spotlight:', err);
         }
-      } else if (newChat.action === 'navigate') {
+      } else if (newChat && newChat.action === 'navigate') {
         browserIpc.send.loadURL(viewId, newChat.value);
       }
     });
