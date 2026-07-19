@@ -139,17 +139,22 @@ export function useOnlineBgManager() {
 
             const moduleState = modulesRef.current[cardId];
             const isHistoryLoading = moduleState?.isHistoryLoading;
+            const pendingActiveIndex = moduleState?.pendingActiveIndex;
 
             if (isHistoryLoading) {
               const prevMsgs = prevMessagesRef.current[cardId] || [];
               const isSame = JSON.stringify(validMsgs) === JSON.stringify(prevMsgs);
 
-              if (isSame && validMsgs.length > 0) {
+              const isStillShowingOldMsgs = isSame && validMsgs.length > 0;
+              const isWaitingForHistoryItem =
+                pendingActiveIndex !== null && pendingActiveIndex !== undefined && validMsgs.length === 0;
+
+              if (isStillShowingOldMsgs || isWaitingForHistoryItem) {
                 const currentIgnoreCount = (ignoreCounterRef.current[cardId] || 0) + 1;
                 ignoreCounterRef.current[cardId] = currentIgnoreCount;
 
-                if (currentIgnoreCount < 5) {
-                  // Ignore scrape: webview is still showing old messages
+                if (currentIgnoreCount < 6) {
+                  // Ignore scrape: webview is still loading the new thread messages
                   return;
                 }
               }
@@ -157,17 +162,12 @@ export function useOnlineBgManager() {
 
             ignoreCounterRef.current[cardId] = 0;
 
-            const prevMsgs = prevMessagesRef.current[cardId] || [];
-            const isSame = JSON.stringify(validMsgs) === JSON.stringify(prevMsgs);
             const updates: Partial<ChatBridgeModuleState> = {
               messages: validMsgs,
               isGenerating,
               isHistoryLoading: false,
+              pendingActiveIndex: null,
             };
-
-            if (!isSame) {
-              updates.pendingActiveIndex = null;
-            }
 
             prevMessagesRef.current[cardId] = validMsgs;
 
@@ -196,28 +196,6 @@ export function useOnlineBgManager() {
                 .trim(),
               active: Boolean(item.active),
             }));
-
-            // Check if active item matches pendingActiveIndex to clear it
-            const activeItem = history.find((item: any) => item.active);
-            const activeIndex = activeItem ? activeItem.index : null;
-            const moduleState = modulesRef.current[cardId];
-
-            if (
-              moduleState &&
-              moduleState.pendingActiveIndex !== null &&
-              moduleState.pendingActiveIndex !== undefined
-            ) {
-              if (activeIndex === moduleState.pendingActiveIndex) {
-                dispatch(
-                  chatBridgeActions.setModuleState({
-                    cardId,
-                    updates: {
-                      pendingActiveIndex: null,
-                    },
-                  }),
-                );
-              }
-            }
 
             dispatch(chatBridgeActions.setModuleChatHistory({cardId, chatHistory: history}));
           }
