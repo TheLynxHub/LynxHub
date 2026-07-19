@@ -1,7 +1,9 @@
 import SettingsSection from '@lynx/components/SettingsSection';
 import {WindowFrame} from '@solar-icons/react-perf/BoldDuotone';
 
+import DisableSpotlight from './DisableSpotlight';
 import SpotlightAlwaysOnTop from './SpotlightAlwaysOnTop';
+import SpotlightKeepInBackground from './SpotlightKeepInBackground';
 import SpotlightRememberPosition from './SpotlightRememberPosition';
 import SpotlightRememberSize from './SpotlightRememberSize';
 import SpotlightShowTaskbar from './SpotlightShowTaskbar';
@@ -16,6 +18,8 @@ export default function SettingsOnlineChat() {
   return (
     <>
       <SettingsSection title="Spotlight" id={SettingsOnlineChatId} icon={<WindowFrame className="size-5" />}>
+        <DisableSpotlight />
+        <SpotlightKeepInBackground />
         <SpotlightAlwaysOnTop />
         <SpotlightShowTaskbar />
         <SpotlightRememberSize />

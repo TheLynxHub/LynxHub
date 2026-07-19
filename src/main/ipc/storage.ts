@@ -41,9 +41,12 @@ export default function listenStorage() {
   storageIpc.handle.update((key, updateData) => {
     const res = storageManager.updateData(key, updateData);
     if (key === 'app') {
-      if ((updateData as any).hotkeys) {
-        import('../childWindows/spotlightChat').then(({RegisterSpotlightHotkey}) => {
+      if ((updateData as any).hotkeys || (updateData as any).disableSpotlight !== undefined) {
+        import('../childWindows/spotlightChat').then(({RegisterSpotlightHotkey, CloseSpotlightWindow}) => {
           RegisterSpotlightHotkey();
+          if ((updateData as any).disableSpotlight) {
+            CloseSpotlightWindow(true);
+          }
         });
       }
       if ((updateData as any).spotlightAlwaysOnTop !== undefined) {

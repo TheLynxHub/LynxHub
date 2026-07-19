@@ -92,6 +92,8 @@ class BaseStorage {
       spotlightRememberPosition: false,
       spotlightLastSize: undefined,
       spotlightLastPosition: undefined,
+      disableSpotlight: false,
+      spotlightKeepInBackground: true,
     },
     terminal: {
       outputColor: false,

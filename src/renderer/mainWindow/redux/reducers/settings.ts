@@ -32,6 +32,8 @@ const initialState: SettingState = {
   spotlightShowTaskbar: false,
   spotlightRememberSize: false,
   spotlightRememberPosition: false,
+  disableSpotlight: false,
+  spotlightKeepInBackground: true,
 };
 
 const settingsSlice = createSlice({

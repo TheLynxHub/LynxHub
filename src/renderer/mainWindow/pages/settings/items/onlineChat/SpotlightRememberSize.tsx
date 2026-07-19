@@ -9,6 +9,7 @@ import SettingsFilterItem from '../../SettingsFilterItem';
 
 export default function SpotlightRememberSize() {
   const spotlightRememberSize = useSettingsState('spotlightRememberSize');
+  const disableSpotlight = useSettingsState('disableSpotlight');
   const dispatch = useDispatch<AppDispatch>();
 
   const onRememberSizeChange = useCallback(
@@ -28,6 +29,7 @@ export default function SpotlightRememberSize() {
       <LynxSwitch
         title={titleText}
         description={descriptionText}
+        isDisabled={disableSpotlight}
         enabled={spotlightRememberSize}
         onEnabledChange={onRememberSizeChange}
       />

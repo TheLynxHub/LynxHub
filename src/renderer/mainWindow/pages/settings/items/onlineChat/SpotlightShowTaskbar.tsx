@@ -9,6 +9,7 @@ import SettingsFilterItem from '../../SettingsFilterItem';
 
 export default function SpotlightShowTaskbar() {
   const spotlightShowTaskbar = useSettingsState('spotlightShowTaskbar');
+  const disableSpotlight = useSettingsState('disableSpotlight');
   const dispatch = useDispatch<AppDispatch>();
 
   const onShowTaskbarChange = useCallback(
@@ -27,6 +28,7 @@ export default function SpotlightShowTaskbar() {
       <LynxSwitch
         title={titleText}
         description={descriptionText}
+        isDisabled={disableSpotlight}
         enabled={spotlightShowTaskbar}
         onEnabledChange={onShowTaskbarChange}
       />

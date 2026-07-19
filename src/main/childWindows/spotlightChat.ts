@@ -3,11 +3,16 @@ import path from 'node:path';
 import {is} from '@electron-toolkit/utils';
 import {LynxHotkey} from '@lynx_common/types/ipc';
 import classHolder from '@lynx_main/managers/classHolder';
-import {BrowserWindow, BrowserWindowConstructorOptions, globalShortcut, screen} from 'electron';
+import {app, BrowserWindow, BrowserWindowConstructorOptions, globalShortcut, screen} from 'electron';
 
 import icon from '../../../resources/icon.png?asset';
 
 let currentHotkeyStr = '';
+let isAppQuitting = false;
+
+app.on('before-quit', () => {
+  isAppQuitting = true;
+});
 
 function hotkeyToAccelerator(hotkey: LynxHotkey): string {
   if (!hotkey || !hotkey.key) return '';
@@ -34,8 +39,8 @@ function hotkeyToAccelerator(hotkey: LynxHotkey): string {
 
 export function RegisterSpotlightHotkey() {
   const storageManager = classHolder.storageManager;
-  const hotkeys = storageManager?.getData('app')?.hotkeys || [];
-  const spotlightHotkey = hotkeys.find(h => h.name === 'spotlightChat');
+  const appConfig = storageManager?.getData('app');
+  const disableSpotlight = appConfig?.disableSpotlight ?? false;
 
   if (currentHotkeyStr) {
     try {
@@ -45,6 +50,13 @@ export function RegisterSpotlightHotkey() {
     }
     currentHotkeyStr = '';
   }
+
+  if (disableSpotlight) {
+    return;
+  }
+
+  const hotkeys = appConfig?.hotkeys || [];
+  const spotlightHotkey = hotkeys.find(h => h.name === 'spotlightChat');
 
   if (!spotlightHotkey || !spotlightHotkey.key) {
     return;
@@ -119,6 +131,9 @@ function saveSpotlightBounds(win: BrowserWindow) {
 function createSpotlightWindow() {
   const storageManager = classHolder.storageManager;
   const appConfig = storageManager?.getData('app');
+  if (appConfig?.disableSpotlight) {
+    return;
+  }
   const spotlightAlwaysOnTop = appConfig?.spotlightAlwaysOnTop ?? true;
   const spotlightShowTaskbar = appConfig?.spotlightShowTaskbar ?? false;
 
@@ -168,8 +183,17 @@ function setupWindowListeners(window: BrowserWindow) {
     window.focus();
   });
 
-  window.on('close', () => {
-    saveSpotlightBounds(window);
+  window.on('close', e => {
+    const storageManager = classHolder.storageManager;
+    const appConfig = storageManager?.getData('app');
+    const keepInBackground = appConfig?.spotlightKeepInBackground ?? true;
+    if (keepInBackground && !isAppQuitting) {
+      e.preventDefault();
+      saveSpotlightBounds(window);
+      window.hide();
+    } else {
+      saveSpotlightBounds(window);
+    }
   });
 
   window.on('closed', () => {
@@ -178,6 +202,12 @@ function setupWindowListeners(window: BrowserWindow) {
 }
 
 export function ToggleSpotlightWindow() {
+  const storageManager = classHolder.storageManager;
+  const appConfig = storageManager?.getData('app');
+  if (appConfig?.disableSpotlight) {
+    return;
+  }
+
   const win = classHolder.spotlightChatWindow;
   if (!win || win.isDestroyed()) {
     createSpotlightWindow();
@@ -186,11 +216,13 @@ export function ToggleSpotlightWindow() {
 
   if (win.isVisible()) {
     saveSpotlightBounds(win);
-    win.hide();
+    const keepInBackground = appConfig?.spotlightKeepInBackground ?? true;
+    if (keepInBackground) {
+      win.hide();
+    } else {
+      win.close();
+    }
   } else {
-    const storageManager = classHolder.storageManager;
-    const appConfig = storageManager?.getData('app');
-
     // Re-center on active monitor OR restore last bounds
     const cursorPos = screen.getCursorScreenPoint();
     const activeDisplay = screen.getDisplayNearestPoint(cursorPos);
@@ -225,9 +257,13 @@ export function ToggleSpotlightWindow() {
   }
 }
 
-export function CloseSpotlightWindow() {
+export function CloseSpotlightWindow(force = false) {
   const win = classHolder.spotlightChatWindow;
   if (win && !win.isDestroyed()) {
-    win.close();
+    if (force) {
+      win.destroy();
+    } else {
+      win.close();
+    }
   }
 }

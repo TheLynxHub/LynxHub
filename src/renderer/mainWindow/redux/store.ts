@@ -131,6 +131,8 @@ const buildPreloadedState = (): PreloadState | undefined => {
       spotlightShowTaskbar: storage.app.spotlightShowTaskbar ?? false,
       spotlightRememberSize: storage.app.spotlightRememberSize ?? false,
       spotlightRememberPosition: storage.app.spotlightRememberPosition ?? false,
+      disableSpotlight: storage.app.disableSpotlight ?? false,
+      spotlightKeepInBackground: storage.app.spotlightKeepInBackground ?? true,
     },
     terminal: storage.terminal,
     volume: {

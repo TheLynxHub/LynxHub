@@ -87,6 +87,8 @@ export type SettingState = {
   spotlightShowTaskbar: boolean;
   spotlightRememberSize: boolean;
   spotlightRememberPosition: boolean;
+  disableSpotlight: boolean;
+  spotlightKeepInBackground: boolean;
 };
 
 export type TerminalState = StorageTypes['terminal'];

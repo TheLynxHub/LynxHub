@@ -9,6 +9,7 @@ import SettingsFilterItem from '../../SettingsFilterItem';
 
 export default function SpotlightAlwaysOnTop() {
   const spotlightAlwaysOnTop = useSettingsState('spotlightAlwaysOnTop');
+  const disableSpotlight = useSettingsState('disableSpotlight');
   const dispatch = useDispatch<AppDispatch>();
 
   const onAlwaysOnTopChange = useCallback(
@@ -27,6 +28,7 @@ export default function SpotlightAlwaysOnTop() {
       <LynxSwitch
         title={titleText}
         description={descriptionText}
+        isDisabled={disableSpotlight}
         enabled={spotlightAlwaysOnTop}
         onEnabledChange={onAlwaysOnTopChange}
       />

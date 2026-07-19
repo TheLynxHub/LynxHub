@@ -9,6 +9,7 @@ import SettingsFilterItem from '../../SettingsFilterItem';
 
 export default function SpotlightRememberPosition() {
   const spotlightRememberPosition = useSettingsState('spotlightRememberPosition');
+  const disableSpotlight = useSettingsState('disableSpotlight');
   const dispatch = useDispatch<AppDispatch>();
 
   const onRememberPositionChange = useCallback(
@@ -30,6 +31,7 @@ export default function SpotlightRememberPosition() {
       <LynxSwitch
         title={titleText}
         description={descriptionText}
+        isDisabled={disableSpotlight}
         enabled={spotlightRememberPosition}
         onEnabledChange={onRememberPositionChange}
       />

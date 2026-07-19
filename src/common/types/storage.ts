@@ -112,6 +112,8 @@ export type AppConfigStorage = {
   spotlightRememberPosition: boolean;
   spotlightLastSize?: {width: number; height: number};
   spotlightLastPosition?: {x: number; y: number};
+  disableSpotlight: boolean;
+  spotlightKeepInBackground: boolean;
 };
 
 /**

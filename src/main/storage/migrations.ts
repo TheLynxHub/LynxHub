@@ -407,6 +407,12 @@ export class StorageMigrationManager {
       if (this.storage.data.app.spotlightRememberPosition === undefined) {
         this.storage.data.app.spotlightRememberPosition = false;
       }
+      if (this.storage.data.app.disableSpotlight === undefined) {
+        this.storage.data.app.disableSpotlight = false;
+      }
+      if (this.storage.data.app.spotlightKeepInBackground === undefined) {
+        this.storage.data.app.spotlightKeepInBackground = true;
+      }
     }
   }
 }

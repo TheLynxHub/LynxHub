@@ -28,6 +28,7 @@ export function useSpotlightSync() {
   const allCards = useAllCardDataWithPath();
   const onlineChat = useSelector((state: RootState) => state.onlineChat);
   const bgChatEnabledCards = onlineChat.bgChatEnabledCards || [];
+  const disableSpotlight = useSelector((state: RootState) => state.settings.disableSpotlight);
 
   const onlineCards = useMemo(() => {
     const list = allCards.filter(card => card.isOnline && card.id !== 'universal');
@@ -39,16 +40,18 @@ export function useSpotlightSync() {
 
   // 1. Sync onlineCards list to spotlight window
   useEffect(() => {
+    if (disableSpotlight) return;
     console.log('useSpotlightSync: syncing onlineCards, count:', onlineCards.length, onlineCards);
     if (onlineCards.length > 0) {
       spotlightChatIpc.setOnlineCards(onlineCards);
     }
-  }, [onlineCards]);
+  }, [onlineCards, disableSpotlight]);
 
   // 2. Sync onlineChat state to spotlight window
   useEffect(() => {
+    if (disableSpotlight) return;
     spotlightChatIpc.syncState(onlineChat);
-  }, [onlineChat]);
+  }, [onlineChat, disableSpotlight]);
 
   // Helper to ensure background view is running for a module
   const handleEnsureBgChatEnabled = useCallback(
@@ -65,6 +68,8 @@ export function useSpotlightSync() {
 
   // 3. Listen to commands from spotlight
   useEffect(() => {
+    if (disableSpotlight) return;
+
     // A. Send Message
     const offSendMessage = spotlightChatIpc.onSendMessage(async (cardId, text) => {
       handleEnsureBgChatEnabled(cardId);
@@ -191,5 +196,5 @@ export function useSpotlightSync() {
       offOpenLogin();
       offSetActiveCard();
     };
-  }, [onlineCards, onlineChat, handleEnsureBgChatEnabled, dispatch]);
+  }, [onlineCards, onlineChat, handleEnsureBgChatEnabled, dispatch, disableSpotlight]);
 }
