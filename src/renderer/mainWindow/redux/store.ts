@@ -133,6 +133,7 @@ const buildPreloadedState = (): PreloadState | undefined => {
       spotlightRememberPosition: storage.app.spotlightRememberPosition ?? false,
       disableSpotlight: storage.app.disableSpotlight ?? false,
       spotlightKeepInBackground: storage.app.spotlightKeepInBackground ?? true,
+      onlineChatMaxWidth: storage.app.onlineChatMaxWidth ?? 'default',
     },
     terminal: storage.terminal,
     volume: {

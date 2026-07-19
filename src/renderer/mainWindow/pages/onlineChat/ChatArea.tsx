@@ -1,12 +1,20 @@
 import 'flowtoken/dist/styles.css';
 
 import {Button, InputGroup, ScrollShadow, TextField} from '@heroui/react';
+import {useSettingsState} from '@lynx/redux/reducers/settings';
 import {ChatBubble, ChatSkeleton, TypingIndicatorBubble} from '@lynx_shared/components/ChatBubble';
 import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
 import {Send} from 'lucide-react';
-import {KeyboardEvent, memo, RefObject, useCallback, useEffect, useRef, useState} from 'react';
+import {KeyboardEvent, memo, RefObject, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {Message} from './useOnlineChat';
+
+const maxWidthMap = {
+  small: {messages: 'max-w-2xl', input: 'max-w-xl'},
+  default: {messages: 'max-w-4xl', input: 'max-w-3xl'},
+  wide: {messages: 'max-w-6xl', input: 'max-w-5xl'},
+  full: {messages: 'max-w-full', input: 'max-w-full'},
+};
 
 interface ChatAreaProps {
   selectedCard: any;
@@ -151,11 +159,14 @@ const ChatArea = memo(
       }
     };
 
+    const onlineChatMaxWidth = useSettingsState('onlineChatMaxWidth') || 'default';
+    const widthClasses = useMemo(() => maxWidthMap[onlineChatMaxWidth] || maxWidthMap.default, [onlineChatMaxWidth]);
+
     return (
       <div className="flex size-full flex-col overflow-hidden bg-surface">
         {/* Chat Messages */}
         <ScrollShadow ref={scrollRef} onScroll={handleScroll} className="flex-1 w-full">
-          <div ref={contentRef} className="max-w-6xl mx-auto w-full min-h-full flex flex-col p-6">
+          <div ref={contentRef} className={`${widthClasses.messages} mx-auto w-full min-h-full flex flex-col p-6`}>
             {isHistoryLoading ? (
               <ChatSkeleton />
             ) : messages.length === 0 ? (
@@ -194,7 +205,7 @@ const ChatArea = memo(
 
         {/* Message Input Box */}
         <div className="p-4 bg-surface shrink-0">
-          <TextField name="message" aria-label="Message input" className="max-w-4xl mx-auto w-full">
+          <TextField name="message" aria-label="Message input" className={`${widthClasses.input} mx-auto w-full`}>
             <InputGroup variant="secondary" className="p-2 rounded-2xl" fullWidth>
               <InputGroup.TextArea
                 placeholder={

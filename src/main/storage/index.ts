@@ -94,6 +94,7 @@ class BaseStorage {
       spotlightLastPosition: undefined,
       disableSpotlight: false,
       spotlightKeepInBackground: true,
+      onlineChatMaxWidth: 'default',
     },
     terminal: {
       outputColor: false,

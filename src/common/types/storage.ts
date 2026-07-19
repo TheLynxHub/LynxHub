@@ -114,6 +114,7 @@ export type AppConfigStorage = {
   spotlightLastPosition?: {x: number; y: number};
   disableSpotlight: boolean;
   spotlightKeepInBackground: boolean;
+  onlineChatMaxWidth: 'default' | 'wide' | 'full' | 'small';
 };
 
 /**

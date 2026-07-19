@@ -34,6 +34,7 @@ const initialState: SettingState = {
   spotlightRememberPosition: false,
   disableSpotlight: false,
   spotlightKeepInBackground: true,
+  onlineChatMaxWidth: 'default',
 };
 
 const settingsSlice = createSlice({

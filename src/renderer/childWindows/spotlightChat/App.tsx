@@ -28,15 +28,22 @@ export default function SpotlightApp() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectionText, setSelectionText] = useState('');
 
-  // Sync Theme
+  const [onlineChatMaxWidth, setOnlineChatMaxWidth] = useState<string>('default');
+
+  // Sync Theme & Settings
   useEffect(() => {
     storageIpc.get('app').then(app => {
-      if (app?.darkMode) {
-        const isDark =
-          app.darkMode === 'dark' ||
-          (app.darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        document.documentElement.classList.toggle('dark', isDark);
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      if (app) {
+        if (app.darkMode) {
+          const isDark =
+            app.darkMode === 'dark' ||
+            (app.darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', isDark);
+          document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        }
+        if (app.onlineChatMaxWidth) {
+          setOnlineChatMaxWidth(app.onlineChatMaxWidth);
+        }
       }
     });
   }, []);
@@ -364,12 +371,17 @@ export default function SpotlightApp() {
     };
   }, [currentCardId, step]);
 
-  // Listen for window shown events to re-trigger setVisible if needed
+  // Listen for window shown events to re-trigger setVisible and sync app settings
   useEffect(() => {
     const offWindowShown = spotlightChatIpc.onWindowShown(() => {
       if (step === 'login' && currentCardId) {
         browserIpc.send.setVisible(`online-bg-${currentCardId}`, true);
       }
+      storageIpc.get('app').then(app => {
+        if (app?.onlineChatMaxWidth) {
+          setOnlineChatMaxWidth(app.onlineChatMaxWidth);
+        }
+      });
     });
 
     return () => {
@@ -574,7 +586,17 @@ export default function SpotlightApp() {
             </div>
           ) : (
             <ScrollShadow ref={scrollRef} onScroll={handleScroll} className="flex-1 w-full notDraggable">
-              <div ref={contentRef} className="max-w-6xl mx-auto w-full flex flex-col gap-y-3 flex-1 p-4">
+              <div
+                className={`${
+                  onlineChatMaxWidth === 'small'
+                    ? 'max-w-2xl'
+                    : onlineChatMaxWidth === 'wide'
+                      ? 'max-w-6xl'
+                      : onlineChatMaxWidth === 'full'
+                        ? 'max-w-full'
+                        : 'max-w-4xl'
+                } mx-auto w-full flex flex-col gap-y-3 flex-1 p-4`}
+                ref={contentRef}>
                 <div className="space-y-4 flex-1">
                   {messages.map((msg, index) => (
                     <ChatBubble

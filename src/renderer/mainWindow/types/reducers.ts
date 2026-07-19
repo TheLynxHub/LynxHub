@@ -89,6 +89,7 @@ export type SettingState = {
   spotlightRememberPosition: boolean;
   disableSpotlight: boolean;
   spotlightKeepInBackground: boolean;
+  onlineChatMaxWidth: 'default' | 'wide' | 'full' | 'small';
 };
 
 export type TerminalState = StorageTypes['terminal'];

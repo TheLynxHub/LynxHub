@@ -413,6 +413,9 @@ export class StorageMigrationManager {
       if (this.storage.data.app.spotlightKeepInBackground === undefined) {
         this.storage.data.app.spotlightKeepInBackground = true;
       }
+      if (this.storage.data.app.onlineChatMaxWidth === undefined) {
+        this.storage.data.app.onlineChatMaxWidth = 'default';
+      }
     }
   }
 }
