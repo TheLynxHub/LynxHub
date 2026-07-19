@@ -117,6 +117,11 @@ export default function FloatChatApp() {
     return currentCardId ? syncedState?.modules?.[currentCardId] : null;
   }, [syncedState, currentCardId]);
 
+  const activeWindowRef = useRef<string | null | undefined>(moduleState?.activeWindow);
+  useEffect(() => {
+    activeWindowRef.current = moduleState?.activeWindow;
+  }, [moduleState?.activeWindow]);
+
   const messages = useMemo(() => {
     return moduleState?.messages || [];
   }, [moduleState]);
@@ -354,28 +359,55 @@ export default function FloatChatApp() {
     }
   }, [isLoginRequired]);
 
+  const lastStepRef = useRef(step);
+  const lastCardIdRef = useRef(currentCardId);
+
   // Handle webview visibility for the active card in Float Chat
   useEffect(() => {
     if (!currentCardId || currentCardId === 'unified') return;
 
     const viewId = `online-bg-${currentCardId}`;
 
+    const stepChangedToLogin = step === 'login' && lastStepRef.current !== 'login';
+    const cardChangedWithLogin = currentCardId !== lastCardIdRef.current && step === 'login';
+
+    lastStepRef.current = step;
+    lastCardIdRef.current = currentCardId;
+
     if (step === 'login') {
-      browserIpc.send.setVisible(viewId, true);
+      if (stepChangedToLogin || cardChangedWithLogin || !activeWindowRef.current) {
+        browserIpc.send.setVisible(viewId, true);
+      }
     } else {
-      browserIpc.send.setVisible(viewId, false, 'offscreen');
+      if (activeWindowRef.current === 'float') {
+        browserIpc.send.setVisible(viewId, false, 'offscreen');
+      }
     }
 
     return () => {
-      browserIpc.send.setVisible(viewId, false, 'offscreen');
+      if (activeWindowRef.current === 'float') {
+        browserIpc.send.setVisible(viewId, false, 'offscreen');
+      }
     };
   }, [currentCardId, step]);
+
+  // Reclaim free webview when it becomes free (activeWindow becomes null)
+  useEffect(() => {
+    if (!currentCardId || currentCardId === 'unified') return;
+    const viewId = `online-bg-${currentCardId}`;
+
+    if (step === 'login' && !moduleState?.activeWindow) {
+      browserIpc.send.setVisible(viewId, true);
+    }
+  }, [moduleState?.activeWindow, currentCardId, step]);
 
   // Listen for window shown events to re-trigger setVisible and sync app settings
   useEffect(() => {
     const offWindowShown = floatChatIpc.onWindowShown(() => {
       if (step === 'login' && currentCardId) {
-        browserIpc.send.setVisible(`online-bg-${currentCardId}`, true);
+        if (activeWindowRef.current !== 'main') {
+          browserIpc.send.setVisible(`online-bg-${currentCardId}`, true);
+        }
       }
       storageIpc.get('app').then(app => {
         if (app?.chatBridgeMaxWidth) {
@@ -573,7 +605,32 @@ export default function FloatChatApp() {
           {step === 'login' ? (
             <div className="flex size-full flex-col overflow-hidden bg-white notDraggable">
               <div className="flex-1 relative w-full bg-white">
-                <BrowserViewPlaceholder />
+                {moduleState?.activeWindow === 'main' ? (
+                  <div
+                    className={
+                      'absolute inset-0 flex flex-col items-center ' +
+                      'justify-center p-6 bg-surface text-center draggable'
+                    }>
+                    <Earth className="size-12 text-semi-muted mb-4 animate-pulse notDraggable" />
+                    <h3 className="text-base font-semibold mb-2 draggable">Webview is Active in Main Window</h3>
+                    <p className="text-xs text-semi-muted max-w-sm mb-6 draggable">
+                      The interactive webview for this AI module is currently active in the main app window.
+                    </p>
+                    <Button
+                      onPress={() => {
+                        if (currentCardId) {
+                          browserIpc.send.setVisible(`online-bg-${currentCardId}`, true);
+                        }
+                      }}
+                      size="sm"
+                      variant="primary"
+                      className="notDraggable">
+                      Bring Webview Here
+                    </Button>
+                  </div>
+                ) : (
+                  <BrowserViewPlaceholder />
+                )}
               </div>
             </div>
           ) : isHistoryLoading ? (

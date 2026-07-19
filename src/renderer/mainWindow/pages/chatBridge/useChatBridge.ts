@@ -2,7 +2,7 @@ import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import browserIpc from '@lynx_shared/ipc/browser';
 import filesIpc from '@lynx_shared/ipc/files';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
 import {topToast} from '../../layouts/ToastProviders';
@@ -99,6 +99,12 @@ export function useChatBridge(tabID = 'chat-bridge') {
   const isPageLoaded = currentModule?.isPageLoaded || false;
   const isHistoryLoading = currentModule?.isHistoryLoading || false;
   const isSending = currentModule?.isSending || false;
+  const activeWindow = currentModule?.activeWindow || null;
+
+  const activeWindowRef = useRef(activeWindow);
+  useEffect(() => {
+    activeWindowRef.current = activeWindow;
+  }, [activeWindow]);
 
   // Reconcile unified sidebar history
   const unifiedHistory = useMemo(() => {
@@ -128,6 +134,9 @@ export function useChatBridge(tabID = 'chat-bridge') {
     return merged;
   }, [selectedCard, currentModule, modules, visibleModuleIds, activeUnifiedCardId]);
 
+  const lastStepRef = useRef(step);
+  const lastActiveTabRef = useRef(activeTab);
+
   // Handle visibility transitions
   useEffect(() => {
     if (!currentCardId || currentCardId === 'unified') return;
@@ -135,24 +144,51 @@ export function useChatBridge(tabID = 'chat-bridge') {
     const viewId = `online-bg-${currentCardId}`;
     const isTabFocused = activeTab === tabID;
 
+    const stepChangedToLogin = step === 'login' && lastStepRef.current !== 'login';
+    const tabFocusedWithLogin = isTabFocused && lastActiveTabRef.current !== tabID && step === 'login';
+
+    lastStepRef.current = step;
+    lastActiveTabRef.current = activeTab;
+
     if (isTabFocused) {
       if (step === 'login') {
-        browserIpc.send.setVisible(viewId, true);
+        if (stepChangedToLogin || tabFocusedWithLogin || !activeWindowRef.current) {
+          browserIpc.send.setVisible(viewId, true);
+        }
       } else if (step === 'chat') {
-        browserIpc.send.setVisible(viewId, false, 'offscreen');
+        if (activeWindowRef.current === 'main') {
+          browserIpc.send.setVisible(viewId, false, 'offscreen');
+        }
       } else {
-        browserIpc.send.setVisible(viewId, false, 'detach');
+        if (activeWindowRef.current === 'main') {
+          browserIpc.send.setVisible(viewId, false, 'detach');
+        }
       }
     } else {
-      const isBgEnabled = bgChatEnabledCards.includes(currentCardId);
-      browserIpc.send.setVisible(viewId, false, isBgEnabled ? 'offscreen' : 'detach');
+      if (activeWindowRef.current === 'main') {
+        const isBgEnabled = bgChatEnabledCards.includes(currentCardId);
+        browserIpc.send.setVisible(viewId, false, isBgEnabled ? 'offscreen' : 'detach');
+      }
     }
 
     return () => {
-      const isBgEnabled = bgChatEnabledCards.includes(currentCardId);
-      browserIpc.send.setVisible(viewId, false, isBgEnabled ? 'offscreen' : 'detach');
+      if (activeWindowRef.current === 'main') {
+        const isBgEnabled = bgChatEnabledCards.includes(currentCardId);
+        browserIpc.send.setVisible(viewId, false, isBgEnabled ? 'offscreen' : 'detach');
+      }
     };
   }, [tabID, activeTab, step, currentCardId, bgChatEnabledCards]);
+
+  // Reclaim free webview when it becomes free (activeWindow becomes null)
+  useEffect(() => {
+    if (!currentCardId || currentCardId === 'unified') return;
+    const viewId = `online-bg-${currentCardId}`;
+    const isTabFocused = activeTab === tabID;
+
+    if (isTabFocused && step === 'login' && !activeWindow) {
+      browserIpc.send.setVisible(viewId, true);
+    }
+  }, [activeWindow, currentCardId, step, activeTab, tabID]);
 
   const handleSelectCard = useCallback(
     (card: any) => {
@@ -460,6 +496,7 @@ export function useChatBridge(tabID = 'chat-bridge') {
     handleCopyToClipboard,
     handleSaveToFile,
     handleNewChat,
+    activeWindow,
     // Background Scraper settings/state properties
     activeUnifiedCardId,
     setActiveUnifiedCardId: (id: string | null) => dispatch(chatBridgeActions.setActiveUnifiedCardId(id)),

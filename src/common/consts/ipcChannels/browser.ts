@@ -13,6 +13,7 @@ export const browserChannels = {
   openVolume: 'browser:openVolume',
 
   onZoomChanged: 'browser:on-zoom-changed',
+  onActiveWindowChange: 'browser:on-active-window-change',
 
   onLinkHover: 'browser:on-link-hover',
   resizeLinkPreview: 'browser:resize-link-preview',

@@ -22,6 +22,7 @@ export interface ChatBridgeModuleState {
   isHistoryLoading: boolean;
   isSending: boolean;
   pendingActiveIndex?: number | null;
+  activeWindow?: 'main' | 'float' | null;
 }
 
 export interface ChatBridgeState {
@@ -41,6 +42,7 @@ const initialModuleState: ChatBridgeModuleState = {
   isHistoryLoading: false,
   isSending: false,
   pendingActiveIndex: null,
+  activeWindow: null,
 };
 
 const initialState: ChatBridgeState = {

@@ -186,6 +186,9 @@ export const browserIpc = {
       sendToContextMenu(browserChannels.onFoundInPage, result),
     /** Sends zoom change event */
     onZoomChanged: (id: string, factor: number) => sendToMain(browserChannels.onZoomChanged, id, factor),
+    /** Sends active window change event */
+    onActiveWindowChange: (id: string, activeWindow: 'main' | 'float' | null) =>
+      sendToMain(browserChannels.onActiveWindowChange, id, activeWindow),
   },
   on: {
     /** Listens for create browser request */

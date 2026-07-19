@@ -251,9 +251,22 @@ export function useOnlineBgManager() {
       }
     });
 
+    const offActiveWindowChange = browserIpc.on.activeWindowChanged((id, activeWindow) => {
+      if (id.startsWith('online-bg-')) {
+        const cardId = id.replace('online-bg-', '');
+        dispatch(
+          chatBridgeActions.setModuleState({
+            cardId,
+            updates: {activeWindow},
+          }),
+        );
+      }
+    });
+
     return () => {
       offLoading();
       offDomReady();
+      offActiveWindowChange();
     };
   }, [dispatch]);
 

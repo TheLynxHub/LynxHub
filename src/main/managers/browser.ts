@@ -29,10 +29,11 @@ export default class BrowserManager {
     visible?: boolean;
     hideMode?: 'detach' | 'offscreen';
     attachedWindow?: BrowserWindow;
-    lastBounds?: {x: number; y: number; width: number; height: number};
+    lastBoundsByWindow?: {[windowId: number]: {x: number; y: number; width: number; height: number}};
   }[] = [];
   private readonly mainWindow: BrowserWindow;
   private lastViewSize: ElementResizeData | undefined = undefined;
+  private lastViewSizeByWindow: {[windowId: number]: ElementResizeData} = {};
 
   constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow;
@@ -86,15 +87,17 @@ export default class BrowserManager {
     const targetWindow = senderWindow || mainWindow;
     if (!targetWindow || targetWindow.isDestroyed()) return;
 
-    let targetSize: ElementResizeData | undefined = undefined;
+    let targetSize: ElementResizeData | undefined;
+    const windowId = targetWindow.id;
 
     if (data) {
       targetSize = data;
+      this.lastViewSizeByWindow[windowId] = data;
       if (targetWindow === mainWindow) {
         this.lastViewSize = data;
       }
-    } else if (targetWindow === mainWindow && this.lastViewSize) {
-      targetSize = this.lastViewSize;
+    } else {
+      targetSize = this.lastViewSizeByWindow[windowId] || (targetWindow === mainWindow ? this.lastViewSize : undefined);
     }
 
     if (!targetSize) {
@@ -106,7 +109,10 @@ export default class BrowserManager {
     this.browsers.forEach(browser => {
       if (browser.attachedWindow === targetWindow && browser.visible !== false) {
         browser.view.setBounds({x: x || 0, y: y || 80, width, height});
-        browser.lastBounds = {x: x || 0, y: y || 80, width, height};
+        if (!browser.lastBoundsByWindow) {
+          browser.lastBoundsByWindow = {};
+        }
+        browser.lastBoundsByWindow[windowId] = {x: x || 0, y: y || 80, width, height};
       }
     });
   }
@@ -508,9 +514,19 @@ export default class BrowserManager {
           destWindow.contentView.addChildView(view);
           browser.attachedWindow = destWindow;
 
-          // Apply last bounds for this view if we have them, or layout defaults
-          if (browser.lastBounds) {
-            view.setBounds(browser.lastBounds);
+          const windowId = destWindow.id;
+          const lastWinBounds = browser.lastBoundsByWindow?.[windowId];
+          const lastWinSize = this.lastViewSizeByWindow[windowId];
+
+          if (lastWinSize) {
+            const {x, y, width, height} = lastWinSize;
+            view.setBounds({x: x || 0, y: y || 80, width, height});
+            if (!browser.lastBoundsByWindow) {
+              browser.lastBoundsByWindow = {};
+            }
+            browser.lastBoundsByWindow[windowId] = {x: x || 0, y: y || 80, width, height};
+          } else if (lastWinBounds) {
+            view.setBounds(lastWinBounds);
           } else if (destWindow === mainWindow && this.lastViewSize) {
             const {x, y, width, height} = this.lastViewSize;
             view.setBounds({x: x || 0, y: y || 80, width, height});
@@ -548,6 +564,17 @@ export default class BrowserManager {
         browser.attachedWindow = undefined;
       }
     }
+
+    // Send active window change notification
+    let activeWindow: 'main' | 'float' | null = null;
+    if (visible && destWindow) {
+      if (destWindow === mainWindow) {
+        activeWindow = 'main';
+      } else if (destWindow === classHolder.floatChatWindow) {
+        activeWindow = 'float';
+      }
+    }
+    browserIpc.send.onActiveWindowChange(id, activeWindow);
   }
 
   public findInPage(id: string, value: string, options: FindInPageOptions) {
@@ -718,6 +745,9 @@ export default class BrowserManager {
             console.warn('Failed to restore background view to main window on float window hide:', e);
           }
         }
+
+        // Notify that the active window for this view is now null
+        browserIpc.send.onActiveWindowChange(browser.id, null);
       }
     });
   }

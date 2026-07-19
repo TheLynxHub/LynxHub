@@ -149,6 +149,10 @@ const browserIpc = {
     // Listens for zoom level changes (Ctrl+/- or mouse wheel zoom)
     onZoomChanged: (callback: (id: string, factor: number) => void): (() => void) =>
       lynxIpc.on(browserChannels.onZoomChanged, callback),
+
+    // Listens for active window changes for a browser view
+    activeWindowChanged: (callback: (id: string, activeWindow: 'main' | 'float' | null) => void): (() => void) =>
+      lynxIpc.on(browserChannels.onActiveWindowChange, callback),
   },
   invoke: {
     // Clears browser cache
