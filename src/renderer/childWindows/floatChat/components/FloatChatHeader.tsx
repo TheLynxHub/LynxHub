@@ -17,6 +17,7 @@ interface FloatChatHeaderProps {
   inputText: string;
   setInputText: (text: string) => void;
   handleKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
+  hasMessages?: boolean;
 }
 
 export const FloatChatHeader = memo(
@@ -33,27 +34,32 @@ export const FloatChatHeader = memo(
     inputText,
     setInputText,
     handleKeyDown,
+    hasMessages = false,
   }: FloatChatHeaderProps) => {
     return (
       <div className="flex flex-row items-center justify-between py-3 px-4 gap-x-2 draggable">
         <div className="flex flex-row items-center flex-1 gap-x-2">
           <ChatRound className="text-semi-muted size-5 shrink-0 mb-0.5" />
           {step === 'chat' ? (
-            <InputGroup variant="secondary" className="rounded-2xl notDraggable" fullWidth>
-              <InputGroup.TextArea
-                placeholder={
-                  isLoginRequired
-                    ? `Login required for ${currentCard?.title || 'AI'}`
-                    : `Message ${currentCard?.title || 'AI'}...`
-                }
-                rows={1}
-                value={inputText}
-                className="max-h-32"
-                onKeyDown={handleKeyDown}
-                onChange={e => setInputText(e.target.value)}
-                autoFocus
-              />
-            </InputGroup>
+            !hasMessages ? (
+              <InputGroup variant="secondary" className="rounded-2xl notDraggable" fullWidth>
+                <InputGroup.TextArea
+                  placeholder={
+                    isLoginRequired
+                      ? `Login required for ${currentCard?.title || 'AI'}`
+                      : `Message ${currentCard?.title || 'AI'}...`
+                  }
+                  rows={1}
+                  value={inputText}
+                  className="max-h-32"
+                  onKeyDown={handleKeyDown}
+                  onChange={e => setInputText(e.target.value)}
+                  autoFocus
+                />
+              </InputGroup>
+            ) : (
+              <span className="text-[0.9rem] font-semibold">{currentCard?.title || activeCard?.title || 'AI'}</span>
+            )
           ) : activeCard ? (
             <span className="text-[0.9rem] font-semibold">{activeCard.title}</span>
           ) : null}

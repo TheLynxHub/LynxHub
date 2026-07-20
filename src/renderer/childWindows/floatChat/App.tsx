@@ -37,9 +37,11 @@ export default function FloatChatApp() {
     messages,
     chatHistory,
     isGenerating,
+    isSending,
     isHistoryLoading,
     isLoginRequired,
     handleScroll,
+    handleSend,
     handleKeyDown,
     handleSelectThread,
     handleNewChat,
@@ -47,6 +49,8 @@ export default function FloatChatApp() {
     handleCopyToClipboard,
     handleSaveToFile,
   } = useFloatChat();
+
+  const hasMessages = messages.length > 0;
 
   return (
     <FloatChatContextMenu
@@ -71,6 +75,7 @@ export default function FloatChatApp() {
             activeCard={activeCard}
             currentCard={currentCard}
             onlineCards={onlineCards}
+            hasMessages={hasMessages}
             activeCardId={activeCardId}
             setInputText={setInputText}
             currentCardId={currentCardId}
@@ -109,12 +114,17 @@ export default function FloatChatApp() {
               step={step}
               messages={messages}
               scrollRef={scrollRef}
+              isSending={isSending}
+              inputText={inputText}
               contentRef={contentRef}
+              handleSend={handleSend}
               moduleState={moduleState}
               currentCard={currentCard}
               isGenerating={isGenerating}
               handleScroll={handleScroll}
+              setInputText={setInputText}
               currentCardId={currentCardId}
+              handleKeyDown={handleKeyDown}
               messagesEndRef={messagesEndRef}
               isHistoryLoading={isHistoryLoading}
               chatBridgeMaxWidth={chatBridgeMaxWidth}
