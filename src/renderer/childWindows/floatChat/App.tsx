@@ -430,11 +430,11 @@ export default function FloatChatApp() {
     return (
       <button
         className={
-          'relative w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl text-left shrink-0 ' +
+          'relative w-full flex items-center justify-between gap-2 p-2 rounded-xl text-left shrink-0 ' +
           'transition duration-200 cursor-pointer overflow-hidden group ' +
           'focus-visible:outline-none focus:outline-none ' +
           `${isSelected ? 'bg-accent/10 text-accent font-semibold' : 'text-foreground hover:bg-foreground/5'} ` +
-          `${isFocused ? 'ring-2 ring-accent/30' : ''}`
+          `${isFocused || isSelected ? 'ring-2 ring-accent/30' : ''}`
         }
         key={`${cId}-${item.index}`}
         id={`fc-thread-${cId}-${item.index}`}
@@ -905,7 +905,7 @@ export default function FloatChatApp() {
                   </SearchField.Group>
                 </SearchField>
 
-                <ScrollShadow className="flex-1 py-2 px-0.5 overflow-y-auto">
+                <ScrollShadow className="flex-1 py-2 px-1 overflow-y-auto">
                   {filteredHistory.length === 0 ? (
                     <div className="text-center py-8 text-xs text-semi-muted draggable">No chats found</div>
                   ) : (

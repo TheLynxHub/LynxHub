@@ -213,7 +213,7 @@ const ChatSidebar = memo(
             'relative w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-left shrink-0 ' +
             'transition duration-200 cursor-pointer overflow-hidden group ' +
             'focus-visible:outline-none focus:outline-none ' +
-            `${isFocused ? 'ring-2 ring-accent/30' : ''}`
+            `${isFocused || isSelected ? 'ring-2 ring-accent/30' : ''}`
           }
           key={`${cId}-${item.index}`}
           id={`cb-thread-${cId}-${item.index}`}
