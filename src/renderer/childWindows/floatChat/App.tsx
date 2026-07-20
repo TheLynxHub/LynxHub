@@ -664,24 +664,6 @@ export default function FloatChatApp() {
       {/* Header bar */}
       <div className={'flex flex-row items-center justify-between py-3 px-4 gap-x-2 draggable'}>
         <div className="flex flex-row items-center flex-1 gap-x-2">
-          {step === 'chat' && (
-            <Button
-              onPress={() => {
-                const nextVal = !isSidebarCollapsed;
-                setIsSidebarCollapsed(nextVal);
-                storageIpc.update('app', {floatChatSidebarCollapsed: nextVal});
-              }}
-              size="sm"
-              variant="ghost"
-              className="notDraggable size-7 mr-1 shrink-0"
-              isIconOnly>
-              {isSidebarCollapsed ? (
-                <AltArrowRight className="size-4 text-semi-muted" />
-              ) : (
-                <AltArrowLeft className="size-4 text-semi-muted" />
-              )}
-            </Button>
-          )}
           <ChatRound className="text-semi-muted size-5 shrink-0 mb-0.5" />
           {step === 'chat' ? (
             <InputGroup variant="secondary" className=" rounded-2xl notDraggable" fullWidth>
@@ -785,132 +767,218 @@ export default function FloatChatApp() {
         {step !== 'login' && (
           <div
             className={
-              'flex flex-col shrink-0 draggable bg-surface-secondary rounded-tr-2xl overflow-hidden ' +
+              'flex flex-col shrink-0 draggable bg-surface-secondary overflow-hidden ' +
               'relative border-r border-border/10 transition-[width] duration-200 ease-in-out ' +
-              'select-none focus:outline-none'
+              `select-none focus:outline-none ${
+                isSidebarCollapsed ? 'h-fit rounded-r-2xl mt-4' : 'rounded-tr-2xl h-full'
+              }`
             }
             tabIndex={0}
             ref={floatSidebarRef}
             onKeyDown={handleSidebarKeyDown}
-            style={{width: isSidebarCollapsed ? 0 : sidebarWidth}}>
-            <div className={'flex items-center justify-between px-3 py-2 bg-surface/50 draggable shrink-0'}>
-              <span className="text-[8pt] font-bold text-semi-muted tracking-wider uppercase">Recents</span>
-              {activeCardId === 'unified' ? (
-                <Dropdown>
-                  <Dropdown.Trigger>
-                    <Button size="sm" variant="ghost" className="size-7 notDraggable" isIconOnly>
-                      <Plus className="size-3.5" />
-                    </Button>
-                  </Dropdown.Trigger>
-                  <Dropdown.Popover placement="bottom end" className="min-w-44 bg-surface-secondary border-border">
-                    <Dropdown.Menu
-                      onAction={key => {
-                        handleNewChat(String(key));
-                      }}>
-                      {onlineCards
-                        .filter(c => c.id !== 'unified')
-                        .map(c => (
-                          <Dropdown.Item id={c.id} key={c.id} textValue={`New Chat on ${c.title}`}>
-                            <div className="flex items-center gap-x-2">
-                              {c.logoUrl && <img alt="" src={c.logoUrl} className="size-4 rounded shrink-0" />}
-                              <span className="text-xs">{c.title}</span>
-                            </div>
-                          </Dropdown.Item>
-                        ))}
-                    </Dropdown.Menu>
-                  </Dropdown.Popover>
-                </Dropdown>
-              ) : (
+            style={{width: isSidebarCollapsed ? 52 : sidebarWidth}}>
+            {isSidebarCollapsed ? (
+              <div className="flex flex-col items-center gap-2.5 pt-3 pb-2 px-2 shrink-0 notDraggable">
+                {activeCardId === 'unified' ? (
+                  <Dropdown>
+                    <Dropdown.Trigger>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        aria-label="New Chat"
+                        className="size-7 notDraggable shrink-0"
+                        isIconOnly>
+                        <Plus className="size-3.5" />
+                      </Button>
+                    </Dropdown.Trigger>
+                    <Dropdown.Popover placement="right top" className="min-w-44 bg-surface-secondary border-border">
+                      <Dropdown.Menu
+                        onAction={key => {
+                          handleNewChat(String(key));
+                        }}>
+                        {onlineCards
+                          .filter(c => c.id !== 'unified')
+                          .map(c => (
+                            <Dropdown.Item id={c.id} key={c.id} textValue={`New Chat on ${c.title}`}>
+                              <div className="flex items-center gap-x-2">
+                                {c.logoUrl && <img alt="" src={c.logoUrl} className="size-4 rounded shrink-0" />}
+                                <span className="text-xs">{c.title}</span>
+                              </div>
+                            </Dropdown.Item>
+                          ))}
+                      </Dropdown.Menu>
+                    </Dropdown.Popover>
+                  </Dropdown>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    aria-label="New Chat"
+                    onPress={() => handleNewChat()}
+                    className="notDraggable size-7 shrink-0"
+                    isIconOnly>
+                    <Plus className="size-3.5" />
+                  </Button>
+                )}
+
                 <Button
+                  onPress={() => {
+                    setIsSidebarCollapsed(false);
+                    storageIpc.update('app', {floatChatSidebarCollapsed: false});
+                  }}
                   size="sm"
                   variant="ghost"
-                  className="notDraggable size-7"
-                  onPress={() => handleNewChat()}
+                  aria-label="Expand sidebar"
+                  className="notDraggable size-7 shrink-0"
                   isIconOnly>
-                  <Plus className="size-3.5" />
+                  <AltArrowRight className="size-4 text-semi-muted" />
                 </Button>
-              )}
-            </div>
+              </div>
+            ) : (
+              <>
+                <div className={'flex items-center justify-between px-3 py-2 bg-surface/50 draggable shrink-0'}>
+                  <span className="text-[8pt] font-bold text-semi-muted tracking-wider uppercase">Recents</span>
+                  <div className="flex items-center gap-1">
+                    {activeCardId === 'unified' ? (
+                      <Dropdown>
+                        <Dropdown.Trigger>
+                          <Button size="sm" variant="ghost" className="size-7 notDraggable" isIconOnly>
+                            <Plus className="size-3.5" />
+                          </Button>
+                        </Dropdown.Trigger>
+                        <Dropdown.Popover
+                          placement="bottom end"
+                          className="min-w-44 bg-surface-secondary border-border">
+                          <Dropdown.Menu
+                            onAction={key => {
+                              handleNewChat(String(key));
+                            }}>
+                            {onlineCards
+                              .filter(c => c.id !== 'unified')
+                              .map(c => (
+                                <Dropdown.Item id={c.id} key={c.id} textValue={`New Chat on ${c.title}`}>
+                                  <div className="flex items-center gap-x-2">
+                                    {c.logoUrl && <img alt="" src={c.logoUrl} className="size-4 rounded shrink-0" />}
+                                    <span className="text-xs">{c.title}</span>
+                                  </div>
+                                </Dropdown.Item>
+                              ))}
+                          </Dropdown.Menu>
+                        </Dropdown.Popover>
+                      </Dropdown>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="notDraggable size-7"
+                        onPress={() => handleNewChat()}
+                        isIconOnly>
+                        <Plus className="size-3.5" />
+                      </Button>
+                    )}
 
-            {/* Search Input in Float Sidebar */}
-            <SearchField
-              value={searchQuery}
-              onChange={setSearchQuery}
-              aria-label="Search chats"
-              className="notDraggable p-1">
-              <SearchField.Group>
-                <SearchField.SearchIcon />
-                <SearchField.Input placeholder="Search chats..." />
-                {searchQuery && <SearchField.ClearButton className="absolute right-0" />}
-              </SearchField.Group>
-            </SearchField>
+                    <Button
+                      onPress={() => {
+                        setIsSidebarCollapsed(true);
+                        storageIpc.update('app', {floatChatSidebarCollapsed: true});
+                      }}
+                      size="sm"
+                      variant="ghost"
+                      aria-label="Collapse sidebar"
+                      className="notDraggable size-7 shrink-0"
+                      isIconOnly>
+                      <AltArrowLeft className="size-4 text-semi-muted" />
+                    </Button>
+                  </div>
+                </div>
 
-            <ScrollShadow className="flex-1 py-2 px-0.5 overflow-y-auto">
-              {filteredHistory.length === 0 ? (
-                <div className="text-center py-8 text-xs text-semi-muted draggable">No chats found</div>
-              ) : (
-                <div className="notDraggable size-full flex flex-col gap-y-2">
-                  {/* Pinned Section */}
-                  {groupedHistory.pinned.length > 0 && (
-                    <div className="flex flex-col gap-y-0.5">
-                      <div className="px-2 pb-1 text-[8px] font-bold text-accent uppercase tracking-wider">Pinned</div>
-                      {groupedHistory.pinned.map(item => renderThreadItem(item))}
-                    </div>
-                  )}
+                {/* Search Input in Float Sidebar */}
+                <SearchField
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  aria-label="Search chats"
+                  className="notDraggable p-1">
+                  <SearchField.Group>
+                    <SearchField.SearchIcon />
+                    <SearchField.Input placeholder="Search chats..." />
+                    {searchQuery && <SearchField.ClearButton className="absolute right-0" />}
+                  </SearchField.Group>
+                </SearchField>
 
-                  {/* Recents / Groups Section */}
-                  {activeCardId === 'unified' ? (
-                    onlineCards
-                      .filter(c => c.id !== 'unified')
-                      .map(card => {
-                        const providerItems = groupedHistory.groups[card.id] || [];
-                        if (providerItems.length === 0) return null;
-
-                        const isCollapsed = collapsedProviders[card.id] ?? false;
-
-                        return (
-                          <div key={card.id} className="flex flex-col gap-y-0.5">
-                            <button
-                              className={
-                                'flex items-center justify-between px-2 py-1 text-[8px] font-bold text-muted ' +
-                                'hover:text-foreground uppercase tracking-wider ' +
-                                'cursor-pointer w-full text-left font-Nunito'
-                              }
-                              onClick={() => toggleProviderCollapse(card.id)}>
-                              <div className="flex items-center gap-1.5">
-                                {card.logoUrl && (
-                                  <img alt="" src={card.logoUrl} className="size-3 rounded-sm shrink-0" />
-                                )}
-                                <span>{card.title}</span>
-                              </div>
-                              {isCollapsed ? <AltArrowRight className="size-3" /> : <AltArrowDown className="size-3" />}
-                            </button>
-                            {!isCollapsed && providerItems.map(item => renderThreadItem(item))}
-                          </div>
-                        );
-                      })
+                <ScrollShadow className="flex-1 py-2 px-0.5 overflow-y-auto">
+                  {filteredHistory.length === 0 ? (
+                    <div className="text-center py-8 text-xs text-semi-muted draggable">No chats found</div>
                   ) : (
-                    <div className="flex flex-col gap-y-0.5">
-                      {groupedHistory.pinned.length > 0 && groupedHistory.unpinned.length > 0 && (
-                        <div className="px-2 pb-1 text-[8px] font-bold text-muted uppercase tracking-wider">
-                          Recents
+                    <div className="notDraggable size-full flex flex-col gap-y-2">
+                      {/* Pinned Section */}
+                      {groupedHistory.pinned.length > 0 && (
+                        <div className="flex flex-col gap-y-0.5">
+                          <div className="px-2 pb-1 text-[8px] font-bold text-accent uppercase tracking-wider">
+                            Pinned
+                          </div>
+                          {groupedHistory.pinned.map(item => renderThreadItem(item))}
                         </div>
                       )}
-                      {groupedHistory.unpinned.map(item => renderThreadItem(item))}
+
+                      {/* Recents / Groups Section */}
+                      {activeCardId === 'unified' ? (
+                        onlineCards
+                          .filter(c => c.id !== 'unified')
+                          .map(card => {
+                            const providerItems = groupedHistory.groups[card.id] || [];
+                            if (providerItems.length === 0) return null;
+
+                            const isCollapsed = collapsedProviders[card.id] ?? false;
+
+                            return (
+                              <div key={card.id} className="flex flex-col gap-y-0.5">
+                                <button
+                                  className={
+                                    'flex items-center justify-between px-2 py-1 text-[8px] font-bold text-muted ' +
+                                    'hover:text-foreground uppercase tracking-wider ' +
+                                    'cursor-pointer w-full text-left font-Nunito'
+                                  }
+                                  onClick={() => toggleProviderCollapse(card.id)}>
+                                  <div className="flex items-center gap-1.5">
+                                    {card.logoUrl && (
+                                      <img alt="" src={card.logoUrl} className="size-3 rounded-sm shrink-0" />
+                                    )}
+                                    <span>{card.title}</span>
+                                  </div>
+                                  {isCollapsed ? (
+                                    <AltArrowRight className="size-3" />
+                                  ) : (
+                                    <AltArrowDown className="size-3" />
+                                  )}
+                                </button>
+                                {!isCollapsed && providerItems.map(item => renderThreadItem(item))}
+                              </div>
+                            );
+                          })
+                      ) : (
+                        <div className="flex flex-col gap-y-0.5">
+                          {groupedHistory.pinned.length > 0 && groupedHistory.unpinned.length > 0 && (
+                            <div className="px-2 pb-1 text-[8px] font-bold text-muted uppercase tracking-wider">
+                              Recents
+                            </div>
+                          )}
+                          {groupedHistory.unpinned.map(item => renderThreadItem(item))}
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
-            </ScrollShadow>
+                </ScrollShadow>
 
-            {/* Resize Drag Handle */}
-            <div
-              className={
-                'absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-accent/40 ' +
-                'active:bg-accent transition-colors z-30 notDraggable'
-              }
-              onMouseDown={handleMouseDown}
-            />
+                {/* Resize Drag Handle */}
+                <div
+                  className={
+                    'absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-accent/40 ' +
+                    'active:bg-accent transition-colors z-30 notDraggable'
+                  }
+                  onMouseDown={handleMouseDown}
+                />
+              </>
+            )}
           </div>
         )}
 

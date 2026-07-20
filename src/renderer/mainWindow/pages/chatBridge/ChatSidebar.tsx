@@ -1,8 +1,9 @@
 import {Avatar, Button, Checkbox, Dropdown, Label, Popover, ScrollShadow, SearchField} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound, Filter, Pen2, Pin} from '@solar-icons/react-perf/BoldDuotone';
-import {AltArrowDown, AltArrowRight} from '@solar-icons/react-perf/Linear';
+import {ChatRound, Filter, Pin} from '@solar-icons/react-perf/BoldDuotone';
+import {AltArrowDown, AltArrowLeft, AltArrowRight} from '@solar-icons/react-perf/Linear';
 import {motion} from 'framer-motion';
+import {Plus} from 'lucide-react';
 import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 interface ChatHistoryItem {
@@ -21,6 +22,7 @@ interface ChatSidebarProps {
   visibleModuleIds: string[];
   onSetVisibleModuleIds: (ids: string[]) => void;
   isCollapsed: boolean;
+  onToggleSidebar?: () => void;
   sidebarWidth: number;
   onResize: (newWidth: number) => void;
   pinnedThreads: string[];
@@ -37,6 +39,7 @@ const ChatSidebar = memo(
     visibleModuleIds,
     onSetVisibleModuleIds,
     isCollapsed,
+    onToggleSidebar,
     sidebarWidth,
     onResize,
     pinnedThreads,
@@ -272,29 +275,24 @@ const ChatSidebar = memo(
     return (
       <div
         className={
-          'h-full bg-background/50 flex flex-col shrink-0 rounded-tr-2xl relative ' +
+          'bg-background/50 flex flex-col shrink-0 relative ' +
           'border-r border-border/10 transition-[width] duration-200 ease-in-out ' +
-          'select-none focus:outline-none'
+          `select-none focus:outline-none ${isCollapsed ? 'h-fit rounded-r-2xl mt-4' : 'h-full rounded-tr-2xl'}`
         }
         tabIndex={0}
         ref={sidebarRef}
         onKeyDown={handleKeyDown}
-        style={{width: isCollapsed ? 0 : sidebarWidth, overflow: 'hidden'}}>
-        <div className="px-3.5 pt-3 pb-1 flex items-center justify-between gap-2 shrink-0">
-          <div className="flex-1">
+        style={{width: isCollapsed ? 52 : sidebarWidth, overflow: 'hidden'}}>
+        {isCollapsed ? (
+          <div className="flex flex-col items-center gap-2.5 pt-3 pb-2 px-2 shrink-0">
             {selectedCard?.id === 'unified' ? (
               <Dropdown>
-                <Dropdown.Trigger className="w-full">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="flex items-center justify-center gap-2 font-medium"
-                    fullWidth>
-                    <Pen2 className="size-4" />
-                    New Chat
+                <Dropdown.Trigger>
+                  <Button size="sm" variant="ghost" className="shrink-0" aria-label="New Chat" isIconOnly>
+                    <Plus className="size-4" />
                   </Button>
                 </Dropdown.Trigger>
-                <Dropdown.Popover placement="bottom start" className="min-w-44 bg-surface-secondary border-border">
+                <Dropdown.Popover placement="right top" className="min-w-44 bg-surface-secondary border-border">
                   <Dropdown.Menu
                     onAction={key => {
                       if (onNewChat) onNewChat(String(key));
@@ -316,155 +314,220 @@ const ChatSidebar = memo(
             ) : onNewChat ? (
               <Button
                 size="sm"
-                variant="secondary"
+                variant="ghost"
+                className="shrink-0"
+                aria-label="New Chat"
                 onPress={() => onNewChat()}
-                className="flex items-center justify-center gap-2 font-medium"
-                fullWidth>
-                <Pen2 className="size-4" />
-                New Chat
+                isIconOnly>
+                <Plus className="size-4" />
               </Button>
-            ) : (
-              <div className="flex items-center gap-2 py-1.5">
-                <ChatRound className="size-5 text-accent" />
-                <span className="font-bold text-foreground text-sm">Recents</span>
-              </div>
+            ) : null}
+
+            {onToggleSidebar && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="shrink-0"
+                onPress={onToggleSidebar}
+                aria-label="Expand sidebar"
+                isIconOnly>
+                <AltArrowRight className="size-4 text-semi-muted" />
+              </Button>
             )}
           </div>
+        ) : (
+          <>
+            <div className="px-2 pt-2 pb-1 flex items-center gap-x-1 shrink-0">
+              {/* Search input field */}
+              <SearchField
+                variant="secondary"
+                value={searchQuery}
+                onChange={setSearchQuery}
+                aria-label="Search chats"
+                fullWidth>
+                <SearchField.Group>
+                  <SearchField.SearchIcon />
+                  <SearchField.Input placeholder="Search chats..." />
+                  {searchQuery && <SearchField.ClearButton />}
+                </SearchField.Group>
+              </SearchField>
 
-          {selectedCard?.id === 'unified' && (
-            <Popover>
-              <Popover.Trigger>
-                <Button size="sm" variant="tertiary" className="shrink-0" aria-label="Filter AIs" isIconOnly>
-                  <Filter className="size-4 text-semi-muted" />
-                </Button>
-              </Popover.Trigger>
-              <Popover.Content>
-                <Popover.Dialog className="w-56 flex flex-col gap-2.5">
-                  <div className="text-xs font-bold text-muted border-b border-border pb-1">Filter AI</div>
-                  {onlineCards
-                    .filter(c => c.id !== 'unified')
-                    .map(c => {
-                      const isVisible = visibleModuleIds.includes(c.id);
-
-                      return (
-                        <Checkbox
-                          onChange={() => {
-                            if (isVisible) {
-                              onSetVisibleModuleIds(visibleModuleIds.filter(id => id !== c.id));
-                            } else {
-                              onSetVisibleModuleIds([...visibleModuleIds, c.id]);
-                            }
-                          }}
-                          key={c.id}
-                          variant="secondary"
-                          isSelected={isVisible}
-                          id={`filter-toggle-${c.id}`}
-                          aria-label={`Show chats of ${c.title}`}
-                          className="w-full cursor-pointer select-none">
-                          <Checkbox.Content className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-2">
-                              <Avatar className="size-4 shrink-0 rounded-md">
-                                <Avatar.Image alt={c.title} src={getCacheUrl(c.logoUrl)} />
-                                <Avatar.Fallback className="text-[8px]">{getFallbackString(c.title)}</Avatar.Fallback>
-                              </Avatar>
-                              <span className="text-xs font-medium text-foreground">{c.title}</span>
-                            </div>
-                            <Checkbox.Control>
-                              <Checkbox.Indicator />
-                            </Checkbox.Control>
-                          </Checkbox.Content>
-                        </Checkbox>
-                      );
-                    })}
-                </Popover.Dialog>
-              </Popover.Content>
-            </Popover>
-          )}
-        </div>
-
-        {/* Search input field */}
-        <SearchField
-          variant="secondary"
-          value={searchQuery}
-          className="px-3.5 py-1"
-          onChange={setSearchQuery}
-          aria-label="Search chats">
-          <SearchField.Group>
-            <SearchField.SearchIcon />
-            <SearchField.Input placeholder="Search chats..." />
-            {searchQuery && <SearchField.ClearButton />}
-          </SearchField.Group>
-        </SearchField>
-
-        <ScrollShadow className="flex-1 p-2 flex flex-col gap-y-2 overflow-y-auto">
-          {filteredHistory.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-6 text-center h-40">
-              <span className="text-xs text-muted">No chats found</span>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {/* Pinned Section */}
-              {groupedHistory.pinned.length > 0 && (
-                <div className="flex flex-col gap-y-0.5">
-                  <div className="px-2 pb-1 text-[9px] font-bold text-accent uppercase tracking-wider">Pinned</div>
-                  {groupedHistory.pinned.map(item => renderThreadItem(item))}
-                </div>
-              )}
-
-              {/* Recents / Groups Section */}
               {selectedCard?.id === 'unified' ? (
-                onlineCards
-                  .filter(c => c.id !== 'unified')
-                  .map(card => {
-                    const providerItems = groupedHistory.groups[card.id] || [];
-                    if (providerItems.length === 0) return null;
-
-                    const isCollapsed = collapsedProviders[card.id] ?? false;
-
-                    return (
-                      <div key={card.id} className="flex flex-col gap-y-0.5">
-                        {/* Collapsible Provider Header */}
-                        <button
-                          className={
-                            'flex items-center justify-between px-2 py-1 text-[9px] font-bold text-muted ' +
-                            'hover:text-foreground uppercase tracking-wider cursor-pointer w-full text-left font-Nunito'
-                          }
-                          onClick={() => toggleProviderCollapse(card.id)}>
-                          <div className="flex items-center gap-1.5">
-                            <Avatar className="size-3.5 shrink-0 rounded-sm">
-                              <Avatar.Image alt={card.title} src={getCacheUrl(card.logoUrl)} />
-                              <Avatar.Fallback className="text-[6px]">{getFallbackString(card.title)}</Avatar.Fallback>
+                <Dropdown>
+                  <Dropdown.Trigger>
+                    <Button size="sm" variant="ghost" className="shrink-0" fullWidth>
+                      <Plus className="size-4" />
+                    </Button>
+                  </Dropdown.Trigger>
+                  <Dropdown.Popover placement="bottom start" className="min-w-44 bg-surface-secondary border-border">
+                    <Dropdown.Menu
+                      onAction={key => {
+                        if (onNewChat) onNewChat(String(key));
+                      }}>
+                      {onlineCards
+                        .filter(c => c.id !== 'unified')
+                        .map(c => (
+                          <Dropdown.Item id={c.id} key={c.id} textValue={`New Chat on ${c.title}`}>
+                            <Avatar className="size-4 shrink-0 rounded-md">
+                              <Avatar.Image alt={c.title} src={getCacheUrl(c.logoUrl)} />
+                              <Avatar.Fallback className="text-[8px]">{getFallbackString(c.title)}</Avatar.Fallback>
                             </Avatar>
-                            <span>{card.title}</span>
-                          </div>
-                          {isCollapsed ? <AltArrowRight className="size-3" /> : <AltArrowDown className="size-3" />}
-                        </button>
-
-                        {!isCollapsed && providerItems.map(item => renderThreadItem(item))}
-                      </div>
-                    );
-                  })
+                            <Label className="ml-2">{c.title}</Label>
+                          </Dropdown.Item>
+                        ))}
+                    </Dropdown.Menu>
+                  </Dropdown.Popover>
+                </Dropdown>
+              ) : onNewChat ? (
+                <Button size="sm" variant="ghost" className="shrink-0" onPress={() => onNewChat()} isIconOnly>
+                  <Plus className="size-4" />
+                </Button>
               ) : (
-                <div className="flex flex-col gap-y-0.5">
-                  {groupedHistory.pinned.length > 0 && groupedHistory.unpinned.length > 0 && (
-                    <div className="px-2 pb-1 text-[9px] font-bold text-muted uppercase tracking-wider">Recents</div>
-                  )}
-                  {groupedHistory.unpinned.map(item => renderThreadItem(item))}
+                <div className="flex items-center gap-2 py-1.5">
+                  <ChatRound className="size-5 text-accent" />
+                  <span className="font-bold text-foreground text-sm">Recents</span>
                 </div>
               )}
-            </div>
-          )}
-        </ScrollShadow>
 
-        {/* Resize drag handle */}
-        {!isCollapsed && (
-          <div
-            className={
-              'absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-accent/40 ' +
-              'active:bg-accent transition-colors z-30'
-            }
-            onMouseDown={handleMouseDown}
-          />
+              {selectedCard?.id === 'unified' && (
+                <Popover>
+                  <Popover.Trigger>
+                    <Button size="sm" variant="tertiary" className="shrink-0" aria-label="Filter AIs" isIconOnly>
+                      <Filter className="size-4 text-semi-muted" />
+                    </Button>
+                  </Popover.Trigger>
+                  <Popover.Content>
+                    <Popover.Dialog className="w-56 flex flex-col gap-2.5">
+                      <div className="text-xs font-bold text-muted border-b border-border pb-1">Filter AI</div>
+                      {onlineCards
+                        .filter(c => c.id !== 'unified')
+                        .map(c => {
+                          const isVisible = visibleModuleIds.includes(c.id);
+
+                          return (
+                            <Checkbox
+                              onChange={() => {
+                                if (isVisible) {
+                                  onSetVisibleModuleIds(visibleModuleIds.filter(id => id !== c.id));
+                                } else {
+                                  onSetVisibleModuleIds([...visibleModuleIds, c.id]);
+                                }
+                              }}
+                              key={c.id}
+                              variant="secondary"
+                              isSelected={isVisible}
+                              id={`filter-toggle-${c.id}`}
+                              aria-label={`Show chats of ${c.title}`}
+                              className="w-full cursor-pointer select-none">
+                              <Checkbox.Content className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="size-4 shrink-0 rounded-md">
+                                    <Avatar.Image alt={c.title} src={getCacheUrl(c.logoUrl)} />
+                                    <Avatar.Fallback className="text-[8px]">
+                                      {getFallbackString(c.title)}
+                                    </Avatar.Fallback>
+                                  </Avatar>
+                                  <span className="text-xs font-medium text-foreground">{c.title}</span>
+                                </div>
+                                <Checkbox.Control>
+                                  <Checkbox.Indicator />
+                                </Checkbox.Control>
+                              </Checkbox.Content>
+                            </Checkbox>
+                          );
+                        })}
+                    </Popover.Dialog>
+                  </Popover.Content>
+                </Popover>
+              )}
+
+              {onToggleSidebar && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="shrink-0"
+                  onPress={onToggleSidebar}
+                  aria-label="Collapse sidebar"
+                  isIconOnly>
+                  <AltArrowLeft className="size-4 text-semi-muted" />
+                </Button>
+              )}
+            </div>
+
+            <ScrollShadow className="flex-1 p-2 flex flex-col gap-y-2 overflow-y-auto">
+              {filteredHistory.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-6 text-center h-40">
+                  <span className="text-xs text-muted">No chats found</span>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Pinned Section */}
+                  {groupedHistory.pinned.length > 0 && (
+                    <div className="flex flex-col gap-y-0.5">
+                      <div className="px-2 pb-1 text-[9px] font-bold text-accent uppercase tracking-wider">Pinned</div>
+                      {groupedHistory.pinned.map(item => renderThreadItem(item))}
+                    </div>
+                  )}
+
+                  {/* Recents / Groups Section */}
+                  {selectedCard?.id === 'unified' ? (
+                    onlineCards
+                      .filter(c => c.id !== 'unified')
+                      .map(card => {
+                        const providerItems = groupedHistory.groups[card.id] || [];
+                        if (providerItems.length === 0) return null;
+
+                        const isCollapsed = collapsedProviders[card.id] ?? false;
+
+                        return (
+                          <div key={card.id} className="flex flex-col gap-y-0.5">
+                            {/* Collapsible Provider Header */}
+                            <button
+                              className={
+                                'flex items-center justify-between px-2 py-1 text-[9px] font-bold text-muted ' +
+                                'hover:text-foreground uppercase tracking-wider ' +
+                                'cursor-pointer w-full text-left font-Nunito'
+                              }
+                              onClick={() => toggleProviderCollapse(card.id)}>
+                              <div className="flex items-center gap-1.5">
+                                <Avatar className="size-3.5 shrink-0 rounded-sm">
+                                  <Avatar.Image alt={card.title} src={getCacheUrl(card.logoUrl)} />
+                                  <Avatar.Fallback className="text-[6px]">
+                                    {getFallbackString(card.title)}
+                                  </Avatar.Fallback>
+                                </Avatar>
+                                <span>{card.title}</span>
+                              </div>
+                              {isCollapsed ? <AltArrowRight className="size-3" /> : <AltArrowDown className="size-3" />}
+                            </button>
+
+                            {!isCollapsed && providerItems.map(item => renderThreadItem(item))}
+                          </div>
+                        );
+                      })
+                  ) : (
+                    <div className="flex flex-col gap-y-0.5">
+                      {groupedHistory.pinned.length > 0 && groupedHistory.unpinned.length > 0 && (
+                        <div className="px-2 pb-1 text-[9px] font-bold text-muted uppercase tracking-wider">
+                          Recents
+                        </div>
+                      )}
+                      {groupedHistory.unpinned.map(item => renderThreadItem(item))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </ScrollShadow>
+
+            {/* Resize drag handle */}
+            <div
+              className={
+                'absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-accent/40 ' +
+                'active:bg-accent transition-colors z-30'
+              }
+              onMouseDown={handleMouseDown}
+            />
+          </>
         )}
       </div>
     );

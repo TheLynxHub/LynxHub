@@ -204,11 +204,9 @@ const ChatBridgePage = memo(({tabID = 'chat-bridge'}: Props) => {
           onBackToSelect={handleBackToSelect}
           showScrollBottom={showScrollBottom}
           onScrollBottom={handleScrollBottom}
-          onToggleSidebar={handleToggleSidebar}
           bgChatEnabledCards={bgChatEnabledCards}
           onCopyToClipboard={handleCopyToClipboard}
           activeUnifiedCardId={activeUnifiedCardId}
-          isSidebarCollapsed={chatSidebarCollapsed}
           onSelectActiveCard={setActiveUnifiedCardId}
           showBackButton={!tabID.startsWith('chat-bridge-')}
         />
@@ -227,6 +225,7 @@ const ChatBridgePage = memo(({tabID = 'chat-bridge'}: Props) => {
               isCollapsed={chatSidebarCollapsed}
               visibleModuleIds={visibleModuleIds}
               onTogglePin={handleTogglePinThread}
+              onToggleSidebar={handleToggleSidebar}
               onSetVisibleModuleIds={setVisibleModuleIds}
               onSelectHistoryItem={handleSelectHistoryItem}
             />
