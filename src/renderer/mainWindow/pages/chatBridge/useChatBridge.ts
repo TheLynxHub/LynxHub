@@ -2,7 +2,7 @@ import {useAllCardDataWithPath} from '@lynx/plugins/modules';
 import browserIpc from '@lynx_shared/ipc/browser';
 import filesIpc from '@lynx_shared/ipc/files';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
 import {topToast} from '../../layouts/ToastProviders';
@@ -11,53 +11,12 @@ import {useSettingsState} from '../../redux/reducers/settings';
 import {tabsActions, useTabsState} from '../../redux/reducers/tabs';
 import {AppDispatch} from '../../redux/store';
 import {resolveOnlineScript} from '../../utils/onlineChatScripts';
+import {useChatBridgeVisibility} from './hooks/useChatBridgeVisibility';
+import {formatChatToMarkdown, formatChatToPlainText} from './utils/chatBridgeUtils';
 
 export type ChatStep = 'select_module' | 'login' | 'chat';
 
-export interface Message {
-  sender: 'user' | 'assistant';
-  text: string;
-}
-
-export function markdownToPlainText(markdown: string): string {
-  return markdown
-    .replace(/```[\s\S]*?```/g, block => block.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, ''))
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/!\[([^\]]*)]\([^)]+\)/g, '$1')
-    .replace(/\[([^\]]+)]\([^)]+\)/g, '$1')
-    .replace(/^#{1,6}\s+/gm, '')
-    .replace(/(\*\*|__)(.*?)\1/g, '$2')
-    .replace(/([*_])(.*?)\1/g, '$2')
-    .replace(/~~(.*?)~~/g, '$1')
-    .replace(/^>\s?/gm, '')
-    .replace(/^[-*+]\s+/gm, '')
-    .replace(/^\d+\.\s+/gm, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
-
-export function formatChatToMarkdown(messages: Message[], cardTitle: string): string {
-  const header = `# Chat with ${cardTitle}\n\n`;
-  const body = messages
-    .map(msg => {
-      const sender = msg.sender === 'user' ? 'User' : cardTitle || 'Assistant';
-      return `**${sender}**:\n${msg.text}`;
-    })
-    .join('\n\n---\n\n');
-  return header + body;
-}
-
-export function formatChatToPlainText(messages: Message[], cardTitle: string): string {
-  const header = `Chat with ${cardTitle}\n\n`;
-  const body = messages
-    .map(msg => {
-      const sender = msg.sender === 'user' ? 'User' : cardTitle || 'Assistant';
-      const plainText = markdownToPlainText(msg.text);
-      return `${sender}:\n${plainText}`;
-    })
-    .join('\n\n' + '-'.repeat(50) + '\n\n');
-  return header + body;
-}
+export {formatChatToMarkdown, formatChatToPlainText, markdownToPlainText, type Message} from './utils/chatBridgeUtils';
 
 const unifiedCard: any = {
   id: 'unified',
@@ -104,11 +63,6 @@ export function useChatBridge(tabID = 'chat-bridge') {
   const isSending = currentModule?.isSending || false;
   const activeWindow = currentModule?.activeWindow || null;
 
-  const activeWindowRef = useRef(activeWindow);
-  useEffect(() => {
-    activeWindowRef.current = activeWindow;
-  }, [activeWindow]);
-
   // Reconcile unified sidebar history
   const unifiedHistory = useMemo(() => {
     if (!selectedCard) return [];
@@ -137,61 +91,15 @@ export function useChatBridge(tabID = 'chat-bridge') {
     return merged;
   }, [selectedCard, currentModule, modules, visibleModuleIds, activeUnifiedCardId]);
 
-  const lastStepRef = useRef(step);
-  const lastActiveTabRef = useRef(activeTab);
-
-  // Handle visibility transitions
-  useEffect(() => {
-    if (!currentCardId || currentCardId === 'unified') return;
-
-    const viewId = `online-bg-${currentCardId}`;
-    const isTabFocused = activeTab === tabID;
-
-    const stepChangedToLogin = step === 'login' && lastStepRef.current !== 'login';
-    const tabFocusedWithLogin = isTabFocused && lastActiveTabRef.current !== tabID && step === 'login';
-
-    lastStepRef.current = step;
-    lastActiveTabRef.current = activeTab;
-
-    if (isTabFocused) {
-      if (step === 'login') {
-        if (stepChangedToLogin || tabFocusedWithLogin || !activeWindowRef.current) {
-          browserIpc.send.setVisible(viewId, true);
-        }
-      } else if (step === 'chat') {
-        if (activeWindowRef.current === 'main') {
-          browserIpc.send.setVisible(viewId, false, 'offscreen');
-        }
-      } else {
-        if (activeWindowRef.current === 'main') {
-          browserIpc.send.setVisible(viewId, false, 'detach');
-        }
-      }
-    } else {
-      if (activeWindowRef.current === 'main') {
-        const isBgEnabled = bgChatEnabledCards.includes(currentCardId);
-        browserIpc.send.setVisible(viewId, false, isBgEnabled ? 'offscreen' : 'detach');
-      }
-    }
-
-    return () => {
-      if (activeWindowRef.current === 'main') {
-        const isBgEnabled = bgChatEnabledCards.includes(currentCardId);
-        browserIpc.send.setVisible(viewId, false, isBgEnabled ? 'offscreen' : 'detach');
-      }
-    };
-  }, [tabID, activeTab, step, currentCardId, bgChatEnabledCards]);
-
-  // Reclaim free webview when it becomes free (activeWindow becomes null)
-  useEffect(() => {
-    if (!currentCardId || currentCardId === 'unified') return;
-    const viewId = `online-bg-${currentCardId}`;
-    const isTabFocused = activeTab === tabID;
-
-    if (isTabFocused && step === 'login' && !activeWindow) {
-      browserIpc.send.setVisible(viewId, true);
-    }
-  }, [activeWindow, currentCardId, step, activeTab, tabID]);
+  // Hook for WebContentsView IPC visibility management
+  useChatBridgeVisibility({
+    tabID,
+    activeTab,
+    step,
+    currentCardId,
+    bgChatEnabledCards,
+    activeWindow,
+  });
 
   const handleSelectCard = useCallback(
     (card: any) => {
