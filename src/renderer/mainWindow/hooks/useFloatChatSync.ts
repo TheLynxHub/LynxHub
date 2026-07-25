@@ -41,7 +41,6 @@ export function useFloatChatSync() {
   // 1. Sync onlineCards list to float window
   useEffect(() => {
     if (disableFloatChat) return;
-    console.log('useFloatChatSync: syncing onlineCards, count:', onlineCards.length, onlineCards);
     if (onlineCards.length > 0) {
       floatChatIpc.setOnlineCards(onlineCards);
     }
