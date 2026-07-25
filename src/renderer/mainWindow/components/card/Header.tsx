@@ -122,7 +122,7 @@ export const CardHeaderContent = memo(({modifiedTitle, onTitleChange, updateAvai
             exit={{opacity: 0, scale: 0.2}}
             animate={{opacity: 1, scale: 1}}
             initial={{opacity: 0, scale: 0.2}}
-            className="absolute top-1.5 right-1.5 flex">
+            className="absolute top-4 right-4 flex">
             <Spinner size="sm" color="success" />
           </motion.div>
         )}
