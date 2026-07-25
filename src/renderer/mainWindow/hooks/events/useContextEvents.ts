@@ -1,7 +1,6 @@
 import {useRemoveTab} from '@lynx/layouts/tabs/utils';
 import {cardsActions, useCardsState} from '@lynx/redux/reducers/cards';
-import {useTabsState} from '@lynx/redux/reducers/tabs';
-import {AppDispatch} from '@lynx/redux/store';
+import {AppDispatch, getStore} from '@lynx/redux/store';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import ptyIpc from '@lynx_shared/ipc/pty';
 import {useEffect} from 'react';
@@ -12,7 +11,6 @@ import {useDispatch} from 'react-redux';
  */
 export const useContextEvents = () => {
   const runningCards = useCardsState('runningCard');
-  const activeTab = useTabsState('activeTab');
 
   const dispatch = useDispatch<AppDispatch>();
   const removeTab = useRemoveTab();
@@ -24,13 +22,24 @@ export const useContextEvents = () => {
       const runningCard = runningCards.find(card => card.id === id);
       if (!runningCard) return;
 
-      removeTab({id});
+      const targetTabId = runningCard.tabId;
+
+      // Stop process & browser without removing the tab from tabs list
+      if (runningCard.type !== 'browser') {
+        ptyIpc.stop(runningCard.id);
+      }
+      dispatch(cardsActions.stopRunningCard({tabId: targetTabId}));
+
       setTimeout(() => {
+        const store = getStore();
+        const tabExists = store.getState().tabs.tabs.some(tab => tab.id === targetTabId);
+        const finalTabId = tabExists ? targetTabId : store.getState().tabs.activeTab;
+
         if (runningCard.isEmptyRunning) {
-          dispatch(cardsActions.addRunningEmpty({tabId: activeTab, type: runningCard.type}));
+          dispatch(cardsActions.addRunningEmpty({tabId: finalTabId, type: runningCard.type}));
         } else {
           ptyIpc.process(runningCard.id, runningCard.id);
-          dispatch(cardsActions.addRunningCard({id: runningCard.id, tabId: activeTab}));
+          dispatch(cardsActions.addRunningCard({id: runningCard.id, tabId: finalTabId}));
         }
       }, 1000);
     });
@@ -39,5 +48,5 @@ export const useContextEvents = () => {
       offRelaunchAI();
       offStopAI();
     };
-  }, [runningCards, dispatch, activeTab, removeTab]);
+  }, [runningCards, dispatch, removeTab]);
 };
