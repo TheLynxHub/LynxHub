@@ -8,9 +8,9 @@
 
 **Cross-platform, extensible terminal and browser for AI management.**
 
-[![GitHub Release][github-release-shield]](https://github.com/KindaBrazy/LynxHub/releases)
-[![GitHub Release Date][github-release-date-shield]](https://github.com/KindaBrazy/LynxHub/releases)
-[![GitHub Downloads (all assets, all releases)][github-downloads-shield]](https://github.com/KindaBrazy/LynxHub/releases)
+[![GitHub Release][github-release-shield]](https://github.com/TheLynxHub/LynxHub/releases)
+[![GitHub Release Date][github-release-date-shield]](https://github.com/TheLynxHub/LynxHub/releases)
+[![GitHub Downloads (all assets, all releases)][github-downloads-shield]](https://github.com/TheLynxHub/LynxHub/releases)
 
 [![Website][website-shield]](https://lynxhub.app)
 [![Docs][docs-shield]](https://docs.lynxhub.app)
@@ -44,9 +44,9 @@ LynxHub consolidates your AI workflow into a single, unified workspace.
 
 🧩 **Extensible & Modular:** Build and expand LynxHub to fit your needs.
 
-- **[Extensible Architecture:](https://github.com/KindaBrazy/LynxHub-Extension-Guide)** Add to LynxHub's core
+- **[Extensible Architecture:](https://docs.lynxhub.app/plugins/extensions/quick-start)** Add to LynxHub's core
   functionality.
-- **[Modular Design:](https://github.com/KindaBrazy/LynxHub-Module-Guide)** Developers can create and share modules that
+- **[Modular Design:](https://docs.lynxhub.app/plugins/modules/quick-start)** Developers can create and share modules that
   add new AI WebUIs, complete with pre-set arguments, extensions, commands, etc.
 
 🚀 **Manage Your AI Interfaces:** Handle your AI WebUIs easily from one place.
@@ -93,7 +93,7 @@ LynxHub consolidates your AI workflow into a single, unified workspace.
 | ---------------- |-----------------------------------------------------------------|--------------|
 | **Insider**      | [V3.5.8](https://www.patreon.com/collection/1557749)            | 2026-07-25   |
 | **Early Access** | [V3.5.8](https://www.patreon.com/collection/714004)             | 2026-07-25   |
-| **Public**       | [V3.5.5](https://github.com/KindaBrazy/LynxHub/releases/latest) | 2026-07-18   |
+| **Public**       | [V3.5.5](https://github.com/TheLynxHub/LynxHub/releases/latest) | 2026-07-18   |
 
 > [!TIP]  
 > 💡 Support development and get early access to LynxHub Core updates, premium extensions, and exclusive modules by joining our [**Patreon**](#%EF%B8%8F%E2%80%8D-support--sponsors).
@@ -115,14 +115,14 @@ LynxHub's true power lies in its community-driven ecosystem. Integrate these int
 
 ### Featured Extensions
 
-- 🐍 [**Python Toolkit:**](https://github.com/KindaBrazy/LynxHub-Python-Toolkit) Streamline Python virtual environments (venv) and package management.
-- 📊 [**Hardware Monitor:**](https://github.com/KindaBrazy/LynxHub-Hardware-Monitor) Real-time CPU, GPU, and RAM telemetry injected directly into the status bar.
-- ⚡ [**Custom Actions:**](https://github.com/KindaBrazy/LynxHub-Custom-Actions) Create personalized workflow shortcuts and macro cards.
-- 📖 [**Skills Manager:**](https://github.com/KindaBrazy/LynxHub-Skills-Toolkit) An interactive, feature-rich GUI management extension for AI Coding Agent Skills.
+- 🐍 [**Python Toolkit:**](https://github.com/TheLynxHub/Python-Toolkit) Streamline Python virtual environments (venv) and package management.
+- 📊 [**Hardware Monitor:**](https://github.com/TheLynxHub/Hardware-Monitor) Real-time CPU, GPU, and RAM telemetry injected directly into the status bar.
+- ⚡ [**Custom Actions:**](https://github.com/TheLynxHub/Custom-Actions) Create personalized workflow shortcuts and macro cards.
+- 📖 [**Skills Manager:**](https://github.com/TheLynxHub/Skills-Toolkit) An interactive, feature-rich GUI management extension for AI Coding Agent Skills.
 
 ### Featured Modules
 
-- 🧠 [**Local AI Collection:**](https://github.com/KindaBrazy/LynxHub-Module-Offline-Container) A curated suite of local AI tools featuring full argument, config, and extension support.
+- 🧠 [**Local AI Collection:**](https://github.com/TheLynxHub/Local-AI-Collection) A curated suite of local AI tools featuring full argument, config, and extension support.
 
 ---
 
@@ -141,7 +141,7 @@ Ensure you have [Node.js LTS](https://nodejs.org/en/download) and [Git](https://
 
 ```bash
 # Clone the repository
-git clone https://github.com/KindaBrazy/LynxHub && cd LynxHub
+git clone https://github.com/TheLynxHub/LynxHub && cd LynxHub
 
 # Install dependencies and start in dev mode
 npm i --legacy-peer-deps
@@ -210,9 +210,9 @@ Massive thanks to my Gold Sponsors:
 
 </div>
 
-[github-release-shield]: https://img.shields.io/github/v/release/KindaBrazy/LynxHub?include_prereleases&style=flat&labelColor=%23212121&color=%2300A9FF&label=Version&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IndoaXRlIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNCAyMmgtNGMtMy43NzEgMC01LjY1NyAwLTYuODI4LTEuMTcyQzIgMTkuNjU3IDIgMTcuNzcxIDIgMTR2LTRjMC0zLjc3MSAwLTUuNjU3IDEuMTcyLTYuODI4QzQuMzQzIDIgNi4yMzkgMiAxMC4wMyAyYy42MDYgMCAxLjA5MSAwIDEuNS4wMTdjLS4wMTMuMDgtLjAyLjE2MS0uMDIuMjQ0bC0uMDEgMi44MzRjMCAxLjA5NyAwIDIuMDY3LjEwNSAyLjg0OGMuMTE0Ljg0Ny4zNzUgMS42OTQgMS4wNjcgMi4zODZjLjY5LjY5IDEuNTM4Ljk1MiAyLjM4NSAxLjA2NmMuNzgxLjEwNSAxLjc1MS4xMDUgMi44NDguMTA1aDQuMDUyYy4wNDMuNTM0LjA0MyAxLjE5LjA0MyAyLjA2M1YxNGMwIDMuNzcxIDAgNS42NTctMS4xNzIgNi44MjhDMTkuNjU3IDIyIDE3Ljc3MSAyMiAxNCAyMiIgY2xpcC1ydWxlPSJldmVub2RkIiBvcGFjaXR5PSIwLjUiLz48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEwLjU2IDE1LjQ5OGEuNzUuNzUgMCAxIDAtMS4xMi0uOTk2bC0yLjEwNyAyLjM3bC0uNzcyLS44N2EuNzUuNzUgMCAwIDAtMS4xMjIuOTk2bDEuMzM0IDEuNWEuNzUuNzUgMCAwIDAgMS4xMiAwem0uOTUtMTMuMjM4bC0uMDEgMi44MzVjMCAxLjA5NyAwIDIuMDY2LjEwNSAyLjg0OGMuMTE0Ljg0Ny4zNzUgMS42OTQgMS4wNjcgMi4zODVjLjY5LjY5MSAxLjUzOC45NTMgMi4zODUgMS4wNjdjLjc4MS4xMDUgMS43NTEuMTA1IDIuODQ4LjEwNWg0LjA1MmMuMDEzLjE1NS4wMjIuMzIxLjAyOC41SDIyYzAtLjI2OCAwLS40MDItLjAxLS41NmE1LjMyMiA1LjMyMiAwIDAgMC0uOTU4LTIuNjQxYy0uMDk0LS4xMjgtLjE1OC0uMjA0LS4yODUtLjM1N0MxOS45NTQgNy40OTQgMTguOTEgNi4zMTIgMTggNS41Yy0uODEtLjcyNC0xLjkyMS0xLjUxNS0yLjg5LTIuMTYxYy0uODMyLS41NTYtMS4yNDgtLjgzNC0xLjgxOS0xLjA0YTUuNDg4IDUuNDg4IDAgMCAwLS41MDYtLjE1NGMtLjM4NC0uMDk1LS43NTgtLjEyOC0xLjI4NS0uMTR6Ii8+PC9zdmc+
-[github-release-date-shield]: https://img.shields.io/github/release-date-pre/KindaBrazy/LynxHub?style=flat&labelColor=%23212121&color=%2300A9FF&label=Date&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNNi45NiAyYy40MTggMCAuNzU2LjMxLjc1Ni42OTJWNC4wOWMuNjctLjAxMiAxLjQyMi0uMDEyIDIuMjY4LS4wMTJoNC4wMzJjLjg0NiAwIDEuNTk3IDAgMi4yNjguMDEyVjIuNjkyYzAtLjM4Mi4zMzgtLjY5Mi43NTYtLjY5MnMuNzU2LjMxLjc1Ni42OTJWNC4xNWMxLjQ1LjEwNiAyLjQwMy4zNjggMy4xMDMgMS4wMDhjLjcuNjQxLjk4NSAxLjUxMyAxLjEwMSAyLjg0MnYxSDJWOGMuMTE2LTEuMzI5LjQwMS0yLjIgMS4xMDEtMi44NDJjLjctLjY0IDEuNjUyLS45MDIgMy4xMDMtMS4wMDhWMi42OTJjMC0uMzgyLjMzOS0uNjkyLjc1Ni0uNjkyIi8+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0yMiAxNHYtMmMwLS44MzktLjAxMy0yLjMzNS0uMDI2LTNIMi4wMDZjLS4wMTMuNjY1IDAgMi4xNjEgMCAzdjJjMCAzLjc3MSAwIDUuNjU3IDEuMTcgNi44MjhDNC4zNDkgMjIgNi4yMzQgMjIgMTAuMDA0IDIyaDRjMy43NyAwIDUuNjU0IDAgNi44MjYtMS4xNzJDMjIgMTkuNjU3IDIyIDE3Ljc3MSAyMiAxNCIgb3BhY2l0eT0iMC41Ii8+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xOCAxNi41YTEuNSAxLjUgMCAxIDEtMyAwYTEuNSAxLjUgMCAwIDEgMyAwIi8+PC9zdmc+
-[github-downloads-shield]: https://img.shields.io/github/downloads/KindaBrazy/LynxHub/total?labelColor=%23212121&color=%2300A9FF&label=Downloads&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNMjIgMTZ2LTFjMC0yLjgyOCAwLTQuMjQyLS44NzktNS4xMkMyMC4yNDIgOSAxOC44MjggOSAxNiA5SDhjLTIuODI5IDAtNC4yNDMgMC01LjEyMi44OEMyIDEwLjc1NyAyIDEyLjE3IDIgMTQuOTk3VjE2YzAgMi44MjkgMCA0LjI0My44NzkgNS4xMjJDMy43NTcgMjIgNS4xNzIgMjIgOCAyMmg4YzIuODI4IDAgNC4yNDMgMCA1LjEyMS0uODc4QzIyIDIwLjI0MiAyMiAxOC44MjkgMjIgMTYiIG9wYWNpdHk9IjAuNSIvPjxwYXRoIGZpbGw9IndoaXRlIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMiAxLjI1YS43NS43NSAwIDAgMC0uNzUuNzV2MTAuOTczbC0xLjY4LTEuOTYxYS43NS43NSAwIDEgMC0xLjE0Ljk3NmwzIDMuNWEuNzUuNzUgMCAwIDAgMS4xNCAwbDMtMy41YS43NS43NSAwIDEgMC0xLjE0LS45NzZsLTEuNjggMS45NlYyYS43NS43NSAwIDAgMC0uNzUtLjc1IiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=
+[github-release-shield]: https://img.shields.io/github/v/release/TheLynxHub/LynxHub?include_prereleases&style=flat&labelColor=%23212121&color=%2300A9FF&label=Version&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IndoaXRlIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNCAyMmgtNGMtMy43NzEgMC01LjY1NyAwLTYuODI4LTEuMTcyQzIgMTkuNjU3IDIgMTcuNzcxIDIgMTR2LTRjMC0zLjc3MSAwLTUuNjU3IDEuMTcyLTYuODI4QzQuMzQzIDIgNi4yMzkgMiAxMC4wMyAyYy42MDYgMCAxLjA5MSAwIDEuNS4wMTdjLS4wMTMuMDgtLjAyLjE2MS0uMDIuMjQ0bC0uMDEgMi44MzRjMCAxLjA5NyAwIDIuMDY3LjEwNSAyLjg0OGMuMTE0Ljg0Ny4zNzUgMS42OTQgMS4wNjcgMi4zODZjLjY5LjY5IDEuNTM4Ljk1MiAyLjM4NSAxLjA2NmMuNzgxLjEwNSAxLjc1MS4xMDUgMi44NDguMTA1aDQuMDUyYy4wNDMuNTM0LjA0MyAxLjE5LjA0MyAyLjA2M1YxNGMwIDMuNzcxIDAgNS42NTctMS4xNzIgNi44MjhDMTkuNjU3IDIyIDE3Ljc3MSAyMiAxNCAyMiIgY2xpcC1ydWxlPSJldmVub2RkIiBvcGFjaXR5PSIwLjUiLz48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEwLjU2IDE1LjQ5OGEuNzUuNzUgMCAxIDAtMS4xMi0uOTk2bC0yLjEwNyAyLjM3bC0uNzcyLS44N2EuNzUuNzUgMCAwIDAtMS4xMjIuOTk2bDEuMzM0IDEuNWEuNzUuNzUgMCAwIDAgMS4xMiAwem0uOTUtMTMuMjM4bC0uMDEgMi44MzVjMCAxLjA5NyAwIDIuMDY2LjEwNSAyLjg0OGMuMTE0Ljg0Ny4zNzUgMS42OTQgMS4wNjcgMi4zODVjLjY5LjY5MSAxLjUzOC45NTMgMi4zODUgMS4wNjdjLjc4MS4xMDUgMS43NTEuMTA1IDIuODQ4LjEwNWg0LjA1MmMuMDEzLjE1NS4wMjIuMzIxLjAyOC41SDIyYzAtLjI2OCAwLS40MDItLjAxLS41NmE1LjMyMiA1LjMyMiAwIDAgMC0uOTU4LTIuNjQxYy0uMDk0LS4xMjgtLjE1OC0uMjA0LS4yODUtLjM1N0MxOS45NTQgNy40OTQgMTguOTEgNi4zMTIgMTggNS41Yy0uODEtLjcyNC0xLjkyMS0xLjUxNS0yLjg5LTIuMTYxYy0uODMyLS41NTYtMS4yNDgtLjgzNC0xLjgxOS0xLjA0YTUuNDg4IDUuNDg4IDAgMCAwLS41MDYtLjE1NGMtLjM4NC0uMDk1LS43NTgtLjEyOC0xLjI4NS0uMTR6Ii8+PC9zdmc+
+[github-release-date-shield]: https://img.shields.io/github/release-date-pre/TheLynxHub/LynxHub?style=flat&labelColor=%23212121&color=%2300A9FF&label=Date&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNNi45NiAyYy40MTggMCAuNzU2LjMxLjc1Ni42OTJWNC4wOWMuNjctLjAxMiAxLjQyMi0uMDEyIDIuMjY4LS4wMTJoNC4wMzJjLjg0NiAwIDEuNTk3IDAgMi4yNjguMDEyVjIuNjkyYzAtLjM4Mi4zMzgtLjY5Mi43NTYtLjY5MnMuNzU2LjMxLjc1Ni42OTJWNC4xNWMxLjQ1LjEwNiAyLjQwMy4zNjggMy4xMDMgMS4wMDhjLjcuNjQxLjk4NSAxLjUxMyAxLjEwMSAyLjg0MnYxSDJWOGMuMTE2LTEuMzI5LjQwMS0yLjIgMS4xMDEtMi44NDJjLjctLjY0IDEuNjUyLS45MDIgMy4xMDMtMS4wMDhWMi42OTJjMC0uMzgyLjMzOS0uNjkyLjc1Ni0uNjkyIi8+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0yMiAxNHYtMmMwLS44MzktLjAxMy0yLjMzNS0uMDI2LTNIMi4wMDZjLS4wMTMuNjY1IDAgMi4xNjEgMCAzdjJjMCAzLjc3MSAwIDUuNjU3IDEuMTcgNi44MjhDNC4zNDkgMjIgNi4yMzQgMjIgMTAuMDA0IDIyaDRjMy43NyAwIDUuNjU0IDAgNi44MjYtMS4xNzJDMjIgMTkuNjU3IDIyIDE3Ljc3MSAyMiAxNCIgb3BhY2l0eT0iMC41Ii8+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xOCAxNi41YTEuNSAxLjUgMCAxIDEtMyAwYTEuNSAxLjUgMCAwIDEgMyAwIi8+PC9zdmc+
+[github-downloads-shield]: https://img.shields.io/github/downloads/TheLynxHub/LynxHub/total?labelColor=%23212121&color=%2300A9FF&label=Downloads&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNMjIgMTZ2LTFjMC0yLjgyOCAwLTQuMjQyLS44NzktNS4xMkMyMC4yNDIgOSAxOC44MjggOSAxNiA5SDhjLTIuODI5IDAtNC4yNDMgMC01LjEyMi44OEMyIDEwLjc1NyAyIDEyLjE3IDIgMTQuOTk3VjE2YzAgMi44MjkgMCA0LjI0My44NzkgNS4xMjJDMy43NTcgMjIgNS4xNzIgMjIgOCAyMmg4YzIuODI4IDAgNC4yNDMgMCA1LjEyMS0uODc4QzIyIDIwLjI0MiAyMiAxOC44MjkgMjIgMTYiIG9wYWNpdHk9IjAuNSIvPjxwYXRoIGZpbGw9IndoaXRlIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMiAxLjI1YS43NS43NSAwIDAgMC0uNzUuNzV2MTAuOTczbC0xLjY4LTEuOTYxYS43NS43NSAwIDEgMC0xLjE0Ljk3NmwzIDMuNWEuNzUuNzUgMCAwIDAgMS4xNCAwbDMtMy41YS43NS43NSAwIDEgMC0xLjE0LS45NzZsLTEuNjggMS45NlYyYS43NS43NSAwIDAgMC0uNzUtLjc1IiBjbGlwLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=
 [website-shield]: https://img.shields.io/badge/Website-LynxHub.app-00A9FF?style=flat&labelColor=%23212121&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgY29sb3I9IiMwZjQxNTkiIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBvcGFjaXR5PSIwLjUiIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0id2hpdGUiPjwvY2lyY2xlPjxwYXRoIGQ9Ik0gOC41NzUxNiA5LjQ0NzM3IEMgOC4zODc5IDcuMzYzMTYgNi43ODA2IDUuNDIxMDUgNi4wMDAzNSA0LjcxMDUzIEwgNS41NjkzNCA0LjM0MTg5IEMgNy4zMDc5MiAyLjg4MDM3IDkuNTUxMzMgMiAxMi4wMDA0IDIgQyAxNC4yMTM3IDIgMTYuMjU5MiAyLjcxOTEgMTcuOTE1OCAzLjkzNjQyIEMgMTguMTQ5OCA0LjY0Njk1IDE3LjcwNCA2LjEzMTU4IDE3LjIzNTkgNi44NDIxMSBDIDE3LjA2NjMgNy4wOTk0NyAxNi42ODE4IDcuNDE4OTggMTYuMjYwMiA3LjcyMTg2IEMgMTUuMzA5NyA4LjQwNDc3IDE0LjExMDIgOC43NDI1NCAxMy41MDA0IDEwIEMgMTMuMzI2IDEwLjM1OTUgMTMuMzMzNSAxMC43MTA4IDEzLjQxNzMgMTEuMDE2MyBDIDEzLjQ3NzYgMTEuMjM1OCAxMy41MTYxIDExLjQ3NDUgMTMuNTE2NyAxMS43MDggQyAxMy41MTg3IDEyLjQ2MjkgMTIuNzU1MiAxMy4wMDgyIDEyLjAwMDQgMTMgQyAxMC4wMzYxIDEyLjk3ODYgOC43NTAyIDExLjM5NTUgOC41NzUxNiA5LjQ0NzM3IFoiIGZpbGw9IndoaXRlIj48L3BhdGg+PHBhdGggZD0iTSAxMy40MzY1IDE4LjI3NjEgQyAxNC40MjQ2IDE2LjQxNCAxNy43MTgyIDE2LjQxNCAxNy43MTgyIDE2LjQxNCBDIDIxLjE1MDIgMTYuMzc4MiAyMS42MTM4IDE0LjI5NDQgMjEuOTIzNyAxMy4yNDEyIEMgMjEuMzY5IDE3LjcyMjYgMTcuODQ5NCAyMS4yODQ5IDEzLjM4ODUgMjEuOTA0NiBDIDEzLjA2NTkgMjEuMjI1NiAxMi42ODM3IDE5LjY5NDYgMTMuNDM2NSAxOC4yNzYxIFoiIGZpbGw9IndoaXRlIj48L3BhdGg+PC9zdmc+
 [docs-shield]: https://img.shields.io/badge/Docs-docs.LynxHub.app-00A9FF?style=flat&labelColor=%23212121&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9IiNmZmYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTIgMTYuMTQ0VjQuOTk4YzAtMS4wOTguODg2LTEuOTkgMS45ODItMS45MjNjLjk3Ny4wNiAyLjEzMS4xNzkgMy4wMTguNDEzYzEuMDUuMjc2IDIuMjk2Ljg2NiAzLjI4MiAxLjM4OEEzLjUgMy41IDAgMCAwIDEyIDUuMjc1djE1LjJhMy40NiAzLjQ2IDAgMCAxLTEuNjI4LS40MDZjLTEtLjUzMi0yLjI5LTEuMTUtMy4zNzItMS40MzVjLS44NzctLjIzMi0yLjAxNi0uMzUtMi45ODUtLjQxMUMyLjkwNiAxOC4xNTMgMiAxNy4yNTUgMiAxNi4xNDMiIGNsaXAtcnVsZT0iZXZlbm9kZCIgb3BhY2l0eT0iLjUiIC8+Cgk8cGF0aCBmaWxsPSIjZmZmIiBkPSJNMjIgMTYuMTQ0VjQuOTM0YzAtMS4wNzMtLjg0Ni0xLjk1My0xLjkxOC0xLjkxNmMtMS4xMjkuMDQtMi41MzUuMTU2LTMuNTgyLjQ3Yy0uOTA4LjI3MS0xLjk2NS44MTYtMi44MjYgMS4zMTVBMy41IDMuNSAwIDAgMSAxMiA1LjI3NXYxNS4yYy41NiAwIDEuMTIxLS4xMzYgMS42MjgtLjQwNmMxLS41MzIgMi4yOS0xLjE1IDMuMzcyLTEuNDM1Yy44NzctLjIzMiAyLjAxNi0uMzUgMi45ODUtLjQxMWMxLjEwOS0uMDcgMi4wMTUtLjk2OCAyLjAxNS0yLjA4IiAvPgo8L3N2Zz4K
 [resolita]: https://wsrv.nl/?url=https://c10.patreonusercontent.com/4/patreon-media/p/user/215565457/f96f7d12b2284a189e4490daabb17891/eyJ3IjoyMDB9/2.jpg?token-hash=u4ebFSw-hnpdOD8fu0ME1mlH--jNPPMJPG-0icor0no%3D&h=90&w=90&fit=cover&mask=circle

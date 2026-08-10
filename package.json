@@ -7,15 +7,15 @@
   "description": "Cross-platform, extensible terminal/browser for AI management",
   "main": "./out/main/index.cjs",
   "author": {
-    "name": "KindaBrazy",
+    "name": "TheLynxHub",
     "email": "kindofbrazy@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/KindaBrazy/LynxHub"
+    "url": "https://github.com/TheLynxHub/LynxHub"
   },
   "license": "AGPL-3.0",
-  "homepage": "https://github.com/KindaBrazy/LynxHub",
+  "homepage": "https://github.com/TheLynxHub/LynxHub",
   "appDetails": {
     "title": "LynxHub",
     "buildNumber": 55,

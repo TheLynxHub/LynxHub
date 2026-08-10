@@ -61,12 +61,14 @@ export const STATICS_FOLDER_NAME = 'Statics' as const;
 // Static Assets
 export const APP_ICON_TRANSPARENT: string = 'LynxHub.png';
 
-export const MAIN_MODULE_URL: string = 'https://github.com/KindaBrazy/LynxHub-Module-Offline-Container';
-export const STATICS_URL: string = 'https://github.com/KindaBrazy/LynxHub-Statics';
+export const GITHUB_ORG: string = 'https://github.com/TheLynxHub';
+
+export const MAIN_MODULE_URL: string = `${GITHUB_ORG}/Local-AI-Collection`;
+export const STATICS_URL: string = `${GITHUB_ORG}/Statics`;
 export const DISCORD_SERVER: string = 'https://discord.gg/e8rBzhtcnK';
 export const X_URL: string = 'https://x.com/LynxHubAI';
 export const PATREON_URL: string = 'https://www.patreon.com/LynxHub';
-export const GITHUB_URL: string = 'https://github.com/KindaBrazy/LynxHub';
+export const GITHUB_URL: string = `${GITHUB_ORG}/LynxHub`;
 export const REDDIT_URL: string = 'https://www.reddit.com/r/LynxHubAI';
 export const YOUTUBE_URL: string = 'https://www.youtube.com/@LynxHubAI';
 

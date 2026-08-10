@@ -1,7 +1,7 @@
 import {createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync} from 'node:fs';
 import {join} from 'node:path';
 
-import {APP_BUILD_NUMBER, LYNXHUB_WEBSITE} from '@lynx_common/consts';
+import {APP_BUILD_NUMBER, LYNXHUB_WEBSITE, STATICS_URL} from '@lynx_common/consts';
 import {
   AppUpdateData,
   AppUpdateInsiderData,
@@ -237,7 +237,7 @@ export default class StaticsManager {
   private async fetchLatestReleaseTag(): Promise<string | undefined> {
     // 1. Try redirect on releases/latest page
     try {
-      const res = await axios.get('https://github.com/KindaBrazy/LynxHub-Statics/releases/latest', {
+      const res = await axios.get(`${STATICS_URL}/releases/latest`, {
         maxRedirects: 0,
         validateStatus: status => status >= 200 && status < 400,
         timeout: 10000,
@@ -260,14 +260,11 @@ export default class StaticsManager {
 
     // 2. Try redirect on releases/latest/download/statics.7z
     try {
-      const res = await axios.head(
-        'https://github.com/KindaBrazy/LynxHub-Statics/releases/latest/download/statics.7z',
-        {
-          maxRedirects: 0,
-          validateStatus: status => status >= 200 && status < 400,
-          timeout: 10000,
-        },
-      );
+      const res = await axios.head(`${STATICS_URL}/releases/latest/download/statics.7z`, {
+        maxRedirects: 0,
+        validateStatus: status => status >= 200 && status < 400,
+        timeout: 10000,
+      });
       const location = (res.headers['location'] || res.headers['Location']) as string | undefined;
       if (location) {
         const match = location.match(/\/download\/(v\d+)\//i);
@@ -291,7 +288,7 @@ export default class StaticsManager {
    * Downloads statics.7z for a given tag into .tmp, extracts it, and moves to target version folder.
    */
   private async downloadAndExtractRelease(tag: string): Promise<void> {
-    const downloadUrl = `https://github.com/KindaBrazy/LynxHub-Statics/releases/download/${tag}/statics.7z`;
+    const downloadUrl = `${STATICS_URL}/releases/download/${tag}/statics.7z`;
     const tmpDir = join(this.dir, '.tmp');
     const tmpArchive = join(tmpDir, 'statics.7z');
     const tmpExtractDir = join(tmpDir, tag);

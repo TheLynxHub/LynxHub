@@ -14,7 +14,7 @@ import {
 import {SiGithub} from '@icons-pack/react-simple-icons';
 import SettingsSection from '@lynx/components/SettingsSection';
 import {useUserState} from '@lynx/redux/reducers/user';
-import {APP_VERSION, LYNXHUB_WEBSITE} from '@lynx_common/consts';
+import {APP_VERSION, GITHUB_URL, LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import userIpc from '@lynx_shared/ipc/user';
 import {Bug, ChatSquare, Lightbulb, SquareTopDown} from '@solar-icons/react-perf/BoldDuotone';
 import {memo, SyntheticEvent, useCallback, useMemo, useState} from 'react';
@@ -121,12 +121,11 @@ const DashboardReportIssue = memo(() => {
         }
       } else {
         // Redirect to GitHub new issue page with prefilled template parameters
-        const repoUrl = 'https://github.com/KindaBrazy/LynxHub';
         const queryParams = new URLSearchParams({
           title: title.trim(),
           body,
         });
-        const url = `${repoUrl}/issues/new?${queryParams.toString()}`;
+        const url = `${GITHUB_URL}/issues/new?${queryParams.toString()}`;
         window.open(url);
 
         setSubmitResult({

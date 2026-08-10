@@ -87,7 +87,7 @@ export default function StarRepoModal() {
             <SiGithub className="size-6 text-foreground shrink-0" />
           </div>
           <div className="space-y-0.5">
-            <h4 className="text-xs font-bold text-foreground">KindaBrazy/LynxHub</h4>
+            <h4 className="text-xs font-bold text-foreground">TheLynxHub/LynxHub</h4>
             <p className="text-[11px] text-muted-foreground leading-relaxed select-none">
               Starring is completely free and takes just a second.
             </p>
