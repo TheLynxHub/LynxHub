@@ -68,6 +68,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@lynxhub/7zip": "^0.10.0",
     "@originjs/vite-plugin-federation": "^1.4.1",
     "@sentry/electron": "^7.16.0",
     "@sentry/react": "^10.67.0",
