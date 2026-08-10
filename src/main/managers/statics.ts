@@ -5,8 +5,6 @@ import {APP_BUILD_NUMBER, LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {
   AppUpdateData,
   AppUpdateInsiderData,
-  ExtensionInfo,
-  ModuleInfo,
   NotificationData,
   PatreonSupporter,
   SubscribeStages,
@@ -362,18 +360,6 @@ export default class StaticsManager {
       }
       return [];
     }
-  }
-
-  public async getModules(): Promise<ModuleInfo[] | undefined> {
-    return this.getDataAsJson<ModuleInfo[]>('modules.json');
-  }
-
-  public async getExtensions(): Promise<ExtensionInfo[] | undefined> {
-    return this.getDataAsJson<ExtensionInfo[]>('extensions.json');
-  }
-
-  public async getExtensionsEA(): Promise<ExtensionInfo[] | undefined> {
-    return this.getDataAsJson<ExtensionInfo[]>('extensions_ea.json');
   }
 
   public async getPatrons(): Promise<PatreonSupporter[] | undefined> {

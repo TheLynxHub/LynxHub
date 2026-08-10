@@ -1,12 +1,5 @@
 import {staticsChannels} from '@lynx_common/consts/ipcChannels/statics';
-import type {
-  AppUpdateData,
-  AppUpdateInsiderData,
-  ExtensionInfo,
-  ModuleInfo,
-  NotificationData,
-  PatreonSupporter,
-} from '@lynx_common/types';
+import type {AppUpdateData, AppUpdateInsiderData, NotificationData, PatreonSupporter} from '@lynx_common/types';
 
 import lynxIpc from './lynxIpc';
 
@@ -24,15 +17,6 @@ const staticsIpc = {
 
   // Gets notification data
   getNotification: () => lynxIpc.invoke<OptionalList<NotificationData>>(staticsChannels.getNotification),
-
-  // Gets available modules list
-  getModules: () => lynxIpc.invoke<OptionalList<ModuleInfo>>(staticsChannels.getModules),
-
-  // Gets available extensions list
-  getExtensions: () => lynxIpc.invoke<OptionalList<ExtensionInfo>>(staticsChannels.getExtensions),
-
-  // Gets early access extensions list
-  getExtensionsEA: () => lynxIpc.invoke<OptionalList<ExtensionInfo>>(staticsChannels.getExtensionsEA),
 
   // Gets Patreon supporters list
   getPatrons: () => lynxIpc.invoke<OptionalList<PatreonSupporter>>(staticsChannels.getPatrons),
