@@ -78,6 +78,9 @@ export default class StaticsManager {
         this.brokenVersions = new Set(dbData.brokenVersions);
       }
 
+      // Clean up legacy git-cloned files/directories at the root level
+      this.cleanupLegacyFiles();
+
       // Prune old versions on startup (keep only 2 latest)
       this.pruneOldVersions();
 
@@ -123,6 +126,28 @@ export default class StaticsManager {
       }
     } catch (err) {
       console.error('StaticsManager: Error pruning old versions:', err);
+    }
+  }
+
+  /**
+   * Cleans up legacy files and directories leftover from git sync (e.g. .git, .github, plugins, .gitignore, root json files).
+   */
+  private cleanupLegacyFiles(): void {
+    if (!existsSync(this.dir)) return;
+
+    try {
+      const entries = readdirSync(this.dir, {withFileTypes: true});
+      for (const entry of entries) {
+        if ((entry.isDirectory() && /^v\d+$/i.test(entry.name)) || entry.name === '.tmp') {
+          continue;
+        }
+
+        const legacyPath = join(this.dir, entry.name);
+        console.log(`StaticsManager: Cleaning up legacy statics item: ${entry.name}`);
+        this.robustWipe(legacyPath);
+      }
+    } catch (err) {
+      console.error('StaticsManager: Error cleaning up legacy files:', err);
     }
   }
 
