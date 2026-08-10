@@ -387,7 +387,7 @@ export default class StaticsManager {
     }
   }
 
-  public async getPatrons(): Promise<PatreonSupporter[] | undefined> {
+  public async getPatrons(): Promise<PatreonSupporter[]> {
     try {
       const response = await axios.get(`${LYNXHUB_WEBSITE}/api/patrons`, {
         timeout: 10000,
@@ -395,10 +395,11 @@ export default class StaticsManager {
       if (response.data && response.data.success) {
         return response.data.patrons;
       }
+      return [];
     } catch (error) {
       console.error('Failed to fetch patrons from website:', axios.isAxiosError(error) ? error.message : error);
+      return [];
     }
-    return this.getDataAsJson<PatreonSupporter[]>('patrons.json');
   }
 
   public async getPluginMetadataById(pluginId: string): Promise<PluginMetadata | undefined> {
