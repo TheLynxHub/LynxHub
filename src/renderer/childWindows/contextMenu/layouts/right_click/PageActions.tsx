@@ -1,5 +1,5 @@
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {Code} from '@solar-icons/react-perf/BoldDuotone';
+import {CodeIcon} from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 
 import {ActionButton, createActionHandler} from './Utils';
@@ -21,7 +21,7 @@ const PageActions = memo(function PageActions({id, x, y}: PageActionsProps) {
         contextMenuIpc.send.rightClickItems.inspectElement(id, x, y);
       })}
       title="Inspect Element"
-      icon={<Code className="size-4" />}
+      icon={<CodeIcon className="size-4" />}
     />
   );
 });

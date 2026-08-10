@@ -2,7 +2,7 @@ import {Avatar, Description, Label, Link, Modal} from '@heroui/react';
 import {CardInfoDescriptions} from '@lynx_common/types/plugins/modules';
 import {extractGitUrl, getCacheUrl, getFallbackString, validateGitRepoUrl} from '@lynx_common/utils';
 import {useDebounceBreadcrumb} from '@lynx_shared/sentry/Breadcrumbs';
-import {Inbox} from '@solar-icons/react-perf/BoldDuotone';
+import {InboxIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty, startCase} from 'lodash-es';
 import {useEffect, useMemo, useState} from 'react';
 
@@ -67,7 +67,7 @@ const CardInfoModalContent = ({state}: CommonProps) => {
         {isEmpty(openFolders) && isEmpty(cardInfoDescriptions) ? (
           <EmptyStateCard
             bodyClassName="my-6"
-            icon={<Inbox size={40} />}
+            icon={<InboxIcon size={40} />}
             className="bg-surface-secondary"
             title="No data available to display!"
           />

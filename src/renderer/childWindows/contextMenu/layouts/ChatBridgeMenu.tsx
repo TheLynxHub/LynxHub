@@ -1,6 +1,6 @@
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {ChatRound, Copy, Earth, FileDownload, Restart} from '@solar-icons/react-perf/BoldDuotone';
-import {AltArrowLeft} from '@solar-icons/react-perf/LineDuotone';
+import {ChatRoundIcon, CopyIcon, EarthIcon, FileDownloadIcon, RestartIcon} from '@solar-icons/react/bold-duotone';
+import {AltArrowLeftIcon} from '@solar-icons/react/line-duotone';
 import {memo} from 'react';
 
 import {useContextState} from '../redux/reducer';
@@ -28,17 +28,17 @@ const ChatBridgeMenu = memo(function ChatBridgeMenu() {
         <>
           <ActionButton
             title="Copy Selection"
-            icon={<Copy className="size-4" />}
+            icon={<CopyIcon className="size-4" />}
             onPress={() => triggerAction('copy-selection', selectionText)}
           />
           <ActionButton
             title="Search Web"
-            icon={<Earth className="size-4" />}
+            icon={<EarthIcon className="size-4" />}
             onPress={() => triggerAction('search-web', selectionText)}
           />
           <ActionButton
             title="Start New Chat with Selection"
-            icon={<ChatRound className="size-4 text-accent" />}
+            icon={<ChatRoundIcon className="size-4 text-accent" />}
             onPress={() => triggerAction('start-chat-with-selection', selectionText)}
           />
           <Separator />
@@ -50,20 +50,20 @@ const ChatBridgeMenu = memo(function ChatBridgeMenu() {
         <>
           <ActionButton
             title="Reload Module"
-            icon={<Restart className="size-4" />}
             onPress={() => triggerAction('reload')}
+            icon={<RestartIcon className="size-4" />}
           />
           {!tabID?.startsWith('chat-bridge-') && (
             <ActionButton
               title="Back to Select"
               onPress={() => triggerAction('back')}
-              icon={<AltArrowLeft className="size-4" />}
+              icon={<AltArrowLeftIcon className="size-4" />}
             />
           )}
           <ActionButton
             onPress={() => triggerAction('toggle-webpage')}
             title={step === 'chat' ? 'View Source Webpage' : 'Show Chatting'}
-            icon={step === 'chat' ? <Earth className="size-4" /> : <ChatRound className="size-4" />}
+            icon={step === 'chat' ? <EarthIcon className="size-4" /> : <ChatRoundIcon className="size-4" />}
           />
         </>
       )}
@@ -73,7 +73,7 @@ const ChatBridgeMenu = memo(function ChatBridgeMenu() {
         <ActionButton
           title="New Chat"
           onPress={() => triggerAction('new-chat')}
-          icon={<ChatRound className="size-4 text-accent" />}
+          icon={<ChatRoundIcon className="size-4 text-accent" />}
         />
       )}
 
@@ -83,23 +83,23 @@ const ChatBridgeMenu = memo(function ChatBridgeMenu() {
           <Separator />
           <ActionButton
             title="Copy as Markdown"
-            icon={<Copy className="size-4 text-muted" />}
             onPress={() => triggerAction('copy-markdown')}
+            icon={<CopyIcon className="size-4 text-muted" />}
           />
           <ActionButton
             title="Copy as Plain Text"
             onPress={() => triggerAction('copy-text')}
-            icon={<Copy className="size-4 text-muted" />}
+            icon={<CopyIcon className="size-4 text-muted" />}
           />
           <ActionButton
             title="Save as Markdown (.md)"
             onPress={() => triggerAction('save-markdown')}
-            icon={<FileDownload className="size-4 text-muted" />}
+            icon={<FileDownloadIcon className="size-4 text-muted" />}
           />
           <ActionButton
             title="Save as Plain Text (.txt)"
             onPress={() => triggerAction('save-text')}
-            icon={<FileDownload className="size-4 text-muted" />}
+            icon={<FileDownloadIcon className="size-4 text-muted" />}
           />
         </>
       )}

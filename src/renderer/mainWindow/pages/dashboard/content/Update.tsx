@@ -5,7 +5,7 @@ import {useSettingsState} from '@lynx/redux/reducers/settings';
 import {useUserState} from '@lynx/redux/reducers/user';
 import {AppDispatch} from '@lynx/redux/store';
 import staticsIpc from '@lynx_shared/ipc/statics';
-import {Download} from '@solar-icons/react-perf/BoldDuotone';
+import {DownloadIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -60,7 +60,7 @@ const DashboardUpdate = memo(() => {
   const selection = userData.subscribeStage || 'public';
 
   return (
-    <SettingsSection title="Updates" id={DashboardUpdateId} icon={<Download className="size-5" />} itemsCenter>
+    <SettingsSection title="Updates" id={DashboardUpdateId} icon={<DownloadIcon className="size-5" />} itemsCenter>
       <div className="w-full">
         <div className="grid grid-cols-3 gap-4">
           {/* Insider Card */}

@@ -5,7 +5,7 @@ import {useVolumeState, volumeActions} from '@lynx/redux/reducers/volume';
 import {AppDispatch} from '@lynx/redux/store';
 import browserIpc from '@lynx_shared/ipc/browser';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Volume, VolumeCross} from '@solar-icons/react-perf/BoldDuotone';
+import {VolumeCrossIcon, VolumeIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -135,9 +135,9 @@ export default function AudioControl() {
                 <Switch.Thumb />
               </Switch.Control>
               {globalMuted ? (
-                <VolumeCross aria-hidden="true" className="size-4.5 shrink-0 text-danger-500" />
+                <VolumeCrossIcon aria-hidden="true" className="size-4.5 shrink-0 text-danger-500" />
               ) : (
-                <Volume aria-hidden="true" className="size-5 shrink-0 text-default-500" />
+                <VolumeIcon aria-hidden="true" className="size-5 shrink-0 text-default-500" />
               )}
               {globalMuted ? 'All audio muted' : 'Audio enabled'}
             </Switch.Content>

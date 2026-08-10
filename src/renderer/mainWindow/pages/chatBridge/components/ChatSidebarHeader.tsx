@@ -1,7 +1,7 @@
 import {Avatar, Button, Checkbox, Dropdown, Label, Popover, SearchField} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound, Filter} from '@solar-icons/react-perf/BoldDuotone';
-import {AltArrowLeft, AltArrowRight} from '@solar-icons/react-perf/Linear';
+import {ChatRoundIcon, FilterIcon} from '@solar-icons/react/bold-duotone';
+import {AltArrowLeftIcon, AltArrowRightIcon} from '@solar-icons/react/linear';
 import {Plus} from 'lucide-react';
 import {memo} from 'react';
 
@@ -78,7 +78,7 @@ export const ChatSidebarHeader = memo(
               onPress={onToggleSidebar}
               aria-label="Expand sidebar"
               isIconOnly>
-              <AltArrowRight className="size-4 text-semi-muted" />
+              <AltArrowRightIcon className="size-4 text-semi-muted" />
             </Button>
           )}
         </div>
@@ -133,7 +133,7 @@ export const ChatSidebarHeader = memo(
           </Button>
         ) : (
           <div className="flex items-center gap-2 py-1.5">
-            <ChatRound className="size-5 text-accent" />
+            <ChatRoundIcon className="size-5 text-accent" />
             <span className="font-bold text-foreground text-sm">Recents</span>
           </div>
         )}
@@ -142,7 +142,7 @@ export const ChatSidebarHeader = memo(
           <Popover>
             <Popover.Trigger>
               <Button size="sm" variant="tertiary" className="shrink-0" aria-label="Filter AIs" isIconOnly>
-                <Filter className="size-4 text-semi-muted" />
+                <FilterIcon className="size-4 text-semi-muted" />
               </Button>
             </Popover.Trigger>
             <Popover.Content>
@@ -196,7 +196,7 @@ export const ChatSidebarHeader = memo(
             onPress={onToggleSidebar}
             aria-label="Collapse sidebar"
             isIconOnly>
-            <AltArrowLeft className="size-4 text-semi-muted" />
+            <AltArrowLeftIcon className="size-4 text-semi-muted" />
           </Button>
         )}
       </div>

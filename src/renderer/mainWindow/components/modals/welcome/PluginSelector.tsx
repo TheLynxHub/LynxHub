@@ -1,6 +1,6 @@
 import {Avatar, Button, Checkbox, CheckboxGroup, cn, Description, Spinner} from '@heroui/react';
 import {getFallbackString} from '@lynx_common/utils';
-import {ArrowRight} from '@solar-icons/react-perf/BoldDuotone';
+import {ArrowRightIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {Dispatch, SetStateAction, useState} from 'react';
 
@@ -16,7 +16,7 @@ type Props = {
 
 const addon = {
   description: 'Receive updates via email',
-  icon: ArrowRight,
+  icon: ArrowRightIcon,
   title: 'Email Notifications',
   value: 'email',
 };

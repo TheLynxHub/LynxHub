@@ -1,26 +1,26 @@
-import {GalleryRound, HomeSmile} from '@solar-icons/react-perf/Bold';
+import {GalleryRoundIcon, HomeSmileIcon} from '@solar-icons/react/bold';
 import {
-  Dialog,
-  Gamepad,
-  Layers,
-  MagicStick3,
-  MusicNote,
-  Stars,
-  Tuning2,
-  User,
-  WidgetAdd,
-} from '@solar-icons/react-perf/BoldDuotone';
+  DialogIcon,
+  GamepadIcon,
+  LayersIcon,
+  MagicWand3Icon,
+  MusicNoteIcon,
+  StarsIcon,
+  Tuning2Icon,
+  UserIcon,
+  WidgetAddIcon,
+} from '@solar-icons/react/bold-duotone';
 
 export {
-  Stars as AgentPage_Icon,
-  MusicNote as AudioPage_Icon,
-  User as DashboardPage_Icon,
-  Gamepad as GamePage_Icon,
-  HomeSmile as HomePage_Icon,
-  GalleryRound as ImagePage_Icon,
-  Layers as OthersPage_Icon,
-  WidgetAdd as PluginPage_Icon,
-  Tuning2 as SettingPage_Icon,
-  Dialog as TextPage_Icon,
-  MagicStick3 as ToolsPage_Icon,
+  StarsIcon as AgentPage_Icon,
+  MusicNoteIcon as AudioPage_Icon,
+  UserIcon as DashboardPage_Icon,
+  GamepadIcon as GamePage_Icon,
+  HomeSmileIcon as HomePage_Icon,
+  GalleryRoundIcon as ImagePage_Icon,
+  LayersIcon as OthersPage_Icon,
+  WidgetAddIcon as PluginPage_Icon,
+  Tuning2Icon as SettingPage_Icon,
+  DialogIcon as TextPage_Icon,
+  MagicWand3Icon as ToolsPage_Icon,
 };

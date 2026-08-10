@@ -1,7 +1,7 @@
 import {Button, Label, Slider} from '@heroui/react';
 import browserIpc from '@lynx_shared/ipc/browser';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Magnifier, Refresh} from '@solar-icons/react-perf/BoldDuotone';
+import {MagnifierIcon, RefreshIcon} from '@solar-icons/react/bold-duotone';
 import {isArray} from 'lodash-es';
 import {memo, useCallback} from 'react';
 import {useDispatch} from 'react-redux';
@@ -43,7 +43,7 @@ const BrowserScale = memo(function BrowserScale() {
       {/* Header with title and reset button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Magnifier aria-hidden="true" className="size-5 text-muted" />
+          <MagnifierIcon aria-hidden="true" className="size-5 text-muted" />
           <span className="text-sm font-semibold text-muted">Browser Scale</span>
         </div>
         <Button
@@ -52,7 +52,7 @@ const BrowserScale = memo(function BrowserScale() {
           onPress={handleReset}
           isDisabled={factor === 100}
           aria-label="Reset zoom to 100%">
-          <Refresh className="size-4" />
+          <RefreshIcon className="size-4" />
           Reset
         </Button>
       </div>

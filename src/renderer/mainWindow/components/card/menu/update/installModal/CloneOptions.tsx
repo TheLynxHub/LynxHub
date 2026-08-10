@@ -1,6 +1,6 @@
 import {Card, Checkbox, Key, Label, ListBox, NumberField, Select, Spinner} from '@heroui/react';
 import {extractGitUrl} from '@lynx_common/utils';
-import {SettingsMinimalistic, ShieldWarning} from '@solar-icons/react-perf/BoldDuotone';
+import {SettingsMinimalisticIcon, ShieldWarningIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {Dispatch, SetStateAction, useEffect, useState} from 'react';
 
@@ -84,7 +84,7 @@ export default function CloneOptions({url, setCloneOptionsResult}: CloneOptionsP
   return (
     <Card variant="secondary">
       <Card.Header className="gap-x-2 flex flex-row items-center text-surface-secondary-foreground">
-        <SettingsMinimalistic />
+        <SettingsMinimalisticIcon />
         <span>Clone Options</span>
       </Card.Header>
       <Card.Content>
@@ -95,7 +95,7 @@ export default function CloneOptions({url, setCloneOptionsResult}: CloneOptionsP
           </div>
         ) : isEmpty(branches) ? (
           <div className="flex flex-col items-center justify-center p-2 gap-y-1">
-            <ShieldWarning className="size-14 text-warning" />
+            <ShieldWarningIcon className="size-14 text-warning" />
             <span className="text-lg font-medium">Unable to retrieve repository branches</span>
             <p className="text-sm text-muted">The default repository branch will be used for cloning.</p>
           </div>

@@ -1,6 +1,6 @@
 import {Button, Input, TextArea} from '@heroui/react';
 import {ChosenArgument} from '@lynx_common/types/plugins/modules';
-import {Restart, Text} from '@solar-icons/react-perf/BoldDuotone';
+import {RestartIcon, TextFormatIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {useGetArgumentsByID} from '../../../../../../../plugins/modules';
@@ -59,7 +59,7 @@ export default function InputArgItem({argument, changeValue, removeArg, id}: Pro
       extra={
         <LynxTooltip delay={800} content={`Change to ${isInputBox ? 'One line' : 'Multiline'}`}>
           <Button size="sm" variant="ghost" onPress={toggleInput} aria-label="Toggle path type" isIconOnly>
-            <Restart
+            <RestartIcon
               onAnimationEnd={() => setRotateEffect(false)}
               className={`${rotateEffect && 'animate-[spin_0.5s]'} size-3.5`}
             />
@@ -69,7 +69,7 @@ export default function InputArgItem({argument, changeValue, removeArg, id}: Pro
       id={id}
       name={argument.name}
       removeArg={removeArg}
-      icon={<Text className="size-3.5" />}>
+      icon={<TextFormatIcon className="size-3.5" />}>
       {isInputBox || isCustomArg ? (
         <TextArea
           onBlur={onBlur}

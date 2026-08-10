@@ -5,7 +5,7 @@ import {showRestartModal} from '@lynx/utils';
 import {PluginItem} from '@lynx_common/types/plugins';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {DownloadMinimalistic} from '@solar-icons/react-perf/BoldDuotone';
+import {DownloadMinimalisticIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useMemo} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -77,7 +77,7 @@ export function UpdateButton({item, isIconOnly = false}: UpdateButtonProps) {
       isPending={isUpdating}
       isIconOnly={isIconOnly}
       isDisabled={updatingAll}>
-      {isUpdating ? <Spinner size="sm" color="current" /> : <DownloadMinimalistic className="size-3" />}
+      {isUpdating ? <Spinner size="sm" color="current" /> : <DownloadMinimalisticIcon className="size-3" />}
       {!isIconOnly && text}
     </Button>
   );

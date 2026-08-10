@@ -4,7 +4,7 @@ import {AppDispatch} from '@lynx/redux/store';
 import {DarkModeTypes} from '@lynx_common/types/ipc';
 import applicationIpc from '@lynx_shared/ipc/application';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Display, Moon, Sun2} from '@solar-icons/react-perf/BoldDuotone';
+import {DisplayIcon, MoonIcon, Sun2Icon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -88,17 +88,17 @@ export default function Theme() {
           <ListBox>
             <ListBox.Item id="dark" textValue="dark">
               <ListBox.ItemIndicator />
-              <Moon />
+              <MoonIcon />
               <Label>Dark</Label>
             </ListBox.Item>
             <ListBox.Item id="light" textValue="light">
               <ListBox.ItemIndicator />
-              <Sun2 />
+              <Sun2Icon />
               <Label>Light</Label>
             </ListBox.Item>
             <ListBox.Item id="system" textValue="system">
               <ListBox.ItemIndicator />
-              <Display />
+              <DisplayIcon />
 
               <div className="flex flex-col">
                 <Label>System Default</Label>

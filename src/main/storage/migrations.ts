@@ -47,9 +47,7 @@ export class StorageMigrationManager {
     [1.05, () => this.migrate_1_05()],
     [1.06, () => this.migrate_1_06()],
     [1.07, () => this.migrate_1_07()],
-    [1.08, () => this.migrate_1_08()],
     [1.09, () => this.migrate_1_09()],
-    [1.1, () => this.migrate_1_10()],
   ]);
 
   constructor(
@@ -383,60 +381,7 @@ export class StorageMigrationManager {
     }
   }
 
-  private migrate_1_08() {
-    if (!this.storage.data.plugin.bgChatEnabledCards) {
-      this.storage.data.plugin.bgChatEnabledCards = [];
-    }
-  }
-
   private migrate_1_09() {
     this.mergeDefaultHotkeys();
-  }
-
-  private migrate_1_10() {
-    if (this.storage.data.app) {
-      if (this.storage.data.app.floatChatAlwaysOnTop === undefined) {
-        this.storage.data.app.floatChatAlwaysOnTop = true;
-      }
-      if (this.storage.data.app.floatChatShowTaskbar === undefined) {
-        this.storage.data.app.floatChatShowTaskbar = false;
-      }
-      if (this.storage.data.app.floatChatRememberSize === undefined) {
-        this.storage.data.app.floatChatRememberSize = false;
-      }
-      if (this.storage.data.app.floatChatRememberPosition === undefined) {
-        this.storage.data.app.floatChatRememberPosition = false;
-      }
-      if (this.storage.data.app.disableFloatChat === undefined) {
-        this.storage.data.app.disableFloatChat = false;
-      }
-      if (this.storage.data.app.floatChatKeepInBackground === undefined) {
-        this.storage.data.app.floatChatKeepInBackground = true;
-      }
-      if (this.storage.data.app.chatBridgeMaxWidth === undefined) {
-        this.storage.data.app.chatBridgeMaxWidth = 'default';
-      }
-      if (this.storage.data.app.bridgeDefaultView === undefined) {
-        this.storage.data.app.bridgeDefaultView = 'custom';
-      }
-      if (this.storage.data.app.floatDefaultView === undefined) {
-        this.storage.data.app.floatDefaultView = 'custom';
-      }
-      if (this.storage.data.app.chatSidebarCollapsed === undefined) {
-        this.storage.data.app.chatSidebarCollapsed = false;
-      }
-      if (this.storage.data.app.chatSidebarWidth === undefined) {
-        this.storage.data.app.chatSidebarWidth = 240;
-      }
-      if (this.storage.data.app.floatChatSidebarCollapsed === undefined) {
-        this.storage.data.app.floatChatSidebarCollapsed = false;
-      }
-      if (this.storage.data.app.floatChatSidebarWidth === undefined) {
-        this.storage.data.app.floatChatSidebarWidth = 200;
-      }
-      if (this.storage.data.app.pinnedThreads === undefined) {
-        this.storage.data.app.pinnedThreads = [];
-      }
-    }
   }
 }

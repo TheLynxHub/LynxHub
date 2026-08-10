@@ -83,20 +83,6 @@ export type SettingState = {
   searchValue: string;
   searchWords: string[];
   selectedSection: string;
-  floatChatAlwaysOnTop: boolean;
-  floatChatShowTaskbar: boolean;
-  floatChatRememberSize: boolean;
-  floatChatRememberPosition: boolean;
-  disableFloatChat: boolean;
-  floatChatKeepInBackground: boolean;
-  chatBridgeMaxWidth: 'default' | 'wide' | 'full' | 'small';
-  bridgeDefaultView: 'webview' | 'custom';
-  floatDefaultView: 'webview' | 'custom';
-  chatSidebarCollapsed: boolean;
-  chatSidebarWidth: number;
-  floatChatSidebarCollapsed: boolean;
-  floatChatSidebarWidth: number;
-  pinnedThreads: string[];
 };
 
 export type TerminalState = StorageTypes['terminal'];

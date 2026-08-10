@@ -1,6 +1,6 @@
 import SettingsSection from '@lynx/components/SettingsSection';
-import {Widget} from '@solar-icons/react-perf/BoldDuotone';
-import {WindowFrame} from '@solar-icons/react-perf/BoldDuotone';
+import {WidgetIcon} from '@solar-icons/react/bold-duotone';
+import {WindowFrameIcon} from '@solar-icons/react/bold-duotone';
 
 import BridgeDefaultView from './BridgeDefaultView';
 import ChatBridgeMaxWidth from './ChatBridgeMaxWidth';
@@ -21,11 +21,11 @@ export const SettingsChatBridgeId = 'settings_chat_bridge_elem';
 export default function SettingsChatBridge() {
   return (
     <>
-      <SettingsSection title="Interface" icon={<Widget className="size-5" />}>
+      <SettingsSection title="Interface" icon={<WidgetIcon className="size-5" />}>
         <ChatBridgeMaxWidth />
         <BridgeDefaultView />
       </SettingsSection>
-      <SettingsSection title="Float Chat" id={SettingsChatBridgeId} icon={<WindowFrame className="size-5" />}>
+      <SettingsSection title="Float Chat" id={SettingsChatBridgeId} icon={<WindowFrameIcon className="size-5" />}>
         <DisableFloatChat />
         <FloatChatKeepInBackground />
         <FloatChatAlwaysOnTop />

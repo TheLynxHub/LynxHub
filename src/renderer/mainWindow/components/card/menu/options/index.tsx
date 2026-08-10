@@ -1,7 +1,7 @@
 import {DropdownItem} from '@heroui/react';
 import {Extensions2_Icon, GitHub_Icon} from '@lynx_assets/icons';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {SettingsMinimalistic} from '@solar-icons/react-perf/BoldDuotone';
+import {SettingsMinimalisticIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback} from 'react';
 
 import {useGetInstallType} from '../../../../plugins/modules';
@@ -23,7 +23,7 @@ export const LaunchConfigMenuItem = ({state}: CommonProps) => {
 
   return (
     <DropdownItem onPress={onPress} key="launch-config">
-      <SettingsMinimalistic className="size-4" />
+      <SettingsMinimalisticIcon className="size-4" />
       Launch Config
     </DropdownItem>
   );

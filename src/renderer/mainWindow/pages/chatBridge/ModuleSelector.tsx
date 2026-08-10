@@ -1,6 +1,6 @@
 import {Avatar, Card, Checkbox} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRoundIcon} from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 
 interface ModuleSelectorProps {
@@ -32,7 +32,7 @@ const ModuleSelector = memo(({onlineCards, onSelectCard, bgChatEnabledCards, onT
                   <div className="flex items-center gap-3">
                     {isUnified ? (
                       <div className="size-10 shrink-0 flex items-center justify-center bg-accent-soft rounded-full">
-                        <ChatRound className="size-5 text-accent" />
+                        <ChatRoundIcon className="size-5 text-accent" />
                       </div>
                     ) : (
                       <Avatar className="size-10 shrink-0">

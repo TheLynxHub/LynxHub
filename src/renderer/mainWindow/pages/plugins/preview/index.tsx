@@ -1,6 +1,6 @@
 import {Card} from '@heroui/react';
 import {usePluginsState} from '@lynx/redux/reducers/plugins';
-import {WidgetAdd} from '@solar-icons/react-perf/BoldDuotone';
+import {WidgetAddIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {memo} from 'react';
 
@@ -18,7 +18,7 @@ function EmptySelectionPlaceholder() {
         'bg-white dark:bg-LynxRaisinBlack size-full flex items-center' +
         ' justify-center gap-y-4 flex-col px-4 text-center'
       }>
-      <WidgetAdd className="size-16" />
+      <WidgetAddIcon className="size-16" />
       <span className="text-lg">Select a plugin from the list to begin your exploration.</span>
     </div>
   );

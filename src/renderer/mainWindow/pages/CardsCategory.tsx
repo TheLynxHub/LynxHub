@@ -9,7 +9,7 @@ import {useAllCardDataWithPath, useHasArguments, useSearchCards} from '@lynx/plu
 import {toolsCardRegistry} from '@lynx/plugins/modules/toolsRegistry';
 import {useCardsState} from '@lynx/redux/reducers/cards';
 import {Apps_Color_Icon, History_Color_Icon, Pin_Color_Icon} from '@lynx_assets/icons/Icons_Colorful';
-import {Inbox, PinCircle} from '@solar-icons/react-perf/BoldDuotone';
+import {InboxIcon, PinCircleIcon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, LayoutGroup, motion, Variants} from 'framer-motion';
 import Fuse from 'fuse.js';
 import {isEmpty, isNil} from 'lodash-es';
@@ -61,8 +61,8 @@ const CardsByIds = ({cardIds, cat}: {cardIds: string[]; cat: string}) => {
             <EmptyStateCard
               className="size-full"
               bodyClassName="gap-y-3"
-              icon={<Inbox size={40} />}
               title="No Card to Display!"
+              icon={<InboxIcon size={40} />}
               action={<NavigateToPluginsButton />}
               description="Please install at least one module in plugins page."
             />
@@ -134,8 +134,8 @@ const AllCards = () => {
       <EmptyStateCard
         className="size-full"
         bodyClassName="gap-y-3"
-        icon={<Inbox size={40} />}
         title="No Card to Display!"
+        icon={<InboxIcon size={40} />}
         action={<NavigateToPluginsButton />}
         description="Please install at least one module in plugins page."
       />
@@ -203,7 +203,7 @@ export const PinnedCars = memo(() => {
             className="size-full"
             bodyClassName="gap-y-3"
             title="No pinned card!"
-            icon={<PinCircle size={45} />}
+            icon={<PinCircleIcon size={45} />}
             description="Pin your favorite cards to easily access them here."
           />
         ) : (
@@ -236,7 +236,7 @@ export const RecentlyCards = memo(() => {
           <EmptyStateCard
             className="size-full"
             bodyClassName="gap-y-3"
-            icon={<Inbox size={40} />}
+            icon={<InboxIcon size={40} />}
             description="No Recently Used Card to Display!"
           />
         ) : (

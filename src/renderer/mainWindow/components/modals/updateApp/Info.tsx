@@ -1,8 +1,8 @@
 import {Accordion, buttonVariants, Card, Chip, Link, ScrollShadow, Separator} from '@heroui/react';
 import {APP_BUILD_NUMBER, APP_VERSION, RELEASES_PAGE} from '@lynx_common/consts';
 import {AppUpdateInfo} from '@lynx_common/types';
-import {ShieldCross} from '@solar-icons/react-perf/BoldDuotone';
-import {AltArrowDown, ArrowRight} from '@solar-icons/react-perf/Linear';
+import {ShieldCrossIcon} from '@solar-icons/react/bold-duotone';
+import {AltArrowDownIcon, ArrowRightIcon} from '@solar-icons/react/linear';
 import {isEmpty} from 'lodash-es';
 
 import {RenderSubItems} from '../../../utils/hooks';
@@ -27,7 +27,7 @@ export default function Info({updateInfo, releaseNotes}: Props) {
             content: (
               <div className="flex justify-center items-center gap-x-2">
                 <span>{APP_VERSION}</span>
-                <ArrowRight />
+                <ArrowRightIcon />
                 <span className="text-success font-semibold">{updateInfo?.currentVersion}</span>
               </div>
             ),
@@ -38,7 +38,7 @@ export default function Info({updateInfo, releaseNotes}: Props) {
             content: (
               <div className="flex justify-center items-center gap-x-2">
                 <span>{APP_BUILD_NUMBER}</span>
-                <ArrowRight />
+                <ArrowRightIcon />
                 <span className="text-success font-semibold">{updateInfo?.currentBuild}</span>
               </div>
             ),
@@ -69,7 +69,7 @@ export default function Info({updateInfo, releaseNotes}: Props) {
                 }
                 className="size-full"
                 title="Failed to fetch release notes"
-                icon={<ShieldCross className="size-14 text-warning-soft-foreground" />}
+                icon={<ShieldCrossIcon className="size-14 text-warning-soft-foreground" />}
               />
             ) : (
               <Accordion
@@ -83,7 +83,7 @@ export default function Info({updateInfo, releaseNotes}: Props) {
                       <Accordion.Trigger>
                         <span className="shrink-0 text-muted">Version {note.version}</span>
                         <Accordion.Indicator>
-                          <AltArrowDown />
+                          <AltArrowDownIcon />
                         </Accordion.Indicator>
                       </Accordion.Trigger>
                     </Accordion.Heading>

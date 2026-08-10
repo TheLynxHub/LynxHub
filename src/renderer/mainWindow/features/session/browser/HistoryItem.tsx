@@ -5,7 +5,7 @@ import {AppDispatch} from '@lynx/redux/store';
 import {FavIcons} from '@lynx_common/types/ipc';
 import {formatWebAddress, getCacheUrl, getUrlName} from '@lynx_common/utils';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
-import {Earth} from '@solar-icons/react-perf/BoldDuotone';
+import {EarthIcon} from '@solar-icons/react/bold-duotone';
 import {memo, MouseEvent, useCallback, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -65,7 +65,7 @@ const HistoryItem = memo(({recent, type, favIconMap, onDataChange}: Props) => {
                 onError={() => setImgError(true)}
               />
             ) : (
-              <Earth className="size-8" />
+              <EarthIcon className="size-8" />
             )}
             <span className="w-full truncate text-wrap line-clamp-1 text-sm">{displayName}</span>
 

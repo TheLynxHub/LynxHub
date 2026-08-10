@@ -4,7 +4,6 @@ import listenActions from './actions';
 import listenApplication from './application';
 import listenContextMenu from './contextMenu';
 import listenFiles from './filesIpc';
-import listenFloatChat from './floatChat';
 import listenGit from './gitIpc';
 import listenModules, {listenModuleApi} from './plugins/modules';
 import listenPlugins from './plugins/plugins';
@@ -40,7 +39,6 @@ export async function listenToIpcChannels() {
   listenStorage();
   listenStorageUtils();
   listenActions();
-  listenFloatChat();
 
   await listenApplication();
   listenFiles();

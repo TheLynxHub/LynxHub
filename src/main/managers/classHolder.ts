@@ -45,7 +45,6 @@ class ClassHolder {
   private _browserManager?: BrowserManager;
 
   private _toastWindow?: BrowserWindow;
-  private _floatChatWindow?: BrowserWindow;
 
   private readonly _appStartTime: number;
   private _isOnline: boolean = true;
@@ -197,9 +196,6 @@ class ClassHolder {
   set toastWindow(value: ClassHolder['_toastWindow']) {
     this._toastWindow = value;
   }
-  set floatChatWindow(value: ClassHolder['_floatChatWindow']) {
-    this._floatChatWindow = value;
-  }
   set browserManager(value: BrowserManager | undefined) {
     this._browserManager = value;
   }
@@ -249,9 +245,6 @@ class ClassHolder {
   }
   get toastWindow() {
     return this._toastWindow;
-  }
-  get floatChatWindow() {
-    return this._floatChatWindow;
   }
   get browserManager() {
     return this._browserManager;

@@ -5,7 +5,7 @@ import {InitialStep} from '@lynx_common/types/plugins/modules';
 import {extractGitUrl, isWin} from '@lynx_common/utils';
 import filesIpc from '@lynx_shared/ipc/files';
 import gitIpc from '@lynx_shared/ipc/git';
-import {Folder2} from '@solar-icons/react-perf/BoldDuotone';
+import {Folder2Icon} from '@solar-icons/react/bold-duotone';
 import {capitalize} from 'lodash-es';
 import {useEffect, useState} from 'react';
 import {SimpleGitProgressEvent} from 'simple-git';
@@ -142,7 +142,7 @@ export default function CloneRepo({url, start, done, isOpen, updateState, curren
           </Card>
           <Card variant="secondary">
             <Card.Header className="gap-x-2 flex flex-row items-center text-surface-secondary-foreground">
-              <Folder2 />
+              <Folder2Icon />
               <span>Save to</span>
             </Card.Header>
             <Card.Content>

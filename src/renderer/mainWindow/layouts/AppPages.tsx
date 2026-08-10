@@ -1,7 +1,6 @@
 import SessionView from '@lynx/features/session';
 import Agents from '@lynx/pages/agents';
 import AudioGenerationPage from '@lynx/pages/audio';
-import ChatBridgePage from '@lynx/pages/chatBridge';
 import DashboardPage from '@lynx/pages/dashboard';
 import GamesPage from '@lynx/pages/games';
 import HomePage from '@lynx/pages/home';
@@ -28,7 +27,6 @@ const PageComponents = {
   [PageID.dashboard]: DashboardPage,
   [PageID.plugins]: PluginsPage,
   [PageID.settings]: SettingsPage,
-  [PageID.chatBridge]: ChatBridgePage,
 };
 
 import ptyIpc from '@lynx_shared/ipc/pty';

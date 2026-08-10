@@ -4,14 +4,14 @@ import {Linux_Icon, MacOS_Icon, Windows_Icon} from '@lynx_assets/icons';
 import {PluginItem} from '@lynx_common/types/plugins';
 import {extractGitUrl, getCacheUrl, getFallbackString} from '@lynx_common/utils';
 import {getPluginIconUrl} from '@lynx_common/utils/plugins';
-import {QuestionCircle} from '@solar-icons/react-perf/Bold';
+import {QuestionCircleIcon} from '@solar-icons/react/bold';
 import {
-  DownloadMinimalistic,
-  SettingsMinimalistic,
-  ShieldWarning,
-  TrashBin2,
-} from '@solar-icons/react-perf/BoldDuotone';
-import {ArrowRight, CheckRead} from '@solar-icons/react-perf/LineDuotone';
+  DownloadMinimalisticIcon,
+  SettingsMinimalisticIcon,
+  ShieldWarningIcon,
+  TrashBin2Icon,
+} from '@solar-icons/react/bold-duotone';
+import {ArrowRightIcon, CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {MouseEvent} from 'react';
 
 import {UpdateButton} from '../Elements';
@@ -95,7 +95,7 @@ export function PluginListItemCompact({
               }`}>
               {item.metadata.title}
             </Link>
-            {foundInstalled && <CheckRead className="text-success size-3.5 shrink-0" />}
+            {foundInstalled && <CheckReadIcon className="text-success size-3.5 shrink-0" />}
           </div>
           <div className="flex flex-row items-center gap-x-2 text-[10px] text-muted truncate">
             <span>
@@ -103,7 +103,7 @@ export function PluginListItemCompact({
             </span>
             {item.downloadsCount !== undefined && (
               <span title="Total downloads" className="flex items-center gap-x-0.5 font-JetBrainsMono">
-                <DownloadMinimalistic className="size-3 text-muted/70" />
+                <DownloadMinimalisticIcon className="size-3 text-muted/70" />
                 <span>{formatNumber(item.downloadsCount).toLowerCase()}</span>
               </span>
             )}
@@ -124,7 +124,7 @@ export function PluginListItemCompact({
           <Tooltip delay={300}>
             <Tooltip.Trigger>
               <div className="text-warning cursor-help shrink-0">
-                <QuestionCircle className="size-5" />
+                <QuestionCircleIcon className="size-5" />
               </div>
             </Tooltip.Trigger>
             <Tooltip.Content className="whitespace-pre" showArrow>
@@ -134,7 +134,7 @@ export function PluginListItemCompact({
           </Tooltip>
           {foundInstalled && (
             <Button size="sm" className="size-7" variant="danger-soft" onClick={handleUninstall} isIconOnly>
-              <TrashBin2 className="size-3.5" />
+              <TrashBin2Icon className="size-3.5" />
             </Button>
           )}
         </div>
@@ -157,7 +157,7 @@ export function PluginListItemCompact({
               <span>{currentVersion}</span>
               {targetUpdate && (
                 <>
-                  <ArrowRight className="size-2" />
+                  <ArrowRightIcon className="size-2" />
                   <span className={`font-bold ${isUpgrade ? 'text-success' : 'text-warning'}`}>{targetVersion}</span>
                 </>
               )}
@@ -169,7 +169,7 @@ export function PluginListItemCompact({
             <Tooltip delay={300}>
               <Tooltip.Trigger>
                 <div className="text-warning cursor-help shrink-0">
-                  <ShieldWarning className="size-4" />
+                  <ShieldWarningIcon className="size-4" />
                 </div>
               </Tooltip.Trigger>
               <Tooltip.Content showArrow>
@@ -192,7 +192,7 @@ export function PluginListItemCompact({
                 className="size-7"
                 variant="secondary"
                 isIconOnly>
-                <SettingsMinimalistic className="size-3.5" />
+                <SettingsMinimalisticIcon className="size-3.5" />
               </Button>
             </>
           )}

@@ -1,7 +1,7 @@
 import {Button, Modal} from '@heroui/react';
 import {Power_Icon} from '@lynx_assets/icons';
 import applicationIpc from '@lynx_shared/ipc/application';
-import {Forward2, Restart, ShieldWarning} from '@solar-icons/react-perf/BoldDuotone';
+import {Forward2Icon, RestartIcon, ShieldWarningIcon} from '@solar-icons/react/bold-duotone';
 import {useDispatch} from 'react-redux';
 
 import {modalActions, useModalsState} from '../../redux/reducers/modals';
@@ -35,18 +35,18 @@ export function RestartModal() {
     <TabModal size="md" isOpen={isOpen} onOpenChange={handleClose}>
       <Modal.Header>
         <Modal.Heading className="flex items-center gap-x-1">
-          <ShieldWarning className="text-warning size-6" />
+          <ShieldWarningIcon className="text-warning size-6" />
           <span>Restart Required</span>
         </Modal.Heading>
       </Modal.Header>
       <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onPress={handleClose}>
-          <Forward2 className="rotate-180 size-4" />
+          <Forward2Icon className="rotate-180 size-4" />
           Restart Later
         </Button>
         <Button onPress={isLinuxPortable ? handleExit : handleRestart}>
-          {isLinuxPortable ? <Power_Icon className="size-3.5" /> : <Restart className="size-4" />}
+          {isLinuxPortable ? <Power_Icon className="size-3.5" /> : <RestartIcon className="size-4" />}
           {isLinuxPortable ? 'Exit Now' : 'Restart Now'}
         </Button>
       </Modal.Footer>

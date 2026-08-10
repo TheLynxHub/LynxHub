@@ -1,6 +1,6 @@
 import {Description, Link, Spinner, Table} from '@heroui/react';
 import filesIpc from '@lynx_shared/ipc/files';
-import {Inbox} from '@solar-icons/react-perf/BoldDuotone';
+import {InboxIcon} from '@solar-icons/react/bold-duotone';
 import {motion} from 'framer-motion';
 import {startCase} from 'lodash-es';
 import {memo, useCallback, useEffect, useMemo, useState} from 'react';
@@ -141,7 +141,7 @@ const Installed = memo(
       </div>
     ) : (
       <EmptyStateCard
-        icon={<Inbox size={40} />}
+        icon={<InboxIcon size={40} />}
         bodyClassName="py-8 bg-surface-secondary"
         description="No extension installed to display."
       />

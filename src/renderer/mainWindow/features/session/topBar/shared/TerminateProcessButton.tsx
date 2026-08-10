@@ -6,7 +6,7 @@ import {terminalLineEnding} from '@lynx_common/utils/platform';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import ptyIpc from '@lynx_shared/ipc/pty';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Exit} from '@solar-icons/react-perf/BoldDuotone';
+import {ExitIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback} from 'react';
 
 import LynxTooltip from '../../../../components/LynxTooltip';
@@ -60,7 +60,7 @@ const TerminateProcessButton = memo(({id}: Props) => {
           onPress={handleExit}
           className="text-warning-soft-foreground bg-warning-soft hover:bg-warning-soft-hover"
           isIconOnly>
-          <Exit size={16} />
+          <ExitIcon size={16} />
         </Button>
       </LynxTooltip>
       <LynxTooltip delay={500} content="Terminate Process">

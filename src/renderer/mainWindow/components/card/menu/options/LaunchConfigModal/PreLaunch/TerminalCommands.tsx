@@ -1,7 +1,7 @@
 import {Button, Dropdown, Label} from '@heroui/react';
 import {Terminal_Icon} from '@lynx_assets/icons';
 import filesIpc from '@lynx_shared/ipc/files';
-import {Inbox, MoveToFolder} from '@solar-icons/react-perf/BoldDuotone';
+import {InboxIcon, MoveToFolderIcon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, Reorder} from 'framer-motion';
 import {isEmpty} from 'lodash-es';
 import {Plus} from 'lucide-react';
@@ -45,7 +45,7 @@ export default function PreTerminalCommands({id}: Props) {
                 <Label>Command</Label>
               </Dropdown.Item>
               <Dropdown.Item onPress={cdFolder} textValue="Cd Folder">
-                <MoveToFolder className="size-3.5" />
+                <MoveToFolderIcon className="size-3.5" />
                 <Label>Cd Folder</Label>
               </Dropdown.Item>
             </Dropdown.Menu>
@@ -58,7 +58,7 @@ export default function PreTerminalCommands({id}: Props) {
       {isEmpty(commands) ? (
         <EmptyStateCard
           bodyClassName="py-8"
-          icon={<Inbox size={40} />}
+          icon={<InboxIcon size={40} />}
           description="No commands available to execute"
         />
       ) : (

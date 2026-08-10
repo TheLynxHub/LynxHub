@@ -2,7 +2,7 @@ import {Button, Card, Checkbox, CheckboxGroup, Spinner} from '@heroui/react';
 import {topToast} from '@lynx/layouts/ToastProviders';
 import {AppDispatch} from '@lynx/redux/store';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {Broom} from '@solar-icons/react-perf/BoldDuotone';
+import {BroomIcon} from '@solar-icons/react/bold-duotone';
 import isEmpty from 'lodash/isEmpty';
 import {useCallback, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -124,7 +124,7 @@ export default function ClearBrowserData() {
             isPending={isClearing}
             onPress={performClearData}
             isDisabled={isEmpty(selectedOptions)}>
-            {isClearing ? <Spinner size="sm" color="current" /> : <Broom />}
+            {isClearing ? <Spinner size="sm" color="current" /> : <BroomIcon />}
             Clear
           </Button>
         </Card.Content>

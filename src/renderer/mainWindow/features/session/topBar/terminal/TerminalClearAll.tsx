@@ -1,6 +1,6 @@
 import {Button} from '@heroui/react';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Broom} from '@solar-icons/react-perf/BoldDuotone';
+import {BroomIcon} from '@solar-icons/react/bold-duotone';
 import {memo, RefObject, useCallback} from 'react';
 
 import LynxTooltip from '../../../../components/LynxTooltip';
@@ -26,7 +26,7 @@ const TerminalClearAll = memo(({clearTerminal}: Props) => {
   return (
     <LynxTooltip delay={500} content="Clear all">
       <Button size="sm" variant="ghost" onPress={clearTerm} aria-label="Clear all" isIconOnly>
-        <Broom className="size-3.5" />
+        <BroomIcon className="size-3.5" />
       </Button>
     </LynxTooltip>
   );

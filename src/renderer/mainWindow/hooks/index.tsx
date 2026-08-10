@@ -6,8 +6,6 @@ import {useClearOldFaviconCache, useMigrateCardTitles} from './migration';
 import {useFilterPinnedCards} from './states';
 import useCheckPluginLoadFailures from './useCheckPluginLoadFailures';
 import useAppEvents from './useEvents';
-import {useFloatChatSync} from './useFloatChatSync';
-import {useOnlineBgManager} from './useOnlineBgManager';
 import useUsageTracker from './useUsageTracker';
 import useVolumeSync from './volume';
 
@@ -21,8 +19,6 @@ const AppHooks = memo(() => {
   useVolumeSync();
   useCheckPluginLoadFailures();
   useUsageTracker();
-  useOnlineBgManager();
-  useFloatChatSync();
 
   return null;
 });

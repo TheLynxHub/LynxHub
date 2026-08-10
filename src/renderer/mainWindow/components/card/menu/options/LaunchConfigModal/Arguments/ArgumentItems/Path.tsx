@@ -2,7 +2,7 @@ import {Button} from '@heroui/react';
 import {ChosenArgument} from '@lynx_common/types/plugins/modules';
 import {replaceSlashes} from '@lynx_common/utils';
 import filesIpc from '@lynx_shared/ipc/files';
-import {Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {RestartIcon} from '@solar-icons/react/bold-duotone';
 import {ReactNode, useCallback, useEffect, useMemo, useState} from 'react';
 
 import {useGetArgumentsByID} from '../../../../../../../plugins/modules';
@@ -94,7 +94,7 @@ export default function PathArgItem({type, icon, placeholder, argument, changeVa
         baseDir ? (
           <LynxTooltip delay={800} content={`Change to ${isRelative ? 'Absolute' : 'Relative'}`}>
             <Button size="sm" variant="ghost" onPress={changePathType} aria-label="Toggle path type" isIconOnly>
-              <Restart
+              <RestartIcon
                 onAnimationEnd={() => setRotateEffect(false)}
                 className={`${rotateEffect && 'animate-[spin_0.5s]'} size-3.5`}
               />

@@ -26,10 +26,6 @@ export const createCardStore = (
     extensionsDir: initialData.extensionsDir,
     haveArguments: initialData.hasArguments,
     type: initialData.type || 'unknown',
-    isOnline: initialData.isOnline,
-    logoUrl: initialData.logoUrl,
-    iconUrl: initialData.iconUrl,
-    developer: initialData.developer,
 
     // Component State
     menuIsOpen: false,

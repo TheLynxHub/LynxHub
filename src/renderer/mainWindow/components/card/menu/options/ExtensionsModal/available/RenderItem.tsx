@@ -1,8 +1,8 @@
 import {Avatar, Button, Chip, Description, Link, Spinner, useOverlayState} from '@heroui/react';
 import {extractGitUrl, getFallbackString} from '@lynx_common/utils';
 import gitIpc from '@lynx_shared/ipc/git';
-import {Star} from '@solar-icons/react-perf/Bold';
-import {Home2} from '@solar-icons/react-perf/BoldDuotone';
+import {StarIcon} from '@solar-icons/react/bold';
+import {Home2Icon} from '@solar-icons/react/bold-duotone';
 import {capitalize} from 'lodash-es';
 import {memo, useCallback, useState} from 'react';
 import Highlighter from 'react-highlight-words';
@@ -87,7 +87,7 @@ const RenderItem = memo(({item, updateTable, dir, searchValue}: Props) => {
               </Chip>
               {item.stars && (
                 <Chip size="sm" variant="soft" color="warning">
-                  <Star size={10} className={item.stars >= 1000 ? 'text-yellow-400' : 'text-yellow-500'} />
+                  <StarIcon size={10} className={item.stars >= 1000 ? 'text-yellow-400' : 'text-yellow-500'} />
                   {formatNumber(item.stars)}
                 </Chip>
               )}
@@ -110,7 +110,7 @@ const RenderItem = memo(({item, updateTable, dir, searchValue}: Props) => {
             {installing ? <Spinner color="current" size="sm" /> : 'Install'}
           </Button>
           <Button size="sm" variant="secondary" onPress={readmeModal.open} isIconOnly>
-            <Home2 className="size-4" />
+            <Home2Icon className="size-4" />
           </Button>
         </div>
       </div>

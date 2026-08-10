@@ -2,7 +2,7 @@ import {Button} from '@heroui/react';
 import {useVolumeState} from '@lynx/redux/reducers/volume';
 import browserIpc from '@lynx_shared/ipc/browser';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Volume, VolumeCross, VolumeLoud} from '@solar-icons/react-perf/BoldDuotone';
+import {VolumeCrossIcon, VolumeIcon, VolumeLoudIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback, useMemo, useRef} from 'react';
 
 import LynxTooltip from '../../../../components/LynxTooltip';
@@ -46,12 +46,12 @@ const BrowserVolume = memo(({id, tabId}: Props) => {
 
   const icon = useMemo(() => {
     if (isMuted || globalMuted) {
-      return <VolumeCross className="size-4" />;
+      return <VolumeCrossIcon className="size-4" />;
     }
     if (volume > 50) {
-      return <VolumeLoud className="size-4" />;
+      return <VolumeLoudIcon className="size-4" />;
     }
-    return <Volume className="size-4" />;
+    return <VolumeIcon className="size-4" />;
   }, [isMuted, globalMuted, volume]);
 
   const ariaLabel = useMemo(() => {

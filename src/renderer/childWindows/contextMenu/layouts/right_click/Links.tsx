@@ -1,6 +1,6 @@
 import applicationIpc from '@lynx_shared/ipc/application';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {Export, Link, SquareTopDown} from '@solar-icons/react-perf/BoldDuotone';
+import {ExportIcon, LinkIcon, SquareTopDownIcon} from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 
 import Separator from './Separator';
@@ -25,14 +25,14 @@ export const Links = memo(function Links({url}: LinksProps) {
           contextMenuIpc.send.rightClickItems.newTab(url);
         })}
         title="Open link in new tab"
-        icon={<SquareTopDown className="size-3.5" />}
+        icon={<SquareTopDownIcon className="size-3.5" />}
       />
       <ActionButton
         onPress={createActionHandler(() => {
           applicationIpc.send.openUrlDefaultBrowser(url);
         })}
         title="Open link in default browser"
-        icon={<Export className="size-4" />}
+        icon={<ExportIcon className="size-4" />}
       />
       <ActionButton
         onPress={createActionHandler(async () => {
@@ -43,7 +43,7 @@ export const Links = memo(function Links({url}: LinksProps) {
           }
         })}
         title="Copy Link Address"
-        icon={<Link className="size-4" />}
+        icon={<LinkIcon className="size-4" />}
       />
       <Separator />
     </>

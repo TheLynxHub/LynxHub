@@ -1,8 +1,8 @@
 import {Button, ButtonGroup, Card, Label, ProgressBar, Separator, Tooltip} from '@heroui/react';
 import {DownloadItemInfo} from '@lynx_common/types/downloadManager';
 import downloadManagerIpc from '@lynx_shared/ipc/downloadManager';
-import {Pause, Play, Restart} from '@solar-icons/react-perf/Bold';
-import {FileDownload, FolderOpen, TrashBin2} from '@solar-icons/react-perf/BoldDuotone';
+import {PauseIcon, PlayIcon, RestartIcon} from '@solar-icons/react/bold';
+import {FileDownloadIcon, FolderOpenIcon, TrashBin2Icon} from '@solar-icons/react/bold-duotone';
 import {X} from 'lucide-react';
 import {memo, useCallback} from 'react';
 import {useDispatch} from 'react-redux';
@@ -114,17 +114,17 @@ const DownloadItem = memo(({item}: DownloadItemProps) => {
           {item.status === 'completed' ? (
             <>
               <Button size="sm" onPress={onOpen} variant="secondary" fullWidth>
-                <FileDownload className="size-3.5" />
+                <FileDownloadIcon className="size-3.5" />
                 Open File
               </Button>
 
               <Button size="sm" variant="secondary" onPress={onOpenFolder} fullWidth>
-                <FolderOpen className="size-3.5" />
+                <FolderOpenIcon className="size-3.5" />
                 Open Path
               </Button>
 
               <Button size="sm" onPress={onClear} variant="secondary" fullWidth>
-                <TrashBin2 className="size-3.5" />
+                <TrashBin2Icon className="size-3.5" />
                 Clear
               </Button>
             </>
@@ -132,12 +132,12 @@ const DownloadItem = memo(({item}: DownloadItemProps) => {
             <>
               {item.status === 'downloading' ? (
                 <Button size="sm" onPress={onPause} className="w-full" variant="danger-soft">
-                  <Pause className="size-3.5" />
+                  <PauseIcon className="size-3.5" />
                   Pause
                 </Button>
               ) : item.status === 'paused' ? (
                 <Button size="sm" className="w-full" onPress={onResume}>
-                  <Play className="size-3.5" />
+                  <PlayIcon className="size-3.5" />
                   Resume
                 </Button>
               ) : null}
@@ -146,17 +146,17 @@ const DownloadItem = memo(({item}: DownloadItemProps) => {
                 // Show both clear and retry for cancelled downloads with partial progress
                 <>
                   <Button size="sm" className="w-full" onPress={onResume} variant="secondary" fullWidth>
-                    <Restart className="size-3.5" />
+                    <RestartIcon className="size-3.5" />
                     Retry
                   </Button>
                   <Button size="sm" onPress={onClear} className="w-full" variant="danger-soft" fullWidth>
-                    <TrashBin2 className="size-3.5" />
+                    <TrashBin2Icon className="size-3.5" />
                     Clear
                   </Button>
                 </>
               ) : item.status === 'cancelled' ? (
                 <Button size="sm" onPress={onClear} className="w-full" fullWidth>
-                  <TrashBin2 className="size-3.5" />
+                  <TrashBin2Icon className="size-3.5" />
                   Clear
                 </Button>
               ) : (

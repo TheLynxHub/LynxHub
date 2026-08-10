@@ -1,5 +1,5 @@
 import {Button, Input} from '@heroui/react';
-import {TrashBin2} from '@solar-icons/react-perf/BoldDuotone';
+import {TrashBin2Icon} from '@solar-icons/react/bold-duotone';
 import {Reorder} from 'framer-motion';
 import {isEmpty} from 'lodash-es';
 import {GripVertical} from 'lucide-react';
@@ -62,7 +62,7 @@ const TerminalCommandItem = memo(({initialValue, onEdit, index, onRemove, onDone
         onPress={remove}
         className="text-danger-soft-foreground shrink-0 hover:bg-danger-soft-hover"
         isIconOnly>
-        <TrashBin2 className="size-3.5" />
+        <TrashBin2Icon className="size-3.5" />
       </Button>
     </Reorder.Item>
   );

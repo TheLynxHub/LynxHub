@@ -1,7 +1,7 @@
 import {Button, Disclosure} from '@heroui/react';
 import CopyClipboard from '@lynx/components/CopyClipboard';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {LinkBroken, Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {RestartIcon, UnlinkIcon} from '@solar-icons/react/bold-duotone';
 import {motion} from 'framer-motion';
 import {memo, useEffect} from 'react';
 
@@ -38,7 +38,7 @@ const BrowserError = memo(({error, onReload, id}: Props) => {
         initial={{opacity: 0, translateY: 5}}
         animate={{opacity: 1, translateY: 0, transition: {delay: 0.2}}}
         className="flex w-full max-w-xl flex-col items-center gap-6 text-center">
-        <LinkBroken className="size-20 text-warning" />
+        <UnlinkIcon className="size-20 text-warning" />
         <div className="flex w-full flex-col gap-2">
           <div>
             <h1 className="text-2xl font-bold text-warning">This page isn't available</h1>
@@ -50,7 +50,7 @@ const BrowserError = memo(({error, onReload, id}: Props) => {
 
         <div className="flex items-center gap-4">
           <Button className="w-36" onPress={onReload}>
-            <Restart />
+            <RestartIcon />
             Reload
           </Button>
         </div>

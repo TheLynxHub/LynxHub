@@ -1,7 +1,7 @@
 import {Chip, Description, Key, Label, ListBox, Select} from '@heroui/react';
 import {usePluginsState} from '@lynx/redux/reducers/plugins';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
-import {BoxMinimalistic} from '@solar-icons/react-perf/BoldDuotone';
+import {BoxMinimalisticIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useMemo} from 'react';
 
 import {getStageColor, getStageDisplayName} from './utils';
@@ -66,7 +66,7 @@ export default function PluginVersionSelector({currentVersion}: PluginVersionSel
       <Select.Trigger>
         <Select.Value>
           <span className="flex items-center gap-x-1.5 font-medium">
-            <BoxMinimalistic className="size-3.5 shrink-0" />
+            <BoxMinimalisticIcon className="size-3.5 shrink-0" />
             Target v{activeVersion}
           </span>
         </Select.Value>

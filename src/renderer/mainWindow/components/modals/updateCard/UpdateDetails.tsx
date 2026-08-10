@@ -1,5 +1,5 @@
 import {Accordion, Chip, Modal, Table, UseOverlayStateReturn} from '@heroui/react';
-import {AltArrowDown} from '@solar-icons/react-perf/Linear';
+import {AltArrowDownIcon} from '@solar-icons/react/linear';
 import {isEmpty} from 'lodash-es';
 import {LucideReplace, Minus, Plus} from 'lucide-react';
 import {ReactNode, useCallback, useMemo} from 'react';
@@ -107,7 +107,7 @@ export default function UpdateDetails({state, details, title}: Props) {
                     {details.created.length}
                   </Chip>
                   <Accordion.Indicator>
-                    <AltArrowDown />
+                    <AltArrowDownIcon />
                   </Accordion.Indicator>
                 </Accordion.Trigger>
               </Accordion.Heading>
@@ -124,7 +124,7 @@ export default function UpdateDetails({state, details, title}: Props) {
                     {details.deleted.length}
                   </Chip>
                   <Accordion.Indicator>
-                    <AltArrowDown />
+                    <AltArrowDownIcon />
                   </Accordion.Indicator>
                 </Accordion.Trigger>
               </Accordion.Heading>
@@ -141,7 +141,7 @@ export default function UpdateDetails({state, details, title}: Props) {
                     {details.files.length}
                   </Chip>
                   <Accordion.Indicator>
-                    <AltArrowDown />
+                    <AltArrowDownIcon />
                   </Accordion.Indicator>
                 </Accordion.Trigger>
               </Accordion.Heading>

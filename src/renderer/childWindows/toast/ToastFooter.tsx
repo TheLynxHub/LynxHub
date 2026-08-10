@@ -1,7 +1,7 @@
 import {Button} from '@heroui/react';
 import {Power_Icon} from '@lynx_assets/icons';
 import {ToastWindowMessageType} from '@lynx_common/types';
-import {Refresh} from '@solar-icons/react-perf/BoldDuotone';
+import {RefreshIcon} from '@solar-icons/react/bold-duotone';
 import {X} from 'lucide-react';
 
 type ToastFooterProps = {
@@ -37,7 +37,7 @@ export function ToastFooter({buttons, customButtons, onClose, onExit, onRestart,
       <div className="flex items-center gap-3">
         {buttons?.includes('restart') && (
           <Button size="sm" onPress={onRestart} variant="danger-soft" className="notDraggable">
-            <Refresh className="size-3.5" />
+            <RefreshIcon className="size-3.5" />
             Restart LynxHub
           </Button>
         )}

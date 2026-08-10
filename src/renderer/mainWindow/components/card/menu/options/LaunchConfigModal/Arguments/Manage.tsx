@@ -1,7 +1,7 @@
 import {Button, Chip, useOverlayState} from '@heroui/react';
 import {ArgumentsPresets, ChosenArgumentsData} from '@lynx_common/types';
 import {ChosenArgument} from '@lynx_common/types/plugins/modules';
-import {Inbox} from '@solar-icons/react-perf/BoldDuotone';
+import {InboxIcon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, Reorder} from 'framer-motion';
 import {isEmpty} from 'lodash-es';
 import {Plus} from 'lucide-react';
@@ -65,7 +65,7 @@ export default function ManageArguments({addArgumentsModal, chosenArguments, set
       {isEmpty(chosenArguments.arguments) ? (
         <EmptyStateCard
           bodyClassName="py-8"
-          icon={<Inbox size={40} />}
+          icon={<InboxIcon size={40} />}
           description="No argument selected to display!"
         />
       ) : (

@@ -2,7 +2,7 @@ import {Button, Modal, ScrollShadow, Spinner, Tabs} from '@heroui/react';
 import {ChosenArgumentsData} from '@lynx_common/types';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import {useDebounceBreadcrumb} from '@lynx_shared/sentry/Breadcrumbs';
-import {Diskette} from '@solar-icons/react-perf/BoldDuotone';
+import {DisketteIcon} from '@solar-icons/react/bold-duotone';
 import {Key, memo, useCallback, useEffect, useMemo, useState} from 'react';
 
 import {topToast} from '../../../../../layouts/ToastProviders';
@@ -101,7 +101,7 @@ const LaunchConfig = memo(({state}: CommonProps) => {
       {currentTab === tabs.arguments && (
         <Modal.Footer className="px-6 pb-4">
           <Button onPress={saveArguments} isPending={isSavingArgs}>
-            {isSavingArgs ? <Spinner size="sm" color="current" /> : <Diskette className="size-4" />}
+            {isSavingArgs ? <Spinner size="sm" color="current" /> : <DisketteIcon className="size-4" />}
             {isSavingArgs ? 'Saving...' : 'Save Arguments'}
           </Button>
         </Modal.Footer>

@@ -1,6 +1,6 @@
 import {DropdownItem} from '@heroui/react';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {MinusSquare, TrashBin2} from '@solar-icons/react-perf/BoldDuotone';
+import {MinusSquareIcon, TrashBin2Icon} from '@solar-icons/react/bold-duotone';
 import {useCallback} from 'react';
 
 import {useCardStore} from '../../store';
@@ -21,7 +21,7 @@ export const UnAssignMenuItem = ({state}: CommonProps) => {
 
   return (
     <DropdownItem key="unassign" onPress={onPress} className="text-warning">
-      <MinusSquare className="size-4" />
+      <MinusSquareIcon className="size-4" />
       Unassign
     </DropdownItem>
   );
@@ -42,7 +42,7 @@ export const UninstallMenuItem = ({state}: CommonProps) => {
 
   return (
     <DropdownItem key="uninstall" onPress={onPress} className="text-danger">
-      <TrashBin2 className="size-4" />
+      <TrashBin2Icon className="size-4" />
       Uninstall
     </DropdownItem>
   );

@@ -1,5 +1,5 @@
 import {ChosenArgument} from '@lynx_common/types/plugins/modules';
-import {File} from '@solar-icons/react-perf/BoldDuotone';
+import {FileIcon} from '@solar-icons/react/bold-duotone';
 
 import PathArgItem from './Path';
 
@@ -28,8 +28,8 @@ export default function FileArgItem({argument, changeValue, removeArg, id}: Prop
       argument={argument}
       removeArg={removeArg}
       changeValue={changeValue}
-      icon={<File className="size-4" />}
       placeholder="Click to choose file..."
+      icon={<FileIcon className="size-4" />}
     />
   );
 }

@@ -2,13 +2,13 @@ import {Avatar, Button, Dropdown, Header, Label} from '@heroui/react';
 import {SearchQuerySites} from '@lynx_common/types';
 import {getCacheUrl, getSearchUrl} from '@lynx_common/utils';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Earth, SquareTopDown} from '@solar-icons/react-perf/BoldDuotone';
+import {EarthIcon, SquareTopDownIcon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, motion} from 'framer-motion';
 import {memo, useCallback} from 'react';
 
 import LynxTooltip from '../../../../components/LynxTooltip';
 
-const endContent = <SquareTopDown className="size-3 group-hover:opacity-100 opacity-0 transition duration-300" />;
+const endContent = <SquareTopDownIcon className="size-3 group-hover:opacity-100 opacity-0 transition duration-300" />;
 
 type Props = {
   /**
@@ -40,7 +40,7 @@ const TerminalSearchBy = memo(({selectedTerminalText}: Props) => {
             <Dropdown.Trigger>
               <LynxTooltip delay={500} content="Search selected text by">
                 <Button size="sm" variant="ghost" aria-label="Search selected text" isIconOnly>
-                  <Earth className="size-3.5" />
+                  <EarthIcon className="size-3.5" />
                 </Button>
               </LynxTooltip>
             </Dropdown.Trigger>

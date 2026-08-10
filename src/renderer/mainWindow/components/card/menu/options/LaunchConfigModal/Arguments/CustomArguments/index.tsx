@@ -1,7 +1,7 @@
 import {Button, Dropdown, Label} from '@heroui/react';
 import {CustomArg, CustomArgKinds} from '@lynx_common/types';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {HomeAdd, Inbox, Notes, Pen2, SettingsMinimalistic} from '@solar-icons/react-perf/BoldDuotone';
+import {HomeAddIcon, InboxIcon, NotesIcon, Pen2Icon, SettingsMinimalisticIcon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, motion} from 'framer-motion';
 import {some} from 'lodash-es';
 import {Plus} from 'lucide-react';
@@ -93,19 +93,19 @@ const CustomArgComp = memo(({title, description, list, setList, addItem, isAdded
             <Dropdown.Popover>
               <Dropdown.Menu>
                 <Dropdown.Item id="envVar" onPress={() => addCustom('envVar')}>
-                  <HomeAdd />
+                  <HomeAddIcon />
                   <Label>Environment Variable</Label>
                 </Dropdown.Item>
                 <Dropdown.Item id="commandLine" onPress={() => addCustom('commandLine')}>
-                  <SettingsMinimalistic />
+                  <SettingsMinimalisticIcon />
                   <Label>Command Line</Label>
                 </Dropdown.Item>
                 <Dropdown.Item id="custom" onPress={() => addCustom('custom')}>
-                  <Notes />
+                  <NotesIcon />
                   <Label>Custom</Label>
                 </Dropdown.Item>
                 <Dropdown.Item id="comment" onPress={() => addCustom('comment')}>
-                  <Pen2 />
+                  <Pen2Icon />
                   <Label>Comment</Label>
                 </Dropdown.Item>
               </Dropdown.Menu>
@@ -125,7 +125,7 @@ const CustomArgComp = memo(({title, description, list, setList, addItem, isAdded
                     Use <Plus className="size-3" /> Button to add new item.
                   </span>
                 }
-                icon={<Inbox size={40} />}
+                icon={<InboxIcon size={40} />}
                 title="No custom argument available to display"
               />
             </motion.div>

@@ -5,7 +5,7 @@ import {AppDispatch} from '@lynx/redux/store';
 import {Terminal_Icon} from '@lynx_assets/icons';
 import {History_Color_Icon} from '@lynx_assets/icons/Icons_Colorful';
 import {FavIcons} from '@lynx_common/types/ipc';
-import {Star} from '@solar-icons/react-perf/Bold';
+import {StarIcon} from '@solar-icons/react/bold';
 import {AnimatePresence, motion} from 'framer-motion';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -134,7 +134,7 @@ export default function BrowserHome({type}: Props) {
           onRefresh={handleDataRefresh}
           emptyDescription="Star sites to add them here"
           subtitle="Quick access to your bookmarked sites"
-          icon={<Star className="size-10 text-amber-500" />}
+          icon={<StarIcon className="size-10 text-amber-500" />}
         />
 
         <HistorySection

@@ -7,7 +7,7 @@ import {Circle_Icon, Grid_Icon, List_Icon} from '@lynx_assets/icons';
 import {PluginPage_Icon} from '@lynx_assets/icons/pages';
 import {PluginFilter} from '@lynx_common/types/plugins';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
-import {Refresh} from '@solar-icons/react-perf/BoldDuotone';
+import {RefreshIcon} from '@solar-icons/react/bold-duotone';
 import Fuse from 'fuse.js';
 import {isEmpty} from 'lodash-es';
 import {useCallback, useMemo, useState} from 'react';
@@ -228,7 +228,7 @@ function SyncAllButton() {
 
   return (
     <Button size="sm" onPress={syncAll} isPending={updatingAll}>
-      {updatingAll ? <Spinner size="sm" color="current" /> : <Refresh />}
+      {updatingAll ? <Spinner size="sm" color="current" /> : <RefreshIcon />}
       {updatingAll ? 'Syncing...' : `Sync All (${syncList.length})`}
     </Button>
   );

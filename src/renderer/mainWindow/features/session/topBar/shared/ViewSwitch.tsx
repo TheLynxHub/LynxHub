@@ -4,7 +4,7 @@ import {useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
 import {Terminal_Icon} from '@lynx_assets/icons';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Earth} from '@solar-icons/react-perf/BoldDuotone';
+import {EarthIcon} from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -40,7 +40,7 @@ const ViewSwitch = memo(({currentView}: Props) => {
         onPress={handlePress}
         aria-label={tooltipContent}
         className="w-18 bg-accent-soft hover:bg-accent/30 text-accent-soft-foreground">
-        {isBrowser ? <Terminal_Icon className="size-4" /> : <Earth className="size-4" />}
+        {isBrowser ? <Terminal_Icon className="size-4" /> : <EarthIcon className="size-4" />}
       </Button>
     </LynxTooltip>
   );

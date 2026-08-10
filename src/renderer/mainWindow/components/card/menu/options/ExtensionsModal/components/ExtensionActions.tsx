@@ -1,5 +1,11 @@
 import {Button, Popover, Spinner} from '@heroui/react';
-import {DownloadMinimalistic, InfoCircle, Lock, LockUnlocked, TrashBin2} from '@solar-icons/react-perf/BoldDuotone';
+import {
+  DownloadMinimalisticIcon,
+  InfoCircleIcon,
+  LockIcon,
+  LockUnlockedIcon,
+  TrashBin2Icon,
+} from '@solar-icons/react/bold-duotone';
 import {X} from 'lucide-react';
 import {memo} from 'react';
 
@@ -17,7 +23,7 @@ export const RemoveButton = memo(
     if (isDisabled) {
       return (
         <Button size="sm" isDisabled={true} variant="danger-soft" aria-label="Remove Extension" isIconOnly>
-          <TrashBin2 className="size-4" />
+          <TrashBin2Icon className="size-4" />
         </Button>
       );
     }
@@ -25,14 +31,14 @@ export const RemoveButton = memo(
     return (
       <Popover isOpen={isOpen} onOpenChange={onOpenChange}>
         <Button size="sm" variant="danger-soft" aria-label="Remove Extension" isIconOnly>
-          <TrashBin2 className="size-4" />
+          <TrashBin2Icon className="size-4" />
         </Button>
         <Popover.Content>
           <Popover.Dialog>
             <Popover.Heading>Delete {name}</Popover.Heading>
             <div className="mt-2 flex gap-x-1">
               <Button size="sm" variant="secondary" onPress={onMoveToTrash}>
-                <TrashBin2 />
+                <TrashBin2Icon />
                 Move to trash
               </Button>
               <Button size="sm" variant="danger-soft" onPress={onDeletePerman}>
@@ -57,7 +63,7 @@ export const UpdateButton = memo(({status, onPress}: UpdateButtonProps) => {
     case 'available':
       return (
         <Button size="sm" variant="primary" onPress={onPress}>
-          <DownloadMinimalistic />
+          <DownloadMinimalisticIcon />
           Available
         </Button>
       );
@@ -95,7 +101,7 @@ export const DisableButton = memo(({isDisabled, isLoading, onPress, isActionDisa
         isPending={isLoading}
         aria-label="Extension Information"
         isIconOnly>
-        {isLoading ? <Spinner size="sm" color="current" /> : <InfoCircle className="size-5" />}
+        {isLoading ? <Spinner size="sm" color="current" /> : <InfoCircleIcon className="size-5" />}
       </Button>
     );
   }
@@ -107,7 +113,7 @@ export const DisableButton = memo(({isDisabled, isLoading, onPress, isActionDisa
       variant={isDisabled ? 'tertiary' : 'secondary'}
       aria-label={isDisabled ? 'Enable Extension' : 'Disable Extension'}
       isIconOnly>
-      {isDisabled ? <Lock className="size-4" /> : <LockUnlocked className="size-4" />}
+      {isDisabled ? <LockIcon className="size-4" /> : <LockUnlockedIcon className="size-4" />}
     </Button>
   );
 });

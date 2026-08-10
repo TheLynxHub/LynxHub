@@ -3,7 +3,7 @@ import {GitHub_Icon} from '@lynx_assets/icons';
 import {GitProgressCallback} from '@lynx_common/types/ipc';
 import {extractGitUrl, validateGitRepoUrl} from '@lynx_common/utils';
 import gitIpc from '@lynx_shared/ipc/git';
-import {Download} from '@solar-icons/react-perf/BoldDuotone';
+import {DownloadIcon} from '@solar-icons/react/bold-duotone';
 import {motion} from 'framer-motion';
 import {capitalize, startCase} from 'lodash-es';
 import {useCallback, useEffect, useState} from 'react';
@@ -171,7 +171,7 @@ export default function Clone({updateTable, visible, installedExtensions, dir}: 
                   <span className="font-semibold text-success">This extension has already been installed.</span>
                 ) : (
                   <div className="relative flex w-full flex-col items-center justify-center">
-                    <Download
+                    <DownloadIcon
                       className={'absolute left-7 size-10 opacity-50 transition duration-300 group-hover:opacity-100'}
                     />
                     <div className="flex flex-row items-center justify-center text-large font-bold">

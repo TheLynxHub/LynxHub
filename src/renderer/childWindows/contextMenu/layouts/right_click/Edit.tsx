@@ -1,5 +1,11 @@
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {ClipboardText, Copy, Scissors, TextSelection, UndoLeftRound} from '@solar-icons/react-perf/BoldDuotone';
+import {
+  ClipboardTextIcon,
+  CopyIcon,
+  ScissorsIcon,
+  TextSelectionIcon,
+  UndoLeftRoundIcon,
+} from '@solar-icons/react/bold-duotone';
 import type {EditFlags} from 'electron';
 import {isEmpty} from 'lodash-es';
 import {memo, useCallback} from 'react';
@@ -37,28 +43,33 @@ export const Edit = memo(({flags, selection, id}: EditProps) => {
   return (
     <>
       {canUndo && (
-        <ActionButton title="Undo" onPress={onUndo()} key="context_undo" icon={<UndoLeftRound className="size-4" />} />
+        <ActionButton
+          title="Undo"
+          onPress={onUndo()}
+          key="context_undo"
+          icon={<UndoLeftRoundIcon className="size-4" />}
+        />
       )}
       {canRedo && (
         <ActionButton
           title="Redo"
           onPress={onRedo()}
           key="context_redo"
-          icon={<UndoLeftRound className="size-4 scale-x-[-1]" />}
+          icon={<UndoLeftRoundIcon className="size-4 scale-x-[-1]" />}
         />
       )}
       {canCut && !isEmpty(selection) && (
-        <ActionButton title="Cut" onPress={onCut()} key="context_cut" icon={<Scissors className="size-4" />} />
+        <ActionButton title="Cut" onPress={onCut()} key="context_cut" icon={<ScissorsIcon className="size-4" />} />
       )}
       {canCopy && !isEmpty(selection) && (
-        <ActionButton title="Copy" onPress={onCopy()} key="context_copy" icon={<Copy className="size-4" />} />
+        <ActionButton title="Copy" onPress={onCopy()} key="context_copy" icon={<CopyIcon className="size-4" />} />
       )}
       {canPaste && (
         <ActionButton
           title="Paste"
           onPress={onPaste()}
           key="context_paste"
-          icon={<ClipboardText className="size-4" />}
+          icon={<ClipboardTextIcon className="size-4" />}
         />
       )}
       {canSelectAll && (
@@ -66,7 +77,7 @@ export const Edit = memo(({flags, selection, id}: EditProps) => {
           title="Select All"
           onPress={onSelectAll()}
           key="context_selectAll"
-          icon={<TextSelection className="size-4" />}
+          icon={<TextSelectionIcon className="size-4" />}
         />
       )}
       <Separator />

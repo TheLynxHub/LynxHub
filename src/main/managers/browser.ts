@@ -296,10 +296,6 @@ export default class BrowserManager {
 
   private listenForLinkHover(webContents: WebContents) {
     webContents.on('update-target-url', (_, url) => {
-      const browser = this.browsers.find(b => b.view.webContents === webContents);
-      if (browser && browser.attachedWindow === classHolder.floatChatWindow) {
-        return;
-      }
       const {linkPreviewManager} = classHolder;
       linkPreviewManager?.updateUrl(url);
     });
@@ -531,14 +527,9 @@ export default class BrowserManager {
             const {x, y, width, height} = this.lastViewSize;
             view.setBounds({x: x || 0, y: y || 80, width, height});
           } else {
-            // Fallback default bounds for float chat/other windows
+            // Fallback default bounds
             const bounds = destWindow.getBounds();
-            const isFloatChat = destWindow === classHolder.floatChatWindow;
-            if (isFloatChat) {
-              view.setBounds({x: 0, y: 48, width: bounds.width, height: bounds.height - 48});
-            } else {
-              view.setBounds({x: 200, y: 48, width: bounds.width - 200, height: bounds.height - 48});
-            }
+            view.setBounds({x: 200, y: 48, width: bounds.width - 200, height: bounds.height - 48});
           }
         } catch (e) {
           console.warn('Failed to add child view:', e);
@@ -546,12 +537,7 @@ export default class BrowserManager {
       }
     } else {
       if (hideMode === 'offscreen') {
-        // Position mostly outside the window with 1px overlap so Chromium's compositor
-        // still paints the view. Extreme negative coords (e.g. -9999) cause culling and
-        // stop paint events; fully in-bounds coords make the view visually appear on top.
         view.setBounds({x: -1439, y: -899, width: 1440, height: 900});
-        // Ensure the view is behind everything (z-index 0) so it's hidden from the user.
-        // addChildView reorders the view if it's already attached, or adds it at index 0 if not.
         if (!mainWindow.isDestroyed()) {
           try {
             mainWindow.contentView.addChildView(view, 0);
@@ -564,17 +550,6 @@ export default class BrowserManager {
         browser.attachedWindow = undefined;
       }
     }
-
-    // Send active window change notification
-    let activeWindow: 'main' | 'float' | null = null;
-    if (visible && destWindow) {
-      if (destWindow === mainWindow) {
-        activeWindow = 'main';
-      } else if (destWindow === classHolder.floatChatWindow) {
-        activeWindow = 'float';
-      }
-    }
-    browserIpc.send.onActiveWindowChange(id, activeWindow);
   }
 
   public findInPage(id: string, value: string, options: FindInPageOptions) {
@@ -717,38 +692,5 @@ export default class BrowserManager {
         null,
       ) ?? null
     );
-  }
-
-  public handleFloatChatHidden() {
-    const floatWin = classHolder.floatChatWindow;
-    if (!floatWin) return;
-
-    const mainWindow = this.getMainWindow();
-    if (!mainWindow || mainWindow.isDestroyed()) return;
-
-    this.browsers.forEach(browser => {
-      if (browser.attachedWindow === floatWin) {
-        try {
-          floatWin.contentView.removeChildView(browser.view);
-        } catch (e) {
-          console.warn('Failed to remove view from float window on hide:', e);
-        }
-        browser.attachedWindow = undefined;
-        browser.visible = false;
-
-        if (browser.hideMode === 'offscreen') {
-          browser.view.setBounds({x: -1439, y: -899, width: 1440, height: 900});
-          try {
-            mainWindow.contentView.addChildView(browser.view, 0);
-            browser.attachedWindow = mainWindow;
-          } catch (e) {
-            console.warn('Failed to restore background view to main window on float window hide:', e);
-          }
-        }
-
-        // Notify that the active window for this view is now null
-        browserIpc.send.onActiveWindowChange(browser.id, null);
-      }
-    });
   }
 }

@@ -1,7 +1,7 @@
 import {Avatar, CardHeader, Description, Label, Spinner, Tooltip} from '@heroui/react';
 import {extractGitUrl, getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound} from '@solar-icons/react-perf/BoldDuotone';
-import {ArrowDown} from '@solar-icons/react-perf/LineDuotone';
+import {ChatRoundIcon} from '@solar-icons/react/bold-duotone';
+import {ArrowDownIcon} from '@solar-icons/react/line-duotone';
 import {AnimatePresence, motion} from 'framer-motion';
 import {memo, useMemo} from 'react';
 
@@ -47,7 +47,7 @@ export const CardHeaderContent = memo(({modifiedTitle, onTitleChange, updateAvai
       <div className="inline-flex items-center gap-2">
         <Avatar className={`size-12 shrink-0 ${isInstalled && 'ring-accent ring-2'}`}>
           {id === 'unified' ? (
-            <ChatRound className="size-6 text-accent" />
+            <ChatRoundIcon className="size-6 text-accent" />
           ) : (
             <>
               <Avatar.Image
@@ -107,7 +107,7 @@ export const CardHeaderContent = memo(({modifiedTitle, onTitleChange, updateAvai
                     'flex items-center justify-center size-6 rounded-full bg-success/15 text-success' +
                     ' border border-success/20 shadow-sm transition duration-200 hover:scale-105'
                   }>
-                  <ArrowDown className="size-3" />
+                  <ArrowDownIcon className="size-3" />
                 </div>
               </Tooltip.Trigger>
               <Tooltip.Content>Update available</Tooltip.Content>

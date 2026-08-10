@@ -102,7 +102,6 @@ export default defineConfig(({mode}) => {
             toast: resolve(__dirname, 'src/renderer/toast.html'),
             shareScreen: resolve(__dirname, 'src/renderer/shareScreen.html'),
             linkPreview: resolve(__dirname, 'src/renderer/linkPreview.html'),
-            floatChat: resolve(__dirname, 'src/renderer/floatChat.html'),
           },
         },
         target: 'esnext',

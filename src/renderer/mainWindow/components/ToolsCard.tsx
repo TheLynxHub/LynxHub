@@ -3,8 +3,8 @@ import {useIsPinnedCard} from '@lynx/utils/hooks';
 import {getFallbackString} from '@lynx_common/utils';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Pin} from '@solar-icons/react-perf/Bold';
-import {Pin as PinLine} from '@solar-icons/react-perf/LineDuotone';
+import {PinIcon} from '@solar-icons/react/bold';
+import {PinIcon as PinLine} from '@solar-icons/react/line-duotone';
 import {ReactNode} from 'react';
 
 type Props = {
@@ -75,7 +75,7 @@ export function ToolsCard({id, title, description, icon, onPress, footer, avatar
               size="sm"
               variant="ghost"
               isIconOnly>
-              {isPinned ? <Pin className="size-3" /> : <PinLine className="size-3" />}
+              {isPinned ? <PinIcon className="size-3" /> : <PinLine className="size-3" />}
             </Button>
           </div>
         ) : (

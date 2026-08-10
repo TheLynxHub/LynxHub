@@ -1,7 +1,7 @@
 import {Checkbox} from '@heroui/react';
 import {ConfirmMenuTypes} from '@lynx_common/types';
 import storageIpc, {storageUtilsIpc} from '@lynx_shared/ipc/storage';
-import {ShieldWarning} from '@solar-icons/react-perf/BoldDuotone';
+import {ShieldWarningIcon} from '@solar-icons/react/bold-duotone';
 import {memo, ReactNode, useEffect, useState} from 'react';
 
 /**
@@ -49,7 +49,7 @@ const ConfirmElement = memo(({title, enabledTitle, confirmName, buttons}: Confir
   return (
     <div className="py-4 px-5 w-90">
       <div className="flex flex-row items-center justify-start gap-x-2">
-        <ShieldWarning className="text-danger size-7" />
+        <ShieldWarningIcon className="text-danger size-7" />
         <span className="text-medium font-semibold">{title}</span>
       </div>
 

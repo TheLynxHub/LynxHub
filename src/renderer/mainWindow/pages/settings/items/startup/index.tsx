@@ -1,6 +1,6 @@
 import SettingsSection from '@lynx/components/SettingsSection';
 import {isWin} from '@lynx_common/utils';
-import {Rocket} from '@solar-icons/react-perf/BoldDuotone';
+import {RocketIcon} from '@solar-icons/react/bold-duotone';
 
 import DisableLoadingAnim from './DisableLoadingAnim';
 import LastSize from './LastSize';
@@ -16,7 +16,7 @@ export const SettingsStartupId = 'settings_startup_elem';
  */
 export default function SettingsStartup() {
   return (
-    <SettingsSection title="Startup" id={SettingsStartupId} icon={<Rocket className="size-5" />}>
+    <SettingsSection title="Startup" id={SettingsStartupId} icon={<RocketIcon className="size-5" />}>
       {isWin && <System />}
       <LastSize />
       <StartMaximized />

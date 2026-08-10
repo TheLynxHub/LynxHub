@@ -1,7 +1,7 @@
 import {Button, Dropdown, Separator, Spinner, useOverlayState} from '@heroui/react';
 import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {useUpdatingCard} from '@lynx/utils/hooks';
-import {MenuDots} from '@solar-icons/react-perf/BoldDuotone';
+import {MenuDotsIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useMemo} from 'react';
 
 import ReadmeModal from '../../modals/ReadmeModal';
@@ -65,7 +65,7 @@ export const InstalledMenu = memo(({setType, state}: {setType: (type: 'install' 
           {updating ? (
             <Spinner size="sm" color="current" />
           ) : (
-            <MenuDots
+            <MenuDotsIcon
               className={`size-[1.3rem] ${menuIsOpen ? 'rotate-90' : 'rotate-0'} transition-all duration-500`}
             />
           )}

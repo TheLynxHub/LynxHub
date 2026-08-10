@@ -17,7 +17,7 @@ import {
 import {APP_ICON_TRANSPARENT, PageID} from '@lynx_common/consts';
 import {TabInfo} from '@lynx_common/types';
 import {getCacheUrl} from '@lynx_common/utils';
-import {ChatRound, Earth} from '@solar-icons/react-perf/BoldDuotone';
+import {EarthIcon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, motion, MotionProps} from 'framer-motion';
 import {memo, useCallback, useEffect, useMemo, useState} from 'react';
 
@@ -57,8 +57,6 @@ const getPageIcon = (pageID: string) => {
       return <PluginPage_Icon className="size-full" />;
     case PageID.settings:
       return <SettingPage_Icon className="size-full" />;
-    case PageID.chatBridge:
-      return <ChatRound className="size-full" />;
     default: {
       const customPage = (extensionsData.router.pages || []).find(p => p.id === pageID);
       if (customPage) {
@@ -97,14 +95,14 @@ const TabIcon = memo(({tab, currentView}: Props) => {
         <Avatar className="size-4 rounded-none bg-transparent">
           <Avatar.Image alt={title} onError={handleImgError} src={getCacheUrl(favIcon.url)} />
           <Avatar.Fallback className="bg-transparent">
-            {pageID === PageID.chatBridge ? <ChatRound className="size-full" /> : <Earth />}
+            <EarthIcon />
           </Avatar.Fallback>
         </Avatar>
       );
     }
 
     if (currentView === 'browser') {
-      return <Earth className="size-full" />;
+      return <EarthIcon className="size-full" />;
     }
 
     return getPageIcon(pageID);

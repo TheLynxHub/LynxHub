@@ -4,7 +4,6 @@ import {useEffect} from 'react';
 
 import {MenuTypes} from './consts';
 import BrowserScale from './layouts/BrowserScale';
-import ChatBridgeMenu from './layouts/ChatBridgeMenu';
 import CloseApp from './layouts/confirm_warn/CloseApp';
 import ProcessExitSignal from './layouts/confirm_warn/ProcessExitSignal';
 import TerminateProcess from './layouts/confirm_warn/TerminateProcess';
@@ -63,7 +62,6 @@ export default function ContextMenu() {
       {activeLayout === MenuTypes.Alert && <AlertWindow />}
       {activeLayout === MenuTypes.Confirm && <ConfirmWindow />}
       {activeLayout === MenuTypes.ProcessExitSignal && <ProcessExitSignal />}
-      {activeLayout === MenuTypes.ChatBridgeMenu && <ChatBridgeMenu />}
     </div>
   );
 }

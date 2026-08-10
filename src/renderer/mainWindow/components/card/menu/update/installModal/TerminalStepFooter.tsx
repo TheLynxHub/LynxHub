@@ -1,7 +1,7 @@
 import {Button, Description, Popover} from '@heroui/react';
 import ptyIpc from '@lynx_shared/ipc/pty';
-import {ArrowRight, Restart} from '@solar-icons/react-perf/BoldDuotone';
-import {CheckRead} from '@solar-icons/react-perf/LineDuotone';
+import {ArrowRightIcon, RestartIcon} from '@solar-icons/react/bold-duotone';
+import {CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {RefObject, useEffect, useState} from 'react';
 
 import {XTermAPI} from '../../../../useXTerm';
@@ -56,7 +56,7 @@ export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID,
     <>
       <Popover isOpen={isRestartOpen} onOpenChange={setIsRestartOpen}>
         <Button variant="danger" className="flex-1">
-          <Restart className="size-4" />
+          <RestartIcon className="size-4" />
           Restart Terminal
         </Button>
         <Popover.Content placement="top" className="max-w-xs gap-y-2">
@@ -67,7 +67,7 @@ export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID,
               Are you sure you want to restart the terminal and run commands again?
             </Description>
             <Button size="sm" className="mt-2" variant="danger" onPress={handleRestart} fullWidth>
-              <Restart className="size-3.5" />
+              <RestartIcon className="size-3.5" />
               Restart
             </Button>
           </Popover.Dialog>
@@ -76,7 +76,7 @@ export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID,
       <Popover isOpen={isNextOpen} onOpenChange={setIsNextOpen}>
         <Button variant="primary" className="flex-1">
           Next
-          <ArrowRight className="size-4" />
+          <ArrowRightIcon className="size-4" />
         </Button>
         <Popover.Content placement="top" className="max-w-xs gap-y-2">
           <Popover.Dialog>
@@ -86,7 +86,7 @@ export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID,
               Please confirm that all commands finished successfully without any errors.
             </Description>
             <Button size="sm" onPress={next} className="mt-2" variant="primary" fullWidth>
-              <CheckRead className="size-4" />
+              <CheckReadIcon className="size-4" />
               All good
             </Button>
           </Popover.Dialog>

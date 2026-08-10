@@ -1,6 +1,6 @@
 import {Avatar} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {ChatRound, Pin} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRoundIcon, PinIcon} from '@solar-icons/react/bold-duotone';
 import {motion} from 'framer-motion';
 import {memo} from 'react';
 
@@ -73,7 +73,7 @@ export const ChatThreadItem = memo(
               <Avatar.Fallback className="text-[8px]">{getFallbackString(card.title)}</Avatar.Fallback>
             </Avatar>
           ) : (
-            <ChatRound className={`size-4 shrink-0 ${isSelected ? 'text-accent-soft-foreground' : 'text-muted'}`} />
+            <ChatRoundIcon className={`size-4 shrink-0 ${isSelected ? 'text-accent-soft-foreground' : 'text-muted'}`} />
           )}
           <span
             className={
@@ -96,7 +96,7 @@ export const ChatThreadItem = memo(
               }`
             }
             aria-label={isPinned ? 'Unpin' : 'Pin'}>
-            <Pin className={`size-3 ${isPinned ? 'fill-accent' : ''}`} />
+            <PinIcon className={`size-3 ${isPinned ? 'fill-accent' : ''}`} />
           </button>
         </div>
       </button>

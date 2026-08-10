@@ -2,7 +2,7 @@ import {Button} from '@heroui/react';
 import {useVolumeState, volumeActions} from '@lynx/redux/reducers/volume';
 import {AppDispatch} from '@lynx/redux/store';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {VolumeCross, VolumeLoud} from '@solar-icons/react-perf/BoldDuotone';
+import {VolumeCrossIcon, VolumeLoudIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback, useMemo} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -42,7 +42,7 @@ const AudioIndicator = memo(({tabId, id}: Props) => {
   }, [dispatch, id, tabId, isMuted, globalMuted]);
 
   const icon = useMemo(
-    () => (isMuted ? <VolumeCross className="shrink-0" /> : <VolumeLoud className="shrink-0" />),
+    () => (isMuted ? <VolumeCrossIcon className="shrink-0" /> : <VolumeLoudIcon className="shrink-0" />),
     [isMuted],
   );
 

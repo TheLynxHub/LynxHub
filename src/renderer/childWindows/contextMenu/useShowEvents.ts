@@ -141,17 +141,6 @@ export default function useShowEvents() {
       );
     });
 
-    // Chat Bridge Menu
-    const offChatBridgeMenu = contextMenuIpc.on.onChatBridgeMenu((tabID, data) => {
-      dispatch(
-        contextActions.showLayout({
-          key: 'chatBridgeMenu',
-          value: {tabID, ...data},
-          layout: MenuTypes.ChatBridgeMenu,
-        }),
-      );
-    });
-
     // Prompt Dialog
     const offPrompt = windowDialogsIpc.promptShow((message: string, defaultValue?: string) => {
       dispatch(
@@ -221,7 +210,6 @@ export default function useShowEvents() {
       offTerminateTab();
       offVolume();
       OffDownloads();
-      offChatBridgeMenu();
       offPrompt();
       offAlert();
       offConfirm();

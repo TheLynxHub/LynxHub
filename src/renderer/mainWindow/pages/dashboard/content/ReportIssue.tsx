@@ -16,7 +16,7 @@ import SettingsSection from '@lynx/components/SettingsSection';
 import {useUserState} from '@lynx/redux/reducers/user';
 import {APP_VERSION, GITHUB_URL, LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import userIpc from '@lynx_shared/ipc/user';
-import {Bug, ChatSquare, Lightbulb, SquareTopDown} from '@solar-icons/react-perf/BoldDuotone';
+import {BugIcon, ChatSquareIcon, LightbulbIcon, SquareTopDownIcon} from '@solar-icons/react/bold-duotone';
 import {memo, SyntheticEvent, useCallback, useMemo, useState} from 'react';
 
 export const DashboardReportIssueId = 'settings_report_issue_elem';
@@ -153,7 +153,7 @@ const DashboardReportIssue = memo(() => {
     <SettingsSection
       title="Help & Feedback"
       id={DashboardReportIssueId}
-      icon={<Bug className="size-5" aria-hidden="true" />}>
+      icon={<BugIcon className="size-5" aria-hidden="true" />}>
       <div className="flex flex-col gap-2 max-w-2xl mx-auto py-2">
         <p className="text-sm text-default-500 text-center mb-4">
           Found a bug, have a feature request, or want to ask a question? Fill out the form below.
@@ -173,7 +173,7 @@ const DashboardReportIssue = memo(() => {
                   <Radio.Indicator />
                 </Radio.Control>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <Bug aria-hidden="true" className="size-4 text-danger" />
+                  <BugIcon aria-hidden="true" className="size-4 text-danger" />
                   <span>Report Issue</span>
                 </div>
               </Radio.Content>
@@ -184,7 +184,7 @@ const DashboardReportIssue = memo(() => {
                   <Radio.Indicator />
                 </Radio.Control>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <Lightbulb aria-hidden="true" className="size-4 text-warning" />
+                  <LightbulbIcon aria-hidden="true" className="size-4 text-warning" />
                   <span>Feature Request</span>
                 </div>
               </Radio.Content>
@@ -195,7 +195,7 @@ const DashboardReportIssue = memo(() => {
                   <Radio.Indicator />
                 </Radio.Control>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <ChatSquare aria-hidden="true" className="size-4 text-primary" />
+                  <ChatSquareIcon aria-hidden="true" className="size-4 text-primary" />
                   <span>General Feedback</span>
                 </div>
               </Radio.Content>
@@ -338,7 +338,7 @@ const DashboardReportIssue = memo(() => {
                 <>
                   <SiGithub aria-hidden="true" className="size-3.5 shrink-0" />
                   <span>Open on GitHub</span>
-                  <SquareTopDown aria-hidden="true" className="size-3.5 shrink-0" />
+                  <SquareTopDownIcon aria-hidden="true" className="size-3.5 shrink-0" />
                 </>
               )}
             </Button>

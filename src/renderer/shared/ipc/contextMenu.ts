@@ -41,22 +41,6 @@ const contextMenuIpc = {
     // Removes browser tab
     removeTab: (tabId: string) => lynxIpc.send(contextMenuChannels.removeTab, tabId),
 
-    // Opens custom right click context menu for chat bridge
-    openChatBridgeMenu: (
-      tabID: string,
-      data: {
-        step: 'select_module' | 'login' | 'chat';
-        hasMessages: boolean;
-        hasNewChat: boolean;
-        selectionText?: string;
-      },
-      customPosition?: ContextMenuPosition,
-    ) => lynxIpc.send(contextMenuChannels.openChatBridgeMenu, tabID, data, customPosition),
-
-    // Triggers action from chat bridge context menu
-    chatBridgeAction: (tabID: string, action: string, data?: string) =>
-      lynxIpc.send(contextMenuChannels.chatBridgeAction, tabID, action, data),
-
     rightClickItems: {
       copy: (id: number) => lynxIpc.send(contextMenuChannels.copy, id),
 
@@ -148,23 +132,6 @@ const contextMenuIpc = {
     // Listens for tab removal events
     removeTab: (callback: (tabId: string) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onRemoveTab, callback),
-
-    // Listens for showing chat bridge menu
-    onChatBridgeMenu: (
-      callback: (
-        tabID: string,
-        data: {
-          step: 'select_module' | 'login' | 'chat';
-          hasMessages: boolean;
-          hasNewChat: boolean;
-          selectionText?: string;
-        },
-      ) => void,
-    ): (() => void) => lynxIpc.on(contextMenuChannels.onChatBridgeMenu, callback),
-
-    // Listens for actions triggered from chat bridge context menu
-    chatBridgeAction: (callback: (tabID: string, action: string, data?: string) => void): (() => void) =>
-      lynxIpc.on(contextMenuChannels.onChatBridgeAction, callback),
   },
 };
 

@@ -1,7 +1,7 @@
 import {Kbd} from '@heroui/react';
 import SettingsSection from '@lynx/components/SettingsSection';
 import {SettingPage_Icon} from '@lynx_assets/icons/pages';
-import {Shield} from '@solar-icons/react-perf/BoldDuotone';
+import {ShieldIcon} from '@solar-icons/react/bold-duotone';
 
 import CollectErrors from './CollectErrors';
 import Confirm from './Confirm';
@@ -36,7 +36,7 @@ export default function SettingsGeneral() {
         }
         title="Confirmations"
         id={SettingsGeneralId}
-        icon={<Shield className="size-5" />}>
+        icon={<ShieldIcon className="size-5" />}>
         <Confirm />
       </SettingsSection>
     </>

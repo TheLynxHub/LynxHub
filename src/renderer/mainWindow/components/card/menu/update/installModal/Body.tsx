@@ -2,7 +2,7 @@ import {Label, ModalBody, ProgressBar} from '@heroui/react';
 import {DownloadProgress} from '@lynx_common/types/ipc';
 import {InitialStep, UserInputField, UserInputResult} from '@lynx_common/types/plugins/modules';
 import {formatSize} from '@lynx_common/utils';
-import {CheckCircle, SadCircle, ShieldCross} from '@solar-icons/react-perf/BoldDuotone';
+import {CheckCircleIcon, SadCircleIcon, ShieldCrossIcon} from '@solar-icons/react/bold-duotone';
 import {capitalize} from 'lodash-es';
 import {Dispatch, Fragment, memo, RefObject, SetStateAction, useCallback} from 'react';
 
@@ -160,7 +160,7 @@ const InstallBody = memo(
             <EmptyStateCard
               className="my-6"
               title="Download Failed"
-              icon={<ShieldCross className="size-12 text-danger" />}
+              icon={<ShieldCrossIcon className="size-12 text-danger" />}
               description="Please check your internet connection and try again."
             />
           ) : (
@@ -187,9 +187,9 @@ const InstallBody = memo(
               <EmptyStateCard
                 icon={
                   state.doneAll.type === 'success' ? (
-                    <CheckCircle className="shrink-0 size-14 text-success" />
+                    <CheckCircleIcon className="shrink-0 size-14 text-success" />
                   ) : (
-                    <SadCircle className="shrink-0 size-14 text-danger" />
+                    <SadCircleIcon className="shrink-0 size-14 text-danger" />
                   )
                 }
                 className="my-6"

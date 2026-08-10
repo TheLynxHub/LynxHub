@@ -2,7 +2,7 @@ import LynxSwitch from '@lynx/components/LynxSwitch';
 import {AppDispatch} from '@lynx/redux/store';
 import {showRestartModal} from '@lynx/utils';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {ShieldWarning} from '@solar-icons/react-perf/BoldDuotone';
+import {ShieldWarningIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -42,7 +42,7 @@ export default function FrameRate() {
         enabled={enabled}
         description={descriptionText}
         onEnabledChange={onEnabledChange}
-        icon={<ShieldWarning className="text-warning size-5" />}
+        icon={<ShieldWarningIcon className="text-warning size-5" />}
       />
     </SettingsFilterItem>
   );

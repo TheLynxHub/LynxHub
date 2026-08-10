@@ -1,6 +1,6 @@
 import {Button, Checkbox, Modal} from '@heroui/react';
 import {APP_AUTHOR_NAME} from '@lynx_common/consts';
-import {ShieldWarning} from '@solar-icons/react-perf/BoldDuotone';
+import {ShieldWarningIcon} from '@solar-icons/react/bold-duotone';
 import {Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import TabModal from '../../components/TabModal';
@@ -73,7 +73,7 @@ export default function SecurityWarning({isOpen, onAgree, setIsOpen, type, title
       <Modal.CloseTrigger />
       <Modal.Header>
         <Modal.Heading className="justify-center text-warning items-center gap-x-2 flex-row flex">
-          <ShieldWarning className="size-7" />
+          <ShieldWarningIcon className="size-7" />
           <span>Security Notice</span>
         </Modal.Heading>
       </Modal.Header>

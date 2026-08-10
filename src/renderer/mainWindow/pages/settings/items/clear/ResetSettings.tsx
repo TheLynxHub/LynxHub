@@ -1,6 +1,6 @@
 import {Button, ButtonGroup, Popover} from '@heroui/react';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Refresh} from '@solar-icons/react-perf/BoldDuotone';
+import {RefreshIcon} from '@solar-icons/react/bold-duotone';
 import {useState} from 'react';
 
 import SettingsSearchHighlight from '../../SettingsSearchHighlight';
@@ -21,7 +21,7 @@ export default function ResetSettings() {
     <Popover isOpen={isClearSettingsOpen} onOpenChange={setIsClearSettingsOpen}>
       <Popover.Trigger>
         <Button variant="danger" fullWidth>
-          <Refresh />
+          <RefreshIcon />
           <SettingsSearchHighlight text="Reset Settings (Restart Required)" />
         </Button>
       </Popover.Trigger>
@@ -36,7 +36,7 @@ export default function ResetSettings() {
           </p>
           <ButtonGroup className="mt-3" fullWidth>
             <Button size="sm" onPress={reset} variant="danger-soft">
-              <Refresh />
+              <RefreshIcon />
               Reset & Restart
             </Button>
             <Button size="sm" onPress={cancel} variant="secondary">

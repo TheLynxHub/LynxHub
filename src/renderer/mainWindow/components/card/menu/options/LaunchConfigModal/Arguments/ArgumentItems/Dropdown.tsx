@@ -1,7 +1,7 @@
 import {Description, Key, Label, ListBox, Select} from '@heroui/react';
 import {ArgumentDropdownValues, ChosenArgument} from '@lynx_common/types/plugins/modules';
 import {isStringArray} from '@lynx_common/utils';
-import {ListDownMinimalistic} from '@solar-icons/react-perf/BoldDuotone';
+import {ListDownMinimalisticIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {useGetArgumentsByID} from '../../../../../../../plugins/modules';
@@ -70,7 +70,7 @@ export default function DropdownArgItem({argument, changeValue, removeArg, id}: 
       id={id}
       name={argument.name}
       removeArg={removeArg}
-      icon={<ListDownMinimalistic className="size-4.5" />}>
+      icon={<ListDownMinimalisticIcon className="size-4.5" />}>
       <Select
         variant="secondary"
         value={selectedKey}

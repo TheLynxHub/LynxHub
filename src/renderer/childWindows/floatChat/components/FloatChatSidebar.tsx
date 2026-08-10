@@ -1,7 +1,7 @@
 import {Button, Dropdown, ScrollShadow, SearchField} from '@heroui/react';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {ChatRound, Pin} from '@solar-icons/react-perf/BoldDuotone';
-import {AltArrowDown, AltArrowLeft, AltArrowRight} from '@solar-icons/react-perf/LineDuotone';
+import {ChatRoundIcon, PinIcon} from '@solar-icons/react/bold-duotone';
+import {AltArrowDownIcon, AltArrowLeftIcon, AltArrowRightIcon} from '@solar-icons/react/line-duotone';
 import {Plus} from 'lucide-react';
 import {Dispatch, memo, SetStateAction, useCallback, useEffect, useMemo, useRef} from 'react';
 
@@ -221,7 +221,7 @@ export const FloatChatSidebar = memo(
             {activeCardId === 'unified' && card?.logoUrl ? (
               <img alt="" src={card.logoUrl} className="size-3.5 rounded shrink-0" />
             ) : (
-              <ChatRound className={`size-3.5 shrink-0 ${isSelected ? 'text-accent' : 'text-muted'}`} />
+              <ChatRoundIcon className={`size-3.5 shrink-0 ${isSelected ? 'text-accent' : 'text-muted'}`} />
             )}
             <span className="text-xs truncate flex-1">{item.title || 'Untitled Chat'}</span>
 
@@ -238,7 +238,7 @@ export const FloatChatSidebar = memo(
                 }`
               }
               aria-label={isPinned ? 'Unpin' : 'Pin'}>
-              <Pin className={`size-3 ${isPinned ? 'fill-accent' : ''}`} />
+              <PinIcon className={`size-3 ${isPinned ? 'fill-accent' : ''}`} />
             </button>
           </div>
         </button>
@@ -310,7 +310,7 @@ export const FloatChatSidebar = memo(
               aria-label="Expand sidebar"
               className="notDraggable size-7 shrink-0"
               isIconOnly>
-              <AltArrowRight className="size-4 text-semi-muted" />
+              <AltArrowRightIcon className="size-4 text-semi-muted" />
             </Button>
           </div>
         ) : (
@@ -364,7 +364,7 @@ export const FloatChatSidebar = memo(
                   aria-label="Collapse sidebar"
                   className="notDraggable size-7 shrink-0"
                   isIconOnly>
-                  <AltArrowLeft className="size-4 text-semi-muted" />
+                  <AltArrowLeftIcon className="size-4 text-semi-muted" />
                 </Button>
               </div>
             </div>
@@ -420,7 +420,11 @@ export const FloatChatSidebar = memo(
                                 )}
                                 <span>{card.title}</span>
                               </div>
-                              {isCollapsed ? <AltArrowRight className="size-3" /> : <AltArrowDown className="size-3" />}
+                              {isCollapsed ? (
+                                <AltArrowRightIcon className="size-3" />
+                              ) : (
+                                <AltArrowDownIcon className="size-3" />
+                              )}
                             </button>
                             {!isCollapsed && providerItems.map(item => renderThreadItem(item))}
                           </div>

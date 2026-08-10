@@ -6,7 +6,6 @@ import {type ComponentType, useMemo} from 'react';
 
 import SettingsBrowser, {SettingsBrowserId} from './items/browser';
 import SettingsCard, {SettingsCardId} from './items/card';
-import SettingsChatBridge, {SettingsChatBridgeId} from './items/chatBridge';
 import SettingsClear, {SettingsClearId} from './items/clear';
 import SettingsData, {SettingsDataId} from './items/data';
 import SettingsGeneral, {SettingsGeneralId} from './items/general';
@@ -26,7 +25,6 @@ export const settingsSectionId = {
   SettingsDataId,
   SettingsHotkeysId,
   SettingsPerformanceId,
-  SettingsChatBridgeId,
 } as const;
 
 /** Definition structure for a given settings section */
@@ -53,7 +51,6 @@ const builtInSections: SettingsSectionDefinition[] = [
   {title: 'Card', elementId: settingsSectionId.SettingsCardId, Component: SettingsCard},
   {title: 'Terminal', elementId: settingsSectionId.SettingsTerminalId, Component: SettingsTerminal},
   {title: 'Browser', elementId: settingsSectionId.SettingsBrowserId, Component: SettingsBrowser},
-  {title: 'Chat Bridge', elementId: settingsSectionId.SettingsChatBridgeId, Component: SettingsChatBridge},
   {title: 'Hotkeys', elementId: settingsSectionId.SettingsHotkeysId, Component: SettingsHotkeys},
   {title: 'Data', elementId: settingsSectionId.SettingsDataId, Component: SettingsData},
   {title: 'Clear', elementId: settingsSectionId.SettingsClearId, Component: SettingsClear},

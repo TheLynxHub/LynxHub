@@ -1,6 +1,6 @@
 import {NumberField} from '@heroui/react';
 import {ChosenArgument} from '@lynx_common/types/plugins/modules';
-import {Text} from '@solar-icons/react-perf/BoldDuotone';
+import {TextFormatIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {useGetArgumentsByID} from '../../../../../../../plugins/modules';
@@ -47,7 +47,7 @@ export default function NumberArgItem({argument, changeValue, removeArg, id}: Pr
   }, []);
 
   return (
-    <ArgumentItemBase id={id} name={argument.name} removeArg={removeArg} icon={<Text className="size-3.5" />}>
+    <ArgumentItemBase id={id} name={argument.name} removeArg={removeArg} icon={<TextFormatIcon className="size-3.5" />}>
       <NumberField
         onBlur={onBlur}
         step={numberStep}

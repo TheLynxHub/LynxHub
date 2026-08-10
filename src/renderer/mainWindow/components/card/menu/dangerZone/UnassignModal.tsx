@@ -1,6 +1,6 @@
 import {Button, ButtonGroup, Modal} from '@heroui/react';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
-import {ShieldCross} from '@solar-icons/react-perf/BoldDuotone';
+import {ShieldCrossIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback, useMemo} from 'react';
 
 import {topToast} from '../../../../layouts/ToastProviders';
@@ -32,7 +32,7 @@ const UnassignDialog = memo(({state}: CommonProps) => {
     <TabModal size="lg" isOpen={state.isOpen}>
       <Modal.Header>
         <Modal.Heading className="flex items-center gap-x-2">
-          <ShieldCross className="text-warning size-7" />
+          <ShieldCrossIcon className="text-warning size-7" />
           <span className="text-warning">Confirm Unassign</span>
         </Modal.Heading>
       </Modal.Header>

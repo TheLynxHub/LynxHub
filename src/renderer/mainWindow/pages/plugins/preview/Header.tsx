@@ -7,15 +7,15 @@ import {extractGitUrl, getCacheUrl, getFallbackString} from '@lynx_common/utils'
 import {getPluginIconUrl} from '@lynx_common/utils/plugins';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {
-  BoxMinimalistic,
-  CalendarMinimalistic,
-  DownloadMinimalistic,
-  HomeAngle2,
-  SquareTopDown,
-  User as UserIcon,
-  WidgetAdd,
-} from '@solar-icons/react-perf/BoldDuotone';
-import {ArrowRight} from '@solar-icons/react-perf/LineDuotone';
+  BoxMinimalisticIcon,
+  CalendarMinimalisticIcon,
+  DownloadMinimalisticIcon,
+  HomeAngle2Icon,
+  SquareTopDownIcon,
+  UserIcon,
+  WidgetAddIcon,
+} from '@solar-icons/react/bold-duotone';
+import {ArrowRightIcon} from '@solar-icons/react/line-duotone';
 import {useCallback, useMemo} from 'react';
 
 import PluginActionButtons from './ActionButtons';
@@ -83,11 +83,11 @@ export default function PluginPreviewHeader({installedPlugin}: PluginPreviewHead
               <div className="flex flex-row gap-x-2 items-center">
                 {/* Version chip with optional upgrade/downgrade arrow indicator */}
                 <Chip size="sm" variant="tertiary" className="text-muted tracking-tight">
-                  <BoxMinimalistic className="size-3.5" />
+                  <BoxMinimalisticIcon className="size-3.5" />
                   <span>{resolvedVersion}</span>
                   {targetVersion && (
                     <>
-                      <ArrowRight className="size-2.5" />
+                      <ArrowRightIcon className="size-2.5" />
                       <span className={isUpgradeAvailable ? 'text-success' : 'text-warning'}>{targetVersion}</span>
                     </>
                   )}
@@ -95,14 +95,14 @@ export default function PluginPreviewHeader({installedPlugin}: PluginPreviewHead
 
                 {/* Release date chip */}
                 <Chip size="sm" variant="tertiary" className="text-muted">
-                  <CalendarMinimalistic />
+                  <CalendarMinimalisticIcon />
                   {releaseDate}
                 </Chip>
 
                 {/* Downloads count chip */}
                 {selectedPlugin?.downloadsCount !== undefined && (
                   <Chip size="sm" variant="tertiary" className="text-muted font-JetBrainsMono">
-                    <DownloadMinimalistic />
+                    <DownloadMinimalisticIcon />
                     <span>{formatNumber(selectedPlugin.downloadsCount).toLowerCase()}</span>
                   </Chip>
                 )}
@@ -114,7 +114,7 @@ export default function PluginPreviewHeader({installedPlugin}: PluginPreviewHead
                       ? 'bg-blue-500/10 text-blue-500 dark:bg-blue-500/20 dark:text-blue-400'
                       : 'bg-purple-500/10 text-purple-500 dark:bg-purple-500/20 dark:text-purple-400'
                   }`}>
-                  <WidgetAdd className="size-3.5" />
+                  <WidgetAddIcon className="size-3.5" />
                   <span className="capitalize">{pluginType || 'Extension'}</span>
                 </div>
               </div>
@@ -134,9 +134,9 @@ export default function PluginPreviewHeader({installedPlugin}: PluginPreviewHead
             className="text-xs"
             onPress={handleOpenHomePage}
             aria-label="Open plugin home page">
-            <HomeAngle2 className="size-3.5" />
+            <HomeAngle2Icon className="size-3.5" />
             Home Page
-            <SquareTopDown className="size-2.5" />
+            <SquareTopDownIcon className="size-2.5" />
           </Button>
         </div>
       </div>

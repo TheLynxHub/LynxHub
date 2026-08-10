@@ -1,7 +1,7 @@
 import {Button, Chip, Label, SearchField, Switch} from '@heroui/react';
 import {Circle_Icon} from '@lynx_assets/icons';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {AltArrowDown, AltArrowUp} from '@solar-icons/react-perf/Bold';
+import {AltArrowDownIcon, AltArrowUpIcon} from '@solar-icons/react/bold';
 import {isEmpty} from 'lodash-es';
 import {X} from 'lucide-react';
 import {type KeyboardEvent, memo, useCallback, useEffect, useRef, useState} from 'react';
@@ -185,7 +185,7 @@ const FindInPage = memo(function FindInPage() {
           variant="secondary"
           isDisabled={isEmpty(searchValue) || !hasResults}
           aria-label="Previous match (Shift+Enter or Up Arrow)">
-          <AltArrowUp className="size-4" />
+          <AltArrowUpIcon className="size-4" />
           Previous
         </Button>
         <Button
@@ -195,7 +195,7 @@ const FindInPage = memo(function FindInPage() {
           variant="secondary"
           aria-label="Next match (Enter or Down Arrow)"
           isDisabled={isEmpty(searchValue) || !hasResults}>
-          <AltArrowDown className="size-4" />
+          <AltArrowDownIcon className="size-4" />
           Next
         </Button>
         <Button

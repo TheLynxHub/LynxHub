@@ -1,7 +1,7 @@
 import {Button, Input} from '@heroui/react';
 import {terminalActions, useTerminalState} from '@lynx/redux/reducers/terminal';
 import {AppDispatch} from '@lynx/redux/store';
-import {Broom} from '@solar-icons/react-perf/BoldDuotone';
+import {BroomIcon} from '@solar-icons/react/bold-duotone';
 import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
@@ -56,7 +56,7 @@ export default function QuickCommands() {
                 variant="danger-soft"
                 onPress={() => updateQuickCommands(index, {label: '', command: ''})}
                 isIconOnly>
-                <Broom />
+                <BroomIcon />
               </Button>
             </div>
           );

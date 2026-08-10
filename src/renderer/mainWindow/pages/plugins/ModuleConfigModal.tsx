@@ -5,7 +5,7 @@ import {CardModules, RendererModuleImportType} from '@lynx_common/types/plugins/
 import {isDev} from '@lynx_common/utils';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Diskette, SettingsMinimalistic} from '@solar-icons/react-perf/BoldDuotone';
+import {DisketteIcon, SettingsMinimalisticIcon} from '@solar-icons/react/bold-duotone';
 import {compact} from 'lodash-es';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -210,7 +210,7 @@ export default function ModuleConfigModal({isOpen, onClose}: ModuleConfigModalPr
       <Modal.Header>
         <Modal.Heading className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <SettingsMinimalistic className="size-5" />
+            <SettingsMinimalisticIcon className="size-5" />
             <span>Module Configuration</span>
           </div>
           <span className="text-sm font-normal text-muted">
@@ -258,7 +258,7 @@ export default function ModuleConfigModal({isOpen, onClose}: ModuleConfigModalPr
       </Modal.Body>
       <Modal.Footer>
         <Button isPending={saving} onPress={handleSave}>
-          {saving ? <Spinner size="sm" color="current" /> : <Diskette />}
+          {saving ? <Spinner size="sm" color="current" /> : <DisketteIcon />}
           Save & Restart
         </Button>
       </Modal.Footer>

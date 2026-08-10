@@ -4,14 +4,14 @@ import {Linux_Icon, MacOS_Icon, Windows_Icon} from '@lynx_assets/icons';
 import {PluginItem} from '@lynx_common/types/plugins';
 import {extractGitUrl, getCacheUrl, getFallbackString} from '@lynx_common/utils';
 import {getPluginIconUrl} from '@lynx_common/utils/plugins';
-import {QuestionCircle} from '@solar-icons/react-perf/Bold';
+import {QuestionCircleIcon} from '@solar-icons/react/bold';
 import {
-  DownloadMinimalistic,
-  SettingsMinimalistic,
-  ShieldWarning,
-  TrashBin2,
-} from '@solar-icons/react-perf/BoldDuotone';
-import {ArrowRight, CheckRead} from '@solar-icons/react-perf/LineDuotone';
+  DownloadMinimalisticIcon,
+  SettingsMinimalisticIcon,
+  ShieldWarningIcon,
+  TrashBin2Icon,
+} from '@solar-icons/react/bold-duotone';
+import {ArrowRightIcon, CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {MouseEvent} from 'react';
 
 import {UpdateButton} from '../Elements';
@@ -98,7 +98,7 @@ export function PluginListItemDefault({
                     <span>{currentVersion}</span>
                     {targetUpdate && (
                       <>
-                        <ArrowRight className="size-2.5" />
+                        <ArrowRightIcon className="size-2.5" />
                         <span className={`${isUpgrade ? 'text-success' : 'text-warning'}`}>{targetVersion}</span>
                       </>
                     )}
@@ -109,7 +109,7 @@ export function PluginListItemDefault({
                 <Tooltip delay={300}>
                   <Tooltip.Trigger>
                     <Chip size="sm" variant="soft" color="warning" className="px-1.5">
-                      <ShieldWarning />
+                      <ShieldWarningIcon />
                       Unloaded
                     </Chip>
                   </Tooltip.Trigger>
@@ -123,7 +123,7 @@ export function PluginListItemDefault({
           </div>
         </div>
 
-        {foundInstalled && <CheckRead className="text-success size-5 absolute top-3 right-3" />}
+        {foundInstalled && <CheckReadIcon className="text-success size-5 absolute top-3 right-3" />}
       </Card.Header>
 
       <Card.Content>
@@ -140,7 +140,7 @@ export function PluginListItemDefault({
             <div
               title="Total downloads"
               className="flex flex-row items-center gap-x-0.5 text-[10px] text-muted ml-2 font-JetBrainsMono">
-              <DownloadMinimalistic className="size-3.5 text-muted/70" />
+              <DownloadMinimalisticIcon className="size-3.5 text-muted/70" />
               <span>{formatNumber(item.downloadsCount).toLowerCase()}</span>
             </div>
           )}
@@ -153,7 +153,7 @@ export function PluginListItemDefault({
                   <Tooltip delay={500}>
                     <Tooltip.Trigger>
                       <Button size="sm" variant="secondary" className="ml-1 px-2" onPress={configModal.open} isIconOnly>
-                        <SettingsMinimalistic className="size-4" />
+                        <SettingsMinimalisticIcon className="size-4" />
                       </Button>
                     </Tooltip.Trigger>
                     <Tooltip.Content showArrow>
@@ -171,7 +171,7 @@ export function PluginListItemDefault({
           <Tooltip delay={300}>
             <Tooltip.Trigger>
               <Chip variant="soft" color="danger" className="px-1.5 h-5 text-[10px] gap-1 cursor-help">
-                <QuestionCircle className="size-3.5 text-danger/80" />
+                <QuestionCircleIcon className="size-3.5 text-danger/80" />
                 Incompatible
               </Chip>
             </Tooltip.Trigger>
@@ -190,7 +190,7 @@ export function PluginListItemDefault({
               variant="danger-soft"
               onClick={handleUninstall}
               className="px-2.5 h-7 text-xs font-semibold flex items-center">
-              <TrashBin2 className="size-3.5" />
+              <TrashBin2Icon className="size-3.5" />
               Uninstall
             </Button>
           )

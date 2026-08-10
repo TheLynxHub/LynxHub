@@ -1,6 +1,6 @@
 import {Avatar, ScrollShadow} from '@heroui/react';
 import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
-import {AltArrowDown, AltArrowRight} from '@solar-icons/react-perf/Linear';
+import {AltArrowDownIcon, AltArrowRightIcon} from '@solar-icons/react/linear';
 import {memo, useCallback, useEffect, useRef} from 'react';
 
 import {ChatSidebarHeader} from './components/ChatSidebarHeader';
@@ -180,9 +180,9 @@ const ChatSidebar = memo(
                                 <span>{card.title}</span>
                               </div>
                               {isProviderCollapsed ? (
-                                <AltArrowRight className="size-3" />
+                                <AltArrowRightIcon className="size-3" />
                               ) : (
-                                <AltArrowDown className="size-3" />
+                                <AltArrowDownIcon className="size-3" />
                               )}
                             </button>
 

@@ -2,7 +2,13 @@ import {DropdownItem} from '@heroui/react';
 import filesIpc from '@lynx_shared/ipc/files';
 import storageIpc from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Copy, FolderOpen, HomeAngle2, InfoSquare, SquareTopDown} from '@solar-icons/react-perf/BoldDuotone';
+import {
+  CopyIcon,
+  FolderOpenIcon,
+  HomeAngle2Icon,
+  InfoSquareIcon,
+  SquareTopDownIcon,
+} from '@solar-icons/react/bold-duotone';
 import {useCallback, useMemo} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -44,7 +50,7 @@ export const AboutMenuItem = ({state}: CommonProps) => {
 
   return (
     <DropdownItem key="information" onPress={onPress}>
-      {showOpenFolder ? <FolderOpen className="size-4" /> : <InfoSquare className="size-4" />}
+      {showOpenFolder ? <FolderOpenIcon className="size-4" /> : <InfoSquareIcon className="size-4" />}
       {showOpenFolder ? 'Open Folder' : 'Information'}
     </DropdownItem>
   );
@@ -74,9 +80,9 @@ export function HomePageMenuItem({state}: CommonProps) {
 
   return (
     <DropdownItem key="homepage" onPress={onPress}>
-      <HomeAngle2 className="size-4" />
+      <HomeAngle2Icon className="size-4" />
       HomePage
-      {isCtrlPressed && <SquareTopDown className="size-3.5" />}
+      {isCtrlPressed && <SquareTopDownIcon className="size-3.5" />}
     </DropdownItem>
   );
 }
@@ -112,7 +118,7 @@ export const DuplicateMenuItem = () => {
 
   return (
     <DropdownItem onPress={onPress} key="duplicate_card">
-      <Copy className="size-4" />
+      <CopyIcon className="size-4" />
       {isDuplicated ? 'Remove Duplicate' : 'Duplicate'}
     </DropdownItem>
   );

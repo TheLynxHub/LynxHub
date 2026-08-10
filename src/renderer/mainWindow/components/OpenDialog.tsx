@@ -2,7 +2,7 @@ import {Button, ButtonGroup, FieldError, InputGroup, TextField} from '@heroui/re
 import {isWin} from '@lynx_common/utils';
 import applicationIpc from '@lynx_shared/ipc/application';
 import filesIpc from '@lynx_shared/ipc/files';
-import {MoveToFolder} from '@solar-icons/react-perf/BoldDuotone';
+import {MoveToFolderIcon} from '@solar-icons/react/bold-duotone';
 import {OpenDialogOptions} from 'electron';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
@@ -99,7 +99,7 @@ export default function OpenDialog({dialogType, directory, extraFolder = '', set
               onPress={chooseDirectory}
               aria-label="Choose directory"
               isIconOnly>
-              <MoveToFolder className="size-4" />
+              <MoveToFolderIcon className="size-4" />
             </Button>
           </InputGroup.Suffix>
         </InputGroup>

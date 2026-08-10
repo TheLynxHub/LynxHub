@@ -3,7 +3,7 @@ import BrowserViewPlaceholder from '@lynx/features/session/browser/BrowserViewPl
 import browserIpc from '@lynx_shared/ipc/browser';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Earth} from '@solar-icons/react-perf/BoldDuotone';
+import {EarthIcon} from '@solar-icons/react/bold-duotone';
 import {memo, MouseEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -248,7 +248,7 @@ const ChatBridgePage = memo(({tabID = 'chat-bridge'}: Props) => {
                       className={
                         'absolute inset-0 flex flex-col items-center ' + 'justify-center p-6 bg-surface text-center'
                       }>
-                      <Earth className="size-12 text-semi-muted mb-4 animate-pulse" />
+                      <EarthIcon className="size-12 text-semi-muted mb-4 animate-pulse" />
                       <h3 className="text-base font-semibold mb-2">Webview is Active in Float Chat</h3>
                       <p className="text-xs text-semi-muted max-w-sm mb-6">
                         The interactive webview for this AI module is currently docked in the Float Chat window.

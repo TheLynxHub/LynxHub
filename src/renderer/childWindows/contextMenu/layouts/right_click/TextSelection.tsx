@@ -1,5 +1,5 @@
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {Magnifier} from '@solar-icons/react-perf/BoldDuotone';
+import {MagnifierIcon} from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 
 import Separator from './Separator';
@@ -24,7 +24,7 @@ const TextSelection = memo(function TextSelection({selection}: TextSelectionProp
           contextMenuIpc.send.rightClickItems.searchWithGoogle(selection);
         })}
         title={`Search with Google`}
-        icon={<Magnifier className="size-4" />}
+        icon={<MagnifierIcon className="size-4" />}
       />
       <Separator />
     </>

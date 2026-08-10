@@ -163,11 +163,6 @@ async function initializeLynxHub(): Promise<void> {
 
   listenToIpcChannels();
 
-  // Register global system hotkey for float chat
-  import('./childWindows/floatChat').then(({RegisterFloatChatHotkey}) => {
-    RegisterFloatChatHotkey();
-  });
-
   Auth();
 
   const appManager = await classHolder.waitForClass('appManager');

@@ -2,7 +2,7 @@ import {Button} from '@heroui/react';
 import {isLinuxPortable} from '@lynx/utils/hooks';
 import {Power_Icon} from '@lynx_assets/icons';
 import applicationIpc from '@lynx_shared/ipc/application';
-import {Forward2, Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {Forward2Icon, RestartIcon} from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 
 import {hideContextWindow, useFocus} from '../Shared';
@@ -23,13 +23,13 @@ const CloseApp = memo(() => {
       buttons={
         <>
           <Button size="sm" className="w-22" variant="secondary" onPress={hideContextWindow}>
-            <Forward2 className="rotate-180 shrink-0 size-3.5" />
+            <Forward2Icon className="rotate-180 shrink-0 size-3.5" />
             Stay
           </Button>
           <div className="space-x-2">
             {!isLinuxPortable && (
               <Button size="sm" className="w-25" onPress={onRestart} variant="danger-soft">
-                <Restart className="shrink-0 size-3.5" />
+                <RestartIcon className="shrink-0 size-3.5" />
                 Restart
               </Button>
             )}

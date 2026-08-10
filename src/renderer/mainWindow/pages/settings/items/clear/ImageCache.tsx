@@ -2,7 +2,7 @@ import {Button, ButtonGroup, Chip, Description, Key, Label, ListBox, Popover, Se
 import {topToast} from '@lynx/layouts/ToastProviders';
 import storageIpc from '@lynx_shared/ipc/storage';
 import utilsIpc from '@lynx_shared/ipc/utils';
-import {Broom} from '@solar-icons/react-perf/BoldDuotone';
+import {BroomIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useState} from 'react';
 
 import DescriptionGrid from '../../../../components/DescriptionGrid';
@@ -272,14 +272,14 @@ export default function ImageCache() {
           <div className="mt-2 w-full">
             {cacheStats.entryCount === 0 || isClearing ? (
               <Button variant="danger-soft" isPending={isClearing} fullWidth isDisabled>
-                {isClearing ? <Spinner size="sm" color="current" /> : <Broom />}
+                {isClearing ? <Spinner size="sm" color="current" /> : <BroomIcon />}
                 <SettingsSearchHighlight text="Clear Image Cache" />
               </Button>
             ) : (
               <Popover isOpen={isClearCacheOpen} onOpenChange={setIsClearCacheOpen}>
                 <Popover.Trigger>
                   <Button variant="danger-soft" isPending={isClearing} fullWidth>
-                    {isClearing ? <Spinner size="sm" color="current" /> : <Broom />}
+                    {isClearing ? <Spinner size="sm" color="current" /> : <BroomIcon />}
                     <SettingsSearchHighlight text="Clear Image Cache" />
                   </Button>
                 </Popover.Trigger>
@@ -294,7 +294,7 @@ export default function ImageCache() {
                     </p>
                     <ButtonGroup className="mt-2" fullWidth>
                       <Button size="sm" variant="danger-soft" onPress={handleClearImageCache}>
-                        <Broom />
+                        <BroomIcon />
                         Clear
                       </Button>
                       <Button size="sm" variant="secondary" onPress={() => setIsClearCacheOpen(false)}>

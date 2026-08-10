@@ -6,9 +6,9 @@ import {useInstalledCard, useIsPinnedCard} from '@lynx/utils/hooks';
 import filesIpc from '@lynx_shared/ipc/files';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Pin, Play} from '@solar-icons/react-perf/Bold';
-import {DownloadMinimalistic, FolderOpen} from '@solar-icons/react-perf/BoldDuotone';
-import {Pin as PinLine} from '@solar-icons/react-perf/LineDuotone';
+import {PinIcon, PlayIcon} from '@solar-icons/react/bold';
+import {DownloadMinimalisticIcon, FolderOpenIcon} from '@solar-icons/react/bold-duotone';
+import {PinIcon as PinLine} from '@solar-icons/react/line-duotone';
 import {AnimatePresence, motion} from 'framer-motion';
 import {memo, useCallback, useMemo} from 'react';
 
@@ -86,7 +86,7 @@ const Footer = memo(({isRunning, updatingExtensions, updating, updateCount, id, 
             variant="ghost"
             onPress={onPress}
             isIconOnly>
-            {isPinned ? <Pin className="size-3" /> : <PinLine className="size-3" />}
+            {isPinned ? <PinIcon className="size-3" /> : <PinLine className="size-3" />}
           </Button>
         )}
       </div>
@@ -107,7 +107,11 @@ const Footer = memo(({isRunning, updatingExtensions, updating, updateCount, id, 
             className={
               'translate-y-2 opacity-0 transition duration-400 group-hover:translate-y-0 group-hover:opacity-100'
             }>
-            {isInstalled ? <Play className="size-4 text-accent" /> : <DownloadMinimalistic className="size-4" />}
+            {isInstalled ? (
+              <PlayIcon className="size-4 text-accent" />
+            ) : (
+              <DownloadMinimalisticIcon className="size-4" />
+            )}
           </div>
         )
       )}
@@ -123,7 +127,7 @@ const Footer = memo(({isRunning, updatingExtensions, updating, updateCount, id, 
             animate={{opacity: 1, scale: 1, translateY: 0}}
             initial={{opacity: 0, scale: 0.8, translateY: 10}}
             className="absolute bottom-2 right-1/2 translate-x-1/2 duration-0 shrink-0">
-            <FolderOpen size={16} className="text-muted" />
+            <FolderOpenIcon size={16} className="text-muted" />
           </MotionButton>
         )}
       </AnimatePresence>

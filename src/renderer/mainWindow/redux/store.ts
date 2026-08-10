@@ -8,7 +8,6 @@ import {createReduxEnhancer} from '@sentry/react';
 import {actionLoggerMiddleware} from './middleware/actionLogger';
 import app from './reducers/app';
 import cards from './reducers/cards';
-import chatBridge from './reducers/chatBridge';
 import hotkeys from './reducers/hotkeys';
 import modals from './reducers/modals';
 import plugins from './reducers/plugins';
@@ -32,7 +31,6 @@ const staticReducers = {
   plugins,
   volume,
   trigger,
-  chatBridge,
 };
 
 const emptyHotkeyInput = {
@@ -127,20 +125,6 @@ const buildPreloadedState = (): PreloadState | undefined => {
       searchValue: '',
       searchWords: [],
       selectedSection: '',
-      floatChatAlwaysOnTop: storage.app.floatChatAlwaysOnTop ?? true,
-      floatChatShowTaskbar: storage.app.floatChatShowTaskbar ?? false,
-      floatChatRememberSize: storage.app.floatChatRememberSize ?? false,
-      floatChatRememberPosition: storage.app.floatChatRememberPosition ?? false,
-      disableFloatChat: storage.app.disableFloatChat ?? false,
-      floatChatKeepInBackground: storage.app.floatChatKeepInBackground ?? true,
-      chatBridgeMaxWidth: storage.app.chatBridgeMaxWidth ?? 'default',
-      bridgeDefaultView: storage.app.bridgeDefaultView ?? 'custom',
-      floatDefaultView: storage.app.floatDefaultView ?? 'custom',
-      chatSidebarCollapsed: storage.app.chatSidebarCollapsed ?? false,
-      chatSidebarWidth: storage.app.chatSidebarWidth ?? 240,
-      floatChatSidebarCollapsed: storage.app.floatChatSidebarCollapsed ?? false,
-      floatChatSidebarWidth: storage.app.floatChatSidebarWidth ?? 200,
-      pinnedThreads: storage.app.pinnedThreads ?? [],
     },
     terminal: storage.terminal,
     volume: {

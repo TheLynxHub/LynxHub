@@ -1,5 +1,5 @@
 import {isWin} from '@lynx_common/utils';
-import {InboxLine} from '@solar-icons/react-perf/BoldDuotone';
+import {InboxLineIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {PrismLight as SyntaxHighlighter} from 'react-syntax-highlighter';
 import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
@@ -34,7 +34,7 @@ export default function ArgumentsPreview({text}: Props) {
         <EmptyStateCard
           className="m-0"
           bodyClassName="py-8"
-          icon={<InboxLine size={40} />}
+          icon={<InboxLineIcon size={40} />}
           description="No preview available to display"
         />
       ) : (

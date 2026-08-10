@@ -1,6 +1,6 @@
 import {Button} from '@heroui/react';
 import {APP_NAME} from '@lynx_common/consts';
-import {CheckRead} from '@solar-icons/react-perf/LineDuotone';
+import {CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {motion} from 'framer-motion';
 
 import {RequirementStatus} from './types';
@@ -32,7 +32,7 @@ export default function StepComplete({onComplete, installedPlugins, requirementS
       variants={containerVariants}
       className="flex flex-col items-center justify-center h-full text-center">
       <motion.div variants={itemVariants} className="bg-green-100 dark:bg-green-500/20 p-4 rounded-full mb-6">
-        <CheckRead className="size-10 text-green-600 dark:text-green-400" />
+        <CheckReadIcon className="size-10 text-green-600 dark:text-green-400" />
       </motion.div>
       <motion.h2 variants={itemVariants} className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
         All Set!
@@ -65,7 +65,7 @@ export default function StepComplete({onComplete, installedPlugins, requirementS
 
       <motion.div variants={itemVariants}>
         <Button size="lg" variant="primary" onPress={onComplete} className="font-semibold h-12">
-          <CheckRead className="size-5" />
+          <CheckReadIcon className="size-5" />
           Finish & Restart {APP_NAME}
         </Button>
       </motion.div>

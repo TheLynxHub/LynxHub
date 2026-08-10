@@ -1,6 +1,6 @@
 import {NavHistory} from '@lynx_common/types/ipc';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {ArrowLeft, ArrowRight, Refresh} from '@solar-icons/react-perf/BoldDuotone';
+import {ArrowLeftIcon, ArrowRightIcon, RefreshIcon} from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 
 import {NavBtnProps} from '../../types';
@@ -39,20 +39,20 @@ const Navigation = memo(function Navigation({id, navHistory}: NavigationProps) {
           contextMenuIpc.send.rightClickItems.navigate(id, 'back');
         })}
         isDisabled={!navHistory.canGoBack}
-        icon={<ArrowLeft className="size-5" />}
+        icon={<ArrowLeftIcon className="size-5" />}
       />
       <NavButton
         onPress={createActionHandler(() => {
           contextMenuIpc.send.rightClickItems.navigate(id, 'forward');
         })}
         isDisabled={!navHistory.canGoForward}
-        icon={<ArrowRight className="size-5" />}
+        icon={<ArrowRightIcon className="size-5" />}
       />
       <NavButton
         onPress={createActionHandler(() => {
           contextMenuIpc.send.rightClickItems.navigate(id, 'refresh');
         })}
-        icon={<Refresh className="size-4" />}
+        icon={<RefreshIcon className="size-4" />}
       />
     </div>
   );

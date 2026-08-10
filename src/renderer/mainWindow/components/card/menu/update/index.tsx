@@ -4,7 +4,7 @@ import gitIpc from '@lynx_shared/ipc/git';
 import moduleIpc from '@lynx_shared/ipc/plugins/module';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {DownloadMinimalistic, Refresh} from '@solar-icons/react-perf/BoldDuotone';
+import {DownloadMinimalisticIcon, RefreshIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -55,7 +55,7 @@ export const UpdateMenuItem = ({setType, state}: {setType: (type: 'install' | 'u
       isDisabled={updating}
       className={`${updateAvailable && 'text-success'} justify-between`}>
       <div className="flex items-center gap-x-4">
-        <DownloadMinimalistic className="size-4" />
+        <DownloadMinimalisticIcon className="size-4" />
         Update
       </div>
       {updating && <Spinner size="sm" color="success" />}
@@ -95,7 +95,7 @@ export const CheckForUpdateMenuItem = () => {
 
   return (
     <DropdownItem onPress={onPress} key="check-update" isDisabled={checkingForUpdate}>
-      {checkingForUpdate ? <Spinner size="sm" color="current" /> : <Refresh className="size-4" />}
+      {checkingForUpdate ? <Spinner size="sm" color="current" /> : <RefreshIcon className="size-4" />}
       Check For Updates
     </DropdownItem>
   );

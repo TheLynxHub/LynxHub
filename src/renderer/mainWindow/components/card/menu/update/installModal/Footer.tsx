@@ -4,8 +4,8 @@ import {InstallationMethod, UserInputResult} from '@lynx_common/types/plugins/mo
 import applicationIpc from '@lynx_shared/ipc/application';
 import filesIpc from '@lynx_shared/ipc/files';
 import ptyIpc from '@lynx_shared/ipc/pty';
-import {ArrowRight, Download, FolderOpen, Restart} from '@solar-icons/react-perf/BoldDuotone';
-import {CheckRead} from '@solar-icons/react-perf/LineDuotone';
+import {ArrowRightIcon, DownloadIcon, FolderOpenIcon, RestartIcon} from '@solar-icons/react/bold-duotone';
+import {CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {X} from 'lucide-react';
 import {memo, RefObject, useCallback, useState} from 'react';
 
@@ -103,7 +103,7 @@ const InstallFooter = memo(
             className="flex-1"
             onPress={handleClose}
             variant={!isDone ? 'danger-soft' : isSuccess ? 'primary' : 'secondary'}>
-            {isDone && isSuccess ? <CheckRead className="size-5" /> : <X className="size-3.5" />}
+            {isDone && isSuccess ? <CheckReadIcon className="size-5" /> : <X className="size-3.5" />}
             {!isDone ? 'Cancel' : isSuccess ? 'Finish' : 'Close'}
           </Button>
           {state.body === 'terminal' && (
@@ -118,19 +118,19 @@ const InstallFooter = memo(
             <>
               {!state.disableSelectDir && (
                 <Button onPress={locate} className="flex-1" variant="secondary">
-                  <FolderOpen />
+                  <FolderOpenIcon />
                   Locate
                 </Button>
               )}
               <Button className="flex-1" onPress={() => starterResolver.current?.({chosen: 'install'})}>
                 Start Installation
-                <ArrowRight className="size-4" />
+                <ArrowRightIcon className="size-4" />
               </Button>
             </>
           )}
           {state.body === 'clone' && !state.startClone && (
             <Button className="flex-1" onPress={() => updateState({startClone: true})}>
-              <Download className="size-4" />
+              <DownloadIcon className="size-4" />
               Download
             </Button>
           )}
@@ -142,18 +142,18 @@ const InstallFooter = memo(
               className="flex-1"
               isDisabled={!canContinue}>
               Next
-              <ArrowRight className="size-4" />
+              <ArrowRightIcon className="size-4" />
             </Button>
           )}
           {state.body === 'extension-custom' && (
             <Button className="flex-1" onPress={nextStep}>
               Next
-              <ArrowRight className="size-4" />
+              <ArrowRightIcon className="size-4" />
             </Button>
           )}
           {progressInfo?.stage === 'failed' && urlToDownload && (
             <Button className="flex-1" variant="secondary" onPress={() => downloadFileFromUrl(urlToDownload)}>
-              <Restart className="size-4" />
+              <RestartIcon className="size-4" />
               Try Again
             </Button>
           )}

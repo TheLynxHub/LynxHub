@@ -1,6 +1,6 @@
 import {UseOverlayStateReturn} from '@heroui/react';
 import gitIpc from '@lynx_shared/ipc/git';
-import {Documents} from '@solar-icons/react-perf/BoldDuotone';
+import {DocumentsIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {LucideReplace, Minus, Plus} from 'lucide-react';
 import {useEffect} from 'react';
@@ -74,7 +74,7 @@ export function useUpdatingProgress(
               className: 'self-center',
               children: (
                 <div className="flex items-center gap-x-1">
-                  <Documents size={14} />
+                  <DocumentsIcon size={14} />
                   <span>Details</span>
                 </div>
               ),

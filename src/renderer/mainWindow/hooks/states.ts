@@ -21,12 +21,9 @@ export function useFilterPinnedCards() {
 
     const installedCardIds = new Set(installedCards.map(card => card.id));
     const registeredToolsIds = new Set(toolsCardRegistry.getAll().map(t => t.id));
-    const onlineCardIds = new Set(allCards.filter(card => card.isOnline).map(card => card.id));
 
-    // Filter pinned cards based on whether their ID exists in the installed cards, registered tools cards, or online cards
-    const filteredPins = pinnedCards.filter(
-      pCard => installedCardIds.has(pCard) || registeredToolsIds.has(pCard) || onlineCardIds.has(pCard),
-    );
+    // Filter pinned cards based on whether their ID exists in the installed cards or registered tools cards
+    const filteredPins = pinnedCards.filter(pCard => installedCardIds.has(pCard) || registeredToolsIds.has(pCard));
 
     if (!isEqual(filteredPins, pinnedCards)) {
       storageUtilsIpc.invoke.pinnedCards('set', '', filteredPins);

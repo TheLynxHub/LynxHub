@@ -1,6 +1,6 @@
 import {Card, Tooltip} from '@heroui/react';
 import {ScreenShareSources} from '@lynx_common/types/shareScreen';
-import {Record} from '@solar-icons/react-perf/BoldDuotone';
+import {RecordIcon} from '@solar-icons/react/bold-duotone';
 
 type SourceCardProps = {
   /** The screen or window source item to display. */
@@ -25,7 +25,7 @@ export function SourceCard({item, isSelected, onSelect, isScreen}: SourceCardPro
         <img alt={item.name} src={item.thumbnail} className="object-cover aspect-video" />
         {isSelected && (
           <div className="absolute inset-0 flex items-center justify-center bg-accent/70 animate-appearance-in z-10">
-            <Record className="size-7 text-white animate-appearance-in" />
+            <RecordIcon className="size-7 text-white animate-appearance-in" />
           </div>
         )}
       </Card.Content>

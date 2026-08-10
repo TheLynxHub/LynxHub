@@ -5,7 +5,7 @@ import {AppDispatch} from '@lynx/redux/store';
 import {PluginFilter, PluginItem} from '@lynx_common/types/plugins';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
 import staticsIpc from '@lynx_shared/ipc/statics';
-import {Filter} from '@solar-icons/react-perf/BoldDuotone';
+import {FilterIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {Dispatch, SetStateAction, useEffect, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -134,7 +134,7 @@ export function FilterMenu({selectedKeys, setSelectedKeys}: FilterMenuProps) {
     <Dropdown>
       <Dropdown.Trigger>
         <Button variant="tertiary" className="bg-surface shrink-0 shadow" isIconOnly>
-          <Filter />
+          <FilterIcon />
         </Button>
       </Dropdown.Trigger>
       <Dropdown.Popover>

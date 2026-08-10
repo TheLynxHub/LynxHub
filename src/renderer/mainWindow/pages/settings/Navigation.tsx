@@ -4,15 +4,14 @@ import {settingsActions, useSettingsState} from '@lynx/redux/reducers/settings';
 import {Terminal_Icon} from '@lynx_assets/icons';
 import {SettingPage_Icon} from '@lynx_assets/icons/pages';
 import {
-  Card as CardIcon,
-  ChatSquare,
-  Database,
-  Earth,
-  Keyboard,
-  Rocket,
-  SpeedometerMiddle,
-  TrashBin2,
-} from '@solar-icons/react-perf/BoldDuotone';
+  CardIcon,
+  DatabaseIcon,
+  EarthIcon,
+  KeyboardIcon,
+  RocketIcon,
+  SpeedometerMiddleIcon,
+  TrashBin2Icon,
+} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, motion} from 'framer-motion';
 import Fuse from 'fuse.js';
 import {ReactNode, useCallback, useMemo} from 'react';
@@ -55,12 +54,12 @@ const groupSections: GroupProps[] = [
       },
       {
         title: 'Startup',
-        icon: <Rocket className="size-4 shrink-0" />,
+        icon: <RocketIcon className="size-4 shrink-0" />,
         elementId: settingsSectionId.SettingsStartupId,
       },
       {
         title: 'Performance',
-        icon: <SpeedometerMiddle className="size-4 shrink-0" />,
+        icon: <SpeedometerMiddleIcon className="size-4 shrink-0" />,
         elementId: settingsSectionId.SettingsPerformanceId,
       },
       {
@@ -75,17 +74,12 @@ const groupSections: GroupProps[] = [
       },
       {
         title: 'Browser',
-        icon: <Earth className="size-4 shrink-0" />,
+        icon: <EarthIcon className="size-4 shrink-0" />,
         elementId: settingsSectionId.SettingsBrowserId,
       },
       {
-        title: 'Chat Bridge',
-        icon: <ChatSquare className="size-4 shrink-0" />,
-        elementId: settingsSectionId.SettingsChatBridgeId,
-      },
-      {
         title: 'Hotkeys',
-        icon: <Keyboard className="size-4 shrink-0" />,
+        icon: <KeyboardIcon className="size-4 shrink-0" />,
         elementId: settingsSectionId.SettingsHotkeysId,
       },
     ],
@@ -95,12 +89,12 @@ const groupSections: GroupProps[] = [
     items: [
       {
         title: 'Data',
-        icon: <Database className="size-4 shrink-0" />,
+        icon: <DatabaseIcon className="size-4 shrink-0" />,
         elementId: settingsSectionId.SettingsDataId,
       },
       {
         title: 'Clear',
-        icon: <TrashBin2 className="size-4 shrink-0" />,
+        icon: <TrashBin2Icon className="size-4 shrink-0" />,
         className: 'text-danger',
         elementId: settingsSectionId.SettingsClearId,
       },

@@ -10,20 +10,20 @@ import staticsIpc from '@lynx_shared/ipc/statics';
 import storageIpc, {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {
-  Bell,
-  CheckCircle,
-  CloseCircle,
-  Download,
-  Gift,
-  Heart,
-  InfoCircle,
-  ShieldWarning,
-  Star,
-  VolumeLoud,
-  Widget,
-  Widget5,
-} from '@solar-icons/react-perf/BoldDuotone';
-import {CheckRead} from '@solar-icons/react-perf/LineDuotone';
+  BellIcon,
+  CheckCircleIcon,
+  CloseCircleIcon,
+  DownloadIcon,
+  GiftIcon,
+  HeartIcon,
+  InfoCircleIcon,
+  ShieldWarningIcon,
+  StarIcon,
+  VolumeLoudIcon,
+  Widget5Icon,
+  WidgetIcon,
+} from '@solar-icons/react/bold-duotone';
+import {CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {AnimatePresence, motion, useReducedMotion} from 'framer-motion';
 import {X} from 'lucide-react';
 import {ComponentType, useCallback, useEffect, useMemo, useState} from 'react';
@@ -32,18 +32,18 @@ import {useDispatch} from 'react-redux';
 import {formatMarkdown} from './markdown';
 
 const IconMap: Record<string, ComponentType<{className?: string}>> = {
-  Bell,
-  InfoCircle,
-  ShieldWarning,
-  CheckCircle,
-  CloseCircle,
-  Gift,
-  Star,
-  VolumeLoud,
-  Heart,
-  Widget,
-  Widget5,
-  Download,
+  BellIcon,
+  InfoCircleIcon,
+  ShieldWarningIcon,
+  CheckCircleIcon,
+  CloseCircleIcon,
+  GiftIcon,
+  StarIcon,
+  VolumeLoudIcon,
+  HeartIcon,
+  WidgetIcon,
+  Widget5Icon,
+  DownloadIcon,
 };
 
 /**
@@ -270,7 +270,7 @@ function NotificationItem({
                   'mt-2.5 p-2.5 bg-warning/10 border border-warning/20 rounded-xl ' +
                   'flex items-start gap-1.5 text-[10px] text-warning font-semibold leading-normal'
                 }>
-                <ShieldWarning className="size-3.5 mt-0.5 shrink-0" />
+                <ShieldWarningIcon className="size-3.5 mt-0.5 shrink-0" />
                 <span>
                   This version is exclusive to {releaseType === 'INSIDER' ? 'Insider' : 'Early Access'} members. Upgrade
                   your plan to unlock downloads.
@@ -363,7 +363,7 @@ export default function HomeNotificationDrawer() {
     <>
       <Badge.Anchor>
         <Button variant="tertiary" className="shrink-0" onPress={handleOpenDrawer} isIconOnly>
-          <Bell />
+          <BellIcon />
         </Button>
         {totalNotificationCount !== 0 && (
           <Badge size="sm" placement="top-left" color={hasWarningOrDanger ? 'warning' : 'success'}>
@@ -385,11 +385,11 @@ export default function HomeNotificationDrawer() {
               <Drawer.Header className="px-6">
                 <Drawer.Heading className="flex justify-between">
                   <div className="flex items-center gap-x-1">
-                    <Bell className="size-4" />
+                    <BellIcon className="size-4" />
                     <Label>Notifications</Label>
                   </div>
                   <Button onPress={readAll} variant="tertiary" isIconOnly>
-                    <CheckRead className="size-4.5" />
+                    <CheckReadIcon className="size-4.5" />
                   </Button>
                 </Drawer.Heading>
               </Drawer.Header>
@@ -407,7 +407,7 @@ export default function HomeNotificationDrawer() {
                           className="mt-4"
                           variant="secondary"
                           description="No notifications yet!"
-                          icon={<Bell size={30} className="text-surface-secondary-foreground" />}
+                          icon={<BellIcon size={30} className="text-surface-secondary-foreground" />}
                         />
                       </motion.div>
                     ) : (

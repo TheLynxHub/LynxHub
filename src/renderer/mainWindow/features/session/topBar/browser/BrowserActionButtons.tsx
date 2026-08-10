@@ -5,7 +5,7 @@ import {useTabsState} from '@lynx/redux/reducers/tabs';
 import {Hotkey_Names} from '@lynx_common/consts/hotkeys';
 import browserIpc from '@lynx_shared/ipc/browser';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {ArrowLeft, ArrowRight, Home2, Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {ArrowLeftIcon, ArrowRightIcon, Home2Icon, RestartIcon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, motion, Transition, Variants} from 'framer-motion';
 import {X} from 'lucide-react';
 import {memo, useEffect, useMemo, useState} from 'react';
@@ -99,7 +99,7 @@ const BrowserActionButtons = memo(({webuiAddress, tabID, id, isDomReady}: Props)
           <motion.div exit="exit" initial="exit" animate="animate" variants={variants} transition={transition}>
             <LynxTooltip delay={1000} content="Click to go back">
               <Button size="sm" variant="ghost" onPress={goBack} aria-label="Go Back" isIconOnly>
-                <ArrowLeft className="size-4" />
+                <ArrowLeftIcon className="size-4" />
               </Button>
             </LynxTooltip>
           </motion.div>
@@ -111,7 +111,7 @@ const BrowserActionButtons = memo(({webuiAddress, tabID, id, isDomReady}: Props)
           <motion.div exit="exit" initial="exit" animate="animate" variants={variants} transition={transition}>
             <LynxTooltip delay={1000} content="Click to go forward">
               <Button size="sm" variant="ghost" onPress={goForward} aria-label="Go Forward" isIconOnly>
-                <ArrowRight className="size-4" />
+                <ArrowRightIcon className="size-4" />
               </Button>
             </LynxTooltip>
           </motion.div>
@@ -127,7 +127,7 @@ const BrowserActionButtons = memo(({webuiAddress, tabID, id, isDomReady}: Props)
       ) : (
         <LynxTooltip delay={1000} content="Reload page">
           <Button size="sm" variant="ghost" onPress={reload} aria-label="Reload Page" isIconOnly>
-            <Restart className="size-4" />
+            <RestartIcon className="size-4" />
           </Button>
         </LynxTooltip>
       )}
@@ -135,7 +135,7 @@ const BrowserActionButtons = memo(({webuiAddress, tabID, id, isDomReady}: Props)
       {webuiAddress && (
         <LynxTooltip delay={1000} content="Go to Home">
           <Button size="sm" variant="ghost" aria-label="Go Home" onPress={loadWebuiURL} isIconOnly>
-            <Home2 className="size-4" />
+            <Home2Icon className="size-4" />
           </Button>
         </LynxTooltip>
       )}

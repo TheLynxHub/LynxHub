@@ -7,7 +7,14 @@ import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
 import userIpc from '@lynx_shared/ipc/user';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {CloseCircle, Crown, Login, Logout, Refresh, Settings} from '@solar-icons/react-perf/BoldDuotone';
+import {
+  CloseCircleIcon,
+  CrownIcon,
+  LoginIcon,
+  LogoutIcon,
+  RefreshIcon,
+  SettingsIcon,
+} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -114,7 +121,7 @@ const Profile_Account = memo(() => {
                 isDisabled={isLoading || isSyncing}
                 onPress={() => window.open(`${LYNXHUB_WEBSITE}/account`)}>
                 <div className="flex items-center gap-2">
-                  <Settings className="size-3.5 shrink-0" />
+                  <SettingsIcon className="size-3.5 shrink-0" />
                   <span>Manage Account</span>
                 </div>
               </Button>
@@ -128,7 +135,7 @@ const Profile_Account = memo(() => {
                   <Spinner size="sm" color="current" />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <Refresh className="size-3.5 shrink-0" />
+                    <RefreshIcon className="size-3.5 shrink-0" />
                     <span>Sync</span>
                   </div>
                 )}
@@ -143,7 +150,7 @@ const Profile_Account = memo(() => {
                   <Spinner size="sm" color="current" />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <Logout className="size-3.5 shrink-0" />
+                    <LogoutIcon className="size-3.5 shrink-0" />
                     <span>Logout</span>
                   </div>
                 )}
@@ -155,7 +162,7 @@ const Profile_Account = memo(() => {
                 <Spinner size="sm" color="current" />
               ) : (
                 <div className="flex items-center gap-2">
-                  <Login className="size-3.5 shrink-0" />
+                  <LoginIcon className="size-3.5 shrink-0" />
                   <span>Login</span>
                 </div>
               )}
@@ -164,7 +171,7 @@ const Profile_Account = memo(() => {
           {isLoading && !isLoggedIn && (
             <Button size="sm" variant="danger-soft" onPress={cancelLoading}>
               <div className="flex items-center gap-2">
-                <CloseCircle className="size-3.5 shrink-0" />
+                <CloseCircleIcon className="size-3.5 shrink-0" />
                 <span>Cancel</span>
               </div>
             </Button>
@@ -215,7 +222,7 @@ const Profile_Account = memo(() => {
             onPress={() => window.open(`${LYNXHUB_WEBSITE}/account`)}
             className="font-bold shrink-0 self-start sm:self-center cursor-pointer">
             <div className="flex items-center gap-1">
-              <Crown className="size-3.5 shrink-0" />
+              <CrownIcon className="size-3.5 shrink-0" />
               <span>Upgrade to Access</span>
             </div>
           </Button>

@@ -2,7 +2,7 @@ import {Button, Checkbox, Modal, Tabs} from '@heroui/react';
 import {extractGitUrl} from '@lynx_common/utils';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer, {useDebounceBreadcrumb} from '@lynx_shared/sentry/Breadcrumbs';
-import {Download} from '@solar-icons/react-perf/BoldDuotone';
+import {DownloadIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
@@ -159,7 +159,7 @@ const ExtensionsModalContent = ({state}: CommonProps) => {
                   onPress={updateAll}
                   isDisabled={!isUpdateAvailable || isUpdatingAll}
                   variant={isUpdateAvailable ? 'primary' : 'tertiary'}>
-                  {isUpdateAvailable && !isUpdatingAll && <Download />}
+                  {isUpdateAvailable && !isUpdatingAll && <DownloadIcon />}
                   {!isUpdateAvailable ? 'No Updates Available' : isUpdatingAll ? 'Updating...' : 'Update All'}
                 </Button>
               )}

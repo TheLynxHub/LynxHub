@@ -3,7 +3,7 @@ import {Button} from '@heroui/react';
 import {Apps_Color_Icon, History_Color_Icon, Pin_Color_Icon} from '@lynx_assets/icons/Icons_Colorful';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Filter} from '@solar-icons/react-perf/BoldDuotone';
+import {FilterIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback} from 'react';
 
 /**
@@ -39,7 +39,7 @@ const HomeFilter = memo(({selectedCategories}: HomeFilterProps) => {
   return (
     <Dropdown aria-label="Filter Categories">
       <Button variant="tertiary" className="shrink-0" isIconOnly>
-        <Filter />
+        <FilterIcon />
       </Button>
 
       <Dropdown.Popover>

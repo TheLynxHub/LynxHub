@@ -1,6 +1,6 @@
 import {Button, Dropdown, Label} from '@heroui/react';
 import filesIpc from '@lynx_shared/ipc/files';
-import {File, Folder, Inbox} from '@solar-icons/react-perf/BoldDuotone';
+import {FileIcon, FolderIcon, InboxIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {Plus} from 'lucide-react';
 import {useCallback} from 'react';
@@ -43,11 +43,11 @@ export default function PreOpenPath({id}: Props) {
           <Dropdown.Popover>
             <Dropdown.Menu>
               <Dropdown.Item textValue="Folder" onPress={selectFolder}>
-                <Folder />
+                <FolderIcon />
                 <Label>Folder</Label>
               </Dropdown.Item>
               <Dropdown.Item textValue="File" onPress={selectFile}>
-                <File />
+                <FileIcon />
                 <Label>File</Label>
               </Dropdown.Item>
             </Dropdown.Menu>
@@ -59,13 +59,13 @@ export default function PreOpenPath({id}: Props) {
       {isEmpty(items) ? (
         <EmptyStateCard
           bodyClassName="py-8"
-          icon={<Inbox size={40} />}
+          icon={<InboxIcon size={40} />}
           description="No file or folder available to open!"
         />
       ) : (
         <div className="space-y-2">
           {items.map((open, index) => {
-            const icon = open.type === 'folder' ? <Folder /> : <File />;
+            const icon = open.type === 'folder' ? <FolderIcon /> : <FileIcon />;
             return (
               <PreOpenPathItem
                 icon={icon}

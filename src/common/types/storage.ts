@@ -106,22 +106,6 @@ export type AppConfigStorage = {
   lastPromoShownActiveDaysCount?: number;
   imageCacheIntervalDays: number;
   imageCacheMaxSize: number;
-  floatChatAlwaysOnTop: boolean;
-  floatChatShowTaskbar: boolean;
-  floatChatRememberSize: boolean;
-  floatChatRememberPosition: boolean;
-  floatChatLastSize?: {width: number; height: number};
-  floatChatLastPosition?: {x: number; y: number};
-  disableFloatChat: boolean;
-  floatChatKeepInBackground: boolean;
-  chatBridgeMaxWidth: 'default' | 'wide' | 'full' | 'small';
-  bridgeDefaultView: 'webview' | 'custom';
-  floatDefaultView: 'webview' | 'custom';
-  chatSidebarCollapsed: boolean;
-  chatSidebarWidth: number;
-  floatChatSidebarCollapsed: boolean;
-  floatChatSidebarWidth: number;
-  pinnedThreads: string[];
 };
 
 /**
@@ -183,7 +167,6 @@ export type NotificationStorage = {
 export type PluginStorage = {
   migrated: boolean;
   disabledCards: string[];
-  bgChatEnabledCards?: string[];
   activeVersions?: Record<string, string>;
   brokenVersions?: Record<string, string[]>;
 };

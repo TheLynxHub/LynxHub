@@ -5,13 +5,13 @@ import {PATREON_URL} from '@lynx_common/consts';
 import {PatreonSupporter, PatreonSupporterTier} from '@lynx_common/types';
 import staticsIpc from '@lynx_shared/ipc/statics';
 import {
-  ArrowRightUp,
-  CrownStar,
-  CupFirst,
-  HeartAngle,
-  HeartPulse2,
-  SquareTopDown,
-} from '@solar-icons/react-perf/BoldDuotone';
+  ArrowRightUpIcon,
+  CrownStarIcon,
+  CupFirstIcon,
+  HeartAngleIcon,
+  HeartPulse2Icon,
+  SquareTopDownIcon,
+} from '@solar-icons/react/bold-duotone';
 import {Plus} from 'lucide-react';
 import {memo, ReactNode, useEffect, useMemo, useState} from 'react';
 export const DashboardCreditsId = 'settings_credits_elem';
@@ -28,7 +28,7 @@ interface TierStyle {
 
 const TIER_STYLES: Record<PatreonSupporterTier, TierStyle> = {
   'Diamond Sponsor': {
-    icon: <CrownStar className="size-5" />,
+    icon: <CrownStarIcon className="size-5" />,
     badge: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20',
     gradient: 'from-cyan-500/10 via-transparent to-transparent',
     glow: 'group-hover:shadow-[0_0_15px_rgba(6,182,212,0.12)]',
@@ -37,7 +37,7 @@ const TIER_STYLES: Record<PatreonSupporterTier, TierStyle> = {
     accentText: 'text-cyan-500 dark:text-cyan-400',
   },
   'Platinum Sponsor': {
-    icon: <CupFirst className="size-5" />,
+    icon: <CupFirstIcon className="size-5" />,
     badge: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
     gradient: 'from-amber-500/10 via-transparent to-transparent',
     glow: 'group-hover:shadow-[0_0_15px_rgba(245,158,11,0.12)]',
@@ -103,7 +103,7 @@ const DashboardCredits = memo(() => {
   const hasConnectedPatreon = isLoggedIn && userData.connectedProviders?.includes('patreon');
 
   return (
-    <SettingsSection title="Credits" id={DashboardCreditsId} icon={<HeartPulse2 className="size-5" />} itemsCenter>
+    <SettingsSection title="Credits" id={DashboardCreditsId} icon={<HeartPulse2Icon className="size-5" />} itemsCenter>
       {/* Premium Hero Banner */}
       <div
         className={
@@ -123,7 +123,7 @@ const DashboardCredits = memo(() => {
                 'inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600' +
                 ' dark:text-blue-400 text-[11px] font-semibold mb-3'
               }>
-              <HeartAngle className="size-3.5" />
+              <HeartAngleIcon className="size-3.5" />
               <span>Backer Community</span>
             </div>
             <h2 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -163,7 +163,7 @@ const DashboardCredits = memo(() => {
                 }
                 onPress={handleBecomePatron}>
                 <span className="flex items-center justify-center gap-2 w-full">
-                  Join the Patrons <SquareTopDown className="size-4" />
+                  Join the Patrons <SquareTopDownIcon className="size-4" />
                 </span>
               </Button>
 
@@ -282,7 +282,7 @@ const DashboardCredits = memo(() => {
                           </div>
 
                           {/* Subtle arrow indicator appearing on hover */}
-                          <ArrowRightUp
+                          <ArrowRightUpIcon
                             className={
                               'absolute top-2.5 right-2.5 size-3.5 text-zinc-400 dark:text-zinc-500 opacity-0' +
                               ' group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0.5' +

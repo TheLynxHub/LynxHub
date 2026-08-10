@@ -4,7 +4,7 @@ import filesIpc from '@lynx_shared/ipc/files';
 import ptyIpc from '@lynx_shared/ipc/pty';
 import storageIpc from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {Broom, FolderOpen, MoveToFolder} from '@solar-icons/react-perf/BoldDuotone';
+import {BroomIcon, FolderOpenIcon, MoveToFolderIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {memo, useCallback, useEffect, useState} from 'react';
 
@@ -85,7 +85,7 @@ const TerminalCDTo = memo(({id}: Props) => {
       <Popover.Trigger>
         <LynxTooltip delay={500} content="Change terminal directory (cd)">
           <Button size="sm" variant="ghost" aria-label="Change Directory" isIconOnly>
-            <MoveToFolder className="size-3.5" />
+            <MoveToFolderIcon className="size-3.5" />
           </Button>
         </LynxTooltip>
       </Popover.Trigger>
@@ -95,13 +95,13 @@ const TerminalCDTo = memo(({id}: Props) => {
             <Header>Change Directory</Header>
             {!isEmpty(history) && (
               <Button size="sm" variant="ghost" onPress={clearHistory} className="text-danger shrink-0" isIconOnly>
-                <Broom className="size-3" />
+                <BroomIcon className="size-3" />
               </Button>
             )}
           </Popover.Heading>
           {/* Choose folder button */}
           <Button variant="ghost" onPress={selectDir} className="justify-start" fullWidth>
-            <FolderOpen className="size-3.5" />
+            <FolderOpenIcon className="size-3.5" />
             Choose folder…
           </Button>
 
@@ -110,14 +110,14 @@ const TerminalCDTo = memo(({id}: Props) => {
           {/* History list */}
           {isEmpty(history) ? (
             <div className="flex flex-col items-center gap-1.5 py-6 text-center">
-              <MoveToFolder className="size-6 text-muted" />
+              <MoveToFolderIcon className="size-6 text-muted" />
               <p className="text-xs text-muted">No recent directories</p>
             </div>
           ) : (
             <ScrollShadow className="max-h-50 flex flex-col">
               {history.map(item => (
                 <Button key={item} variant="ghost" className="group" onPress={() => cdTo(item)} fullWidth>
-                  <MoveToFolder className="size-3.5 shrink-0 text-muted" />
+                  <MoveToFolderIcon className="size-3.5 shrink-0 text-muted" />
                   <div className={'min-w-0 flex-1 truncate text-left text-xs text-semi-muted hover:text-foreground'}>
                     {item}
                   </div>

@@ -1,6 +1,6 @@
 import {Button} from '@heroui/react';
 import applicationIpc from '@lynx_shared/ipc/application';
-import {CheckCircle, ShieldCross} from '@solar-icons/react-perf/BoldDuotone';
+import {CheckCircleIcon, ShieldCrossIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -41,7 +41,7 @@ export default function Downloaded({errMsg, success, tryAgain, cancel, onClose}:
           className="w-90"
           variant="secondary"
           title="Update Successfully Downloaded"
-          icon={<CheckCircle className="size-18 text-success" />}
+          icon={<CheckCircleIcon className="size-18 text-success" />}
           description="The update will be installed when you restart the application."
         />
       ) : (
@@ -58,7 +58,7 @@ export default function Downloaded({errMsg, success, tryAgain, cancel, onClose}:
           variant="secondary"
           title="Download Failed"
           description={errMsg || 'An unknown error occurred.'}
-          icon={<ShieldCross className="size-18 text-danger" />}
+          icon={<ShieldCrossIcon className="size-18 text-danger" />}
         />
       )}
     </div>

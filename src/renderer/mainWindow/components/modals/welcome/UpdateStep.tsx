@@ -1,7 +1,7 @@
 import {Alert, Button, buttonVariants, Link} from '@heroui/react';
 import {APP_NAME} from '@lynx_common/consts';
 import applicationIpc from '@lynx_shared/ipc/application';
-import {CheckRead} from '@solar-icons/react-perf/LineDuotone';
+import {CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {motion} from 'framer-motion';
 import {useCallback, useEffect, useState} from 'react';
 
@@ -74,7 +74,7 @@ export default function StepUpdate({onComplete}: Props) {
           isDisabled={!pwshSatisfied}
           className="font-semibold h-12"
           variant={pwshSatisfied ? 'primary' : 'secondary'}>
-          {pwshSatisfied && <CheckRead className="size-5" />}
+          {pwshSatisfied && <CheckReadIcon className="size-5" />}
           {pwshSatisfied ? `Finish & Restart ${APP_NAME}` : 'Waiting for PowerShell...'}
         </Button>
       </motion.div>

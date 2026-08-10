@@ -2,7 +2,7 @@ import {Button} from '@heroui/react';
 import {topToast} from '@lynx/layouts/ToastProviders';
 import filesIpc from '@lynx_shared/ipc/files';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {FileText} from '@solar-icons/react-perf/BoldDuotone';
+import {FileTextIcon} from '@solar-icons/react/bold-duotone';
 import {SerializeAddon} from '@xterm/addon-serialize';
 import {memo, useCallback} from 'react';
 
@@ -54,7 +54,7 @@ const TerminalCopyAll = memo(({serializeAddon}: Props) => {
 
       <LynxTooltip delay={500} content="Export all to file">
         <Button size="sm" variant="ghost" onPress={saveFile} aria-label="Export all to file" isIconOnly>
-          <FileText className="size-3.5" />
+          <FileTextIcon className="size-3.5" />
         </Button>
       </LynxTooltip>
     </div>

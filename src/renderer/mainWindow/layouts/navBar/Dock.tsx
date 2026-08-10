@@ -1,7 +1,7 @@
 import {useAppState} from '@lynx/redux/reducers/app';
 import {tabsActions} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
-import {AltArrowDown, AltArrowUp} from '@solar-icons/react-perf/Linear';
+import {AltArrowDownIcon, AltArrowUpIcon} from '@solar-icons/react/linear';
 import {AnimatePresence, motion, Transition} from 'framer-motion';
 import {memo, MouseEvent, ReactNode, useCallback, useEffect, useMemo, useRef, useState, WheelEvent} from 'react';
 import {useDispatch} from 'react-redux';
@@ -38,7 +38,7 @@ const ScrollArrow = memo(
         style={{color: mutedText}}
         whileHover={{backgroundColor: hoverBg, color: isDark ? '#e5e7eb' : '#1f2937'}}
         className="flex items-center justify-center w-full py-2 rounded-xl cursor-pointer pointer-events-auto">
-        {direction === 'up' ? <AltArrowUp /> : <AltArrowDown />}
+        {direction === 'up' ? <AltArrowUpIcon /> : <AltArrowDownIcon />}
       </motion.button>
     );
   },

@@ -2,7 +2,7 @@ import {Button, Link, Spinner} from '@heroui/react';
 import {CardInfoDescriptions, CardInfoDescriptions_Items} from '@lynx_common/types/plugins/modules';
 import {isValidURL} from '@lynx_common/utils';
 import filesIpc from '@lynx_shared/ipc/files';
-import {FolderOpen} from '@solar-icons/react-perf/BoldDuotone';
+import {FolderOpenIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty, isNil} from 'lodash-es';
 import {memo, useCallback} from 'react';
 
@@ -71,7 +71,7 @@ function CardInfoDescription({folders, descriptions}: CardInfoDescriptionProps) 
 
       {folders?.map((folder, index) => (
         <Button size="lg" variant="secondary" key={`openFolder_${index}`} onPress={() => openDir(folder)} fullWidth>
-          <FolderOpen />
+          <FolderOpenIcon />
           <span className="truncate text-sm font-medium">{folder}</span>
         </Button>
       ))}

@@ -3,7 +3,7 @@ import SettingsSection from '@lynx/components/SettingsSection';
 import {topToast} from '@lynx/layouts/ToastProviders';
 import applicationIpc from '@lynx_shared/ipc/application';
 import filesIpc from '@lynx_shared/ipc/files';
-import {Database, MoveToFolder, Repeat} from '@solar-icons/react-perf/BoldDuotone';
+import {DatabaseIcon, MoveToFolderIcon, RepeatIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useState} from 'react';
 
 import SettingsSearchHighlight from '../../SettingsSearchHighlight';
@@ -54,7 +54,7 @@ export default function SettingsData() {
       }
       title="Data"
       id={SettingsDataId}
-      icon={<Database className="size-5" />}
+      icon={<DatabaseIcon className="size-5" />}
       itemsCenter>
       <Button
         variant="tertiary"
@@ -62,12 +62,12 @@ export default function SettingsData() {
         onPress={handleOpenFolder}
         className="bg-surface hover:bg-surface/50"
         fullWidth>
-        <MoveToFolder />
+        <MoveToFolderIcon />
         {currentPath || 'Loading path...'}
       </Button>
 
       <Button variant="danger-soft" onPress={handleChangeDataPath} fullWidth>
-        <Repeat />
+        <RepeatIcon />
         <SettingsSearchHighlight text="Change (Restart Required)" />
       </Button>
     </SettingsSection>

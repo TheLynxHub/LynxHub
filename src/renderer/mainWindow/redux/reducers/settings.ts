@@ -28,20 +28,6 @@ const initialState: SettingState = {
   searchValue: '',
   searchWords: [],
   selectedSection: '',
-  floatChatAlwaysOnTop: true,
-  floatChatShowTaskbar: false,
-  floatChatRememberSize: false,
-  floatChatRememberPosition: false,
-  disableFloatChat: false,
-  floatChatKeepInBackground: true,
-  chatBridgeMaxWidth: 'default',
-  bridgeDefaultView: 'custom',
-  floatDefaultView: 'custom',
-  chatSidebarCollapsed: false,
-  chatSidebarWidth: 240,
-  floatChatSidebarCollapsed: false,
-  floatChatSidebarWidth: 200,
-  pinnedThreads: [],
 };
 
 const settingsSlice = createSlice({

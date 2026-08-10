@@ -3,7 +3,7 @@ import {topToast} from '@lynx/layouts/ToastProviders';
 import {AgentTypes} from '@lynx_common/types/ipc';
 import browserIpc from '@lynx_shared/ipc/browser';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Diskette} from '@solar-icons/react-perf/BoldDuotone';
+import {DisketteIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useState} from 'react';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
@@ -195,7 +195,7 @@ export default function UserAgent() {
               onPress={saveCustomAgent}
               aria-label="Save custom user agent"
               isIconOnly>
-              <Diskette />
+              <DisketteIcon />
             </Button>
           </div>
         )}

@@ -16,7 +16,7 @@ import {
   LYNXHUB_WEBSITE,
   REDDIT_URL,
 } from '@lynx_common/consts';
-import {Copy, DocumentText, Global, InfoCircle} from '@solar-icons/react-perf/BoldDuotone';
+import {CopyIcon, DocumentTextIcon, GlobalIcon, InfoCircleIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback} from 'react';
 
 import {topToast} from '../../../layouts/ToastProviders';
@@ -38,13 +38,13 @@ const DashboardAbout = memo(() => {
   const socialLinks = [
     {
       name: 'Website',
-      icon: <Global className="size-5" />,
+      icon: <GlobalIcon className="size-5" />,
       action: () => window.open(LYNXHUB_WEBSITE),
       actionIcon: <LinkIcon className="size-3.5" />,
     },
     {
       name: 'Docs',
-      icon: <DocumentText className="size-5" />,
+      icon: <DocumentTextIcon className="size-5" />,
       action: () => window.open(LYNXHUB_DOCS),
       actionIcon: <LinkIcon className="size-3.5" />,
     },
@@ -52,7 +52,7 @@ const DashboardAbout = memo(() => {
       name: 'Email',
       icon: <Gmail_Icon className="size-5" />,
       action: () => copyText(EMAIL),
-      actionIcon: <Copy className="size-4" />,
+      actionIcon: <CopyIcon className="size-4" />,
     },
     {
       name: 'GitHub',
@@ -81,7 +81,7 @@ const DashboardAbout = memo(() => {
   ];
 
   return (
-    <SettingsSection title="About" id={DashboardAboutId} icon={<InfoCircle className="size-5" />} itemsCenter>
+    <SettingsSection title="About" id={DashboardAboutId} icon={<InfoCircleIcon className="size-5" />} itemsCenter>
       <div className="w-full max-w-4xl mx-auto space-y-4">
         {/* App Info Card */}
         <Card className="overflow-hidden border-none bg-transparent shadow-none">

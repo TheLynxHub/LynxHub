@@ -1,5 +1,5 @@
 import {Modal} from '@heroui/react';
-import {ShieldWarning} from '@solar-icons/react-perf/BoldDuotone';
+import {ShieldWarningIcon} from '@solar-icons/react/bold-duotone';
 import {Dispatch, SetStateAction} from 'react';
 
 import TabModal from '../../../../TabModal';
@@ -25,7 +25,7 @@ export default function LocateWarning({isOpen, setIsOpen}: LocateWarningProps) {
       <Modal.CloseTrigger onPress={onClose} />
       <Modal.Header>
         <Modal.Heading className="text-warning-soft-foreground items-center gap-x-2 flex flex-row">
-          <ShieldWarning className="size-8" />
+          <ShieldWarningIcon className="size-8" />
           <span className="font-bold">Installation Directory</span>
         </Modal.Heading>
       </Modal.Header>

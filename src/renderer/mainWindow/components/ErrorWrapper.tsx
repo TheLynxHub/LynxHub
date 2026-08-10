@@ -4,7 +4,7 @@ import {GitHub_Icon} from '@lynx_assets/icons';
 import {ISSUE_PAGE} from '@lynx_common/consts';
 import {isDev} from '@lynx_common/utils';
 import applicationIpc from '@lynx_shared/ipc/application';
-import {Danger} from '@solar-icons/react-perf/BoldDuotone';
+import {DangerIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect} from 'react';
 import {FallbackProps} from 'react-error-boundary';
 
@@ -44,7 +44,7 @@ export default function ErrorWrapper({error, resetErrorBoundary}: FallbackProps)
         }>
         {/* Error Icon & Title */}
         <div className="flex flex-col items-center gap-4 text-center">
-          <Danger className="size-16 text-danger" />
+          <DangerIcon className="size-16 text-danger" />
           <h1 className="text-2xl font-bold">Oops! Something went wrong.</h1>
         </div>
 

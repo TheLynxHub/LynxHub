@@ -1,6 +1,6 @@
 import {Button} from '@heroui/react';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {AltArrowDown, AltArrowUp} from '@solar-icons/react-perf/Linear';
+import {AltArrowDownIcon, AltArrowUpIcon} from '@solar-icons/react/linear';
 import {IDisposable} from '@xterm/xterm';
 import {RefObject, useEffect, useState} from 'react';
 
@@ -66,7 +66,7 @@ export default function TerminalScroll({xtermRef}: Props) {
       <AnimateChild show={currentScroll !== 0 && currentScroll !== undefined}>
         <LynxTooltip delay={500} content="Scroll to top">
           <Button size="sm" variant="ghost" onPress={scrollTop} aria-label="Scroll to top" isIconOnly>
-            <AltArrowUp />
+            <AltArrowUpIcon />
           </Button>
         </LynxTooltip>
       </AnimateChild>
@@ -74,7 +74,7 @@ export default function TerminalScroll({xtermRef}: Props) {
       <AnimateChild show={currentScroll !== undefined && currentScroll < (baseY || 0)}>
         <LynxTooltip delay={500} content="Scroll to bottom">
           <Button size="sm" variant="ghost" onPress={scrollBottom} aria-label="Scroll to bottom" isIconOnly>
-            <AltArrowDown />
+            <AltArrowDownIcon />
           </Button>
         </LynxTooltip>
       </AnimateChild>

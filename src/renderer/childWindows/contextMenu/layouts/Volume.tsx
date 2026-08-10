@@ -1,5 +1,5 @@
 import {Button, Label, Slider} from '@heroui/react';
-import {Volume, VolumeCross, VolumeLoud} from '@solar-icons/react-perf/BoldDuotone';
+import {VolumeCrossIcon, VolumeIcon, VolumeLoudIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useMemo} from 'react';
 
 import {useVolume} from './useVolume';
@@ -18,7 +18,7 @@ const VolumeMenu = memo(() => {
       {/* Header with title and mute button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <VolumeLoud className="size-5 text-muted" />
+          <VolumeLoudIcon className="size-5 text-muted" />
           <span className="text-sm font-semibold text-muted">Volume Control</span>
         </div>
         <Button
@@ -26,7 +26,7 @@ const VolumeMenu = memo(() => {
           onPress={toggleMute}
           aria-label={muted ? 'Unmute audio' : 'Mute audio'}
           variant={effectiveMuted ? 'danger-soft' : 'tertiary'}>
-          {effectiveMuted ? <VolumeCross className="size-4" /> : <VolumeLoud className="size-4" />}
+          {effectiveMuted ? <VolumeCrossIcon className="size-4" /> : <VolumeLoudIcon className="size-4" />}
           {effectiveMuted ? 'Unmute' : 'Mute'}
         </Button>
       </div>
@@ -35,13 +35,13 @@ const VolumeMenu = memo(() => {
       <div className="flex items-center justify-center rounded-2xl bg-surface-secondary py-3">
         <div className="flex items-center gap-2">
           {effectiveMuted ? (
-            <VolumeCross className="size-6 text-danger" />
+            <VolumeCrossIcon className="size-6 text-danger" />
           ) : volume === 0 ? (
-            <Volume className="size-6 text-muted" />
+            <VolumeIcon className="size-6 text-muted" />
           ) : volume < 50 ? (
-            <Volume className="size-6 text-semi-muted" />
+            <VolumeIcon className="size-6 text-semi-muted" />
           ) : (
-            <VolumeLoud className="size-6 text-semi-muted" />
+            <VolumeLoudIcon className="size-6 text-semi-muted" />
           )}
           <span className="text-2xl font-bold text-muted">{effectiveMuted ? 'Muted' : `${volume}%`}</span>
         </div>

@@ -1,5 +1,5 @@
 import {ChosenArgument} from '@lynx_common/types/plugins/modules';
-import {CheckSquare} from '@solar-icons/react-perf/BoldDuotone';
+import {CheckSquareIcon} from '@solar-icons/react/bold-duotone';
 
 import ArgumentItemBase from './Base';
 
@@ -22,6 +22,11 @@ type Props = {
  */
 export default function CheckBoxArgItem({argument, removeArg, id}: Props) {
   return (
-    <ArgumentItemBase id={id} name={argument.name} removeArg={removeArg} icon={<CheckSquare className="size-4" />} />
+    <ArgumentItemBase
+      id={id}
+      name={argument.name}
+      removeArg={removeArg}
+      icon={<CheckSquareIcon className="size-4" />}
+    />
   );
 }

@@ -1,5 +1,11 @@
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {Copy, GalleryCircle, GalleryDownload, GalleryWide, Link} from '@solar-icons/react-perf/BoldDuotone';
+import {
+  CopyIcon,
+  GalleryCircleIcon,
+  GalleryDownloadIcon,
+  GalleryWideIcon,
+  LinkIcon,
+} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback} from 'react';
 
 import Separator from './Separator';
@@ -62,31 +68,31 @@ export const Image = memo(({id, url}: ImageProps) => {
         onPress={onOpenImageTab()}
         key="context_openImageTab"
         title="Open Image in New Tab"
-        icon={<GalleryWide className="size-4" />}
+        icon={<GalleryWideIcon className="size-4" />}
       />
       <ActionButton
         title="Copy Image"
         onPress={onCopyImage()}
         key="context_copyImage"
-        icon={<Copy className="size-4" />}
+        icon={<CopyIcon className="size-4" />}
       />
       <ActionButton
         title="Save Image"
         onPress={onSaveImage()}
         key="context_saveImage"
-        icon={<GalleryDownload className="size-4" />}
+        icon={<GalleryDownloadIcon className="size-4" />}
       />
       <ActionButton
         title="Copy Image Address"
         onPress={onCopyImageAddress()}
         key="context_copyImageAddress"
-        icon={<Link className="size-4" />}
+        icon={<LinkIcon className="size-4" />}
       />
       <ActionButton
         onPress={onSearchImage()}
         key="context_searchImage"
         title="Search Web for Image"
-        icon={<GalleryCircle className="size-4" />}
+        icon={<GalleryCircleIcon className="size-4" />}
       />
       <Separator />
     </>

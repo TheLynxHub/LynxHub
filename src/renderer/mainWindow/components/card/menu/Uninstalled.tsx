@@ -1,5 +1,5 @@
 import {Button, Dropdown, useOverlayState} from '@heroui/react';
-import {MenuDots} from '@solar-icons/react-perf/BoldDuotone';
+import {MenuDotsIcon} from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 
 import ReadmeModal from '../../modals/ReadmeModal';
@@ -22,7 +22,9 @@ const UninstalledMenu = memo(() => {
         }}
         isOpen={menuIsOpen}>
         <Button variant="tertiary" aria-label="Open Card Menu" isIconOnly>
-          <MenuDots className={`size-[1.3rem] ${menuIsOpen ? 'rotate-90' : 'rotate-0'} transition-all duration-500`} />
+          <MenuDotsIcon
+            className={`size-[1.3rem] ${menuIsOpen ? 'rotate-90' : 'rotate-0'} transition-all duration-500`}
+          />
         </Button>
         <Dropdown.Popover>
           <Dropdown.Menu aria-label="Card Menu">

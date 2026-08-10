@@ -5,7 +5,7 @@ import {useUserState} from '@lynx/redux/reducers/user';
 import {GITHUB_URL} from '@lynx_common/consts';
 import storageIpc from '@lynx_shared/ipc/storage';
 import userIpc from '@lynx_shared/ipc/user';
-import {Star} from '@solar-icons/react-perf/BoldDuotone';
+import {StarIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -72,7 +72,7 @@ export default function StarRepoModal() {
     <TabModal size="lg" isOpen={showStarPromo} onOpenChange={() => handleClose(false)} isKeyboardDismissDisabled>
       <Modal.Header>
         <Modal.Heading className="flex items-center gap-x-2 text-warning">
-          <Star className="size-6 shrink-0 animate-pulse" />
+          <StarIcon className="size-6 shrink-0 animate-pulse" />
           <span>Support LynxHub on GitHub</span>
         </Modal.Heading>
       </Modal.Header>
@@ -130,12 +130,12 @@ export default function StarRepoModal() {
             isDisabled={success}
             isPending={isPending}
             className="font-bold cursor-pointer">
-            {!isPending && <Star className="size-4 shrink-0" />}
+            {!isPending && <StarIcon className="size-4 shrink-0" />}
             {success ? 'Starred!' : 'Star Repository'}
           </Button>
         ) : (
           <Button variant="primary" onPress={handleManualStar} className="font-bold cursor-pointer">
-            <Star className="size-4 shrink-0" />
+            <StarIcon className="size-4 shrink-0" />
             Star on GitHub
           </Button>
         )}

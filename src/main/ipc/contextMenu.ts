@@ -6,7 +6,7 @@ import {ptyWrite} from '@lynx_main/ipc/methods/pty';
 import {changeWindowState} from '@lynx_main/ipc/methods/windowUtils';
 import BrowserManager from '@lynx_main/managers/browser';
 import classHolder from '@lynx_main/managers/classHolder';
-import {BrowserWindow, clipboard, ContextMenuParams, dialog} from 'electron';
+import {BrowserWindow, ContextMenuParams, dialog} from 'electron';
 
 import {applicationIpc} from './application';
 import {browserIpc} from './browser';
@@ -82,26 +82,6 @@ export default async function listenContextMenu() {
   contextMenuIpc.on.relaunchAI(id => contextMenuIpc.send.onRelaunchAI(id));
   contextMenuIpc.on.stopAI(id => contextMenuIpc.send.onStopAI(id));
   contextMenuIpc.on.removeTab(tabID => contextMenuIpc.send.onRemoveTab(tabID));
-
-  // Chat Bridge Menu Actions
-  contextMenuIpc.on.openChatBridgeMenu((tabID, data, customPosition) => {
-    contextMenuManager.setCustomContextPosition(customPosition);
-    contextMenuIpc.send.onChatBridgeMenu(tabID, data);
-    contextMenuManager.showContextMenu();
-  });
-
-  contextMenuIpc.on.chatBridgeAction((tabID, action, payload) => {
-    if (action === 'copy-selection' && typeof payload === 'string') {
-      clipboard.writeText(payload);
-      return;
-    }
-    if (action === 'search-web' && typeof payload === 'string') {
-      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(payload)}`;
-      applicationIpc.send.onNewTab(searchUrl);
-      return;
-    }
-    contextMenuIpc.send.onChatBridgeAction(tabID, action, payload);
-  });
 }
 
 /**
@@ -291,12 +271,6 @@ export const contextMenuIpc = {
     onCloseApp: () => sendToContextMenu(contextMenuChannels.onCloseApp),
     /** Sends downloads event to context menu */
     onDownloads: () => sendToContextMenu(contextMenuChannels.onDownloads),
-    /** Sends chat bridge menu show request to context menu renderer */
-    onChatBridgeMenu: (tabID: string, data: any) =>
-      sendToContextMenu(contextMenuChannels.onChatBridgeMenu, tabID, data),
-    /** Sends chat bridge action back to main window renderer */
-    onChatBridgeAction: (tabID: string, action: string, payload?: string) =>
-      sendToMain(contextMenuChannels.onChatBridgeAction, tabID, action, payload),
   },
   on: {
     /** Listens for show ready request from renderer */
@@ -354,12 +328,6 @@ export const contextMenuIpc = {
       lynxIpc.on(contextMenuChannels.openTerminateTab, callback),
     /** Listens for open close app request */
     openCloseApp: (callback: () => void) => lynxIpc.on(contextMenuChannels.openCloseApp, callback),
-    /** Listens for open chat bridge menu request from main window */
-    openChatBridgeMenu: (callback: (tabID: string, data: any, customPosition?: {x: number; y: number}) => void) =>
-      lynxIpc.on(contextMenuChannels.openChatBridgeMenu, callback),
-    /** Listens for chat bridge action from context menu renderer */
-    chatBridgeAction: (callback: (tabID: string, action: string, payload?: string) => void) =>
-      lynxIpc.on(contextMenuChannels.chatBridgeAction, callback),
   },
   handle: {},
 };

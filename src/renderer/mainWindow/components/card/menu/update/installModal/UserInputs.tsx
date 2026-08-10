@@ -1,7 +1,7 @@
 import {Button, InputGroup, Label, ListBox, Select, TextField} from '@heroui/react';
 import {UserInputField, UserInputResult} from '@lynx_common/types/plugins/modules';
 import filesIpc from '@lynx_shared/ipc/files';
-import {File, FolderOpen} from '@solar-icons/react-perf/BoldDuotone';
+import {FileIcon, FolderOpenIcon} from '@solar-icons/react/bold-duotone';
 import {isNil} from 'lodash-es';
 import {Dispatch, FC, SetStateAction, useCallback, useEffect, useState} from 'react';
 
@@ -206,7 +206,7 @@ export default function UserInputs({inputElements, setResult, extensionElements}
                   onPress={() => selectPath('folder', id, isRequired)}
                   className={`${hasError ? 'border-red-500 border-2' : ''}`}
                   fullWidth>
-                  <FolderOpen />
+                  <FolderOpenIcon />
                   <span className={selectedFolder === 'Click here to select folder' && hasError ? 'text-red-500' : ''}>
                     {selectedFolder}
                   </span>
@@ -228,7 +228,7 @@ export default function UserInputs({inputElements, setResult, extensionElements}
                   onPress={() => selectPath('file', id, isRequired)}
                   className={`${hasError ? 'border-red-500 border-2' : ''}`}
                   fullWidth>
-                  <File />
+                  <FileIcon />
                   <span className={selectedFile === 'Click here to select file' && hasError ? 'text-red-500' : ''}>
                     {selectedFile}
                   </span>

@@ -41,25 +41,8 @@ export default function listenStorage() {
   storageIpc.handle.update((key, updateData) => {
     const res = storageManager.updateData(key, updateData);
     if (key === 'app') {
-      if ((updateData as any).hotkeys || (updateData as any).disableFloatChat !== undefined) {
-        import('../childWindows/floatChat').then(({RegisterFloatChatHotkey, CloseFloatChatWindow}) => {
-          RegisterFloatChatHotkey();
-          if ((updateData as any).disableFloatChat) {
-            CloseFloatChatWindow(true);
-          }
-        });
-      }
-      if ((updateData as any).floatChatAlwaysOnTop !== undefined) {
-        const win = classHolder.floatChatWindow;
-        if (win && !win.isDestroyed()) {
-          win.setAlwaysOnTop((updateData as any).floatChatAlwaysOnTop);
-        }
-      }
-      if ((updateData as any).floatChatShowTaskbar !== undefined) {
-        const win = classHolder.floatChatWindow;
-        if (win && !win.isDestroyed()) {
-          win.setSkipTaskbar(!(updateData as any).floatChatShowTaskbar);
-        }
+      if ((updateData as any).hotkeys) {
+        // Hotkey update handling
       }
     }
     return res;

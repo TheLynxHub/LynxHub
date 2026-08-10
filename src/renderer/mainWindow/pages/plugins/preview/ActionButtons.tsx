@@ -11,7 +11,7 @@ import {extractGitUrl} from '@lynx_common/utils';
 import applicationIpc from '@lynx_shared/ipc/application';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {DownloadMinimalistic, SettingsMinimalistic, TrashBin2} from '@solar-icons/react-perf/BoldDuotone';
+import {DownloadMinimalisticIcon, SettingsMinimalisticIcon, TrashBin2Icon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -149,7 +149,7 @@ export default function PluginActionButtons({isInstalled, currentVersion}: Plugi
         {/* Module configuration button – only visible for installed modules */}
         {isModuleType && isInstalled && (
           <Button size="sm" variant="secondary" onPress={configModal.open} aria-label="Open module configuration">
-            <SettingsMinimalistic />
+            <SettingsMinimalisticIcon />
             Configure
           </Button>
         )}
@@ -164,7 +164,7 @@ export default function PluginActionButtons({isInstalled, currentVersion}: Plugi
             onPress={uninstallPlugin}
             isPending={isUninstalling}
             aria-label="Uninstall plugin">
-            {isUninstalling ? <Spinner size="sm" color="current" /> : <TrashBin2 />}
+            {isUninstalling ? <Spinner size="sm" color="current" /> : <TrashBin2Icon />}
             {isUninstalling ? 'Uninstalling...' : 'Uninstall'}
           </Button>
         ) : (
@@ -175,7 +175,7 @@ export default function PluginActionButtons({isInstalled, currentVersion}: Plugi
             isDisabled={!isPlatformCompatible}
             variant={isPlatformCompatible ? 'primary' : 'danger-soft'}
             aria-label={isPlatformCompatible ? 'Install plugin' : 'Plugin not compatible with your platform'}>
-            {isInstalling ? <Spinner size="sm" color="current" /> : <DownloadMinimalistic />}
+            {isInstalling ? <Spinner size="sm" color="current" /> : <DownloadMinimalisticIcon />}
             {!isPlatformCompatible ? 'Not Compatible' : isInstalling ? 'Installing...' : 'Install'}
           </Button>
         )}

@@ -1,7 +1,7 @@
 import {Button, Card, FieldError, Input, Radio, RadioGroup, Spinner, TextField} from '@heroui/react';
 import {topToast} from '@lynx/layouts/ToastProviders';
 import downloadManagerIpc from '@lynx_shared/ipc/downloadManager';
-import {MoveToFolder} from '@solar-icons/react-perf/BoldDuotone';
+import {MoveToFolderIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
@@ -170,7 +170,7 @@ export default function Downloads() {
 
           <Card.Footer>
             <Button variant="tertiary" isPending={isLoadingLocation} onPress={handleChangeLocation} fullWidth>
-              {isLoadingLocation ? <Spinner size="sm" color="current" /> : <MoveToFolder className="size-4" />}
+              {isLoadingLocation ? <Spinner size="sm" color="current" /> : <MoveToFolderIcon className="size-4" />}
               Change Location
             </Button>
           </Card.Footer>

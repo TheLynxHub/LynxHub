@@ -1,5 +1,5 @@
 import {ToastWindowMessageType} from '@lynx_common/types';
-import {CheckCircle, DangerCircle, InfoCircle, ShieldCross} from '@solar-icons/react-perf/BoldDuotone';
+import {CheckCircleIcon, DangerCircleIcon, InfoCircleIcon, ShieldCrossIcon} from '@solar-icons/react/bold-duotone';
 
 type ToastHeaderProps = {
   /** The type of the toast message (success, warning, error, info). */
@@ -16,15 +16,15 @@ type ToastHeaderProps = {
 const getIcon = (type: ToastHeaderProps['type']) => {
   switch (type) {
     case 'success':
-      return <CheckCircle className="size-7 text-emerald-500" />;
+      return <CheckCircleIcon className="size-7 text-emerald-500" />;
     case 'warning':
-      return <DangerCircle className="size-7 text-amber-500" />;
+      return <DangerCircleIcon className="size-7 text-amber-500" />;
     case 'error':
-      return <ShieldCross className="size-7 text-red-500" />;
+      return <ShieldCrossIcon className="size-7 text-red-500" />;
     case 'info':
-      return <InfoCircle className="size-7 text-blue-500" />;
+      return <InfoCircleIcon className="size-7 text-blue-500" />;
     default:
-      return <InfoCircle className="size-7 text-foreground" />;
+      return <InfoCircleIcon className="size-7 text-foreground" />;
   }
 };
 

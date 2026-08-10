@@ -89,7 +89,6 @@ export const PageID = {
   dashboard: 'dashboard_page',
   plugins: 'plugins_page',
   settings: 'settings_page',
-  chatBridge: 'chatBridge_page',
 } as const;
 
 export type AvailablePageIDs = (typeof PageID)[keyof typeof PageID];
@@ -111,7 +110,6 @@ export const PageTitles = {
   dashboard: 'Dashboard',
   plugins: 'Plugins',
   settings: 'Settings',
-  chatBridge: 'Chat Bridge',
 } as const;
 
 /**
@@ -131,5 +129,4 @@ export const PageTitleByPageId = {
   [PageID.dashboard]: 'Dashboard',
   [PageID.plugins]: 'Plugins',
   [PageID.settings]: 'Settings',
-  [PageID.chatBridge]: 'Chat Bridge',
 } as const;

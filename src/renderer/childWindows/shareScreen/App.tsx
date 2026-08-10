@@ -2,7 +2,7 @@ import {Button, ScrollShadow, Spinner, Switch, Tabs} from '@heroui/react';
 import EmptyStateCard from '@lynx/components/EmptyStateCard';
 import {ScreenShareSources, ScreenShareStart} from '@lynx_common/types/shareScreen';
 import shareScreenIpc from '@lynx_shared/ipc/shareScreen';
-import {Monitor, Screencast, VolumeLoud, WindowFrame} from '@solar-icons/react-perf/BoldDuotone';
+import {MonitorIcon, ScreencastIcon, VolumeLoudIcon, WindowFrameIcon} from '@solar-icons/react/bold-duotone';
 import isEmpty from 'lodash/isEmpty';
 import {X} from 'lucide-react';
 import {Key, useState} from 'react';
@@ -50,7 +50,7 @@ export default function ScreenShare() {
     <EmptyStateCard
       className="size-full"
       title="Nothing to share"
-      icon={<Monitor className="size-12" />}
+      icon={<MonitorIcon className="size-12" />}
       description="No {activeTab} available to capture."
     />
   );
@@ -71,12 +71,12 @@ export default function ScreenShare() {
             <Tabs.ListContainer>
               <Tabs.List aria-label="Options">
                 <Tabs.Tab id="windows" className="gap-x-1">
-                  <WindowFrame className="size-4" />
+                  <WindowFrameIcon className="size-4" />
                   Application Window
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="screens" className="gap-x-1">
-                  <Monitor className="size-4" />
+                  <MonitorIcon className="size-4" />
                   Entire Screen
                   <Tabs.Indicator />
                 </Tabs.Tab>
@@ -123,7 +123,7 @@ export default function ScreenShare() {
                 <Switch.Control>
                   <Switch.Thumb>
                     <Switch.Icon>
-                      {shareAudio ? <VolumeLoud className="size-3" /> : <X className="size-3" />}
+                      {shareAudio ? <VolumeLoudIcon className="size-3" /> : <X className="size-3" />}
                     </Switch.Icon>
                   </Switch.Thumb>
                 </Switch.Control>
@@ -135,7 +135,7 @@ export default function ScreenShare() {
                 Cancel
               </Button>
               <Button size="sm" onPress={handleShare} isDisabled={!selectedItem}>
-                <Screencast className="size-4" />
+                <ScreencastIcon className="size-4" />
                 Share
               </Button>
             </div>

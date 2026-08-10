@@ -14,5 +14,4 @@ export enum MenuTypes {
   Alert,
   Confirm,
   ProcessExitSignal,
-  ChatBridgeMenu,
 }

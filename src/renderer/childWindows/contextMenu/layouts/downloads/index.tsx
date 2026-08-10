@@ -1,6 +1,6 @@
 import {Button, Chip} from '@heroui/react';
 import downloadManagerIpc from '@lynx_shared/ipc/downloadManager';
-import {Broom, DownloadMinimalistic} from '@solar-icons/react-perf/BoldDuotone';
+import {BroomIcon, DownloadMinimalisticIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -25,7 +25,7 @@ const DownloadMenu = memo(() => {
       {/* Header */}
       <div className="px-4 py-4 flex flex-row items-center justify-between">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <DownloadMinimalistic className="size-5" />
+          <DownloadMinimalisticIcon className="size-5" />
           Downloads
         </h2>
         <div className="flex items-center gap-3">
@@ -34,7 +34,7 @@ const DownloadMenu = memo(() => {
           </Chip>
           {downloads.length > 0 && (
             <Button size="sm" variant="danger-soft" onPress={handleClearAll}>
-              <Broom />
+              <BroomIcon />
               Cancel & Clear All
             </Button>
           )}

@@ -1,6 +1,6 @@
 import {Button, Modal} from '@heroui/react';
 import {ISSUE_PAGE} from '@lynx_common/consts';
-import {SquareTopDown} from '@solar-icons/react-perf/BoldDuotone';
+import {SquareTopDownIcon} from '@solar-icons/react/bold-duotone';
 import {useMemo} from 'react';
 
 import {extensionsData} from '../../../../../plugins/extensions/loader';
@@ -32,7 +32,7 @@ const WarnModal = ({state}: CommonProps) => {
       <Modal.Footer>
         <Button variant="secondary" onPress={() => window.open(ISSUE_PAGE)}>
           Report
-          <SquareTopDown />
+          <SquareTopDownIcon />
         </Button>
       </Modal.Footer>
     </TabModal>

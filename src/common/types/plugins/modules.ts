@@ -511,12 +511,6 @@ export type CardData = {
    */
   methods?: CardRendererMethods;
 
-  /** Whether this is an online module running in the background browser */
-  isOnline?: boolean;
-
-  /** Selector configurations for scraping and inputting messages in the online module */
-  onlineConfig?: OnlineConfig;
-
   /** An optional URL or local path for the card's avatar or icon */
   logoUrl?: string;
   iconUrl?: string;
@@ -524,33 +518,6 @@ export type CardData = {
   /** An optional developer/creator name to display on the card */
   developer?: string;
 };
-
-export interface OnlineScriptsConfig {
-  scrapeMessages?: string;
-  scrapeHistory?: string;
-  sendMessage?: string;
-  selectThread?: string;
-  newChat?: string;
-}
-
-export interface OnlineConfig {
-  url: string;
-  selectors: {
-    input: string;
-    sendButton?: string;
-    userMessage: string;
-    assistantMessage: string;
-    messageText: string;
-    chatItem?: string;
-    chatItemText?: string;
-    chatActiveItem?: string;
-  };
-  newChat?: {
-    action: 'click' | 'navigate';
-    value: string;
-  };
-  scripts?: OnlineScriptsConfig;
-}
 
 /**
  * Card data loaded into the application, including route path.

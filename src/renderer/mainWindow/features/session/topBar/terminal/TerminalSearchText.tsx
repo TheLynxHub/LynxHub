@@ -5,7 +5,7 @@ import {useHotkeysState} from '@lynx/redux/reducers/hotkeys';
 import {formatHotkey} from '@lynx/utils';
 import {Hotkey_Names} from '@lynx_common/consts/hotkeys';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {AltArrowDown, AltArrowUp, Magnifier} from '@solar-icons/react-perf/BoldDuotone';
+import {AltArrowDownIcon, AltArrowUpIcon, MagnifierIcon} from '@solar-icons/react/bold-duotone';
 import {ISearchOptions, SearchAddon} from '@xterm/addon-search';
 import {AnimatePresence, motion} from 'framer-motion';
 import {isEmpty} from 'lodash-es';
@@ -157,7 +157,7 @@ const TerminalSearchText = memo(({searchAddon, tabId}: Props) => {
           }
           delay={500}>
           <Button size="sm" variant="ghost" aria-label="Search for text" isIconOnly>
-            <Magnifier className="size-3.5" />
+            <MagnifierIcon className="size-3.5" />
           </Button>
         </LynxTooltip>
       </Popover.Trigger>
@@ -204,7 +204,7 @@ const TerminalSearchText = memo(({searchAddon, tabId}: Props) => {
               variant="tertiary"
               onPress={handleFindNext}
               isDisabled={isEmpty(searchText)}>
-              <AltArrowDown className="size-4 shrink-0" />
+              <AltArrowDownIcon className="size-4 shrink-0" />
               Next
             </Button>
             <Button
@@ -213,7 +213,7 @@ const TerminalSearchText = memo(({searchAddon, tabId}: Props) => {
               variant="tertiary"
               onPress={handleFindPrev}
               isDisabled={isEmpty(searchText)}>
-              <AltArrowUp className="size-4 shrink-0" />
+              <AltArrowUpIcon className="size-4 shrink-0" />
               Previous
             </Button>
             <Button

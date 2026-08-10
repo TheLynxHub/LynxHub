@@ -1,6 +1,6 @@
 import {cn, Spinner} from '@heroui/react';
 import {InitialSteps} from '@lynx_common/types/plugins/modules';
-import {Unread} from '@solar-icons/react-perf/Linear';
+import {UnreadIcon} from '@solar-icons/react/linear';
 import {memo, useEffect, useRef} from 'react';
 
 import {useHasScroll} from '../../../../../utils/hooks';
@@ -31,7 +31,7 @@ function StepIndicator({status}: {status: 'complete' | 'current' | 'upcoming'}) 
   if (status === 'complete') {
     return (
       <div className="flex size-5 items-center justify-center rounded-full bg-success-soft-hover text-success">
-        <Unread className="size-4" />
+        <UnreadIcon className="size-4" />
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import SettingsSection from '@lynx/components/SettingsSection';
-import {SpedometerMiddle} from '@solar-icons/react-perf/BoldDuotone';
+import {SpeedometerMiddleIcon} from '@solar-icons/react/bold-duotone';
 
 import HWAcc from '../general/HWAcc';
 import Autoplay from './Autoplay';
@@ -26,7 +26,7 @@ export const SettingsPerformanceId = 'settings_performance_elem';
  */
 export default function SettingsPerformance() {
   return (
-    <SettingsSection title="Performance" id={SettingsPerformanceId} icon={<SpedometerMiddle className="size-5" />}>
+    <SettingsSection title="Performance" id={SettingsPerformanceId} icon={<SpeedometerMiddleIcon className="size-5" />}>
       <HWAcc />
       <HighDpi />
       <VideoDecoding />

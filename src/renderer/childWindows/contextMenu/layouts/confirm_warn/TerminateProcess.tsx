@@ -1,7 +1,7 @@
 import {Button} from '@heroui/react';
 import {Power_Icon} from '@lynx_assets/icons';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {Forward2, Restart} from '@solar-icons/react-perf/BoldDuotone';
+import {Forward2Icon, RestartIcon} from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 
 import {useContextState} from '../../redux/reducer';
@@ -29,12 +29,12 @@ const TerminateProcess = memo(() => {
       buttons={
         <>
           <Button size="sm" className="w-22" variant="secondary" onPress={hideContextWindow}>
-            <Forward2 className="rotate-180 shrink-0 size-3.5" />
+            <Forward2Icon className="rotate-180 shrink-0 size-3.5" />
             Cancel
           </Button>
           <div className="space-x-2">
             <Button size="sm" className="w-25" onPress={onRelaunch} variant="danger-soft">
-              <Restart className="shrink-0 size-3.5" />
+              <RestartIcon className="shrink-0 size-3.5" />
               Relaunch
             </Button>
             <Button size="sm" variant="danger" className="w-27" onPress={onStop} autoFocus>

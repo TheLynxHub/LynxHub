@@ -1,6 +1,6 @@
 import {Dropdown} from '@heroui/react';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {ChatRound, Copy, Earth, FileDownload} from '@solar-icons/react-perf/BoldDuotone';
+import {ChatRoundIcon, CopyIcon, EarthIcon, FileDownloadIcon} from '@solar-icons/react/bold-duotone';
 import {memo, MouseEvent, useCallback, useState} from 'react';
 
 interface FloatChatContextMenuProps {
@@ -114,19 +114,19 @@ export const FloatChatContextMenu = memo(
                     <Dropdown.Section>
                       <Dropdown.Item id="copy-selection" textValue="Copy Selection">
                         <div className="flex items-center gap-x-2 text-xs">
-                          <Copy className="size-4 shrink-0" />
+                          <CopyIcon className="size-4 shrink-0" />
                           <span>Copy Selection</span>
                         </div>
                       </Dropdown.Item>
                       <Dropdown.Item id="search-web" textValue="Search Web">
                         <div className="flex items-center gap-x-2 text-xs">
-                          <Earth className="size-4 shrink-0" />
+                          <EarthIcon className="size-4 shrink-0" />
                           <span>Search Web</span>
                         </div>
                       </Dropdown.Item>
                       <Dropdown.Item id="start-chat-with-selection" textValue="Start New Chat with Selection">
                         <div className="flex items-center gap-x-2 text-xs">
-                          <ChatRound className="size-4 text-accent shrink-0" />
+                          <ChatRoundIcon className="size-4 text-accent shrink-0" />
                           <span>Start New Chat with Selection</span>
                         </div>
                       </Dropdown.Item>
@@ -137,7 +137,7 @@ export const FloatChatContextMenu = memo(
                         currentCardId === 'unified') && (
                         <Dropdown.Item id="new-chat" textValue="New Chat">
                           <div className="flex items-center gap-x-2 text-xs">
-                            <ChatRound className="size-4 text-accent shrink-0" />
+                            <ChatRoundIcon className="size-4 text-accent shrink-0" />
                             <span>New Chat</span>
                           </div>
                         </Dropdown.Item>
@@ -149,25 +149,25 @@ export const FloatChatContextMenu = memo(
                     <Dropdown.Section>
                       <Dropdown.Item id="copy-markdown" textValue="Copy as Markdown">
                         <div className="flex items-center gap-x-2 text-xs">
-                          <Copy className="size-4 text-muted shrink-0" />
+                          <CopyIcon className="size-4 text-muted shrink-0" />
                           <span>Copy as Markdown</span>
                         </div>
                       </Dropdown.Item>
                       <Dropdown.Item id="copy-text" textValue="Copy as Plain Text">
                         <div className="flex items-center gap-x-2 text-xs">
-                          <Copy className="size-4 text-muted shrink-0" />
+                          <CopyIcon className="size-4 text-muted shrink-0" />
                           <span>Copy as Plain Text</span>
                         </div>
                       </Dropdown.Item>
                       <Dropdown.Item id="save-markdown" textValue="Save as Markdown (.md)">
                         <div className="flex items-center gap-x-2 text-xs">
-                          <FileDownload className="size-4 text-muted shrink-0" />
+                          <FileDownloadIcon className="size-4 text-muted shrink-0" />
                           <span>Save as Markdown (.md)</span>
                         </div>
                       </Dropdown.Item>
                       <Dropdown.Item id="save-text" textValue="Save as Plain Text (.txt)">
                         <div className="flex items-center gap-x-2 text-xs">
-                          <FileDownload className="size-4 text-muted shrink-0" />
+                          <FileDownloadIcon className="size-4 text-muted shrink-0" />
                           <span>Save as Plain Text (.txt)</span>
                         </div>
                       </Dropdown.Item>

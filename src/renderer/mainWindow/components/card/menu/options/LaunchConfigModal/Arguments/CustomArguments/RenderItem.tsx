@@ -15,8 +15,15 @@ import {
 import {CustomArg} from '@lynx_common/types';
 import {ArgumentType} from '@lynx_common/types/plugins/modules';
 import filesIpc from '@lynx_shared/ipc/files';
-import {CloseCircle, HomeAdd, Notes, Pen2, SettingsMinimalistic, TrashBin2} from '@solar-icons/react-perf/BoldDuotone';
-import {CheckRead, Unread} from '@solar-icons/react-perf/Linear';
+import {
+  CloseCircleIcon,
+  HomeAddIcon,
+  NotesIcon,
+  Pen2Icon,
+  SettingsMinimalisticIcon,
+  TrashBin2Icon,
+} from '@solar-icons/react/bold-duotone';
+import {CheckReadIcon, UnreadIcon} from '@solar-icons/react/linear';
 import {AnimatePresence, motion} from 'framer-motion';
 import {Dispatch, ReactNode, SetStateAction} from 'react';
 
@@ -136,23 +143,23 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
                 `flex items-center gap-x-2 font-semibold ` +
                 `${item.kind === 'envVar' ? 'text-accent' : 'text-LynxPurple/70'}`
               }>
-              {item.kind === 'envVar' ? <HomeAdd /> : <SettingsMinimalistic />}
+              {item.kind === 'envVar' ? <HomeAddIcon /> : <SettingsMinimalisticIcon />}
               <span>{item.kind === 'envVar' ? 'Environment Variable' : 'Command Line'}</span>
             </div>
             <div className="flex items-center gap-x-1">
               <AnimateChild show={isAdded}>
                 <Button size="sm" variant="ghost" className="text-success" isDisabled isIconOnly>
-                  <CheckRead className="size-4.5" />
+                  <CheckReadIcon className="size-4.5" />
                 </Button>
               </AnimateChild>
               <AnimateChild show={!isAdded}>
                 <Button size="sm" variant="secondary" onPress={() => addItem(item)} isIconOnly>
-                  <Unread className="size-4.5" />
+                  <UnreadIcon className="size-4.5" />
                 </Button>
               </AnimateChild>
 
               <Button size="sm" variant="danger-soft" onPress={() => removeItem(item)} isIconOnly>
-                <TrashBin2 className="size-3.5" />
+                <TrashBin2Icon className="size-3.5" />
               </Button>
             </div>
           </div>
@@ -238,7 +245,7 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
                   {item.defaultValue || 'Press to set default folder...'}
                   {item.defaultValue && (
                     <Button size="sm" variant="ghost" className="size-6" onPress={clearDefaultValue} isIconOnly>
-                      <CloseCircle className="size-4" />
+                      <CloseCircleIcon className="size-4" />
                     </Button>
                   )}
                 </Button>
@@ -256,7 +263,7 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
                   {item.defaultValue || 'Press to set default file...'}
                   {item.defaultValue && (
                     <Button size="sm" variant="ghost" className="size-6" onPress={clearDefaultValue} isIconOnly>
-                      <CloseCircle className="size-4" />
+                      <CloseCircleIcon className="size-4" />
                     </Button>
                   )}
                 </Button>
@@ -320,23 +327,23 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
                 `flex items-center gap-x-2 font-semibold ` +
                 `${item.kind === 'comment' ? 'text-warning-soft-foreground' : 'text-success-soft-foreground'}`
               }>
-              {item.kind === 'comment' ? <Pen2 /> : <Notes />}
+              {item.kind === 'comment' ? <Pen2Icon /> : <NotesIcon />}
               <span>{item.kind === 'comment' ? 'Comment' : 'Custom'}</span>
             </div>
             <div className="flex items-center gap-x-1">
               <AnimateChild show={isAdded}>
                 <Button size="sm" variant="ghost" className="text-success" isDisabled isIconOnly>
-                  <CheckRead className="size-4.5" />
+                  <CheckReadIcon className="size-4.5" />
                 </Button>
               </AnimateChild>
               <AnimateChild show={!isAdded}>
                 <Button size="sm" variant="secondary" onPress={() => addItem(item)} isIconOnly>
-                  <Unread className="size-4.5" />
+                  <UnreadIcon className="size-4.5" />
                 </Button>
               </AnimateChild>
 
               <Button size="sm" variant="danger-soft" onPress={() => removeItem(item)} isIconOnly>
-                <TrashBin2 className="size-3.5" />
+                <TrashBin2Icon className="size-3.5" />
               </Button>
             </div>
           </div>

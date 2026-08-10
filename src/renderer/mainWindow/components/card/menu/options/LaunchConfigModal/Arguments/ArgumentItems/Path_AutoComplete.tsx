@@ -2,7 +2,7 @@ import {Autocomplete, Description, EmptyState, Key, Label, ListBox, SearchField}
 import {FolderListData} from '@lynx_common/types';
 import {replaceSlashes} from '@lynx_common/utils';
 import filesIpc from '@lynx_shared/ipc/files';
-import {File, Folder} from '@solar-icons/react-perf/BoldDuotone';
+import {FileIcon, FolderIcon} from '@solar-icons/react/bold-duotone';
 import Fuse from 'fuse.js';
 import {useEffect, useState} from 'react';
 
@@ -142,7 +142,7 @@ export default function PathAutoComplete({baseDir, onValueChange, defaultValue =
           <ListBox renderEmptyState={() => <EmptyState>No results found</EmptyState>}>
             {searchData.map(item => (
               <ListBox.Item id={item.name} key={item.name} textValue={item.name}>
-                {item.type === 'folder' ? <Folder className="size-4" /> : <File className="size-4" />}
+                {item.type === 'folder' ? <FolderIcon className="size-4" /> : <FileIcon className="size-4" />}
                 <Label>{item.name}</Label>
               </ListBox.Item>
             ))}

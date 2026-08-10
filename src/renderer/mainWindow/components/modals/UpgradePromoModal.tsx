@@ -2,7 +2,7 @@ import {Button, Modal} from '@heroui/react';
 import {appActions, useAppState} from '@lynx/redux/reducers/app';
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Crown, ShieldStar, Star} from '@solar-icons/react-perf/BoldDuotone';
+import {CrownIcon, ShieldStarIcon, StarIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -31,7 +31,7 @@ export default function UpgradePromoModal() {
     <TabModal size="lg" isOpen={showUpgradePromo} onOpenChange={() => handleClose(false)} isKeyboardDismissDisabled>
       <Modal.Header>
         <Modal.Heading className="flex items-center gap-x-2 text-warning">
-          <Crown className="size-6 shrink-0 animate-pulse" />
+          <CrownIcon className="size-6 shrink-0 animate-pulse" />
           <span>Unlock Premium Updates</span>
         </Modal.Heading>
       </Modal.Header>
@@ -44,7 +44,7 @@ export default function UpgradePromoModal() {
           {/* Early Access */}
           <div className="flex gap-3 bg-default/40 p-3.5 rounded-2xl border border-divider/50">
             <div className="p-1.5 bg-LynxBlue/10 rounded-lg inline-flex shrink-0 self-start mt-0.5">
-              <Star className="size-5 text-LynxBlue shrink-0" />
+              <StarIcon className="size-5 text-LynxBlue shrink-0" />
             </div>
             <div className="space-y-0.5">
               <h4 className="text-xs font-bold text-foreground">Early Access Tier</h4>
@@ -59,7 +59,7 @@ export default function UpgradePromoModal() {
           {/* Insider Nightly */}
           <div className="flex gap-3 bg-default/40 p-3.5 rounded-2xl border border-divider/50">
             <div className="p-1.5 bg-yellow-500/10 rounded-lg inline-flex shrink-0 self-start mt-0.5">
-              <ShieldStar className="size-5 text-yellow-500 shrink-0" />
+              <ShieldStarIcon className="size-5 text-yellow-500 shrink-0" />
             </div>
             <div className="space-y-0.5">
               <h4 className="text-xs font-bold text-foreground">Insider Nightly builds</h4>
@@ -74,7 +74,7 @@ export default function UpgradePromoModal() {
           {/* Premium Perks */}
           <div className="flex gap-3 bg-default/40 p-3.5 rounded-2xl border border-divider/50">
             <div className="p-1.5 bg-purple-500/10 rounded-lg inline-flex shrink-0 self-start mt-0.5">
-              <Crown className="size-5 text-LynxPurple shrink-0" />
+              <CrownIcon className="size-5 text-LynxPurple shrink-0" />
             </div>
             <div className="space-y-0.5">
               <h4 className="text-xs font-bold text-foreground">Priority Support & Credits</h4>
@@ -92,7 +92,7 @@ export default function UpgradePromoModal() {
           Maybe Later
         </Button>
         <Button variant="primary" onPress={() => handleClose(true)} className="font-bold cursor-pointer">
-          <Crown className="size-4 shrink-0" />
+          <CrownIcon className="size-4 shrink-0" />
           Upgrade Now
         </Button>
       </Modal.Footer>

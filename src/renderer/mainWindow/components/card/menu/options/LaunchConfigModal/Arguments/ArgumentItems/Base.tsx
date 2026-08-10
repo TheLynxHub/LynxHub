@@ -1,5 +1,5 @@
 import {Button, Separator, Surface} from '@heroui/react';
-import {TrashBin2} from '@solar-icons/react-perf/BoldDuotone';
+import {TrashBin2Icon} from '@solar-icons/react/bold-duotone';
 import {Reorder, useDragControls} from 'framer-motion';
 import {GripVertical} from 'lucide-react';
 import {ReactNode, useMemo} from 'react';
@@ -76,7 +76,7 @@ export default function ArgumentItemBase({
                 aria-label="Remove argument"
                 className="text-danger-soft-foreground hover:bg-danger-soft-hover"
                 isIconOnly>
-                <TrashBin2 className="size-3.5" />
+                <TrashBin2Icon className="size-3.5" />
               </Button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import {Description, Pagination, SearchField, Spinner} from '@heroui/react';
 import {validateGitRepoUrl} from '@lynx_common/utils';
-import {Inbox} from '@solar-icons/react-perf/BoldDuotone';
+import {InboxIcon} from '@solar-icons/react/bold-duotone';
 import Fuse from 'fuse.js';
 import {useEffect, useMemo, useState} from 'react';
 
@@ -92,7 +92,7 @@ const useAvailableExtensions = ({visible, updateTable, installedExtensions, id, 
           </div>
         ) : searchedData.length === 0 ? (
           <EmptyStateCard
-            icon={<Inbox size={40} />}
+            icon={<InboxIcon size={40} />}
             className="bg-surface-secondary"
             description="There are no extensions available at the moment!"
           />

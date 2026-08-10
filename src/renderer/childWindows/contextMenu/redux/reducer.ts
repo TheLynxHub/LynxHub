@@ -53,13 +53,6 @@ const initialState: ContextState = {
     message: '',
   },
   downloads: [],
-  chatBridgeMenu: {
-    tabID: '',
-    step: 'select_module',
-    hasMessages: false,
-    hasNewChat: false,
-    selectionText: '',
-  },
 };
 
 const appSlice = createSlice({

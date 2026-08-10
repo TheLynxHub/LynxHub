@@ -14,7 +14,7 @@ import {
 } from '@lynx_common/consts/hotkeys';
 import {LynxHotkey} from '@lynx_common/types/ipc';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Keyboard, Refresh} from '@solar-icons/react-perf/BoldDuotone';
+import {KeyboardIcon, RefreshIcon} from '@solar-icons/react/bold-duotone';
 import {compact} from 'lodash-es';
 import {KeyboardEvent, useCallback, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -185,7 +185,7 @@ export default function SettingsHotkeys() {
                   isDisabled={isRecording}
                   onPress={() => handleRecordClick(name)}
                   isIconOnly>
-                  {isRecording ? <Spinner size="sm" color="current" /> : <Keyboard className="size-5" />}
+                  {isRecording ? <Spinner size="sm" color="current" /> : <KeyboardIcon className="size-5" />}
                 </Button>
                 <Input
                   ref={el => {
@@ -208,7 +208,7 @@ export default function SettingsHotkeys() {
   );
 
   return (
-    <SettingsSection title="Hotkeys" id={SettingsHotkeysId} icon={<Keyboard className="size-5" />}>
+    <SettingsSection title="Hotkeys" id={SettingsHotkeysId} icon={<KeyboardIcon className="size-5" />}>
       <Surface className="rounded-3xl p-1">
         <ListBox aria-label="hotkeys_list">
           {Hotkey_Sections.map(section => {
@@ -222,7 +222,7 @@ export default function SettingsHotkeys() {
         </ListBox>
       </Surface>
       <Button variant="danger-soft" onPress={resetToDefault} fullWidth>
-        <Refresh />
+        <RefreshIcon />
         Reset to Defaults
       </Button>
     </SettingsSection>

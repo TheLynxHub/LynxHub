@@ -1,6 +1,6 @@
 import {cn} from '@heroui/react';
 import {RunningCard} from '@lynx/types';
-import {Star} from '@solar-icons/react-perf/Bold';
+import {StarIcon} from '@solar-icons/react/bold';
 import {motion} from 'framer-motion';
 import {memo} from 'react';
 
@@ -105,7 +105,7 @@ const BrowserAddressBar = memo(({runningCard, setCustomAddress}: Props) => {
             onClick={handleFavoriteToggle}
             className="p-1 rounded-full cursor-pointer"
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
-            <Star
+            <StarIcon
               className={cn(
                 'transition-colors duration-200 size-5',
                 isFavorite

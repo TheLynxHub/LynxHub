@@ -2,7 +2,7 @@ import {Button, ButtonGroup, Modal} from '@heroui/react';
 import filesIpc from '@lynx_shared/ipc/files';
 import moduleIpc from '@lynx_shared/ipc/plugins/module';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
-import {ShieldCross} from '@solar-icons/react-perf/BoldDuotone';
+import {ShieldCrossIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback, useMemo} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -74,7 +74,7 @@ const UninstallDialog = memo(({state}: CommonProps) => {
     <TabModal size="lg" isOpen={state.isOpen}>
       <Modal.Header>
         <Modal.Heading className="items-center gap-x-2 flex">
-          <ShieldCross className="text-danger size-7" />
+          <ShieldCrossIcon className="text-danger size-7" />
           <span className="text-danger">Confirm Uninstallation</span>
         </Modal.Heading>
       </Modal.Header>

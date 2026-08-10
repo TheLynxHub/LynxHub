@@ -2,7 +2,7 @@ import {Label, NumberField} from '@heroui/react';
 import {cardsActions, useCardsState} from '@lynx/redux/reducers/cards';
 import {AppDispatch} from '@lynx/redux/store';
 import storageIpc from '@lynx_shared/ipc/storage';
-import {Stopwatch} from '@solar-icons/react-perf/BoldDuotone';
+import {StopwatchIcon} from '@solar-icons/react/bold-duotone';
 import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
@@ -33,7 +33,7 @@ export default function UpdateInterval() {
         aria-label="Card Update Interval">
         <Label>
           <div className="flex flex-row gap-x-1 items-center justify-start">
-            <Stopwatch />
+            <StopwatchIcon />
             <SettingsSearchHighlight text="Update Check Frequency (Minutes)" />
           </div>
         </Label>

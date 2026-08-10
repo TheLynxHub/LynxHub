@@ -46,9 +46,4 @@ export const contextMenuChannels = {
   openSendExitSignal: 'context:open-send-exit-signal',
   openTerminateTab: 'context:open-terminate-tab',
   openCloseApp: 'context:open-close-app',
-
-  openChatBridgeMenu: 'context:open-chat-bridge-menu',
-  onChatBridgeMenu: 'context:on-chat-bridge-menu',
-  chatBridgeAction: 'context:chat-bridge-action',
-  onChatBridgeAction: 'context:on-chat-bridge-action',
 } as const;

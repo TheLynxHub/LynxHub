@@ -1,7 +1,7 @@
 import {Badge, Button} from '@heroui/react';
 import downloadManagerIpc from '@lynx_shared/ipc/downloadManager';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {DownloadMinimalistic} from '@solar-icons/react-perf/BoldDuotone';
+import {DownloadMinimalisticIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useEffect, useState} from 'react';
 
 import LynxTooltip from '../../../../components/LynxTooltip';
@@ -31,7 +31,7 @@ const BrowserDownloadManager = memo(() => {
     <Badge.Anchor>
       <LynxTooltip delay={1000} content="Show Downloads">
         <Button size="sm" variant="ghost" aria-label="Downloads" onPress={openDownloadsWindow} isIconOnly>
-          <DownloadMinimalistic className="size-4" />
+          <DownloadMinimalisticIcon className="size-4" />
         </Button>
       </LynxTooltip>
 
