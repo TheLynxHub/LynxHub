@@ -7,7 +7,7 @@ import {ChangeWindowState, DarkModeTypes, TaskbarStatus} from '@lynx_common/type
 import {isMac, isWin} from '@lynx_common/utils';
 import classHolder from '@lynx_main/managers/classHolder';
 import {noticeAllWindowsDarkMode} from '@lynx_main/utils';
-import decompress from 'decompress';
+import {decompress} from '@lynxhub/7zip';
 import {app, clipboard, dialog, nativeImage, net, shell} from 'electron';
 import fs, {promises} from 'graceful-fs';
 

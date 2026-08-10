@@ -8,7 +8,7 @@ import {pipeline} from 'node:stream/promises';
 import {isWin} from '@lynx_common/utils';
 import ShowToastWindow from '@lynx_main/childWindows/toast';
 import {getAppDirectory} from '@lynx_main/managers/dataFolder';
-import decompress from 'decompress';
+import {decompress} from '@lynxhub/7zip';
 
 const DU_ZIP_URL = 'https://download.sysinternals.com/files/DU.zip';
 const DU_BINARY_NAME = 'du64.exe';
