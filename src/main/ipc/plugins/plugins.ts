@@ -31,10 +31,10 @@ export default async function listenPlugins() {
   pluginsIpc.handle.getUnloadedList(() => pluginManager.getUnloadedList());
 
   // Installs plugin from URL
-  pluginsIpc.handle.install(async (url, commitHash) => {
+  pluginsIpc.handle.install(async (url, targetVersion) => {
     AddBreadcrumb_Main(`Plugin Install Started: url:${url}`);
     try {
-      const res = await pluginManager.install(url, commitHash);
+      const res = await pluginManager.install(url, targetVersion);
       AddBreadcrumb_Main(`Plugin Install Finished: url:${url}, success:${res}`);
       return res;
     } catch (err) {
@@ -56,11 +56,11 @@ export default async function listenPlugins() {
     }
   });
 
-  // Syncs plugin to specific commit
-  pluginsIpc.handle.sync(async (id, commit) => {
-    AddBreadcrumb_Main(`Plugin Sync Started: id:${id}, commit:${commit}`);
+  // Syncs plugin to specific version
+  pluginsIpc.handle.sync(async (id, version) => {
+    AddBreadcrumb_Main(`Plugin Sync Started: id:${id}, version:${version}`);
     try {
-      const res = await pluginManager.syncItem(id, commit);
+      const res = await pluginManager.syncItem(id, version);
       AddBreadcrumb_Main(`Plugin Sync Finished: id:${id}, success:${res}`);
       return res;
     } catch (err) {
@@ -69,7 +69,7 @@ export default async function listenPlugins() {
     }
   });
 
-  // Syncs multiple plugins to their commits
+  // Syncs multiple plugins to their versions
   pluginsIpc.handle.syncAll(async items => {
     AddBreadcrumb_Main(`Plugins SyncAll Started: items:${JSON.stringify(items)}`);
     try {
@@ -89,7 +89,7 @@ export default async function listenPlugins() {
   pluginsIpc.handle.getList(stage => getList(stage));
 
   // Updates sync list entry for plugin
-  pluginsIpc.handle.updateSyncList((id, commit) => pluginManager.updateSyncItem(id, commit));
+  pluginsIpc.handle.updateSyncList((id, version) => pluginManager.updateSyncItem(id, version));
 }
 
 /**
@@ -113,20 +113,20 @@ export const pluginsIpc = {
     getUnloadedList: (callback: () => MainHT<UnloadedPlugins[]>) =>
       lynxIpc.handle(pluginChannels.getUnloadedList, callback),
     /** Installs a plugin */
-    install: (callback: (url: string, commitHash?: string) => MainHT<boolean>) =>
+    install: (callback: (url: string, targetVersion?: string) => MainHT<boolean>) =>
       lynxIpc.handle(pluginChannels.install, callback),
     /** Uninstalls a plugin */
     uninstall: (callback: (id: string) => MainHT<boolean>) => lynxIpc.handle(pluginChannels.uninstall, callback),
-    /** Syncs a single plugin to a commit */
-    sync: (callback: (id: string, commit: string) => MainHT<boolean>) => lynxIpc.handle(pluginChannels.sync, callback),
+    /** Syncs a single plugin to a version */
+    sync: (callback: (id: string, version: string) => MainHT<boolean>) => lynxIpc.handle(pluginChannels.sync, callback),
     /** Syncs multiple plugins */
-    syncAll: (callback: (items: {id: string; commit: string}[]) => MainHT<string[]>) =>
+    syncAll: (callback: (items: {id: string; version: string; commit?: string}[]) => MainHT<string[]>) =>
       lynxIpc.handle(pluginChannels.syncAll, callback),
     /** Checks for updates */
     checkForSync: (callback: (stage: SubscribeStages) => MainHT<void>) =>
       lynxIpc.handle(pluginChannels.checkForSync, callback),
     /** Updates a specific item in the sync list */
-    updateSyncList: (callback: (id: string, commit: string) => MainHT<void>) =>
+    updateSyncList: (callback: (id: string, version: string) => MainHT<void>) =>
       lynxIpc.handle(pluginChannels.updateSyncList, callback),
   },
 };

@@ -2,11 +2,10 @@
 import path from 'node:path';
 
 import {ExtensionsData, ExtensionsUpdateStatus} from '@lynx_common/types/ipc';
-import GitManager from '@lynx_main/git';
 import {utilsIpc} from '@lynx_main/ipc/utils';
+import classHolder from '@lynx_main/managers/classHolder';
 import {calculateFolderSize} from '@lynx_main/utils';
 import fs from 'graceful-fs';
-import {compact} from 'lodash-es';
 
 // Global flag to control extension loading cancellation
 let isLoadingExtensions = false;
@@ -19,27 +18,16 @@ export function disableExtensionsLoading(): void {
 }
 
 /**
- * Retrieves repository folders from a given directory.
- * @param dir - The directory to search for repositories.
- * @returns A promise that resolves to an array of repository folder names.
+ * Retrieves plugin folders from a given directory.
+ * @param dir - The directory to search for plugins.
+ * @returns A promise that resolves to an array of folder names.
  */
 async function getRepoFolders(dir: string): Promise<string[]> {
   try {
     const files = await fs.promises.readdir(dir, {withFileTypes: true});
-    const folders = files.filter(file => file.isDirectory()).map(file => file.name);
-
-    if (folders.length === 0) return [];
-
-    const repoFolders = await Promise.all(
-      folders.map(async folder => {
-        const isRepo = await GitManager.isGitRepository(path.join(dir, folder));
-        return isRepo ? folder : null;
-      }),
-    );
-
-    return compact(repoFolders);
+    return files.filter(file => file.isDirectory() && !file.name.startsWith('.')).map(file => file.name);
   } catch (error) {
-    console.error(`Error retrieving repository folders from ${dir}:`, error);
+    console.error(`Error retrieving extension folders from ${dir}:`, error);
     return [];
   }
 }
@@ -59,9 +47,7 @@ export async function getExtensionsUpdate(dir: string): Promise<ExtensionsUpdate
     const updateData = await Promise.all(
       filteredFolders.map(async extension => {
         if (!isLoadingExtensions) return null;
-        const extensionDir = path.join(dir, extension);
-        const updateAvailable = await GitManager.isUpdateAvailable(extensionDir);
-        return {id: extension, updateAvailable, isDisabled: extension.startsWith('.')};
+        return {id: extension, updateAvailable: false, isDisabled: extension.startsWith('.')};
       }),
     );
 
@@ -88,11 +74,8 @@ export async function getExtensionsDetails(dir: string): Promise<ExtensionsData 
       filteredFolders.map(async extension => {
         if (!isLoadingExtensions) return null;
         const extensionDir = path.join(dir, extension);
-        const [remoteUrl, size] = await Promise.all([
-          GitManager.getRemoteUrlFromDirectory(extensionDir).catch(() => ''),
-          calculateFolderSize(extensionDir),
-        ]);
-        return {name: extension, remoteUrl, size, isDisabled: extension.startsWith('.')};
+        const size = await calculateFolderSize(extensionDir);
+        return {name: extension, remoteUrl: '', size, isDisabled: extension.startsWith('.')};
       }),
     );
 
@@ -101,11 +84,6 @@ export async function getExtensionsDetails(dir: string): Promise<ExtensionsData 
     console.error(`Error retrieving extension details from ${dir}:`, error);
     return 'empty';
   }
-}
-
-async function getRepoDirectories(dir: string) {
-  const folders = await getRepoFolders(dir);
-  return folders.map(folder => path.join(dir, folder));
 }
 
 /**
@@ -167,25 +145,10 @@ export async function disableExtension(disable: boolean, dir: string): Promise<s
  * @param data - Object containing the directory path and ID for progress tracking.
  */
 export async function updateAllExtensions(data: {id: string; dir: string}) {
-  const directories = await getRepoDirectories(path.resolve(data.dir));
-
-  if (directories) {
-    const extensionsCount: number = directories.length;
-    let currentState: number = 1;
-
-    // Process sequentially to avoid network congestion
-    for (const dir of directories) {
-      const gitManager = new GitManager(false);
-
-      utilsIpc.send.onUpdateAllExtensions({
-        id: data.id,
-        step: `${currentState}/${extensionsCount}`,
-      });
-
-      await gitManager.pullAsync(dir);
-
-      currentState++;
-    }
+  const {pluginManager, staticManager} = classHolder;
+  if (pluginManager && staticManager) {
+    const stage = await staticManager.getCurrentAppState();
+    await pluginManager.checkForSync(stage);
   }
 
   utilsIpc.send.onUpdateAllExtensions({

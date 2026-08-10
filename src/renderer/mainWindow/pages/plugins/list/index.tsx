@@ -204,7 +204,7 @@ function SyncAllButton() {
     dispatch(pluginsActions.setUpdatingAll(true));
 
     pluginsIpc
-      .syncAll(syncList.map(item => ({id: item.id, commit: item.commit})))
+      .syncAll(syncList.map(item => ({id: item.id, version: item.version, commit: item.commit})))
       .then(synced => {
         if (!isEmpty(synced)) {
           topToast.success(`${synced.length} of ${syncList.length} plugins synced successfully!`);

@@ -1,6 +1,29 @@
 import {createHash} from 'node:crypto';
-import {existsSync, renameSync, rmSync} from 'node:fs';
+import {chmodSync, createWriteStream, existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync} from 'node:fs';
 import {dirname, join} from 'node:path';
+
+/**
+ * Helper to recursively make files and directories writable on Windows.
+ */
+function makeWritableRecursive(targetPath: string): void {
+  try {
+    if (!existsSync(targetPath)) return;
+    const stat = statSync(targetPath);
+    try {
+      chmodSync(targetPath, 0o666);
+    } catch {
+      // Ignore permission errors on individual items
+    }
+    if (stat.isDirectory()) {
+      const entries = readdirSync(targetPath, {withFileTypes: true});
+      for (const entry of entries) {
+        makeWritableRecursive(join(targetPath, entry.name));
+      }
+    }
+  } catch {
+    // Ignore error during recursive traversal
+  }
+}
 
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {SubscribeStages} from '@lynx_common/types';
@@ -12,32 +35,46 @@ import {
   ValidatedPlugins,
 } from '@lynx_common/types/plugins';
 import {getUpdateType} from '@lynx_common/utils/plugins';
-import GitManager from '@lynx_main/git';
-import {setupGitManagerListeners} from '@lynx_main/git/gitListeners';
 import {pluginsIpc} from '@lynx_main/ipc/plugins/plugins';
 import classHolder from '@lynx_main/managers/classHolder';
 import {getAppDirectory} from '@lynx_main/managers/dataFolder';
+import {decompress} from '@lynxhub/7zip';
 import {captureException} from '@sentry/electron/main';
 import axios from 'axios';
-import {constants, promises, readdirSync} from 'graceful-fs';
-import {includes, isString} from 'lodash-es';
+import {constants, promises} from 'graceful-fs';
 
 import {AUTH_LOGIN_KEY} from '../monitoring/auth';
 import {getTokens} from '../monitoring/token';
 import {pluginFolders} from './constants';
 import ExtensionManager from './extensions';
 import ModuleManager from './modules';
-import {
-  getCommitByAppStage,
-  getVersionByCommit,
-  isSyncRequired,
-  removeOldInstallations,
-  showGitOwnershipToast,
-} from './utils';
+import {getTargetVersionByAppStage, isSyncRequired} from './utils';
+
+/**
+ * Parses numerical version array from tag (e.g. "v0.4.2" -> [0, 4, 2]).
+ */
+function parseSemver(v: string): number[] {
+  const clean = v.replace(/^v/i, '');
+  return clean.split('.').map(n => parseInt(n, 10) || 0);
+}
+
+/**
+ * Compares two version strings (returns > 0 if v1 > v2).
+ */
+function compareSemver(v1: string, v2: string): number {
+  const p1 = parseSemver(v1);
+  const p2 = parseSemver(v2);
+  for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+    const n1 = p1[i] || 0;
+    const n2 = p2[i] || 0;
+    if (n1 !== n2) return n1 - n2;
+  }
+  return 0;
+}
 
 /**
  * Manages the lifecycle of plugins (extensions and modules).
- * Handles installation, updates, and synchronization.
+ * Handles 7z installation, 2-version management, updates, and synchronization.
  */
 export class PluginManager {
   private addresses: PluginAddresses = [];
@@ -68,22 +105,155 @@ export class PluginManager {
   }
 
   /**
+   * Scans a plugin folder, retains at most 2 highest version subfolders, and deletes older ones.
+   */
+  private pruneOldVersions(pluginId: string): void {
+    const pluginDir = join(this.pluginPath, pluginId);
+    if (!existsSync(pluginDir)) return;
+
+    try {
+      const entries = readdirSync(pluginDir, {withFileTypes: true});
+      const versionFolders = entries
+        .filter(e => e.isDirectory() && /^v\d+/i.test(e.name))
+        .map(e => e.name)
+        .sort((a, b) => compareSemver(a, b));
+
+      if (versionFolders.length > 2) {
+        const toRemove = versionFolders.slice(0, versionFolders.length - 2);
+        for (const tag of toRemove) {
+          console.log(`PluginManager: Pruning old version ${tag} for plugin ${pluginId}`);
+          this.robustWipePluginDir(join(pluginDir, tag));
+        }
+      }
+    } catch (err) {
+      console.error(`PluginManager: Error pruning old versions for ${pluginId}:`, err);
+    }
+  }
+
+  /**
+   * Cleans up legacy non-7z files/directories leftover from Git sync in a plugin directory,
+   * and automatically re-installs clean 7z package.
+   */
+  private async cleanupLegacyFiles(pluginId: string, urlMap: Record<string, string>): Promise<void> {
+    const pluginDir = join(this.pluginPath, pluginId);
+    if (!existsSync(pluginDir)) return;
+
+    try {
+      const entries = readdirSync(pluginDir, {withFileTypes: true});
+      let hasLegacy = false;
+
+      for (const entry of entries) {
+        if (entry.name === '.tmp') continue;
+        if (entry.isDirectory() && /^v\d+/i.test(entry.name)) continue;
+
+        hasLegacy = true;
+        break;
+      }
+
+      if (hasLegacy) {
+        console.log(
+          `PluginManager: Found legacy non-7z files in plugin folder ${pluginId}. Wiping for clean 7z installation...`,
+        );
+        this.robustWipePluginDir(pluginDir);
+
+        const repoUrl = urlMap[pluginId];
+        const targetVersion = await getTargetVersionByAppStage(pluginId);
+
+        if (repoUrl && targetVersion) {
+          console.log(`PluginManager: Re-installing plugin ${pluginId} at v${targetVersion} via 7z archive...`);
+          const success = await this.downloadAndExtractRelease(pluginId, repoUrl, targetVersion);
+          if (success) {
+            const currentStorage = classHolder.storageManager?.getData('plugin') || {};
+            const activeVersions = {...(currentStorage.activeVersions || {}), [pluginId]: targetVersion};
+            await classHolder.storageManager?.setData('plugin', {...currentStorage, activeVersions});
+            console.log(`PluginManager: Successfully migrated legacy plugin ${pluginId} to 7z v${targetVersion}`);
+          }
+        }
+      }
+    } catch (err) {
+      console.error(`PluginManager: Error cleaning up legacy files for ${pluginId}:`, err);
+    }
+  }
+
+  /**
+   * Gets list of local version strings for a plugin sorted descending.
+   */
+  private getLocalVersions(pluginId: string): string[] {
+    const pluginDir = join(this.pluginPath, pluginId);
+    if (!existsSync(pluginDir)) return [];
+    try {
+      const entries = readdirSync(pluginDir, {withFileTypes: true});
+      return entries
+        .filter(e => e.isDirectory() && /^v\d+/i.test(e.name))
+        .map(e => e.name.replace(/^v/i, ''))
+        .sort((a, b) => compareSemver(b, a));
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Resolves the active version string for a plugin.
+   */
+  private resolveActiveVersion(pluginId: string): string | undefined {
+    const pluginStorage = classHolder.storageManager?.getData('plugin');
+    const activeMap = pluginStorage?.activeVersions || {};
+    const brokenList = pluginStorage?.brokenVersions?.[pluginId] || [];
+
+    const storedActive = activeMap[pluginId];
+    if (storedActive && !brokenList.includes(storedActive)) {
+      const storedFolder = join(this.pluginPath, pluginId, `v${storedActive}`);
+      if (existsSync(storedFolder)) {
+        return storedActive;
+      }
+    }
+
+    const local = this.getLocalVersions(pluginId);
+    for (const ver of local) {
+      if (!brokenList.includes(ver)) {
+        return ver;
+      }
+    }
+    return local.length > 0 ? local[0] : undefined;
+  }
+
+  /**
    * Loads installed plugins from the disk.
    */
   private async loadPlugins(): Promise<void> {
     const {staticManager} = classHolder;
     try {
-      // Ensure plugin directory exists before reading
       try {
         await promises.access(this.pluginPath, constants.F_OK);
       } catch {
-        // Directory doesn't exist - create it and return early (no plugins to load)
         await promises.mkdir(this.pluginPath, {recursive: true});
         return;
       }
 
       const files = readdirSync(this.pluginPath, {withFileTypes: true});
-      const folders = files.filter(file => file.isDirectory()).map(folder => folder.name);
+      const folders = files
+        .filter(file => file.isDirectory() && !file.name.includes('_old_') && !file.name.startsWith('.'))
+        .map(folder => folder.name);
+
+      // Clean up any leftover _old_ temporary folders
+      const oldFolders = files
+        .filter(file => file.isDirectory() && file.name.includes('_old_'))
+        .map(folder => folder.name);
+      for (const oldFolder of oldFolders) {
+        this.robustWipePluginDir(join(this.pluginPath, oldFolder));
+      }
+
+      const pluginsUrlPath = join('plugins', 'plugins_url.json');
+      const urlMap = (await staticManager?.getDataAsJson<Record<string, string>>(pluginsUrlPath)) || {};
+
+      // Perform legacy cleanup and version pruning on each plugin directory
+      for (const folder of folders) {
+        await this.cleanupLegacyFiles(folder, urlMap);
+        this.pruneOldVersions(folder);
+      }
+
+      await this.setInstalledPlugins(folders);
+
       const validFolders = await this.validatePluginFolders(folders);
 
       this.addresses = validFolders.map(({folder, type}) => ({
@@ -91,24 +261,25 @@ export class PluginManager {
         type,
       }));
 
-      await this.setInstalledPlugins(folders);
-
       const moduleFolders: string[] = [];
       const extensionFolder: string[] = [];
 
       for (const validItem of validFolders) {
         const metadata = await staticManager?.getPluginMetadataById(validItem.folder);
         if (!metadata) continue;
+
+        const activeDir = this.getDirById(validItem.folder);
+        if (!activeDir) continue;
+
         if (metadata.type === 'module') {
-          moduleFolders.push(join(this.pluginPath, validItem.folder));
+          moduleFolders.push(activeDir);
         } else if (metadata.type === 'extension') {
-          extensionFolder.push(join(this.pluginPath, validItem.folder));
+          extensionFolder.push(activeDir);
         }
       }
       await this.extensionManager.importPlugins(extensionFolder);
       await this.moduleManager.importPlugins(moduleFolders);
 
-      // Filter out any plugins that failed to load (i.e. are in skipped)
       this.addresses = this.addresses.filter(addr => {
         const folder = addr.address.replace('lynxplugin://', '');
         return !this.skipped.some(skip => skip.id === folder);
@@ -125,23 +296,17 @@ export class PluginManager {
    */
   private async setInstalledPlugins(folders: string[]) {
     const {staticManager} = classHolder;
+    const pluginsUrlPath = join('plugins', 'plugins_url.json');
+    const urlMap = (await staticManager?.getDataAsJson<Record<string, string>>(pluginsUrlPath)) || {};
+
     for (const folder of folders) {
       try {
-        const targetDir = join(this.pluginPath, folder);
-        const remoteUrl = await GitManager.getRemoteUrlFromDirectory(targetDir);
-        if (!remoteUrl) continue;
+        const activeVersion = this.resolveActiveVersion(folder);
+        const remoteUrl = urlMap[folder];
 
-        const gitManager = new GitManager(true);
-        const currentCommit = await gitManager.getCurrentCommitHash(targetDir);
-        if (!currentCommit) continue;
+        if (!activeVersion || !remoteUrl) continue;
 
-        const id = await staticManager?.getPluginIdByRepositoryUrl(remoteUrl);
-        if (!id) continue;
-
-        const version = await getVersionByCommit(id, currentCommit);
-        if (!version) continue;
-
-        this.installed.push({id: folder, url: remoteUrl, version});
+        this.installed.push({id: folder, url: remoteUrl, version: activeVersion});
       } catch (error) {
         console.error(`Error parsing ${folder}: ${error}`);
       }
@@ -179,73 +344,38 @@ export class PluginManager {
   }
 
   /**
-   * Gets the directory path for a specific plugin ID.
+   * Gets the active directory path for a specific plugin ID (e.g. AppData/Plugins/custom_actions/v0.4.2).
    * @param id - The plugin ID.
    * @returns The directory path or undefined if not found.
    */
   public getDirById(id: string): string | undefined {
-    const plugin = this.installed.find(installed => installed.id === id);
+    const activeVer = this.resolveActiveVersion(id);
+    if (!activeVer) return undefined;
 
-    if (plugin) return join(this.pluginPath, plugin.id);
-
+    const targetPath = join(this.pluginPath, id, `v${activeVer}`);
+    if (existsSync(targetPath)) {
+      return targetPath;
+    }
     return undefined;
   }
 
   /**
-   * Resolves plugin metadata for installation.
-   * @param url - The repository URL.
-   * @param commitHash - Optional commit hash.
-   * @returns Metadata object or null.
-   */
-  private async resolvePluginMetadata(url: string, commitHash?: string) {
-    const {staticManager} = classHolder;
-    const id = await staticManager?.getPluginIdByRepositoryUrl(url);
-    if (!id) return null;
-
-    const targetCommit = commitHash || (await getCommitByAppStage(id));
-    if (!targetCommit) return null;
-
-    const version = await getVersionByCommit(id, targetCommit);
-    if (!version) return null;
-
-    return {id, targetCommit, version};
-  }
-
-  /**
-   * Performs the Git installation process.
-   * @param url - The repository URL.
-   * @param directory - The target directory.
-   * @param targetCommit - The target commit hash.
-   */
-  private async performGitInstallation(url: string, directory: string, targetCommit: string) {
-    const gitManager = new GitManager(true);
-    setupGitManagerListeners(gitManager, url);
-    await gitManager.shallowClone({url, directory, singleBranch: true, branch: 'main'});
-    await gitManager.resetHard(directory, targetCommit, true, 'main');
-  }
-
-  /**
-   * Installs a plugin from a URL.
-   * @param url - The repository URL.
-   * @param commitHash - Optional commit hash.
-   * @returns True if installation succeeded, false otherwise.
-   */
-  /**
    * Safely deletes a plugin directory.
-   * Fallback to renaming on Windows if locked.
    */
   private robustWipePluginDir(dir: string): void {
+    if (!existsSync(dir)) return;
+    makeWritableRecursive(dir);
     try {
-      if (!existsSync(dir)) return;
-      rmSync(dir, {recursive: true, force: true});
+      rmSync(dir, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
     } catch (error) {
       console.warn(`PluginManager: Initial deletion of directory ${dir} failed (possibly locked files):`, error);
       const tempDirName = `${dir}_old_${Date.now()}`;
       try {
         renameSync(dir, tempDirName);
         console.log(`PluginManager: Successfully renamed locked directory ${dir} to ${tempDirName}`);
+        makeWritableRecursive(tempDirName);
         try {
-          rmSync(tempDirName, {recursive: true, force: true});
+          rmSync(tempDirName, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
         } catch {
           console.warn(
             `PluginManager: Could not delete renamed directory ${tempDirName} immediately, left for OS cleanup.`,
@@ -258,30 +388,89 @@ export class PluginManager {
     }
   }
 
-  public async install(url: string, commitHash?: string): Promise<boolean> {
-    const metadata = await this.resolvePluginMetadata(url, commitHash);
-    if (!metadata) {
-      return false;
-    }
+  /**
+   * Downloads .7z release package for a plugin version and extracts it into v<version> folder.
+   */
+  private async downloadAndExtractRelease(pluginId: string, repoUrl: string, version: string): Promise<boolean> {
+    const cleanRepoUrl = repoUrl.replace(/\/$/, '');
+    const cleanVer = version.replace(/^v/i, '');
+    const tag = `v${cleanVer}`;
+    const downloadUrl = `${cleanRepoUrl}/releases/download/${tag}/${cleanVer}.7z`;
 
-    const {id, targetCommit, version} = metadata;
-    const directory = join(this.pluginPath, id);
+    const pluginDir = join(this.pluginPath, pluginId);
+    const tmpDir = join(pluginDir, '.tmp');
+    const tmpArchive = join(tmpDir, `${cleanVer}.7z`);
+    const tmpExtractDir = join(tmpDir, `v${cleanVer}`);
+    const finalDir = join(pluginDir, `v${cleanVer}`);
 
     try {
-      if (existsSync(directory)) {
-        this.robustWipePluginDir(directory);
+      this.robustWipePluginDir(tmpDir);
+      mkdirSync(tmpExtractDir, {recursive: true});
+
+      console.log(`PluginManager: Downloading ${downloadUrl}...`);
+      const response = await axios({
+        method: 'get',
+        url: downloadUrl,
+        responseType: 'stream',
+        timeout: 60000,
+      });
+
+      await new Promise<void>((resolve, reject) => {
+        const writer = createWriteStream(tmpArchive);
+        response.data.pipe(writer);
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+      });
+
+      console.log(`PluginManager: Extracting plugin archive to ${tmpExtractDir}...`);
+      await decompress(tmpArchive, tmpExtractDir);
+
+      if (existsSync(finalDir)) {
+        this.robustWipePluginDir(finalDir);
       }
-      await this.performGitInstallation(url, directory, targetCommit);
-      this.installed.push({id, url, version});
+      renameSync(tmpExtractDir, finalDir);
+      this.robustWipePluginDir(tmpDir);
+
+      // Save active version in storage
+      const pluginStorage = classHolder.storageManager?.getData('plugin') || {migrated: true, disabledCards: []};
+      const activeVersions = {...(pluginStorage.activeVersions || {}), [pluginId]: cleanVer};
+      classHolder.storageManager?.updateData('plugin', {activeVersions});
+
+      this.pruneOldVersions(pluginId);
+      console.log(`PluginManager: Successfully installed/updated plugin ${pluginId} to version ${cleanVer}`);
+      return true;
+    } catch (error) {
+      console.error(`PluginManager: Error downloading/extracting plugin ${pluginId} version ${cleanVer}:`, error);
+      this.robustWipePluginDir(tmpDir);
+      return false;
+    }
+  }
+
+  /**
+   * Installs a plugin from a URL.
+   * @param url - The repository URL.
+   * @param targetVersion - Optional version string.
+   * @returns True if installation succeeded, false otherwise.
+   */
+  public async install(url: string, targetVersion?: string): Promise<boolean> {
+    const {staticManager} = classHolder;
+    const id = await staticManager?.getPluginIdByRepositoryUrl(url);
+    if (!id) return false;
+
+    const versionToInstall = targetVersion || (await getTargetVersionByAppStage(id));
+    if (!versionToInstall) return false;
+
+    try {
+      const success = await this.downloadAndExtractRelease(id, url, versionToInstall);
+      if (!success) return false;
+
+      this.installed = this.installed.filter(p => p.id !== id);
+      this.installed.push({id, url, version: versionToInstall});
+
       void trackDownload(id);
       return true;
     } catch (e) {
       console.warn(`Failed to install plugin: ${url}`, e);
-      try {
-        this.robustWipePluginDir(directory);
-      } catch (cleanupError) {
-        console.error('Failed to cleanup plugin directory after failed installation:', cleanupError);
-      }
       return false;
     }
   }
@@ -292,12 +481,19 @@ export class PluginManager {
    * @returns True if uninstallation succeeded, false otherwise.
    */
   public async uninstall(id: string): Promise<boolean> {
-    const plugin = this.getDirById(id);
-    if (!plugin) return false;
+    const pluginDir = join(this.pluginPath, id);
     try {
-      this.robustWipePluginDir(plugin);
+      this.robustWipePluginDir(pluginDir);
       this.syncList_remove(id);
       this.installed = this.installed.filter(plugin => plugin.id !== id);
+
+      const pluginStorage = classHolder.storageManager?.getData('plugin');
+      if (pluginStorage?.activeVersions) {
+        const activeVersions = {...pluginStorage.activeVersions};
+        delete activeVersions[id];
+        classHolder.storageManager?.updateData('plugin', {activeVersions});
+      }
+
       return true;
     } catch (e) {
       console.warn(`Failed to uninstall ${id}: `, e);
@@ -311,16 +507,12 @@ export class PluginManager {
    * @param stage - The subscription stage.
    * @returns True if sync is required (and added to list), false otherwise.
    */
-  private async isSyncRequired(id: string, stage: SubscribeStages): Promise<boolean> {
+  private async checkSinglePluginSync(id: string, stage: SubscribeStages): Promise<boolean> {
     try {
-      const targetDir = this.getDirById(id);
-      if (!targetDir) return false;
+      const activeVer = this.resolveActiveVersion(id);
+      if (!activeVer) return false;
 
-      const gitManager = new GitManager(true);
-      const currentCommit = await gitManager.getCurrentCommitHash(targetDir, true);
-      if (!currentCommit) return false;
-
-      const targetItem = await isSyncRequired(id, currentCommit, stage);
+      const targetItem = await isSyncRequired(id, activeVer, stage);
       if (!targetItem) {
         this.syncList_remove(id);
         return false;
@@ -329,7 +521,7 @@ export class PluginManager {
       this.addToSyncList(targetItem);
       return true;
     } catch (e) {
-      console.warn(`Failed to check for updates ${id}: `, e);
+      console.warn(`Failed to check for updates for plugin ${id}: `, e);
       return false;
     }
   }
@@ -341,67 +533,74 @@ export class PluginManager {
   public async checkForSync(stage: SubscribeStages): Promise<void> {
     try {
       for (const plugin of this.installed) {
-        const id = plugin.id;
-        await this.isSyncRequired(id, stage);
+        await this.checkSinglePluginSync(plugin.id, stage);
       }
     } catch (error) {
       console.error('Error checking for all updates:', error);
-
-      const errorMessage = isString(error) ? error : (error as Error).message;
-      if (includes(errorMessage, 'detected dubious ownership')) showGitOwnershipToast();
     }
   }
 
   /**
-   * Syncs a plugin to a specific commit.
+   * Syncs a plugin to a specific version string.
    * @param id - The plugin ID.
-   * @param commit - The target commit hash.
+   * @param version - The target version string.
    * @returns True if successful, false otherwise.
    */
-  public async syncItem(id: string, commit: string): Promise<boolean> {
-    const targetDir = this.getDirById(id);
-    if (!targetDir) return false;
+  public async syncItem(id: string, version: string): Promise<boolean> {
+    const installedItem = this.installed.find(p => p.id === id);
+    const {staticManager} = classHolder;
+    const pluginsUrlPath = join('plugins', 'plugins_url.json');
+    const urlMap = (await staticManager?.getDataAsJson<Record<string, string>>(pluginsUrlPath)) || {};
+    const url = installedItem?.url || urlMap[id];
+
+    if (!url) return false;
 
     try {
-      const gitManager = new GitManager(true);
-      await gitManager.resetHard(targetDir, commit, true, 'main');
+      const cleanVer = version.replace(/^v/i, '');
+      const localPath = join(this.pluginPath, id, `v${cleanVer}`);
+
+      if (existsSync(localPath)) {
+        const pluginStorage = classHolder.storageManager?.getData('plugin') || {migrated: true, disabledCards: []};
+        const activeVersions = {...(pluginStorage.activeVersions || {}), [id]: cleanVer};
+        classHolder.storageManager?.updateData('plugin', {activeVersions});
+      } else {
+        const success = await this.downloadAndExtractRelease(id, url, cleanVer);
+        if (!success) return false;
+      }
+
+      this.installed = this.installed.filter(p => p.id !== id);
+      this.installed.push({id, url, version: cleanVer});
 
       this.syncList_remove(id);
-
       return true;
     } catch (e) {
+      console.error(`Failed to sync item ${id} to version ${version}:`, e);
       return false;
     }
   }
 
   /**
-   * Updates a sync item with a new commit.
+   * Updates a sync item with a new version.
    * @param id - The plugin ID.
-   * @param commit - The new commit hash.
+   * @param version - The target version.
    */
-  public async updateSyncItem(id: string, commit: string) {
+  public async updateSyncItem(id: string, version: string) {
     const {staticManager} = classHolder;
     const versioning = await staticManager?.getPluginVersioningById(id);
     if (!versioning) return;
 
-    const targetDir = this.getDirById(id);
-    if (!targetDir) return;
+    const currentVersion = this.resolveActiveVersion(id);
+    if (!currentVersion) return;
 
-    const gitManager = new GitManager(true);
-    const currentCommit = await gitManager.getCurrentCommitHash(targetDir, true);
-    if (!currentCommit) return;
+    const type = getUpdateType(versioning.versions, currentVersion, version);
+    if (!type) return;
 
-    const version = versioning.versions.find(v => v.commit === commit)?.version;
-    const type = getUpdateType(versioning.versions, currentCommit, commit);
-    if (!version || !type) return;
-
-    const installedVersion = this.installed.find(item => item.id === id)?.version;
-    if (installedVersion === version) {
+    if (currentVersion === version) {
       this.syncList_remove(id);
       return;
     }
 
-    const target = {id, commit, version, type};
+    const target: PluginSyncItem = {id, version, type};
     this.addToSyncList(target);
   }
 
@@ -410,18 +609,17 @@ export class PluginManager {
    * @param items - List of items to sync.
    * @returns List of synced IDs.
    */
-  public async syncAll(items: {id: string; commit: string}[]): Promise<string[]> {
+  public async syncAll(items: {id: string; version: string; commit?: string}[]): Promise<string[]> {
     const synced: string[] = [];
 
     try {
       for (const item of items) {
-        const {id, commit} = item;
+        const {id, version, commit} = item;
+        const targetVersion = version || commit || '';
+        if (!targetVersion) continue;
 
-        const targetDir = this.getDirById(id);
-        if (!targetDir) continue;
-
-        await this.syncItem(id, commit);
-        synced.push(id);
+        const success = await this.syncItem(id, targetVersion);
+        if (success) synced.push(id);
       }
       return synced;
     } catch (e) {
@@ -471,9 +669,16 @@ export class PluginManager {
           id: folder,
           message: "Unloaded because folder starts with '.'.",
         });
-        console.log(`Skipping folder "${folder}" because it starts with '.'`);
       } else {
-        const dir = join(this.pluginPath, folder);
+        const dir = this.getDirById(folder);
+        if (!dir) {
+          this.skipped.push({
+            id: folder,
+            message: 'Unloaded because active version directory was not found.',
+          });
+          continue;
+        }
+
         const scriptsFolder = join(dir, 'scripts');
         const metadata = await staticManager?.getPluginMetadataById(folder);
 
@@ -482,7 +687,6 @@ export class PluginManager {
             id: folder,
             message: 'Unloaded because metadata could not be retrieved.',
           });
-          console.log(`Skipping folder "${folder}" because metadata is unavailable.`);
           continue;
         }
 
@@ -506,7 +710,6 @@ export class PluginManager {
             id: folder,
             message: 'Unloaded due to incompatible structure.',
           });
-          console.log(`Skipping folder "${folder}" due to missing requirements.`);
         }
       }
     }
@@ -522,19 +725,37 @@ export class PluginManager {
     const targetModuleDir = join(dirname(this.pluginPath), pluginFolders.module.oldFolder);
     const targetExtensionDir = join(dirname(this.pluginPath), pluginFolders.extension.oldFolder);
 
-    const oldInstalledModules = await removeOldInstallations(targetModuleDir);
-    const oldInstalledExtensions = await removeOldInstallations(targetExtensionDir);
+    const oldInstallations: string[] = [];
 
-    const oldInstallations = [...oldInstalledModules, ...oldInstalledExtensions];
+    const scanOldFolder = async (folder: string) => {
+      try {
+        const entries = await promises.readdir(folder, {withFileTypes: true});
+        for (const entry of entries) {
+          if (entry.isDirectory()) {
+            const pluginsUrlPath = join('plugins', 'plugins_url.json');
+            const urlMap = (await staticManager?.getDataAsJson<Record<string, string>>(pluginsUrlPath)) || {};
+            if (urlMap[entry.name]) {
+              oldInstallations.push(urlMap[entry.name]);
+            }
+          }
+        }
+        await promises.rm(folder, {recursive: true, force: true});
+      } catch (e) {
+        // Ignore if folder doesn't exist
+      }
+    };
 
-    // Reinstall in the new way
+    await scanOldFolder(targetModuleDir);
+    await scanOldFolder(targetExtensionDir);
+
     for (const url of oldInstallations) {
       const id = await staticManager?.getPluginIdByRepositoryUrl(url);
       if (!id) continue;
 
-      const targetCommit = await getCommitByAppStage(id);
-
-      await this.install(url, targetCommit);
+      const targetVer = await getTargetVersionByAppStage(id);
+      if (targetVer) {
+        await this.install(url, targetVer);
+      }
     }
   }
 }
@@ -575,7 +796,6 @@ async function trackDownload(pluginId: string): Promise<void> {
         return;
       }
     } catch (err: any) {
-      // Fallback to PoW verification if unauthorized (401 status)
       if (err.response?.status === 401) {
         const challengeUrl = `${LYNXHUB_WEBSITE}/api/plugins/download/challenge`;
         const challengeRes = await axios.get(challengeUrl, {timeout: 5000});

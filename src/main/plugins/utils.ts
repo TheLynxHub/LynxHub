@@ -19,19 +19,25 @@ import {getAppDataPath, selectNewAppDataFolder} from '@lynx_main/managers/dataFo
 import {RelaunchApp} from '@lynx_main/utils';
 import axios from 'axios';
 import {promises} from 'graceful-fs';
-import {satisfies} from 'semver';
+import {rcompare, satisfies, valid} from 'semver';
 
 import ShowToastWindow from '../childWindows/toast';
 
 /**
  * Finds the target version compatible with the given type and stage.
+ * Sorts versions by semver descending to ensure the newest compatible version is chosen.
  * @param versions - List of available versions.
  * @param type - The type of plugin (module or extension).
  * @param stage - The subscription stage.
  * @returns The compatible version item or undefined.
  */
 export function getTargetVersion(versions: PluginVersions, type: 'module' | 'extension', stage: SubscribeStages) {
-  return versions.find(version => isVersionCompatible(version, type, stage).compatible);
+  const sorted = [...versions].sort((a, b) => {
+    const vA = valid(a.version) ? a.version : '0.0.0';
+    const vB = valid(b.version) ? b.version : '0.0.0';
+    return rcompare(vA, vB);
+  });
+  return sorted.find(version => isVersionCompatible(version, type, stage).compatible);
 }
 
 /**
@@ -56,7 +62,7 @@ export async function getVersionByCommit(id: string, commit: string) {
  */
 export async function isSyncRequired(
   id: string,
-  currentCommit: string,
+  currentVersion: string,
   stage: SubscribeStages,
 ): Promise<PluginSyncItem | undefined> {
   const {staticManager} = classHolder;
@@ -71,24 +77,24 @@ export async function isSyncRequired(
 
   const {version, commit} = targetVersion;
 
-  const updateType = getUpdateType(versioning.versions, currentCommit, commit);
+  const updateType = getUpdateType(versioning.versions, currentVersion, version);
 
-  if (currentCommit === commit || !updateType) return undefined;
+  if (currentVersion === version || !updateType) return undefined;
 
   return {
     id,
     type: updateType,
     version,
-    commit,
+    commit: commit || version,
   };
 }
 
 /**
- * Gets the target commit hash for a plugin based on the current app stage.
+ * Gets the target version string for a plugin based on the current app stage.
  * @param id - The plugin ID.
- * @returns The commit hash or undefined.
+ * @returns The version string or undefined.
  */
-export async function getCommitByAppStage(id: string) {
+export async function getTargetVersionByAppStage(id: string) {
   const {staticManager} = classHolder;
   const versioning = await staticManager!.getPluginVersioningById(id);
   const metadata = await staticManager!.getPluginMetadataById(id);
@@ -97,7 +103,16 @@ export async function getCommitByAppStage(id: string) {
 
   const stage = await staticManager!.getCurrentAppState();
 
-  return getTargetVersion(versioning.versions, metadata.type, stage)?.commit;
+  return getTargetVersion(versioning.versions, metadata.type, stage)?.version;
+}
+
+/**
+ * Gets the target commit/version hash for a plugin based on the current app stage.
+ * @param id - The plugin ID.
+ * @returns The version or commit hash or undefined.
+ */
+export async function getCommitByAppStage(id: string) {
+  return getTargetVersionByAppStage(id);
 }
 
 /**

@@ -24,19 +24,20 @@ const pluginsIpc = {
   getUnloadedList: () => lynxIpc.invoke<UnloadedPlugins[]>(pluginChannels.getUnloadedList),
 
   // Installs plugin from URL
-  install: (url: string, commitHash?: string) => lynxIpc.invoke<boolean>(pluginChannels.install, url, commitHash),
+  install: (url: string, targetVersion?: string) => lynxIpc.invoke<boolean>(pluginChannels.install, url, targetVersion),
 
   // Uninstalls plugin by ID
   uninstall: (id: string) => lynxIpc.invoke<boolean>(pluginChannels.uninstall, id),
 
-  // Syncs plugin to specific commit
-  sync: (id: string, commit: string) => lynxIpc.invoke<boolean>(pluginChannels.sync, id, commit),
+  // Syncs plugin to specific version
+  sync: (id: string, version: string) => lynxIpc.invoke<boolean>(pluginChannels.sync, id, version),
 
   // Updates sync list entry for plugin
-  updateSyncList: (id: string, commit: string) => lynxIpc.invoke<void>(pluginChannels.updateSyncList, id, commit),
+  updateSyncList: (id: string, version: string) => lynxIpc.invoke<void>(pluginChannels.updateSyncList, id, version),
 
-  // Syncs multiple plugins to their commits
-  syncAll: (items: {id: string; commit: string}[]) => lynxIpc.invoke<string[]>(pluginChannels.syncAll, items),
+  // Syncs multiple plugins to their versions
+  syncAll: (items: {id: string; version: string; commit?: string}[]) =>
+    lynxIpc.invoke<string[]>(pluginChannels.syncAll, items),
 
   // Checks for available sync updates based on subscription stage
   checkForSync: (stage: SubscribeStages) => lynxIpc.invoke<void>(pluginChannels.checkForSync, stage),

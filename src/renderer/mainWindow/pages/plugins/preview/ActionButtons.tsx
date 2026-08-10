@@ -39,7 +39,7 @@ function usePluginActions() {
 
       const matchedVersion = selectedPlugin.versions.find(v => v.version === targetVersion);
 
-      pluginsIpc.install(selectedPlugin.url, matchedVersion?.commit).then(wasInstalled => {
+      pluginsIpc.install(selectedPlugin.url, matchedVersion?.version || targetVersion).then(wasInstalled => {
         dispatch(pluginsActions.manageSet({key: 'installing', id: pluginId, operation: 'remove'}));
         if (wasInstalled) {
           AddBreadcrumb_Renderer(`Install Activity: Finished installing "${selectedPlugin.metadata.title}"`);

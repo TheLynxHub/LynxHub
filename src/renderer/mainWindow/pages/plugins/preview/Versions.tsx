@@ -26,16 +26,16 @@ export default function PluginVersionSelector({currentVersion}: PluginVersionSel
    * Derives the available versions, currently selected sync version, and disabled versions
    * (incompatible) based on the plugin's metadata and existing sync items.
    */
-  const {availableVersions, disabledCommitKeys, activeCommit} = useMemo(() => {
+  const {availableVersions, disabledVersionKeys, activeVersion} = useMemo(() => {
     const availableVersions = selectedPlugin?.versions || [];
     const installedVersionEntry = availableVersions.find(item => item.version === currentVersion);
-    const disabledCommitKeys = availableVersions.filter(item => !item.isCompatible).map(item => item.commit);
+    const disabledVersionKeys = availableVersions.filter(item => !item.isCompatible).map(item => item.version);
 
     // Check if there is already a pending sync entry for this plugin
     const pendingSyncEntry = syncList.find(item => item.id === selectedPlugin?.metadata.id);
-    const activeCommit = pendingSyncEntry?.commit || installedVersionEntry?.commit || '';
+    const activeVersion = pendingSyncEntry?.version || installedVersionEntry?.version || currentVersion || '';
 
-    return {availableVersions, disabledCommitKeys, activeCommit};
+    return {availableVersions, disabledVersionKeys, activeVersion};
   }, [selectedPlugin, syncList, currentVersion]);
 
   /**
@@ -45,31 +45,29 @@ export default function PluginVersionSelector({currentVersion}: PluginVersionSel
   const handleSelectionChange = useCallback(
     (key: Key | null) => {
       if (!key) return;
-      const targetCommit = key as string;
+      const targetVersion = key as string;
       const pluginId = selectedPlugin?.metadata.id;
 
-      if (pluginId && targetCommit) {
-        pluginsIpc.updateSyncList(pluginId, targetCommit);
+      if (pluginId && targetVersion) {
+        pluginsIpc.updateSyncList(pluginId, targetVersion);
       }
     },
     [selectedPlugin?.metadata.id],
   );
 
-  const activeVersionNumber = availableVersions.find(item => item.commit === activeCommit)?.version;
-
   return (
     <Select
       className="w-fit"
       variant="primary"
-      value={activeCommit}
+      value={activeVersion}
       onChange={handleSelectionChange}
-      disabledKeys={disabledCommitKeys}
+      disabledKeys={disabledVersionKeys}
       aria-label="Select target version">
       <Select.Trigger>
         <Select.Value>
           <span className="flex items-center gap-x-1.5 font-medium">
             <BoxMinimalistic className="size-3.5 shrink-0" />
-            Target v{activeVersionNumber}
+            Target v{activeVersion}
           </span>
         </Select.Value>
         <Select.Indicator className="size-3" />
@@ -78,8 +76,8 @@ export default function PluginVersionSelector({currentVersion}: PluginVersionSel
         <ListBox>
           {availableVersions.map(version => (
             <ListBox.Item
-              id={version.commit}
-              key={version.commit}
+              id={version.version}
+              key={version.version}
               textValue={version.version}
               className="flex flex-col gap-y-1 pr-8">
               <ListBox.ItemIndicator />

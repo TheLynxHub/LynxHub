@@ -117,10 +117,10 @@ export async function registerCustomProtocols(): Promise<void> {
     try {
       const url = new URL(request.url);
       const pluginId = url.hostname;
-      const pluginPath = getAppDirectory('Plugins');
       const relativePath = url.pathname || '/';
 
-      const filePath = join(pluginPath, pluginId, relativePath);
+      const pluginDir = classHolder.pluginManager?.getDirById(pluginId) || join(getAppDirectory('Plugins'), pluginId);
+      const filePath = join(pluginDir, relativePath);
       const fileUrl = pathToFileURL(filePath).toString();
 
       return net.fetch(fileUrl);

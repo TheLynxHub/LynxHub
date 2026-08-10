@@ -44,7 +44,7 @@ export type VersionItem = {
   /** The version string (semver). */
   version: string;
   /** The commit hash associated with this version. */
-  commit: string;
+  commit?: string;
   /** The release stage (e.g., stable, beta). */
   stage: SubscribeStages;
   /** The engines required by this version. */
@@ -124,7 +124,7 @@ export type PluginSyncItem = {
   /** The target version. */
   version: string;
   /** The target commit hash. */
-  commit: string;
+  commit?: string;
 };
 
 /**

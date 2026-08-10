@@ -53,9 +53,9 @@ export function UpdateButton({item, isIconOnly = false}: UpdateButtonProps) {
     AddBreadcrumb_Renderer(`Plugin sync: id:${id}`);
     dispatch(pluginsActions.manageSet({key: 'updating', id, operation: 'add'}));
 
-    const {version, commit} = updateItem;
+    const {version} = updateItem;
 
-    pluginsIpc.sync(id, commit).then(isUpdated => {
+    pluginsIpc.sync(id, version).then(isUpdated => {
       if (isUpdated) {
         topToast.success(`${title} synced Successfully`);
         showRestartModal(dispatch, 'To apply the changes, please restart the app.');

@@ -1,7 +1,17 @@
-import {createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync} from 'node:fs';
+import {
+  chmodSync,
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  statSync,
+} from 'node:fs';
 import {join} from 'node:path';
 
-import {APP_BUILD_NUMBER, LYNXHUB_WEBSITE, STATICS_URL} from '@lynx_common/consts';
+import {LYNXHUB_WEBSITE, STATICS_URL} from '@lynx_common/consts';
 import {
   AppUpdateData,
   AppUpdateInsiderData,
@@ -14,7 +24,7 @@ import {toMs} from '@lynx_common/utils';
 import {decompress} from '@lynxhub/7zip';
 import axios from 'axios';
 
-import {AUTH_LOGIN_KEY} from '../monitoring/auth';
+import {AUTH_LOGIN_KEY, getValidatedUserStage} from '../monitoring/auth';
 import {getTokens} from '../monitoring/token';
 import classHolder from './classHolder';
 import {getAppDirectory} from './dataFolder';
@@ -27,6 +37,29 @@ type PluginAvailableItem = {metadata: PluginMetadata; versioning: PluginVersioni
 function parseVersionNumber(tag: string): number {
   const num = parseInt(tag.replace(/^v/i, ''), 10);
   return isNaN(num) ? -1 : num;
+}
+
+/**
+ * Helper to recursively make files and directories writable on Windows.
+ */
+function makeWritableRecursive(targetPath: string): void {
+  try {
+    if (!existsSync(targetPath)) return;
+    const stat = statSync(targetPath);
+    try {
+      chmodSync(targetPath, 0o666);
+    } catch {
+      // Ignore permission errors on individual items
+    }
+    if (stat.isDirectory()) {
+      const entries = readdirSync(targetPath, {withFileTypes: true});
+      for (const entry of entries) {
+        makeWritableRecursive(join(targetPath, entry.name));
+      }
+    }
+  } catch {
+    // Ignore error during recursive traversal
+  }
 }
 
 /**
@@ -420,19 +453,11 @@ export default class StaticsManager {
   }
 
   public async getCurrentAppState(): Promise<SubscribeStages> {
-    const releases = await this.getReleases();
-    const insider = await this.getInsider();
-
-    if (!releases || !insider) return 'public';
-
-    if (APP_BUILD_NUMBER === releases.currentBuild) {
-      return 'public';
-    } else if (APP_BUILD_NUMBER === releases.earlyAccess.build) {
-      return 'early_access';
-    } else if (APP_BUILD_NUMBER === insider.currentBuild) {
-      return 'insider';
+    try {
+      return await getValidatedUserStage();
+    } catch (e) {
+      console.warn('StaticsManager: Error validating channel stage:', e);
     }
-
     return 'public';
   }
 
@@ -481,16 +506,18 @@ export default class StaticsManager {
    * Safely wipes a directory recursively.
    */
   private robustWipe(targetPath: string): void {
+    if (!existsSync(targetPath)) return;
+    makeWritableRecursive(targetPath);
     try {
-      if (!existsSync(targetPath)) return;
-      rmSync(targetPath, {recursive: true, force: true});
+      rmSync(targetPath, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
     } catch (error) {
       console.warn(`StaticsManager: Initial deletion of ${targetPath} failed:`, error);
       const tempDirName = `${targetPath}_old_${Date.now()}`;
       try {
         renameSync(targetPath, tempDirName);
+        makeWritableRecursive(tempDirName);
         try {
-          rmSync(tempDirName, {recursive: true, force: true});
+          rmSync(tempDirName, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
         } catch {
           console.warn(`StaticsManager: Could not delete ${tempDirName} immediately.`);
         }
@@ -504,7 +531,7 @@ export default class StaticsManager {
    * Helper to read and parse a JSON file from the active statics version.
    * On failure, marks the failing version as broken and falls back to previous available versions.
    */
-  private async getDataAsJson<T>(fileName: string): Promise<T | undefined> {
+  public async getDataAsJson<T>(fileName: string): Promise<T | undefined> {
     if (this.requirementsCheckPromise) {
       await this.requirementsCheckPromise;
     }

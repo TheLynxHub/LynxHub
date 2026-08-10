@@ -184,6 +184,8 @@ export type PluginStorage = {
   migrated: boolean;
   disabledCards: string[];
   bgChatEnabledCards?: string[];
+  activeVersions?: Record<string, string>;
+  brokenVersions?: Record<string, string[]>;
 };
 
 /**

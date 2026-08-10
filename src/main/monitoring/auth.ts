@@ -10,7 +10,7 @@ import {autoUpdater} from 'electron-updater';
 import {deleteTokens, getChannel, getTokens, saveChannel, saveTokens} from './token';
 
 // Constants
-const AUTH_CHANNEL_KEY = 'LynxHub-Auth-Update-Channel';
+export const AUTH_CHANNEL_KEY = 'LynxHub-Auth-Update-Channel';
 export const AUTH_LOGIN_KEY = 'LynxHub-Auth-Login-User';
 
 // Internal user data representation including sensitive release tokens
@@ -135,6 +135,33 @@ async function refreshChannel(isLogin: boolean, stage: SubscribeStages) {
     await saveChannel(AUTH_CHANNEL_KEY, 'public');
     applicationIpc.send.updateChannelChange('public');
   }
+}
+
+/**
+ * Safely validates existing login and returns the user's authorized subscription stage.
+ * If logged out or token is invalid/expired, returns 'public'.
+ */
+export async function getValidatedUserStage(): Promise<SubscribeStages> {
+  const token = await getTokens(AUTH_LOGIN_KEY);
+  if (!token) {
+    await saveChannel(AUTH_CHANNEL_KEY, 'public');
+    return 'public';
+  }
+
+  const {isLoggedIn, userData} = await checkExistingLogin();
+  if (!isLoggedIn || !userData) {
+    await saveChannel(AUTH_CHANNEL_KEY, 'public');
+    return 'public';
+  }
+
+  const stage = userData.subscribeStage as SubscribeStages;
+  if (stage === 'insider' || stage === 'early_access') {
+    await saveChannel(AUTH_CHANNEL_KEY, stage);
+    return stage;
+  }
+
+  await saveChannel(AUTH_CHANNEL_KEY, 'public');
+  return 'public';
 }
 
 /**
