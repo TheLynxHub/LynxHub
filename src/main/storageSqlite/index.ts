@@ -317,6 +317,14 @@ export class BaseSqliteStorage {
         value TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS statics_storage (
+        id TEXT PRIMARY KEY,
+        active_version TEXT,
+        broken_versions TEXT,
+        last_checked_at TEXT,
+        updated_at TEXT NOT NULL
+      );
     `);
   }
 
