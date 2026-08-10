@@ -95,7 +95,7 @@ function ChangelogEntry({item, depth = 0, id}: ChangelogEntryProps) {
             <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 leading-normal">{label}</span>
           </div>
           {/* Theme-safe nested timeline connector */}
-          <div className="space-y-0.5 border-l border-zinc-200 dark:border-zinc-800 ml-1.5 pl-3">
+          <div className="space-y-0.5 border-l border-border ml-1.5 pl-3">
             {subItems.map((subItem, index) => (
               <ChangelogEntry id={index} item={subItem} depth={depth + 1} key={`${label}_${index}`} />
             ))}
@@ -117,8 +117,7 @@ function CategoryGroup({category, entries}: {category: string; entries: Changelo
       <div className="flex items-center gap-2 mb-2">
         <div
           className={
-            'flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200' +
-            ' dark:border-zinc-800/60 px-2 py-1 rounded-lg'
+            'flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-900/80 border border-border px-2 py-1 rounded-lg'
           }>
           {getCategoryIcon(cleanName)}
           <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-700 dark:text-zinc-300">
@@ -167,22 +166,24 @@ function VersionHistoryCard({versionData, index, isInstalledVersion, stage}: Ver
 
   return (
     <motion.div
-      className={`relative rounded-2xl border p-4.5 transition-all duration-150 ${
+      className={`relative overflow-hidden rounded-3xl border p-4.5 transition-all duration-150 ${
         isLatest
-          ? 'bg-white/80 dark:bg-zinc-900/40 border-l-2 border-l-purple-500 border-y-zinc-200/60' +
-            ' border-r-zinc-200/60 dark:border-y-zinc-800/60 dark:border-r-zinc-800/60 shadow-xs'
-          : 'bg-white/40 dark:bg-zinc-950/20 border-l-2 border-l-zinc-300 dark:border-l-zinc-700' +
-            ' border-y-zinc-200/40 border-r-zinc-200/40 dark:border-y-zinc-900/60 dark:border-r-zinc-900/60'
+          ? 'bg-white/80 dark:bg-zinc-900/40 border-zinc-200/60 dark:border-zinc-800/60 shadow-xs'
+          : 'bg-white/40 dark:bg-zinc-950/20 border-zinc-200/40 dark:border-zinc-900/60'
       }`}
       key={versionData.version}
       animate={{opacity: 1, y: 0}}
       initial={{opacity: 0, y: 10}}
       transition={{duration: 0.3, delay: index * 0.04}}>
-      {/* Header Panel */}
       <div
         className={
-          'flex items-center justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800/60 pb-3 mb-4'
-        }>
+          'absolute left-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-border/50 ' +
+          (isLatest ? 'via-purple-500' : 'via-zinc-400/80 dark:via-zinc-600/80') +
+          ' from-border/50 pointer-events-none'
+        }
+      />
+      {/* Header Panel */}
+      <div className={'flex items-center justify-between gap-3 border-b border-border pb-3 mb-4'}>
         <div className="flex items-center gap-2">
           {/* Native theme-responsive text title */}
           <h3 className="text-base font-bold tracking-tight text-zinc-950 dark:text-white">{versionData.version}</h3>
