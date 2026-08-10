@@ -1,7 +1,7 @@
-import {existsSync, readdirSync, readFileSync, renameSync, rmSync} from 'node:fs';
+import {createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync} from 'node:fs';
 import {join} from 'node:path';
 
-import {APP_BUILD_NUMBER, LYNXHUB_WEBSITE, STATICS_URL} from '@lynx_common/consts';
+import {APP_BUILD_NUMBER, LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {
   AppUpdateData,
   AppUpdateInsiderData,
@@ -13,9 +13,8 @@ import {
 } from '@lynx_common/types';
 import {PluginMetadata, PluginVersioning} from '@lynx_common/types/plugins';
 import {toMs} from '@lynx_common/utils';
-import GitManager from '@lynx_main/git';
+import {decompress} from '@lynxhub/7zip';
 import axios from 'axios';
-import {promises} from 'graceful-fs';
 
 import {AUTH_LOGIN_KEY} from '../monitoring/auth';
 import {getTokens} from '../monitoring/token';
@@ -25,37 +24,44 @@ import {getAppDirectory} from './dataFolder';
 type PluginAvailableItem = {metadata: PluginMetadata; versioning: PluginVersioning; url: string};
 
 /**
- * Manages static assets and configuration files synced from a remote Git repository.
- * Handles cloning, updating, and serving static data like releases, notifications, and plugin info.
+ * Parses numerical version from tag (e.g. "v120" -> 120, "v2" -> 2).
+ */
+function parseVersionNumber(tag: string): number {
+  const num = parseInt(tag.replace(/^v/i, ''), 10);
+  return isNaN(num) ? -1 : num;
+}
+
+/**
+ * Manages static assets and configuration files downloaded from GitHub Releases.
+ * Handles 7z extraction, version subfolders (v1, v2, ...), startup pruning, and automatic fallbacks.
  */
 export default class StaticsManager {
-  private gitManager: GitManager;
   private readonly dir: string;
   private requirementsCheckPromise: Promise<void> | null = null;
-  private requirementsCheckCompleted: boolean = false;
   private pullIntervalId: NodeJS.Timeout | null = null;
-  private gitAvailable: boolean = true;
   private cachedNotifications: NotificationData[] | undefined = undefined;
   private lastNotificationFetchTime = 0;
   private lastPullTime = 0;
-  private isRepairing = false;
+  private activeVersionCache: string | undefined = undefined;
+  private brokenVersions: Set<string> = new Set<string>();
 
   constructor() {
-    this.gitManager = new GitManager();
     this.dir = getAppDirectory('Statics');
   }
 
   /**
-   * Returns true if statics are available (git installed and clone succeeded)
+   * Returns true if statics are available (at least one valid extracted version exists)
    */
   public isAvailable(): boolean {
-    return this.requirementsCheckCompleted && this.gitAvailable;
+    return this.getActiveVersion() !== undefined;
   }
 
   /**
-   * Checks if requirements are met and initializes the statics repository.
-   * Clones the repo if missing, or pulls updates if present.
-   * Schedules periodic updates if online.
+   * Checks requirements on app startup:
+   * 1. Loads database state for statics.
+   * 2. Prunes statics folder, keeping only the 2 latest versions.
+   * 3. Selects active version.
+   * 4. Downloads latest release if online and missing/outdated.
    */
   public async checkRequirements(): Promise<void> {
     if (this.requirementsCheckPromise) {
@@ -63,33 +69,34 @@ export default class StaticsManager {
     }
 
     this.requirementsCheckPromise = (async () => {
+      // Create root statics directory if missing
+      if (!existsSync(this.dir)) {
+        mkdirSync(this.dir, {recursive: true});
+      }
+
+      // Load DB state
+      const dbData = classHolder.storageManager?.getStaticsData();
+      if (dbData?.brokenVersions) {
+        this.brokenVersions = new Set(dbData.brokenVersions);
+      }
+
+      // Prune old versions on startup (keep only 2 latest)
+      this.pruneOldVersions();
+
+      // Resolve active version on disk
+      this.activeVersionCache = this.resolveActiveVersion();
+
       if (classHolder.isOnline) {
         try {
-          await this.clone();
           await this.pull();
-
           if (!this.pullIntervalId) {
             this.pullIntervalId = setInterval(() => this.pull(), toMs(10, 'minutes'));
           }
-          this.requirementsCheckCompleted = true;
         } catch (error) {
-          const message = (error as Error)?.message || '';
-          if (/Git is not available/i.test(message)) {
-            this.gitAvailable = false;
-            console.warn('StaticsManager: Git not available. App will run with limited functionality.');
-          } else {
-            console.warn('StaticsManager: Failed to check requirements:', error);
-          }
-          this.requirementsCheckCompleted = false;
+          console.warn('StaticsManager: Error during initial pull:', error);
         }
-      } else {
-        try {
-          await promises.access(this.dir);
-          this.requirementsCheckCompleted = true;
-        } catch {
-          console.warn('StaticsManager: Offline and statics directory missing.');
-          this.requirementsCheckCompleted = false;
-        }
+      } else if (!this.activeVersionCache) {
+        console.warn('StaticsManager: Offline and no extracted statics version available.');
       }
     })();
 
@@ -97,23 +104,224 @@ export default class StaticsManager {
   }
 
   /**
-   * Pulls the latest changes from the remote repository.
-   * Re-clones if the local repository is corrupted.
+   * Scans the Statics folder, retains the 2 highest version folders, and deletes all older ones.
    */
-  public async pull() {
-    if (!this.gitAvailable || !classHolder.isOnline) return;
+  private pruneOldVersions(): void {
+    if (!existsSync(this.dir)) return;
+
+    try {
+      const entries = readdirSync(this.dir, {withFileTypes: true});
+      const versionFolders = entries
+        .filter(e => e.isDirectory() && /^v\d+$/i.test(e.name))
+        .map(e => e.name)
+        .sort((a, b) => parseVersionNumber(a) - parseVersionNumber(b));
+
+      if (versionFolders.length > 2) {
+        const toRemove = versionFolders.slice(0, versionFolders.length - 2);
+        for (const tag of toRemove) {
+          console.log(`StaticsManager: Pruning old statics version ${tag}`);
+          this.robustWipe(join(this.dir, tag));
+        }
+      }
+    } catch (err) {
+      console.error('StaticsManager: Error pruning old versions:', err);
+    }
+  }
+
+  /**
+   * Scans local statics directory and returns valid extracted version tags sorted descending.
+   */
+  private getLocalVersions(): string[] {
+    if (!existsSync(this.dir)) return [];
+    try {
+      const entries = readdirSync(this.dir, {withFileTypes: true});
+      return entries
+        .filter(e => e.isDirectory() && /^v\d+$/i.test(e.name))
+        .map(e => e.name)
+        .sort((a, b) => parseVersionNumber(b) - parseVersionNumber(a));
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Resolves the highest non-broken local version.
+   */
+  private resolveActiveVersion(): string | undefined {
+    const versions = this.getLocalVersions();
+    for (const tag of versions) {
+      if (!this.brokenVersions.has(tag)) {
+        return tag;
+      }
+    }
+    return versions.length > 0 ? versions[0] : undefined;
+  }
+
+  private getActiveVersion(): string | undefined {
+    if (this.activeVersionCache && !this.brokenVersions.has(this.activeVersionCache)) {
+      return this.activeVersionCache;
+    }
+    this.activeVersionCache = this.resolveActiveVersion();
+    return this.activeVersionCache;
+  }
+
+  /**
+   * Returns absolute directory path for the current active statics version.
+   */
+  private getActiveVersionDir(): string | undefined {
+    const version = this.getActiveVersion();
+    return version ? join(this.dir, version) : undefined;
+  }
+
+  /**
+   * Checks GitHub Releases for latest release version tag and downloads asset if newer.
+   */
+  public async pull(): Promise<void> {
+    if (!classHolder.isOnline) return;
+
     const now = Date.now();
     if (now - this.lastPullTime < toMs(5, 'minutes')) {
       return;
     }
+    this.lastPullTime = now;
+
     try {
-      await this.gitManager.pull(this.dir);
-      this.lastPullTime = now;
-    } catch {
-      // If pull fails (e.g. merge conflicts, corruption), wipe and re-clone
-      this.robustWipe();
-      await this.clone();
-      this.lastPullTime = now;
+      const latestTag = await this.fetchLatestReleaseTag();
+      if (!latestTag) {
+        console.warn('StaticsManager: Could not resolve latest release tag from GitHub.');
+        return;
+      }
+
+      const activeTag = this.getActiveVersion();
+      const currentVerNum = activeTag ? parseVersionNumber(activeTag) : -1;
+      const latestVerNum = parseVersionNumber(latestTag);
+
+      // Save last checked timestamp to DB
+      classHolder.storageManager?.updateStaticsData({lastCheckedAt: new Date().toISOString()});
+
+      if (latestVerNum > currentVerNum || !activeTag || !existsSync(join(this.dir, latestTag))) {
+        console.log(`StaticsManager: New statics release found (${latestTag}). Downloading...`);
+        await this.downloadAndExtractRelease(latestTag);
+      }
+    } catch (error) {
+      console.error('StaticsManager: Failed to pull statics release:', error);
+    }
+  }
+
+  /**
+   * Fetches latest release version tag from GitHub Releases.
+   */
+  private async fetchLatestReleaseTag(): Promise<string | undefined> {
+    // 1. Try redirect on releases/latest page
+    try {
+      const res = await axios.get('https://github.com/KindaBrazy/LynxHub-Statics/releases/latest', {
+        maxRedirects: 0,
+        validateStatus: status => status >= 200 && status < 400,
+        timeout: 10000,
+      });
+      const location = (res.headers['location'] || res.headers['Location']) as string | undefined;
+      if (location) {
+        const match = location.match(/\/releases\/tag\/(v\d+)/i);
+        if (match) return match[1];
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.headers) {
+        const location = (error.response.headers['location'] || error.response.headers['Location']) as
+          string | undefined;
+        if (location) {
+          const match = location.match(/\/releases\/tag\/(v\d+)/i);
+          if (match) return match[1];
+        }
+      }
+    }
+
+    // 2. Try redirect on releases/latest/download/statics.7z
+    try {
+      const res = await axios.head(
+        'https://github.com/KindaBrazy/LynxHub-Statics/releases/latest/download/statics.7z',
+        {
+          maxRedirects: 0,
+          validateStatus: status => status >= 200 && status < 400,
+          timeout: 10000,
+        },
+      );
+      const location = (res.headers['location'] || res.headers['Location']) as string | undefined;
+      if (location) {
+        const match = location.match(/\/download\/(v\d+)\//i);
+        if (match) return match[1];
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.headers) {
+        const location = (error.response.headers['location'] || error.response.headers['Location']) as
+          string | undefined;
+        if (location) {
+          const match = location.match(/\/download\/(v\d+)\//i);
+          if (match) return match[1];
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Downloads statics.7z for a given tag into .tmp, extracts it, and moves to target version folder.
+   */
+  private async downloadAndExtractRelease(tag: string): Promise<void> {
+    const downloadUrl = `https://github.com/KindaBrazy/LynxHub-Statics/releases/download/${tag}/statics.7z`;
+    const tmpDir = join(this.dir, '.tmp');
+    const tmpArchive = join(tmpDir, 'statics.7z');
+    const tmpExtractDir = join(tmpDir, tag);
+    const finalDir = join(this.dir, tag);
+
+    try {
+      // Prepare clean temp dir
+      this.robustWipe(tmpDir);
+      mkdirSync(tmpExtractDir, {recursive: true});
+
+      console.log(`StaticsManager: Downloading ${downloadUrl}...`);
+      const response = await axios({
+        method: 'get',
+        url: downloadUrl,
+        responseType: 'stream',
+        timeout: 60000,
+      });
+
+      await new Promise<void>((resolve, reject) => {
+        const writer = createWriteStream(tmpArchive);
+        response.data.pipe(writer);
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+      });
+
+      console.log(`StaticsManager: Extracting statics archive to ${tmpExtractDir}...`);
+      await decompress(tmpArchive, tmpExtractDir);
+
+      // Move extracted folder to final location
+      if (existsSync(finalDir)) {
+        this.robustWipe(finalDir);
+      }
+      renameSync(tmpExtractDir, finalDir);
+      this.robustWipe(tmpDir);
+
+      // Update active version
+      this.activeVersionCache = tag;
+      this.brokenVersions.delete(tag);
+
+      // Persist in DB
+      classHolder.storageManager?.updateStaticsData({
+        activeVersion: tag,
+        brokenVersions: Array.from(this.brokenVersions),
+      });
+
+      // Run pruning to retain top 2 versions
+      this.pruneOldVersions();
+
+      console.log(`StaticsManager: Successfully updated statics to ${tag}`);
+    } catch (error) {
+      console.error(`StaticsManager: Error downloading/extracting release ${tag}:`, error);
+      this.robustWipe(tmpDir);
+      throw error;
     }
   }
 
@@ -202,9 +410,6 @@ export default class StaticsManager {
     return entry ? entry[0] : undefined;
   }
 
-  /**
-   * Determines the current application update stage (public, early_access, insider).
-   */
   public async getCurrentAppState(): Promise<SubscribeStages> {
     const releases = await this.getReleases();
     const insider = await this.getInsider();
@@ -222,9 +427,6 @@ export default class StaticsManager {
     return 'public';
   }
 
-  /**
-   * Retrieves a list of available plugins with their metadata and versioning info.
-   */
   public async getPluginsList(): Promise<PluginAvailableItem[]> {
     if (!this.isAvailable()) return [];
 
@@ -232,8 +434,10 @@ export default class StaticsManager {
     const urlMap = await this.getDataAsJson<Record<string, string>>(pluginsUrlPath);
     if (!urlMap) return [];
 
-    const pluginsPath = join(this.dir, 'plugins');
+    const activeDir = this.getActiveVersionDir();
+    if (!activeDir) return [];
 
+    const pluginsPath = join(activeDir, 'plugins');
     if (!existsSync(pluginsPath)) {
       return [];
     }
@@ -257,7 +461,6 @@ export default class StaticsManager {
     return results.filter((item): item is PluginAvailableItem => item !== null);
   }
 
-  /** Stops the manager and clears the pull interval */
   public stop(): void {
     if (this.pullIntervalId) {
       clearInterval(this.pullIntervalId);
@@ -266,156 +469,74 @@ export default class StaticsManager {
   }
 
   /**
-   * Clones the statics repository.
-   * Handles cases where Git is missing or cloning fails.
+   * Safely wipes a directory recursively.
    */
-  /**
-   * Safely deletes the statics directory recursively.
-   * If deletion fails (likely due to Windows file locks), renames the directory
-   * to a temporary name to free up the path immediately and schedules cleanup.
-   */
-  private robustWipe(): void {
+  private robustWipe(targetPath: string): void {
     try {
-      if (!existsSync(this.dir)) return;
-      rmSync(this.dir, {recursive: true, force: true});
+      if (!existsSync(targetPath)) return;
+      rmSync(targetPath, {recursive: true, force: true});
     } catch (error) {
-      console.warn(`StaticsManager: Initial deletion of directory ${this.dir} failed (possibly locked files):`, error);
-      const tempDirName = `${this.dir}_old_${Date.now()}`;
+      console.warn(`StaticsManager: Initial deletion of ${targetPath} failed:`, error);
+      const tempDirName = `${targetPath}_old_${Date.now()}`;
       try {
-        renameSync(this.dir, tempDirName);
-        console.log(`StaticsManager: Successfully renamed locked directory ${this.dir} to ${tempDirName}`);
+        renameSync(targetPath, tempDirName);
         try {
           rmSync(tempDirName, {recursive: true, force: true});
         } catch {
-          console.warn(
-            `StaticsManager: Could not delete renamed directory ${tempDirName} immediately, left for OS cleanup.`,
-          );
+          console.warn(`StaticsManager: Could not delete ${tempDirName} immediately.`);
         }
       } catch (renameError) {
-        console.error(`StaticsManager: Failed to rename directory ${this.dir} as fallback:`, renameError);
-        throw error;
-      }
-    }
-  }
-
-  private async clone() {
-    try {
-      const isValid = await GitManager.isGitRepository(this.dir);
-      if (isValid) {
-        const dirUrl = await GitManager.getRemoteUrlFromDirectory(this.dir);
-        if (dirUrl === STATICS_URL) return;
-      }
-
-      // If it exists but is not a valid repo or url doesn't match, wipe it first
-      if (existsSync(this.dir)) {
-        this.robustWipe();
-      }
-
-      return this.gitManager.shallowClone({url: STATICS_URL, directory: this.dir, singleBranch: true, branch: 'main'});
-    } catch (error) {
-      // Check if git is not available (ENOENT = not found)
-      const message = (error as Error)?.message || '';
-      if (/spawn (git )?ENOENT/i.test(message) || /git.*not found/i.test(message)) {
-        console.warn('StaticsManager: Git is not installed or not in PATH. Statics will not be available.');
-        throw new Error('Git is not available', {cause: error});
-      }
-      // For other errors, wipe and try cloning again (might be corrupted repo)
-      if (existsSync(this.dir)) {
-        this.robustWipe();
-      }
-      return this.gitManager.shallowClone({url: STATICS_URL, directory: this.dir, singleBranch: true, branch: 'main'});
-    }
-  }
-
-  /**
-   * Repairs the statics repository by running a hard reset.
-   * If the hard reset fails, falls back to a clean clone.
-   */
-  public async repair(): Promise<boolean> {
-    if (this.isRepairing || !this.gitAvailable) return false;
-    this.isRepairing = true;
-    console.log('StaticsManager: Attempting to repair statics repository...');
-    try {
-      await this.gitManager.resetHard(this.dir, 'HEAD', false);
-      console.log('StaticsManager: Repository local hard reset successful.');
-      this.isRepairing = false;
-      return true;
-    } catch (error) {
-      console.warn('StaticsManager: Local hard reset failed, attempting fetch and reset to origin/main...', error);
-      try {
-        await this.gitManager.resetHard(this.dir, 'origin/main', true, 'main');
-        console.log('StaticsManager: Repository remote hard reset successful.');
-        this.isRepairing = false;
-        return true;
-      } catch (remoteResetError) {
-        console.warn('StaticsManager: Remote hard reset failed, trying full wipe and re-clone...', remoteResetError);
-        try {
-          this.robustWipe();
-          await this.clone();
-          console.log('StaticsManager: Full wipe and re-clone successful.');
-          this.isRepairing = false;
-          return true;
-        } catch (cloneError) {
-          console.error('StaticsManager: Repair failed completely:', cloneError);
-          this.isRepairing = false;
-          return false;
-        }
+        console.error(`StaticsManager: Failed to rename directory ${targetPath} as fallback:`, renameError);
       }
     }
   }
 
   /**
-   * Helper to read and parse a JSON file from the statics directory.
-   * Handles retry logic for transient file system errors and automatic self-healing.
+   * Helper to read and parse a JSON file from the active statics version.
+   * On failure, marks the failing version as broken and falls back to previous available versions.
    */
-  private async getDataAsJson<T>(fileName: string, allowRepair = true): Promise<T | undefined> {
+  private async getDataAsJson<T>(fileName: string): Promise<T | undefined> {
     if (this.requirementsCheckPromise) {
       await this.requirementsCheckPromise;
     }
 
-    if (!this.requirementsCheckCompleted) {
-      // Statics not available - return undefined instead of throwing
-      return undefined;
-    }
+    const availableVersions = this.getLocalVersions().filter(tag => !this.brokenVersions.has(tag));
 
-    const filePath = join(this.dir, fileName);
+    for (const tag of availableVersions) {
+      const filePath = join(this.dir, tag, fileName);
 
-    const tryRead = () => {
       if (!existsSync(filePath)) {
-        return {success: false, data: undefined, missing: true, transient: false};
+        continue;
       }
+
       try {
         const fileContent = readFileSync(filePath, 'utf8');
-        return {success: true, data: JSON.parse(fileContent) as T, missing: false, transient: false};
+        return JSON.parse(fileContent) as T;
       } catch (error) {
-        const errCode = (error as NodeJS.ErrnoException).code;
-        // Handle transient file system errors (UNKNOWN, EIO, etc.)
-        if (errCode === 'UNKNOWN' || errCode === 'EIO' || errCode === 'EBUSY') {
-          return {success: false, transient: true, missing: false};
+        console.warn(`StaticsManager: Failed to read/parse ${fileName} in statics version ${tag}:`, error);
+        // Mark version as broken
+        this.brokenVersions.add(tag);
+        classHolder.storageManager?.updateStaticsData({
+          brokenVersions: Array.from(this.brokenVersions),
+        });
+        // Continue loop to try next highest valid version
+      }
+    }
+
+    // If all local versions failed or none exist, attempt emergency download if online
+    if (classHolder.isOnline) {
+      try {
+        const latestTag = await this.fetchLatestReleaseTag();
+        if (latestTag && !this.brokenVersions.has(latestTag)) {
+          await this.downloadAndExtractRelease(latestTag);
+          const newPath = join(this.dir, latestTag, fileName);
+          if (existsSync(newPath)) {
+            const content = readFileSync(newPath, 'utf8');
+            return JSON.parse(content) as T;
+          }
         }
-        return {success: false, transient: false, missing: false};
-      }
-    };
-
-    let result = tryRead();
-    if (result.success) {
-      return result.data;
-    }
-
-    if (result.transient) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      result = tryRead();
-      if (result.success) {
-        return result.data;
-      }
-    }
-
-    // If the file is missing or parse failed (corrupted syntax), and we are allowed to repair,
-    // trigger repository self-healing and retry reading once.
-    if (allowRepair && this.gitAvailable) {
-      const repaired = await this.repair();
-      if (repaired) {
-        return this.getDataAsJson<T>(fileName, false);
+      } catch (emergencyError) {
+        console.error('StaticsManager: Emergency download failed:', emergencyError);
       }
     }
 

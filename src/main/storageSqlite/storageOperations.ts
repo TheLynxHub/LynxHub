@@ -1135,6 +1135,48 @@ export class SqliteStorageManager {
     }
   }
 
+  public getStaticsData(): {activeVersion?: string; brokenVersions?: string[]; lastCheckedAt?: string} {
+    const res = this.db.select().from(schema.staticsStorage).where(eq(schema.staticsStorage.id, 'main')).get();
+    if (!res) {
+      return {};
+    }
+    return {
+      activeVersion: res.activeVersion ?? undefined,
+      brokenVersions: (res.brokenVersions as string[]) ?? [],
+      lastCheckedAt: res.lastCheckedAt ?? undefined,
+    };
+  }
+
+  public updateStaticsData(
+    data: Partial<{activeVersion?: string; brokenVersions?: string[]; lastCheckedAt?: string}>,
+  ): void {
+    const current = this.getStaticsData();
+    const updated = {
+      ...current,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    this.db
+      .insert(schema.staticsStorage)
+      .values({
+        id: 'main',
+        activeVersion: updated.activeVersion,
+        brokenVersions: updated.brokenVersions ?? [],
+        lastCheckedAt: updated.lastCheckedAt,
+        updatedAt: updated.updatedAt,
+      })
+      .onConflictDoUpdate({
+        target: schema.staticsStorage.id,
+        set: {
+          activeVersion: updated.activeVersion,
+          brokenVersions: updated.brokenVersions ?? [],
+          lastCheckedAt: updated.lastCheckedAt,
+          updatedAt: updated.updatedAt,
+        },
+      })
+      .run();
+  }
+
   public close(): void {
     this.baseStorage.close();
   }

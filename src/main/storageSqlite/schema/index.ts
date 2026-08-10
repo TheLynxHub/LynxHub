@@ -141,3 +141,14 @@ export const moduleStorage = sqliteTable('module_storage', {
   value: text('value', {mode: 'json'}).notNull(),
   updatedAt: text('updated_at').notNull(),
 });
+
+/**
+ * Statics version metadata table storing active version, broken versions, and check timestamps.
+ */
+export const staticsStorage = sqliteTable('statics_storage', {
+  id: text('id').primaryKey(),
+  activeVersion: text('active_version'),
+  brokenVersions: text('broken_versions', {mode: 'json'}),
+  lastCheckedAt: text('last_checked_at'),
+  updatedAt: text('updated_at').notNull(),
+});
