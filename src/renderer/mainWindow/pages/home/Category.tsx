@@ -26,10 +26,14 @@ interface HomeCategoryProps {
 export default function HomeCategory({children, subTitle, icon, title}: HomeCategoryProps) {
   return (
     <motion.div
-      transition={{duration: 0.2}}
+      transition={{
+        duration: 0.18,
+        ease: [0.23, 1, 0.32, 1],
+      }}
+      animate={{opacity: 1, scale: 1, y: 0}}
+      exit={{opacity: 0, scale: 0.96, y: 6}}
       className="flex w-full flex-col p-4 py-0"
-      animate={{opacity: 1, scale: 1, translateY: 0}}
-      initial={{opacity: 0, scale: 0.95, translateY: 5}}
+      initial={{opacity: 0, scale: 0.96, y: 6}}
       layout>
       <CardsContainer icon={icon} title={title} subTitle={subTitle}>
         {children}

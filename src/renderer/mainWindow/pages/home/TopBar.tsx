@@ -1,13 +1,13 @@
-import {Button, Separator} from '@heroui/react';
+import {Button} from '@heroui/react';
 import {cardsActions} from '@lynx/redux/reducers/cards';
-import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
+import {useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
 import {Terminal_Icon} from '@lynx_assets/icons';
-import {PageID} from '@lynx_common/consts';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {ChatRound, Earth} from '@solar-icons/react-perf/BoldDuotone';
-import {motion} from 'framer-motion';
+import {EarthIcon} from '@solar-icons/react/bold-duotone';
+import {motion, useReducedMotion, Variants} from 'framer-motion';
 import {Plus} from 'lucide-react';
+import {useMemo} from 'react';
 import {useDispatch} from 'react-redux';
 
 /**
@@ -17,6 +17,38 @@ import {useDispatch} from 'react-redux';
 export default function HomeTopBar() {
   const activeTab = useTabsState('activeTab');
   const dispatch = useDispatch<AppDispatch>();
+  const shouldReduceMotion = useReducedMotion();
+
+  const containerVariants: Variants = useMemo(
+    () => ({
+      hidden: {opacity: 0, y: shouldReduceMotion ? 0 : -6},
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+          duration: shouldReduceMotion ? 0.1 : 0.18,
+          ease: [0.23, 1, 0.32, 1] as const,
+          staggerChildren: shouldReduceMotion ? 0 : 0.04,
+        },
+      },
+    }),
+    [shouldReduceMotion],
+  );
+
+  const itemVariants: Variants = useMemo(
+    () => ({
+      hidden: {opacity: 0, y: shouldReduceMotion ? 0 : -4},
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+          duration: shouldReduceMotion ? 0.1 : 0.16,
+          ease: [0.23, 1, 0.32, 1] as const,
+        },
+      },
+    }),
+    [shouldReduceMotion],
+  );
 
   /**
    * Dispatches an action to open a new empty card of the specified type in the active tab.
@@ -46,59 +78,28 @@ export default function HomeTopBar() {
     addRunningEmpty('both');
   };
 
-  const handleNewChatBridge = () => {
-    AddBreadcrumb_Renderer(`New Chat Bridge Tab`);
-    dispatch(
-      tabsActions.addTab({
-        id: 'chat-bridge',
-        title: 'Chat Bridge',
-        pageID: PageID.chatBridge,
-        isLoading: false,
-        isTerminal: false,
-        favIcon: {show: false, url: ''},
-      }),
-    );
-  };
-
   return (
     <div className="flex w-full shrink-0 flex-row items-center justify-end gap-x-3 px-6 py-3">
-      <motion.div
-        transition={{
-          duration: 0.4,
-          ease: [0.16, 1, 0.3, 1],
-          staggerChildren: 0.1,
-        }}
-        className="flex gap-3"
-        animate={{scale: 1, translateY: 0, opacity: 1}}
-        initial={{scale: 0.96, translateY: -10, opacity: 0}}>
-        <motion.div transition={{delay: 0.05}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
-          <Button size="sm" variant="tertiary" onPress={handleNewChatBridge}>
-            <ChatRound />
-            Chat
-          </Button>
-        </motion.div>
-
-        <Separator className="my-2" variant="secondary" orientation="vertical" />
-
-        <motion.div transition={{delay: 0.1}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
+      <motion.div initial="hidden" animate="visible" variants={containerVariants} className="flex items-center gap-3">
+        <motion.div variants={itemVariants}>
           <Button size="sm" className="w-25" variant="tertiary" onPress={handleNewTerminal}>
             <Terminal_Icon />
             Terminal
           </Button>
         </motion.div>
 
-        <motion.div transition={{delay: 0.2}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
+        <motion.div variants={itemVariants}>
           <Button size="sm" className="w-25" variant="tertiary" onPress={handleNewBrowser}>
-            <Earth />
+            <EarthIcon />
             Browser
           </Button>
         </motion.div>
 
-        <motion.div transition={{delay: 0.3}} animate={{opacity: 1, y: 0}} initial={{opacity: 0, y: -10}}>
+        <motion.div variants={itemVariants}>
           <Button size="sm" className="w-21" onPress={handleNewTerminalBrowser}>
             <Terminal_Icon className="flex-1" />
             <Plus className="size-2.5 opacity-80" />
-            <Earth className="flex-1" />
+            <EarthIcon className="flex-1" />
           </Button>
         </motion.div>
       </motion.div>

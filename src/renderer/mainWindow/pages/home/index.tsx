@@ -70,9 +70,11 @@ const HomePage = memo(() => {
             <Categories />
           ) : isEmpty(debouncedSearchValue) ? (
             <LayoutGroup>
-              <AnimatePresence>{homeCategory.includes('Pin') && <PinnedCars />}</AnimatePresence>
-              <AnimatePresence>{homeCategory.includes('Recently') && <RecentlyCards />}</AnimatePresence>
-              <AnimatePresence>{homeCategory.includes('All') && <AllCardsSection />}</AnimatePresence>
+              <AnimatePresence mode="popLayout">
+                {homeCategory.includes('Pin') && <PinnedCars key="pinned-category" />}
+                {homeCategory.includes('Recently') && <RecentlyCards key="recently-category" />}
+                {homeCategory.includes('All') && <AllCardsSection key="all-category" />}
+              </AnimatePresence>
             </LayoutGroup>
           ) : SearchResult ? (
             <SearchResult searchValue={debouncedSearchValue} />
