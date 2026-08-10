@@ -528,11 +528,14 @@ export default class StaticsManager {
       try {
         const latestTag = await this.fetchLatestReleaseTag();
         if (latestTag && !this.brokenVersions.has(latestTag)) {
-          await this.downloadAndExtractRelease(latestTag);
-          const newPath = join(this.dir, latestTag, fileName);
-          if (existsSync(newPath)) {
-            const content = readFileSync(newPath, 'utf8');
-            return JSON.parse(content) as T;
+          const isLatestExtracted = existsSync(join(this.dir, latestTag));
+          if (!isLatestExtracted) {
+            await this.downloadAndExtractRelease(latestTag);
+            const newPath = join(this.dir, latestTag, fileName);
+            if (existsSync(newPath)) {
+              const content = readFileSync(newPath, 'utf8');
+              return JSON.parse(content) as T;
+            }
           }
         }
       } catch (emergencyError) {
