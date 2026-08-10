@@ -142,10 +142,10 @@ async function refreshChannel(isLogin: boolean, stage: SubscribeStages) {
  */
 function checkForAppUpdate(stage: SubscribeStages, updateToken?: string | null) {
   const provider = 'github';
-  const owner = 'KindaBrazy';
+  const owner = 'TheLynxHub';
 
   if (stage === 'insider' || stage === 'early_access') {
-    const repo = stage === 'insider' ? 'LynxHub-Insider-Releases' : 'LynxHub-EA-Releases';
+    const repo = stage === 'insider' ? 'Insider-Releases' : 'EA-Releases';
 
     if (updateToken) {
       process.env.GH_TOKEN = updateToken;
