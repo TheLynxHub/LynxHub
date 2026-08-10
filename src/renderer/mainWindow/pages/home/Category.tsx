@@ -1,4 +1,4 @@
-import {motion} from 'framer-motion';
+import {motion, useReducedMotion} from 'framer-motion';
 import {ReactNode} from 'react';
 
 import CardsContainer from '../CardsContainer';
@@ -24,17 +24,19 @@ interface HomeCategoryProps {
  * @returns {JSX.Element} The animated wrapper surrounding the CardsContainer.
  */
 export default function HomeCategory({children, subTitle, icon, title}: HomeCategoryProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <motion.div
       transition={{
-        duration: 0.18,
-        ease: [0.23, 1, 0.32, 1],
+        duration: shouldReduceMotion ? 0.1 : 0.18,
+        ease: [0.23, 1, 0.32, 1] as const,
       }}
+      layout={!shouldReduceMotion}
       animate={{opacity: 1, scale: 1, y: 0}}
-      exit={{opacity: 0, scale: 0.96, y: 6}}
       className="flex w-full flex-col p-4 py-0"
-      initial={{opacity: 0, scale: 0.96, y: 6}}
-      layout>
+      exit={{opacity: 0, scale: shouldReduceMotion ? 1 : 0.96, y: shouldReduceMotion ? 0 : 6}}
+      initial={{opacity: 0, scale: shouldReduceMotion ? 1 : 0.96, y: shouldReduceMotion ? 0 : 6}}>
       <CardsContainer icon={icon} title={title} subTitle={subTitle}>
         {children}
       </CardsContainer>

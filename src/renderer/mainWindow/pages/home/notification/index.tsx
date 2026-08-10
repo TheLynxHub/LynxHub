@@ -24,7 +24,7 @@ import {
   Widget5,
 } from '@solar-icons/react-perf/BoldDuotone';
 import {CheckRead} from '@solar-icons/react-perf/LineDuotone';
-import {AnimatePresence, motion} from 'framer-motion';
+import {AnimatePresence, motion, useReducedMotion} from 'framer-motion';
 import {X} from 'lucide-react';
 import {ComponentType, useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -125,6 +125,7 @@ function NotificationItem({
   delay,
   userEntitlement,
 }: NotificationItemProps) {
+  const shouldReduceMotion = useReducedMotion();
   const {id, title, body, style, icon, iconColor, bgColor, textColor, image, actions, releaseType} = notif;
 
   // Resolve visual presets
@@ -204,11 +205,17 @@ function NotificationItem({
 
   return (
     <motion.div
+      transition={{
+        duration: shouldReduceMotion ? 0.1 : 0.18,
+        delay: delay || 0,
+        ease: [0.23, 1, 0.32, 1] as const,
+      }}
       layoutId={id}
       className="px-1"
-      transition={{delay}}
-      animate={{translateY: 0, opacity: 1}}
-      initial={{translateY: 30, opacity: 0}}>
+      layout={!shouldReduceMotion}
+      animate={{y: 0, opacity: 1, scale: 1}}
+      initial={{y: shouldReduceMotion ? 0 : 8, opacity: 0, scale: shouldReduceMotion ? 1 : 0.98}}
+      exit={{opacity: 0, scale: shouldReduceMotion ? 1 : 0.95, filter: shouldReduceMotion ? 'none' : 'blur(4px)'}}>
       <div className={`flex flex-col border p-4 rounded-2xl shadow-xl ${cardBgClass} relative overflow-hidden`}>
         {/* Dismiss Button */}
         <Button
@@ -314,6 +321,7 @@ function NotificationItem({
 export default function HomeNotificationDrawer() {
   const dispatch = useDispatch<AppDispatch>();
   const state = useOverlayState();
+  const shouldReduceMotion = useReducedMotion();
 
   const {notifications, isRefreshing, markAsRead} = useNotificationsData();
   const updateChannel = useUserState('updateChannel');
@@ -387,9 +395,14 @@ export default function HomeNotificationDrawer() {
               </Drawer.Header>
               <Drawer.Body className="pr-2">
                 <ScrollShadow className="size-full pb-2 pr-3 pl-4">
-                  <AnimatePresence>
+                  <AnimatePresence mode="popLayout">
                     {totalNotificationCount <= 0 ? (
-                      <motion.div animate={{translateY: 0, opacity: 1}} initial={{translateY: 30, opacity: 0}}>
+                      <motion.div
+                        key="empty-notifications"
+                        animate={{y: 0, opacity: 1}}
+                        exit={{y: shouldReduceMotion ? 0 : 8, opacity: 0}}
+                        initial={{y: shouldReduceMotion ? 0 : 8, opacity: 0}}
+                        transition={{duration: shouldReduceMotion ? 0.1 : 0.18, ease: [0.23, 1, 0.32, 1] as const}}>
                         <EmptyStateCard
                           className="mt-4"
                           variant="secondary"
@@ -398,19 +411,21 @@ export default function HomeNotificationDrawer() {
                         />
                       </motion.div>
                     ) : (
-                      <div className="flex flex-col gap-y-4 mt-3">
-                        {notifications.map((notif, index) => (
-                          <NotificationItem
-                            notif={notif}
-                            key={notif.id}
-                            delay={index * 0.1}
-                            onRead={markAsRead}
-                            onCloseDrawer={state.close}
-                            userEntitlement={userEntitlement}
-                            onNavigatePage={handleNavigatePage}
-                          />
-                        ))}
-                      </div>
+                      <motion.div key="notifications-list" className="flex flex-col gap-y-4 mt-3">
+                        <AnimatePresence mode="popLayout">
+                          {notifications.map((notif, index) => (
+                            <NotificationItem
+                              notif={notif}
+                              key={notif.id}
+                              onRead={markAsRead}
+                              delay={index * 0.04}
+                              onCloseDrawer={state.close}
+                              userEntitlement={userEntitlement}
+                              onNavigatePage={handleNavigatePage}
+                            />
+                          ))}
+                        </AnimatePresence>
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </ScrollShadow>
