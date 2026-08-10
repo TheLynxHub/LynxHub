@@ -3,13 +3,16 @@ import {randomUUID} from 'node:crypto';
 import {is} from '@electron-toolkit/utils';
 import {Get_Default_Hotkeys} from '@lynx_common/consts/hotkeys';
 import AppStorageData from '@lynx_common/types/storage';
+import BaseStorage from '@lynx_main/storage/index';
 import {getUserAgent} from '@lynx_main/utils';
 import type {Database as SqliteDatabase} from 'better-sqlite3';
 import type {BetterSQLite3Database} from 'drizzle-orm/better-sqlite3';
 
 import {createDevDatabase} from './db.dev';
 import {createProdDatabase} from './db.prod';
+import {migrateLowdbToSqlite} from './migrateFromLowdb';
 import * as schema from './schema';
+import {SqliteStorageManager} from './storageOperations';
 
 /**
  * Base SQLite Storage class handling database initialization, table setup,
@@ -19,6 +22,15 @@ export class BaseSqliteStorage {
   public readonly sqlite: SqliteDatabase;
   public readonly db: BetterSQLite3Database<typeof schema>;
   public readonly dbPath: string;
+
+  public static readonly extensionStorages = new Map<string, any>();
+  public static readonly keyToExtensionMap = new Map<string, string>();
+  public static readonly moduleStorages = new Map<string, any>();
+  public static readonly cardToModuleMap = new Map<string, string>();
+
+  public write(): void {
+    // SQLite operates with WAL mode; statements are committed immediately.
+  }
 
   public readonly DEFAULT_DATA: AppStorageData = {
     storage: {version: 1.1},
@@ -165,7 +177,43 @@ export class BaseSqliteStorage {
     this.dbPath = connection.dbPath;
 
     this.ensureTablesExist();
+    this.checkAndPerformAutoMigration();
     this.initializeDefaults();
+  }
+
+  /**
+   * Checks if lowdb migration has run. If not, runs legacy lowdb migrations first,
+   * then copies all lowdb data into SQLite tables.
+   */
+  private checkAndPerformAutoMigration(): void {
+    try {
+      const res = this.sqlite.prepare('SELECT value FROM meta_storage WHERE key = ?').get('lowdb_migrated') as
+        {value: string} | undefined;
+
+      if (res?.value === 'true') {
+        return;
+      }
+
+      // 1. Run legacy lowdb migrations on existing lowdb files first (if present)
+      try {
+        new BaseStorage();
+      } catch (err) {
+        console.warn('[SQLite Storage] LowDB BaseStorage init warning:', err);
+      }
+
+      // 2. Transfer data from lowdb files to SQLite
+      const targetManager = new SqliteStorageManager(this);
+      migrateLowdbToSqlite(targetManager);
+
+      // 3. Mark lowdb_migrated = 'true'
+      this.sqlite
+        .prepare('INSERT OR REPLACE INTO meta_storage (key, value) VALUES (?, ?)')
+        .run('lowdb_migrated', 'true');
+
+      console.log('[SQLite Storage] Successfully completed automatic LowDB -> SQLite migration.');
+    } catch (error) {
+      console.error('[SQLite Storage] Error during automatic LowDB migration:', error);
+    }
   }
 
   /**

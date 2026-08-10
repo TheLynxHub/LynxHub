@@ -7,7 +7,7 @@ import {PluginManager} from '@lynx_main/plugins';
 import ExtensionManager from '@lynx_main/plugins/extensions';
 import ModuleManager from '@lynx_main/plugins/modules';
 import {ValidateCards} from '@lynx_main/plugins/modules/cardsValidator';
-import StorageManager from '@lynx_main/storage/storageOperations';
+import StorageManager from '@lynx_main/storageSqlite/storageOperations';
 import axios from 'axios';
 import {app, BrowserWindow} from 'electron';
 

@@ -8,7 +8,7 @@ import {removeDirRecursive, trashDir} from '@lynx_main/ipc/methods/windowUtils';
 import {modulesIpc} from '@lynx_main/ipc/plugins/modules';
 import classHolder from '@lynx_main/managers/classHolder';
 import {getAppDataPath} from '@lynx_main/managers/dataFolder';
-import BaseStorage from '@lynx_main/storage/index';
+import BaseStorage from '@lynx_main/storageSqlite/index';
 import {getAbsolutePath, getExePath, isPortable} from '@lynx_main/utils';
 import {captureException} from '@sentry/electron/main';
 import {app, ipcMain} from 'electron';

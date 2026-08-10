@@ -17,17 +17,13 @@ export type MigrationSummary = {
 };
 
 /**
- * Reads lowdb JSON configuration files from disk and populates the SQLite database.
- * NOTE: This function is NOT executed automatically on startup, but is available to be called when needed.
+ * Reads lowdb JSON configuration files from disk and populates the SQLite database synchronously.
  *
  * @param sqliteManager Optional custom SqliteStorageManager instance.
  * @param customDataDir Optional custom directory path to scan for lowdb config files.
  * @returns MigrationSummary object with details of migrated files.
  */
-export async function migrateLowdbToSqlite(
-  sqliteManager?: SqliteStorageManager,
-  customDataDir?: string,
-): Promise<MigrationSummary> {
+export function migrateLowdbToSqlite(sqliteManager?: SqliteStorageManager, customDataDir?: string): MigrationSummary {
   const manager = sqliteManager ?? new SqliteStorageManager();
   const summary: MigrationSummary = {
     mainMigrated: false,
@@ -70,7 +66,6 @@ export async function migrateLowdbToSqlite(
         if (knownKeys.includes(key)) {
           manager.setData(key as any, val as any);
         } else {
-          // Custom storage key
           manager.setCustomData(key, val);
         }
       }
@@ -106,13 +101,11 @@ export async function migrateLowdbToSqlite(
       const fullPath = join(dataDir, file);
       const fileNameWithoutExt = file.replace(/\.(config|json)$/, '');
 
-      // Check if file is extension or module config
       try {
         const rawContent = fs.readFileSync(fullPath, 'utf-8');
         const fileData = JSON.parse(rawContent);
 
         if (typeof fileData === 'object' && fileData !== null) {
-          // Identify if it's an extension or module
           if (file.toLowerCase().includes('extension') || file.toLowerCase().includes('ext')) {
             const extName = fileNameWithoutExt.replace(/-Dev$/, '');
             for (const [k, v] of Object.entries(fileData)) {

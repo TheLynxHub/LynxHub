@@ -1,6 +1,6 @@
 import {ExtensionIpcEventsApi, MainIpcHookMethod} from '@lynx_common/types/ipcEvents';
 import MainWindowManager from '@lynx_main/mainWindow';
-import StorageManager from '@lynx_main/storage/storageOperations';
+import StorageManager from '@lynx_main/storageSqlite/storageOperations';
 import {Scope} from '@sentry/node';
 import {MenuItem, MenuItemConstructorOptions} from 'electron';
 import * as pty from 'node-pty';

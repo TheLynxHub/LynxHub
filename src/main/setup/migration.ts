@@ -2,7 +2,7 @@ import {setTimeout} from 'node:timers/promises';
 
 import {isWin} from '@lynx_common/utils';
 import {PluginManager} from '@lynx_main/plugins';
-import StorageManager from '@lynx_main/storage/storageOperations';
+import StorageManager from '@lynx_main/storageSqlite/storageOperations';
 import {app, BrowserWindow, dialog} from 'electron';
 
 /**

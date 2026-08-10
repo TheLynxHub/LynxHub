@@ -3,7 +3,7 @@ import path from 'node:path';
 import {isDev} from '@lynx_common/utils';
 import ElectronAppManager from '@lynx_main/mainWindow';
 import classHolder from '@lynx_main/managers/classHolder';
-import StorageManager from '@lynx_main/storage/storageOperations';
+import StorageManager from '@lynx_main/storageSqlite/storageOperations';
 import {captureException} from '@sentry/electron/main';
 import {app} from 'electron';
 import fs from 'graceful-fs';

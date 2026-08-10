@@ -2,7 +2,7 @@ import {normalize} from 'node:path';
 
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {formatTime, isDev} from '@lynx_common/utils';
-import StorageManager from '@lynx_main/storage/storageOperations';
+import StorageManager from '@lynx_main/storageSqlite/storageOperations';
 import {Event, extraErrorDataIntegration, init as sentryInit} from '@sentry/electron/main';
 import axios from 'axios';
 import {app} from 'electron';
