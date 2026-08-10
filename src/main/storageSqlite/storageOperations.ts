@@ -59,7 +59,6 @@ export class SqliteStorageManager {
 
   constructor(baseStorage?: BaseSqliteStorage) {
     this.baseStorage = baseStorage ?? new BaseSqliteStorage();
-    this.decryptBrowserData();
   }
 
   public get db(): BetterSQLite3Database<typeof schema> {
