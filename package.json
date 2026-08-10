@@ -72,6 +72,8 @@
     "@sentry/electron": "^7.16.0",
     "@sentry/react": "^10.67.0",
     "axios": "^1.18.1",
+    "better-sqlite3": "^13.0.1",
+    "drizzle-orm": "^0.45.2",
     "fix-path": "^5.0.0",
     "flowtoken": "^1.0.40",
     "fuse.js": "^7.5.0",
@@ -97,6 +99,7 @@
     "@solar-icons/react-perf": "^2.1.1",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/decompress": "^4.2.7",
     "@types/fontfaceobserver": "^2.1.3",
     "@types/graceful-fs": "^4.1.9",
@@ -123,6 +126,7 @@
     "@xterm/xterm": "^6.0.0",
     "chokidar": "^5.0.0",
     "decompress": "^4.2.1",
+    "drizzle-kit": "^0.31.10",
     "electron": "^43.2.0",
     "electron-builder": "^26.15.3",
     "electron-dl": "^4.0.0",
@@ -168,6 +172,7 @@
     "electron": true,
     "esbuild": true,
     "node-pty": true,
-    "@sentry/cli": true
+    "@sentry/cli": true,
+    "better-sqlite3": true
   }
 }
