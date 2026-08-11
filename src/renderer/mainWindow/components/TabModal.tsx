@@ -1,5 +1,5 @@
 import {Modal, ModalBackdropProps, ModalContainerProps} from '@heroui/react';
-import {ReactNode, useEffect, useState} from 'react';
+import {MouseEvent, ReactNode, useCallback, useEffect, useState} from 'react';
 import {UNSAFE_PortalProvider} from 'react-aria';
 
 import {useTabsState} from '../redux/reducers/tabs';
@@ -35,14 +35,24 @@ export default function TabModal({
     setTargetContainer(isOpen ? document.getElementById(`${activeTab}_wrapper`) : null);
   }, [isOpen]);
 
+  const handleBackdropClick = useCallback(
+    (e: MouseEvent<HTMLElement>) => {
+      if (isDismissable && e.target instanceof HTMLElement && !e.target.closest('.modal__dialog')) {
+        onOpenChange?.(false);
+      }
+    },
+    [isDismissable, onOpenChange],
+  );
+
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
       {targetContainer && (
         <UNSAFE_PortalProvider getContainer={() => targetContainer}>
           <Modal.Backdrop
             className="h-full"
+            isDismissable={false}
             variant={backdropVariant}
-            isDismissable={isDismissable}
+            onClick={handleBackdropClick}
             isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
             <Modal.Container size={size} scroll="inside" className={`h-full max-h-full ${containerClassName}`}>
               <Modal.Dialog className={size === 'cover' ? `h-full max-h-full ${dialogClassName}` : dialogClassName}>
