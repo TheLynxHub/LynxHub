@@ -77,6 +77,7 @@ const InstallModal = memo(({state: modalState, type}: Props) => {
 
   return (
     <TabModal
+      isDismissable={false}
       backdropVariant="blur"
       isOpen={modalState.isOpen}
       onOpenChange={modalState.setOpen}
