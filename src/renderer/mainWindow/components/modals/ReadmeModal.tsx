@@ -14,7 +14,7 @@ const CardReadmeDialog = memo(({state, url, title}: Props) => {
   const ReplaceMd = useMemo(() => extensionsData.replaceMarkdownViewer, []);
 
   return (
-    <TabModal isOpen={state.isOpen}>
+    <TabModal isOpen={state.isOpen} onOpenChange={state.setOpen}>
       <Modal.CloseTrigger onPress={state.close} />
       <Modal.Header>
         <Modal.Heading className={'justify-center overflow-hidden'}>
