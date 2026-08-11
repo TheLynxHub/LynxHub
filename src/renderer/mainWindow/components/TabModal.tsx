@@ -21,7 +21,7 @@ export default function TabModal({
   onOpenChange,
   children,
   size = 'cover',
-  isDismissable = false,
+  isDismissable = true,
   backdropVariant,
   dialogClassName,
   containerClassName,
