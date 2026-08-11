@@ -1,22 +1,16 @@
 import {ModalHeader, ModalHeading} from '@heroui/react';
-import {InitialSteps} from '@lynx_common/types/plugins/modules';
 import {memo, useMemo} from 'react';
 
 import StepProgress from './StepProgress';
-
-export interface InstallHeaderProps {
-  /** An array of string labels representing the installation steps. */
-  steps: InitialSteps;
-  /** The 0-indexed integer of the currently active step. */
-  currentStep: number;
-}
+import {useInstallStore} from './store';
 
 /**
- * Renders the header of the installation modal, including a stepper visualizing the process.
- *
- * @param {InstallHeaderProps} props - The component props.
+ * Renders the header of the installation modal, visualizing progress using `useInstallStore`.
  */
-const InstallHeader = ({steps, currentStep}: InstallHeaderProps) => {
+const InstallHeader = () => {
+  const steps = useInstallStore(s => s.steps);
+  const currentStep = useInstallStore(s => s.currentStep);
+
   const maxTitleWidth = useMemo(() => (steps.length > 5 ? 'max-w-16' : 'max-w-24'), [steps.length]);
 
   return (
