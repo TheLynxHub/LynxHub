@@ -213,6 +213,18 @@ export class SqliteStorageManager {
           })
           .run();
         break;
+      case 'storage': {
+        const versionVal = typeof data === 'object' && data && 'version' in data ? (data as any).version : data;
+        this.db
+          .insert(schema.metaStorage)
+          .values({key: 'version', value: String(versionVal)})
+          .onConflictDoUpdate({
+            target: schema.metaStorage.key,
+            set: {value: String(versionVal)},
+          })
+          .run();
+        break;
+      }
       default:
         this.setCustomData(key as string, data);
         break;

@@ -11,6 +11,7 @@ import type {BetterSQLite3Database} from 'drizzle-orm/better-sqlite3';
 import {createDevDatabase} from './db.dev';
 import {createProdDatabase} from './db.prod';
 import {migrateLowdbToSqlite} from './migrateFromLowdb';
+import {SqliteStorageMigrationManager} from './migrations';
 import * as schema from './schema';
 import {SqliteStorageManager} from './storageOperations';
 
@@ -164,6 +165,7 @@ export class BaseSqliteStorage {
     this.ensureTablesExist();
     this.checkAndPerformAutoMigration();
     this.initializeDefaults();
+    this.runStorageMigrations();
   }
 
   /**
@@ -319,6 +321,14 @@ export class BaseSqliteStorage {
   private initializeDefaults(): void {
     const now = new Date().toISOString();
 
+    // Storage version
+    const existingVersion = this.sqlite.prepare('SELECT value FROM meta_storage WHERE key = ?').get('version');
+    if (!existingVersion) {
+      this.sqlite
+        .prepare('INSERT INTO meta_storage (key, value) VALUES (?, ?)')
+        .run('version', String(this.DEFAULT_DATA.storage.version));
+    }
+
     // App settings
     const existingApp = this.sqlite.prepare('SELECT id FROM app_settings WHERE id = ?').get('main');
     if (!existingApp) {
@@ -388,6 +398,15 @@ export class BaseSqliteStorage {
     }
   }
 
+  /**
+   * Executes pending SQLite storage migrations.
+   */
+  public runStorageMigrations(): void {
+    const manager = new SqliteStorageManager(this);
+    const migrationManager = new SqliteStorageMigrationManager(manager);
+    migrationManager.runStorageMigrations(this.DEFAULT_DATA.storage.version);
+  }
+
   public close(): void {
     this.sqlite.close();
   }
@@ -396,6 +415,7 @@ export class BaseSqliteStorage {
 export * from './db.dev';
 export * from './db.prod';
 export * from './migrateFromLowdb';
+export * from './migrations';
 export * from './schema';
 export * from './storageOperations';
 
