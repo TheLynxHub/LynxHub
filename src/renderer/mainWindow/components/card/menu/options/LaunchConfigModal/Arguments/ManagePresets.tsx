@@ -119,13 +119,11 @@ export default function PresetsManager({chosenArguments, presets, setChosenArgum
           <Select.Popover>
             <ListBox>
               {sectionItems.map(item => (
-                <>
-                  <ListBox.Item id={item.name} textValue={item.name}>
-                    <ListBox.ItemIndicator />
-                    {item.name}
-                    {item.name !== 'Default' && <CloseButton onPress={() => deletePreset(item.name)}></CloseButton>}
-                  </ListBox.Item>
-                </>
+                <ListBox.Item id={item.name} key={item.name} textValue={item.name}>
+                  <ListBox.ItemIndicator />
+                  {item.name}
+                  {item.name !== 'Default' && <CloseButton onPress={() => deletePreset(item.name)} />}
+                </ListBox.Item>
               ))}
             </ListBox>
           </Select.Popover>
