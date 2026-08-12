@@ -161,8 +161,10 @@ const getCardMethod = <T extends keyof CardRendererMethods>(
   cardMethods: LoadedMethods[],
   id: string,
   method: T,
-): CardRendererMethods[T] | undefined =>
-  cardMethods.find(card => card.id === id)?.methods?.[method] as CardRendererMethods[T] | undefined;
+): CardRendererMethods[T] | undefined => {
+  const targetMethods = Array.isArray(cardMethods) ? cardMethods : allCardMethods;
+  return targetMethods.find(card => card.id === id)?.methods?.[method] as CardRendererMethods[T] | undefined;
+};
 
 /**
  * Returns the installation type for a card.
@@ -559,6 +561,7 @@ const loadModules = async () => {
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export {
+  allCardMethods,
   allCards,
   allModules,
   duplicateCard,

@@ -1,6 +1,7 @@
 import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {LoadedCardData} from '@lynx_common/types/plugins/modules';
-import {memo, useMemo} from 'react';
+import {validateGitRepoUrl} from '@lynx_common/utils';
+import {memo, useEffect, useMemo} from 'react';
 
 import LynxCard from './Card';
 import {CardStoreContext, createCardStore, useCardStore} from './store';
@@ -22,10 +23,16 @@ type WrapperProps = {
 const Wrapper = memo(({cardData, isInstalled, hasArguments}: WrapperProps) => {
   const ReplaceComponent = useMemo(() => extensionsData.cards.replaceComponent, []);
 
-  const storeValue = useMemo(
-    () => createCardStore({...cardData, isInstalled, hasArguments}),
-    [cardData, isInstalled, hasArguments],
-  );
+  const storeValue = useMemo(() => createCardStore({...cardData, isInstalled, hasArguments}), [cardData.id]);
+
+  useEffect(() => {
+    storeValue.setState({
+      ...cardData,
+      installed: isInstalled,
+      haveArguments: hasArguments,
+      repoUrl: cardData.repoUrl ? validateGitRepoUrl(cardData.repoUrl) : '',
+    });
+  }, [storeValue, cardData, isInstalled, hasArguments]);
 
   return (
     <CardStoreContext.Provider value={storeValue}>

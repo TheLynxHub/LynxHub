@@ -41,19 +41,27 @@ const InstallModal = memo(({state: modalState, type}: Props) => {
   const methods = useMemo(() => getCardMethod(allMethods, cardId, 'manager'), [cardId, allMethods]);
 
   const stepper = useStepper({cardId});
+  const initializedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
+    const currentKey = `${cardId}:${type}`;
     if (modalState.isOpen) {
-      initializeStore(cardId, type);
-      if (methods) {
-        if (type === 'install') {
-          methods.startInstall(stepper);
-        } else {
-          methods.updater.startUpdate?.(stepper, installedCard?.dir);
+      if (initializedKeyRef.current !== currentKey) {
+        initializedKeyRef.current = currentKey;
+        initializeStore(cardId, type);
+        if (methods) {
+          if (type === 'install') {
+            methods.startInstall(stepper);
+          } else {
+            methods.updater.startUpdate?.(stepper, installedCard?.dir);
+          }
         }
       }
     } else {
-      resetStore();
+      if (initializedKeyRef.current !== null) {
+        initializedKeyRef.current = null;
+        resetStore();
+      }
     }
   }, [modalState.isOpen, methods, stepper, type, cardId, installedCard?.dir, initializeStore, resetStore]);
 

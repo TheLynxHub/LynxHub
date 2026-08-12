@@ -10,9 +10,9 @@ import utilsIpc from '@lynx_shared/ipc/utils';
 import {isNil} from 'lodash-es';
 import {FC} from 'react';
 
-import {extensionRendererApi, extensionsData} from '../../../../../plugins/extensions/loader';
+import {extensionRendererApi} from '../../../../../plugins/extensions/loader';
 import {collectExtensionUserInputs} from '../../../../../plugins/extensions/utils';
-import {getCardMethod} from '../../../../../plugins/modules';
+import {allCardMethods, getCardMethod} from '../../../../../plugins/modules';
 import {cardsActions} from '../../../../../redux/reducers/cards';
 import {getStore} from '../../../../../redux/store';
 import {useInstallStore} from './store';
@@ -262,7 +262,7 @@ export default class InstallStepper implements InstallationStepper {
   };
 
   private checkForUpdate = (dir: string | undefined) => {
-    const methods = getCardMethod(extensionsData as any, this.cardId, 'manager');
+    const methods = getCardMethod(allCardMethods, this.cardId, 'manager');
     const updateType = methods?.updater?.updateType;
     if (!isNil(updateType)) {
       moduleIpc.cardUpdateAvailable({dir, id: this.cardId}, updateType).then((isAvailable: boolean) => {

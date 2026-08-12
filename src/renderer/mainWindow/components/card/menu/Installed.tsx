@@ -2,7 +2,7 @@ import {Button, Dropdown, Separator, Spinner, useOverlayState} from '@heroui/rea
 import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {useUpdatingCard} from '@lynx/utils/hooks';
 import {MenuDotsIcon} from '@solar-icons/react/bold-duotone';
-import {memo, useMemo} from 'react';
+import {memo, useEffect, useMemo} from 'react';
 
 import ReadmeModal from '../../modals/ReadmeModal';
 import {useCardStore} from '../store';
@@ -29,6 +29,12 @@ export const InstalledMenu = memo(({setType, state}: {setType: (type: 'install' 
 
   const updating = useUpdatingCard(id);
 
+  useEffect(() => {
+    extensionsData.cards.customize.menu.addModal.forEach(modal => {
+      addOverlayState(modal.key);
+    });
+  }, [addOverlayState]);
+
   const {first, second, third, fourth, addModal} = useMemo(() => {
     const sections = extensionsData.cards.customize.menu.addSection;
     const addModal = extensionsData.cards.customize.menu.addModal;
@@ -38,10 +44,7 @@ export const InstalledMenu = memo(({setType, state}: {setType: (type: 'install' 
     const third = sections.find(item => item.index === 2)?.components || [];
     const fourth = sections.find(item => item.index === 3)?.components || [];
 
-    const modals = addModal.map(modal => {
-      addOverlayState(modal.key);
-      return modal.component;
-    });
+    const modals = addModal.map(modal => modal.component);
 
     return {first, second, third, fourth, addModal: modals};
   }, []);
