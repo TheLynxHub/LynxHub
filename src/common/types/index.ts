@@ -275,6 +275,7 @@ export type CardState = {
 
   setMenuIsOpen: (isOpen: boolean) => void;
   setCheckingForUpdate: (isChecking: boolean) => void;
+  setTitle: (title: string) => void;
 } & CardOverlayState;
 
 export type SubscribeStages = 'insider' | 'early_access' | 'public';

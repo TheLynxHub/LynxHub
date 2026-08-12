@@ -353,6 +353,49 @@ const removeDuplicatedCard = (id: string) => {
   notifyListeners();
 };
 
+/**
+ * Globally updates a card's title across module state, search index, custom storage,
+ * and duplicated card entries (if applicable).
+ *
+ * @param id - The unique ID of the card to rename.
+ * @param newTitle - The new title for the card.
+ */
+const updateCardTitle = async (id: string, newTitle: string) => {
+  await storageIpc.setCustom(`${id}_title_edited`, newTitle);
+
+  const card = allCards.find(c => c.id === id);
+  if (card) {
+    card.title = newTitle;
+  }
+
+  const cardWithPath = allCardDataWithPath.find(c => c.id === id);
+  if (cardWithPath) {
+    cardWithPath.title = newTitle;
+  }
+
+  const searchEntry = cardSearchIndex.find(s => s.id === id);
+  if (searchEntry && card) {
+    searchEntry.tokens = buildCardSearchTokens(card);
+  }
+
+  for (const page of allModules) {
+    const pageCard = page.cards.find(c => c.id === id);
+    if (pageCard) {
+      pageCard.title = newTitle;
+    }
+  }
+
+  const {duplicated} = await storageIpc.get('cards');
+  const dupIndex = duplicated.findIndex(d => d.id === id);
+  if (dupIndex !== -1) {
+    const updatedDuplicated = [...duplicated];
+    updatedDuplicated[dupIndex] = {...updatedDuplicated[dupIndex], title: newTitle};
+    await storageIpc.update('cards', {duplicated: updatedDuplicated});
+  }
+
+  notifyListeners();
+};
+
 // ─── State Commit ─────────────────────────────────────────────────────────────
 
 /**
@@ -382,7 +425,23 @@ async function commitModuleState(
   hasArguments = new Set(newCardArguments.filter(arg => !!arg.arguments).map(item => item.id));
 
   // Restore previously duplicated cards (e.g. from a previous session).
-  duplicated.forEach(item => duplicateCard(item.ogID, item.id, item.title));
+  for (const item of duplicated) {
+    const customTitle = await storageIpc.getCustom<string | null>(`${item.id}_title_edited`);
+    duplicateCard(item.ogID, item.id, customTitle || item.title);
+  }
+
+  // Re-apply any edited titles for original & duplicated cards across module-level state
+  for (let i = 0; i < allCards.length; i++) {
+    const card = allCards[i];
+    const customTitle = await storageIpc.getCustom<string | null>(`${card.id}_title_edited`);
+    if (customTitle && customTitle !== card.title) {
+      card.title = customTitle;
+      const dataWithPath = allCardDataWithPath.find(c => c.id === card.id);
+      if (dataWithPath) dataWithPath.title = customTitle;
+      const searchItem = cardSearchIndex.find(s => s.id === card.id);
+      if (searchItem) searchItem.tokens = buildCardSearchTokens(card);
+    }
+  }
 
   notifyListeners();
 }
@@ -508,6 +567,7 @@ export {
   hasCardsByPath,
   loadModules,
   removeDuplicatedCard,
+  updateCardTitle,
   useAllCardArguments,
   useAllCardDataWithPath,
   useAllCardMethods,

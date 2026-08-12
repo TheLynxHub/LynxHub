@@ -1,3 +1,4 @@
+import {updateCardTitle} from '@lynx/plugins/modules';
 import storageIpc from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {isEmpty} from 'lodash-es';
@@ -11,18 +12,22 @@ import {useCardStore} from './store';
 export const useCardTitle = () => {
   const id = useCardStore(state => state.id);
   const title = useCardStore(state => state.title);
+  const setTitle = useCardStore(state => state.setTitle);
 
   const [customTitle, setCustomTitle] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
     storageIpc.getCustom<string | null>(`${id}_title_edited`).then(value => {
-      if (isMounted) setCustomTitle(value || null);
+      if (isMounted && value) {
+        setCustomTitle(value);
+        setTitle(value);
+      }
     });
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, setTitle]);
 
   const modifiedTitle = customTitle ?? title;
 
@@ -31,9 +36,10 @@ export const useCardTitle = () => {
       const newTitle = isEmpty(target) ? title : target;
       AddBreadcrumb_Renderer(`Card Rename: id:${id} to:${newTitle}`);
       setCustomTitle(newTitle);
-      storageIpc.setCustom(`${id}_title_edited`, newTitle);
+      setTitle(newTitle);
+      updateCardTitle(id, newTitle);
     },
-    [id, title],
+    [id, title, setTitle],
   );
 
   return {modifiedTitle, onTitleChange};

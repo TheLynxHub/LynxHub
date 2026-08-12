@@ -37,6 +37,7 @@ export const createCardStore = (
       set({menuIsOpen: isOpen});
     },
     setCheckingForUpdate: isChecking => set({checkingForUpdate: isChecking}),
+    setTitle: newTitle => set({title: newTitle}),
 
     overlayStates: {},
 
