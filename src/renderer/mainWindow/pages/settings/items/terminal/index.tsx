@@ -1,6 +1,7 @@
 import SettingsSection from '@lynx/components/SettingsSection';
 import {Terminal_Icon} from '@lynx_assets/icons';
 
+import AutoExitSignalBeforeKill from './AutoExitSignalBeforeKill';
 import BlinkCursor from './BlinkCursor';
 import CloseOnExit from './CloseOnExit';
 import Conpty from './Conpty';
@@ -41,6 +42,7 @@ export default function SettingsTerminal() {
       <OutputColor />
       <CloseOnExit />
       <SendYWithExit />
+      <AutoExitSignalBeforeKill />
       <OpenLinks />
 
       <div className="mt-1" />

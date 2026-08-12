@@ -127,6 +127,7 @@ export type TerminalStorage = {
   quickCommands: {label: string; command: string}[];
   sendYWithExit: boolean;
   openLinkNewTab: boolean;
+  autoExitSignalBeforeKill: boolean;
 };
 
 /**

@@ -68,15 +68,35 @@ export default class LynxTerminal {
   public async stopAsync(): Promise<void> {
     return new Promise<void>(resolve => {
       if (this.isRunning && this.process) {
+        const {storageManager} = classHolder;
+        const {autoExitSignalBeforeKill, sendYWithExit} = storageManager.getData('terminal');
+
+        if (autoExitSignalBeforeKill) {
+          this.write('\x03');
+          if (sendYWithExit) {
+            this.write('y' + terminalLineEnding);
+          }
+        }
+
         // Register exit handler BEFORE killing to avoid race condition
         this.process.onExit(() => {
           this.process = undefined;
           resolve();
         });
 
-        this.process.kill();
-        treeKill(this.process.pid);
-        this.isRunning = false;
+        const doKill = () => {
+          if (this.isRunning && this.process) {
+            this.process.kill();
+            treeKill(this.process.pid);
+            this.isRunning = false;
+          }
+        };
+
+        if (autoExitSignalBeforeKill) {
+          setTimeout(doKill, 200);
+        } else {
+          doKill();
+        }
 
         // Safety timeout in case onExit never fires (e.g. process already dead)
         setTimeout(() => {
@@ -95,14 +115,34 @@ export default class LynxTerminal {
    */
   public stop(): void {
     if (this.isRunning && this.process) {
+      const {storageManager} = classHolder;
+      const {autoExitSignalBeforeKill, sendYWithExit} = storageManager.getData('terminal');
+
+      if (autoExitSignalBeforeKill) {
+        this.write('\x03');
+        if (sendYWithExit) {
+          this.write('y' + terminalLineEnding);
+        }
+      }
+
       // Register exit handler BEFORE killing to avoid race condition
       this.process.onExit(() => {
         this.process = undefined;
       });
 
-      this.process.kill();
-      treeKill(this.process.pid);
-      this.isRunning = false;
+      const doKill = () => {
+        if (this.isRunning && this.process) {
+          this.process.kill();
+          treeKill(this.process.pid);
+          this.isRunning = false;
+        }
+      };
+
+      if (autoExitSignalBeforeKill) {
+        setTimeout(doKill, 200);
+      } else {
+        doKill();
+      }
     }
   }
 

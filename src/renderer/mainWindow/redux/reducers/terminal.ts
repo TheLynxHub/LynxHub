@@ -25,6 +25,7 @@ const createDefaultTerminalState = (): TerminalState => ({
   quickCommands: [],
   sendYWithExit: false,
   openLinkNewTab: false,
+  autoExitSignalBeforeKill: false,
 });
 
 // Default initial state - actual values come from preloadedState in Store.ts

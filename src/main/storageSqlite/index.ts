@@ -109,6 +109,7 @@ export class BaseSqliteStorage {
       quickCommands: [],
       sendYWithExit: false,
       openLinkNewTab: false,
+      autoExitSignalBeforeKill: false,
     },
     browser: {
       recentAddress: [],

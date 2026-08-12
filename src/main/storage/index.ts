@@ -103,6 +103,7 @@ class BaseStorage {
       quickCommands: [],
       sendYWithExit: false,
       openLinkNewTab: false,
+      autoExitSignalBeforeKill: false,
     },
     browser: {
       recentAddress: [],
