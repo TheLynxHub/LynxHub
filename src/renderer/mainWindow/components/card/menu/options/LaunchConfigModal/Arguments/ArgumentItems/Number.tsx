@@ -57,6 +57,7 @@ export default function NumberArgItem({argument, changeValue, removeArg, id}: Pr
         minValue={numberMin}
         maxValue={numberMax}
         aria-label="Argument number input"
+        formatOptions={{useGrouping: false}}
         fullWidth>
         <NumberField.Group>
           <NumberField.DecrementButton />
