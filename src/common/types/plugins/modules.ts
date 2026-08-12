@@ -432,6 +432,13 @@ export type CardInfoCallback = {
   setOpenFolders: (dir: string[] | undefined) => void;
 };
 
+export type ParsedPreviewItem = {
+  title: string;
+  data: string;
+};
+
+export type ParsedPreview = string | ParsedPreviewItem[];
+
 /**
  * Methods provided by the card renderer.
  */
@@ -447,8 +454,8 @@ export type CardRendererMethods = {
   /** Fetching and return array of available extensions in type of `ExtensionData` */
   fetchExtensionList?: () => Promise<ExtensionData[]>;
 
-  /** Parse the given argument to string */
-  parseArgsToString?: (args: ChosenArgument[]) => string;
+  /** Parse the given argument to string or preview items */
+  parseArgsToString?: (args: ChosenArgument[]) => ParsedPreview;
 
   /** Parse given string to the arguments */
   parseStringToArgs?: (args: string) => ChosenArgument[];

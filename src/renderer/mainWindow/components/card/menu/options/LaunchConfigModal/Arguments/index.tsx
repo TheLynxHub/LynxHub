@@ -1,5 +1,6 @@
 import {useOverlayState} from '@heroui/react';
 import {ChosenArgumentsData} from '@lynx_common/types';
+import {ParsedPreview} from '@lynx_common/types/plugins/modules';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import {motion} from 'framer-motion';
 import {Dispatch, SetStateAction, useEffect, useMemo, useState} from 'react';
@@ -22,7 +23,7 @@ type Props = {
  * Orchestrates presets, argument list, adding new arguments, and preview.
  */
 export default function ArgumentsManager({chosenArguments, setChosenArguments, id}: Props) {
-  const [previewText, setPreviewText] = useState<string>('');
+  const [previewData, setPreviewData] = useState<ParsedPreview>('');
 
   const addArgumentsModal = useOverlayState();
   const allMethods = useAllCardMethods();
@@ -52,11 +53,11 @@ export default function ArgumentsManager({chosenArguments, setChosenArguments, i
   // Derive presets list
   const presets = useMemo(() => chosenArguments.data.map(arg => arg.preset), [chosenArguments.data]);
 
-  // Update preview text when arguments or method changes
+  // Update preview data when arguments or method changes
   useEffect(() => {
     const getParsedArgs = getCardMethod(allMethods, id, 'parseArgsToString');
     if (getParsedArgs) {
-      setPreviewText(getParsedArgs(activePreset.arguments));
+      setPreviewData(getParsedArgs(activePreset.arguments));
     }
   }, [activePreset.arguments, id, allMethods]);
 
@@ -69,7 +70,7 @@ export default function ArgumentsManager({chosenArguments, setChosenArguments, i
         addArgumentsModal={addArgumentsModal}
         setChosenArguments={setChosenArguments}
       />
-      <ArgumentsPreview text={previewText} />
+      <ArgumentsPreview preview={previewData} />
       <AddArgumentModal
         id={id}
         chosenArguments={chosenArguments}
