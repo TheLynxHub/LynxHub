@@ -38,18 +38,18 @@ export default function NumberArgItem({argument, changeValue, removeArg, id}: Pr
     }
   }, [argument.value]);
 
-  const onBlur = useCallback(() => {
-    changeValue(inputValue);
-  }, [inputValue, changeValue]);
-
-  const onChange = useCallback((value: number) => {
-    setInputValue(value);
-  }, []);
+  const onChange = useCallback(
+    (value: number | undefined) => {
+      if (value === undefined || Number.isNaN(value)) return;
+      setInputValue(value);
+      changeValue(value);
+    },
+    [changeValue],
+  );
 
   return (
     <ArgumentItemBase id={id} name={argument.name} removeArg={removeArg} icon={<TextFormatIcon className="size-3.5" />}>
       <NumberField
-        onBlur={onBlur}
         step={numberStep}
         value={inputValue}
         variant="secondary"
