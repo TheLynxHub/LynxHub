@@ -37,10 +37,12 @@ export default function InputArgItem({argument, changeValue, removeArg, id}: Pro
 
   // Sync state with prop updates
   useEffect(() => {
-    if (argument.value !== undefined) {
-      setInputValue(argument.value.toString());
-    }
-  }, [argument.value]);
+    const val =
+      argument.value !== undefined && argument.value !== null
+        ? argument.value.toString()
+        : getArgumentDefaultValue(argument.name, cardArgument) || '';
+    setInputValue(val);
+  }, [argument.value, argument.name, cardArgument]);
 
   const onBlur = useCallback(() => {
     changeValue(inputValue);

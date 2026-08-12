@@ -50,14 +50,18 @@ export default function PathArgItem({type, icon, placeholder, argument, changeVa
     changeValue(value);
   };
 
-  // Initialize isRelative based on current value
+  // Sync state with prop updates
   useEffect(() => {
+    const val = argument.value || getArgumentDefaultValue(argument.name, cardArgument) || placeholder;
+    setSelectedValue(val);
     if (argument.value) {
       filesIpc.isAbsolute(argument.value.toString()).then(isAbsolute => {
         setIsRelative(!isAbsolute);
       });
+    } else {
+      setIsRelative(false);
     }
-  }, [argument.value]);
+  }, [argument.value, argument.name, cardArgument, placeholder]);
 
   const baseDir = useMemo(() => {
     return installedCards.find(card => card.id === id)?.dir;

@@ -39,11 +39,8 @@ export default function DropdownArgItem({argument, changeValue, removeArg, id}: 
 
   // Sync state with prop updates
   useEffect(() => {
-    if (argument.value) {
-      setSelectedKey(argument.value);
-    } else if (defaultValue) {
-      setSelectedKey(defaultValue);
-    }
+    const val = argument.value ? argument.value : defaultValue ? defaultValue : null;
+    setSelectedKey(val);
   }, [argument.value, defaultValue]);
 
   const onChange = useCallback(

@@ -33,10 +33,12 @@ export default function NumberArgItem({argument, changeValue, removeArg, id}: Pr
 
   // Sync state with prop updates
   useEffect(() => {
-    if (argument.value !== undefined) {
-      setInputValue(argument.value as number);
-    }
-  }, [argument.value]);
+    const val =
+      argument.value !== undefined
+        ? (argument.value as number)
+        : getArgumentDefaultValue(argument.name, cardArgument) || 0;
+    setInputValue(val);
+  }, [argument.value, argument.name, cardArgument]);
 
   const onChange = useCallback(
     (value: number | undefined) => {

@@ -76,7 +76,12 @@ export default function ManageArguments({addArgumentsModal, chosenArguments, set
             className="flex flex-col space-y-2 overflow-hidden"
             values={chosenArguments.arguments.map(argument => argument.name)}>
             {chosenArguments.arguments.map(argument => (
-              <ManageArgumentsItem id={id} key={argument.name} argument={argument} setArguments={setChosenArguments} />
+              <ManageArgumentsItem
+                id={id}
+                argument={argument}
+                setArguments={setChosenArguments}
+                key={`${chosenArguments.preset}-${argument.name}`}
+              />
             ))}
           </Reorder.Group>
         </AnimatePresence>
