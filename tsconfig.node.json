@@ -9,7 +9,7 @@
     "extension/src/main/**/*",
     "extension/src/cross/**/*",
     "module/src/**/*",
-    "devFiles/MoveChanges.ts"
+    "devFiles/**/*"
   ],
   "compilerOptions": {
     "moduleResolution": "bundler",
