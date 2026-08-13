@@ -32,8 +32,8 @@ export default function useCardInfoApi(
           },
         },
         storage: {
-          get: (key: string) => storageIpc.getCustom(key),
-          set: (key: string, data: any) => storageIpc.setCustom(key, data),
+          get: (key: string) => storageIpc.getCustom(key.includes('::') ? key : `${cardId}::${key}`),
+          set: (key: string, data: any) => storageIpc.setCustom(key.includes('::') ? key : `${cardId}::${key}`, data),
         },
         getFolderSize: (path: string) => filesIpc.calcFolderSize(path),
         getFolderCreationTime: (path: string) => moduleApiIpc.getFolderCreationTime(path),

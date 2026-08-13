@@ -58,8 +58,9 @@ export default class ModuleManager {
 
     return {
       storage: {
-        get: key => classHolder.storageManager.getCustomData(`${moduleName}::${key}`),
-        set: (key, data) => classHolder.storageManager.setCustomData(`${moduleName}::${key}`, data),
+        get: key => classHolder.storageManager.getCustomData(key.includes('::') ? key : `${moduleName}::${key}`),
+        set: (key, data) =>
+          classHolder.storageManager.setCustomData(key.includes('::') ? key : `${moduleName}::${key}`, data),
       },
       ipc: {
         on(channel: string, listener: (event: any, ...args: any[]) => void) {

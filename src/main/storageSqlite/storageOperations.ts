@@ -294,7 +294,21 @@ export class SqliteStorageManager {
       const parts = id.split('::');
       const moduleName = parts[0];
       const key = parts[1];
-      return this.getModuleData(moduleName, key);
+      const val = this.getModuleData(moduleName, key);
+      if (val !== undefined) return val;
+
+      const mappedModule = this.getModuleNameForKey(moduleName);
+      if (mappedModule && mappedModule !== moduleName) {
+        const valMapped = this.getModuleData(mappedModule, key);
+        if (valMapped !== undefined) return valMapped;
+      }
+
+      for (const [cardId, modName] of BaseSqliteStorage.cardToModuleMap.entries()) {
+        if (modName === moduleName) {
+          const valCard = this.getModuleData(cardId, key);
+          if (valCard !== undefined) return valCard;
+        }
+      }
     }
     const res = this.db.select().from(schema.customStorage).where(eq(schema.customStorage.key, id)).get();
     return res ? res.value : undefined;
