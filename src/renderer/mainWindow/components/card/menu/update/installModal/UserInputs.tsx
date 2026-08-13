@@ -180,9 +180,9 @@ export default function UserInputs({inputElements, extensionElements}: UserInput
                 </Label>
                 <Button
                   key={label}
-                  variant="secondary"
+                  variant="tertiary"
                   onPress={() => selectPath('folder', id, isRequired)}
-                  className={`${hasError ? 'border-red-500 border-2' : ''}`}
+                  className={`${hasError ? 'border-red-500 border-2' : ''} justify-start`}
                   fullWidth>
                   <FolderOpenIcon />
                   <span className={selectedFolder === 'Click here to select folder' && hasError ? 'text-red-500' : ''}>
