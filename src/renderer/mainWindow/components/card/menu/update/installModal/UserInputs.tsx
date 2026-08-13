@@ -182,7 +182,7 @@ export default function UserInputs({inputElements, extensionElements}: UserInput
                   key={label}
                   variant="tertiary"
                   onPress={() => selectPath('folder', id, isRequired)}
-                  className={`${hasError ? 'border-red-500 border-2' : ''} justify-start`}
+                  className={`${hasError ? 'border-red-500 border-2' : ''} justify-start text-foreground`}
                   fullWidth>
                   <FolderOpenIcon />
                   <span className={selectedFolder === 'Click here to select folder' && hasError ? 'text-red-500' : ''}>
