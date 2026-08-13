@@ -37,7 +37,12 @@ export default function TabModal({
 
   const handleBackdropClick = useCallback(
     (e: MouseEvent<HTMLElement>) => {
-      if (isDismissable && e.target instanceof HTMLElement && !e.target.closest('.modal__dialog')) {
+      if (
+        isDismissable &&
+        e.target instanceof HTMLElement &&
+        e.target.closest('.modal__backdrop, .modal__container') &&
+        !e.target.closest('.modal__dialog')
+      ) {
         onOpenChange?.(false);
       }
     },
