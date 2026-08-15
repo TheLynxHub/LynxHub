@@ -36,6 +36,11 @@ export function createDevDatabase(): DatabaseInstance {
 
   const sqlite = new Database(dbPath);
   sqlite.pragma('journal_mode = WAL');
+  sqlite.pragma('synchronous = NORMAL');
+  sqlite.pragma('temp_store = MEMORY');
+  sqlite.pragma('mmap_size = 268435456');
+  sqlite.pragma('cache_size = -32000');
+  sqlite.pragma('busy_timeout = 5000');
 
   const db = drizzle(sqlite, {schema});
   return {sqlite, db, dbPath};
