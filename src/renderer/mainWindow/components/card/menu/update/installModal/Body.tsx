@@ -135,7 +135,9 @@ const InstallBody = memo(({isOpen, xtermRef}: InstallBodyProps) => {
         ) : (
           <div className="my-6">
             <ProgressBar size="lg" value={(progressInfo?.percentage || 0) * 100}>
-              <Label>{progressBarState.percentage}</Label>
+              <Label>
+                {progressInfo?.percentage !== undefined ? `${Math.round(progressInfo.percentage * 100)}%` : undefined}
+              </Label>
               <ProgressBar.Output />
               <ProgressBar.Track>
                 <ProgressBar.Fill />
