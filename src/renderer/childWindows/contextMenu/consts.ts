@@ -14,4 +14,5 @@ export enum MenuTypes {
   Alert,
   Confirm,
   ProcessExitSignal,
+  ForceReloadConfirm,
 }

@@ -16,6 +16,7 @@ export default function Confirm() {
   const closeTabConfirm = useSettingsState('closeTabConfirm');
   const terminateAIConfirm = useSettingsState('terminateAIConfirm');
   const exitSignalConfirm = useSettingsState('exitSignalConfirm');
+  const forceReloadConfirm = useSettingsState('forceReloadConfirm');
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -47,6 +48,14 @@ export default function Confirm() {
     (selected: boolean) => {
       storageIpc.update('app', {exitSignalConfirm: selected});
       dispatch(settingsActions.setSettingsState({key: 'exitSignalConfirm', value: selected}));
+    },
+    [dispatch],
+  );
+
+  const onForceReloadConfirmChange = useCallback(
+    (selected: boolean) => {
+      storageIpc.update('app', {forceReloadConfirm: selected});
+      dispatch(settingsActions.setSettingsState({key: 'forceReloadConfirm', value: selected}));
     },
     [dispatch],
   );
@@ -102,6 +111,24 @@ export default function Confirm() {
           title="Send Exit Signal (Terminal)"
           onEnabledChange={onSendSignalConfirmChange}
           description={'Show a confirmation window when sending exit signal to process.'}
+        />
+      </SettingsFilterItem>
+
+      <SettingsFilterItem
+        searchTexts={[
+          'Force Reload',
+          'force reload',
+          'browser reload',
+          'reload page',
+          'unsaved changes',
+          'confirmation window',
+          'bypass confirmation',
+        ]}>
+        <LynxSwitch
+          enabled={forceReloadConfirm}
+          title="Browser Reload Confirmation"
+          onEnabledChange={onForceReloadConfirmChange}
+          description="Show a confirmation window before reloading a page that has unsaved changes."
         />
       </SettingsFilterItem>
     </>

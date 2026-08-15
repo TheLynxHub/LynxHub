@@ -113,6 +113,7 @@ const buildPreloadedState = (): PreloadState | undefined => {
       closeTabConfirm: storage.app.closeTabConfirm,
       terminateAIConfirm: storage.app.terminateAIConfirm,
       exitSignalConfirm: storage.app.exitSignalConfirm,
+      forceReloadConfirm: storage.app.forceReloadConfirm,
       openLastSize: storage.app.openLastSize,
       updatedModules: [],
       newModules: [],

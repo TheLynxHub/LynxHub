@@ -27,7 +27,7 @@ class BaseStorage {
   private readonly migrationManager: StorageMigrationManager;
 
   private readonly DEFAULT_DATA: AppStorageData = {
-    storage: {version: 1.1},
+    storage: {version: 1.2},
     cards: {
       installedCards: [],
       autoUpdateCards: [],
@@ -55,6 +55,7 @@ class BaseStorage {
       closeTabConfirm: true,
       terminateAIConfirm: true,
       exitSignalConfirm: false,
+      forceReloadConfirm: true,
       openLastSize: false,
       homeCategory: ['All', 'Pin'],
       darkMode: 'dark',

@@ -120,6 +120,17 @@ export default function useShowEvents() {
       );
     });
 
+    // Force Reload Confirmation
+    const offForceReload = contextMenuIpc.on.forceReload(value => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'targetID',
+          value,
+          layout: MenuTypes.ForceReloadConfirm,
+        }),
+      );
+    });
+
     // Volume Control
     const offVolume = contextMenuIpc.on.volume(value => {
       dispatch(
@@ -208,6 +219,7 @@ export default function useShowEvents() {
       offTerminateProcess();
       offSendExitProcess();
       offTerminateTab();
+      offForceReload();
       offVolume();
       OffDownloads();
       offPrompt();

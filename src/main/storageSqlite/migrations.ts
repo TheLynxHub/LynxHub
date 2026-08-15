@@ -6,8 +6,7 @@ import SqliteStorageManager from './storageOperations';
  */
 export class SqliteStorageMigrationManager {
   private readonly migrations = new Map<number, (manager: SqliteStorageManager) => void>([
-    // Future version migrations will be added here, e.g.:
-    // [1.2, manager => this.migrate_1_20(manager)],
+    [1.2, manager => this.migrate_1_20(manager)],
   ]);
 
   constructor(private readonly manager: SqliteStorageManager) {}
@@ -37,6 +36,13 @@ export class SqliteStorageMigrationManager {
       console.log(`[SQLite Storage] Storage successfully updated to v${currentVersion}`);
     } catch (e) {
       console.error('[SQLite Storage] Failed to migrate storage', e);
+    }
+  }
+
+  private migrate_1_20(manager: SqliteStorageManager): void {
+    const appData = manager.getData('app');
+    if (appData && appData.forceReloadConfirm === undefined) {
+      manager.updateData('app', {forceReloadConfirm: true});
     }
   }
 }

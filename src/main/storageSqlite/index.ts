@@ -34,7 +34,7 @@ export class BaseSqliteStorage {
   }
 
   public readonly DEFAULT_DATA: AppStorageData = {
-    storage: {version: 1.1},
+    storage: {version: 1.2},
     cards: {
       installedCards: [],
       autoUpdateCards: [],
@@ -62,6 +62,7 @@ export class BaseSqliteStorage {
       closeTabConfirm: true,
       terminateAIConfirm: true,
       exitSignalConfirm: false,
+      forceReloadConfirm: true,
       openLastSize: false,
       homeCategory: ['All', 'Pin'],
       darkMode: 'dark',

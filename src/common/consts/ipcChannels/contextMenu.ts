@@ -22,6 +22,9 @@ export const contextMenuChannels = {
   removeTab: 'context:remove-tab',
   onRemoveTab: 'context:on-remove-tab',
 
+  forceReload: 'context:force-reload',
+  onForceReload: 'context:on-force-reload',
+
   resizeWindow: 'context:resize-window',
   hideWindow: 'context:hide-window',
   requestShow: 'context:request-show',

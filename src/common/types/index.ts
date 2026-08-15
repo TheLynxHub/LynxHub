@@ -287,4 +287,5 @@ export type StorageUnit = 'B' | 'KB' | 'MB' | 'GB' | 'TB' | 'PB' | 'b' | 'kb' | 
 
 export type HeroToastPlacement = 'top' | 'bottom';
 
-export type ConfirmMenuTypes = 'closeConfirm' | 'terminateAIConfirm' | 'closeTabConfirm' | 'exitSignalConfirm';
+export type ConfirmMenuTypes =
+  'closeConfirm' | 'terminateAIConfirm' | 'closeTabConfirm' | 'exitSignalConfirm' | 'forceReloadConfirm';

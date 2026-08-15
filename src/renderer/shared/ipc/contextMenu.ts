@@ -41,6 +41,9 @@ const contextMenuIpc = {
     // Removes browser tab
     removeTab: (tabId: string) => lynxIpc.send(contextMenuChannels.removeTab, tabId),
 
+    // Forces reload of browser page with unsaved changes
+    forceReload: (id: string) => lynxIpc.send(contextMenuChannels.forceReload, id),
+
     rightClickItems: {
       copy: (id: number) => lynxIpc.send(contextMenuChannels.copy, id),
 
@@ -132,6 +135,10 @@ const contextMenuIpc = {
     // Listens for tab removal events
     removeTab: (callback: (tabId: string) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onRemoveTab, callback),
+
+    // Listens for force reload confirmation events
+    forceReload: (callback: (id: string) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onForceReload, callback),
   },
 };
 

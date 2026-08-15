@@ -5,6 +5,7 @@ import {useEffect} from 'react';
 import {MenuTypes} from './consts';
 import BrowserScale from './layouts/BrowserScale';
 import CloseApp from './layouts/confirm_warn/CloseApp';
+import ForceReload from './layouts/confirm_warn/ForceReload';
 import ProcessExitSignal from './layouts/confirm_warn/ProcessExitSignal';
 import TerminateProcess from './layouts/confirm_warn/TerminateProcess';
 import TerminateTab from './layouts/confirm_warn/TerminateTab';
@@ -62,6 +63,7 @@ export default function ContextMenu() {
       {activeLayout === MenuTypes.Alert && <AlertWindow />}
       {activeLayout === MenuTypes.Confirm && <ConfirmWindow />}
       {activeLayout === MenuTypes.ProcessExitSignal && <ProcessExitSignal />}
+      {activeLayout === MenuTypes.ForceReloadConfirm && <ForceReload />}
     </div>
   );
 }

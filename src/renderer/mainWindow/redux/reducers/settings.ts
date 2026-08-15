@@ -15,6 +15,7 @@ const initialState: SettingState = {
   closeTabConfirm: true,
   terminateAIConfirm: true,
   exitSignalConfirm: true,
+  forceReloadConfirm: true,
   openLastSize: false,
   updatedModules: [],
   newModules: [],

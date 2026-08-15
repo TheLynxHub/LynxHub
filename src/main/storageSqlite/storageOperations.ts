@@ -120,7 +120,7 @@ export class SqliteStorageManager {
       }
       case 'storage': {
         const res = this.db.select().from(schema.metaStorage).where(eq(schema.metaStorage.key, 'version')).get();
-        return {version: res ? Number(res.value) : 1.1} as AppStorageData[K];
+        return {version: res ? Number(res.value) : this.baseStorage.DEFAULT_DATA.storage.version} as AppStorageData[K];
       }
       default:
         return this.getCustomData(key as string);

@@ -97,6 +97,11 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
   const setPosition = (customPosition?: {x: number; y: number}) =>
     contextMenuManager.setCustomContextPosition(customPosition);
 
+  // Force Reload page
+  contextMenuIpc.on.forceReload(id => {
+    browserManager.forceReload(id);
+  });
+
   // Open Find in Page
   browserIpc.on.openFindInPage(async (id, customPosition) => {
     if (isLinux) return;
@@ -271,8 +276,12 @@ export const contextMenuIpc = {
     onCloseApp: () => sendToContextMenu(contextMenuChannels.onCloseApp),
     /** Sends downloads event to context menu */
     onDownloads: () => sendToContextMenu(contextMenuChannels.onDownloads),
+    /** Sends force reload event to context menu */
+    onForceReload: (id: string) => sendToContextMenu(contextMenuChannels.onForceReload, id),
   },
   on: {
+    /** Listens for force reload request */
+    forceReload: (callback: (id: string) => void) => lynxIpc.on(contextMenuChannels.forceReload, callback),
     /** Listens for show ready request from renderer */
     showReady: (callback: (data: ElementResizeData) => void) => lynxIpc.on(contextMenuChannels.showReady, callback),
     /** Listens for resize window request */

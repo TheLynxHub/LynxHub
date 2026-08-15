@@ -2,11 +2,12 @@ import path from 'node:path';
 
 import {ElementResizeData} from '@lynx_common/types';
 import {AudioState, CanGoType} from '@lynx_common/types/ipc';
-import {formatWebAddress} from '@lynx_common/utils';
+import {formatWebAddress, isLinux} from '@lynx_common/utils';
 import {applicationIpc} from '@lynx_main/ipc/application';
 import {browserIpc} from '@lynx_main/ipc/browser';
+import {contextMenuIpc} from '@lynx_main/ipc/contextMenu';
 import {getUserAgent} from '@lynx_main/utils';
-import {BrowserWindow, FindInPageOptions, session, shell, WebContents, WebContentsView} from 'electron';
+import {BrowserWindow, dialog, FindInPageOptions, session, shell, WebContents, WebContentsView} from 'electron';
 import {isNil} from 'lodash-es';
 
 import icon from '../../../resources/icon.png?asset';
@@ -23,6 +24,7 @@ const SCRIPT_EXECUTION_TIMEOUT_MS = 3000;
  * Handles creation, navigation, resizing, and IPC for each browser instance.
  */
 export default class BrowserManager {
+  private bypassingUnload = new Set<string>();
   private browsers: {
     id: string;
     view: WebContentsView;
@@ -307,6 +309,40 @@ export default class BrowserManager {
     });
   }
 
+  private listenForWillPreventUnload(id: string, webContents: WebContents) {
+    webContents.on('will-prevent-unload', event => {
+      const {storageManager, contextMenuManager} = classHolder;
+      const forceReloadConfirm = storageManager?.getData('app')?.forceReloadConfirm ?? true;
+
+      if (!forceReloadConfirm || this.bypassingUnload.has(id)) {
+        this.bypassingUnload.delete(id);
+        event.preventDefault();
+        return;
+      }
+
+      if (isLinux) {
+        const mainWindow = this.getMainWindow();
+        const options: Electron.MessageBoxSyncOptions = {
+          type: 'warning',
+          buttons: ['Cancel', 'Force Reload'],
+          defaultId: 1,
+          cancelId: 0,
+          message: 'Confirm Force Reload',
+          detail: 'Changes that you made may not be saved. Are you sure you want to force reload this page?',
+        };
+        const choice = mainWindow ? dialog.showMessageBoxSync(mainWindow, options) : dialog.showMessageBoxSync(options);
+        if (choice === 1) {
+          event.preventDefault();
+        }
+        return;
+      }
+
+      contextMenuManager?.setCustomContextPosition(undefined);
+      contextMenuIpc.send.onForceReload(id);
+      contextMenuManager?.showContextMenu();
+    });
+  }
+
   private sendAudioStateChange(id: string, playing: boolean): void {
     const viewWc = this.getWebContents(id);
     if (!viewWc) return;
@@ -366,6 +402,7 @@ export default class BrowserManager {
     this.listenForAudioEvents(id, webContents);
     this.listenForLinkHover(webContents);
     this.listenForFindInPage(webContents);
+    this.listenForWillPreventUnload(id, webContents);
 
     const isBackground = options?.backgroundThrottling === false;
     this.browsers.push({
@@ -428,6 +465,7 @@ export default class BrowserManager {
 
     // Remove from array first to prevent any callbacks from accessing stale data
     this.browsers.splice(browserIndex, 1);
+    this.bypassingUnload.delete(id);
 
     if (browser.attachedWindow && !browser.attachedWindow.isDestroyed()) {
       try {
@@ -574,6 +612,12 @@ export default class BrowserManager {
     this.setVisible(id, true, undefined, windowToAttach);
     this.withWebContents(id, wc => wc.reload());
     browserIpc.send.onClearFailed(id);
+  }
+
+  public forceReload(id: string, targetWindow?: BrowserWindow) {
+    this.bypassingUnload.add(id);
+    setTimeout(() => this.bypassingUnload.delete(id), 5000);
+    this.reload(id, targetWindow);
   }
 
   public focus(id: string) {
