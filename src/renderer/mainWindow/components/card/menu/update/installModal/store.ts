@@ -24,6 +24,7 @@ export interface InstallStoreState extends InstallState {
   extensionsToInstall?: {urls: string[]; dir: string};
   progressBarState: ProgressBarState;
   locateWarnIsOpen: boolean;
+  cloneDirValid: boolean;
 
   // Promise resolvers for stepper interactions
   starterResolver: ((result: InstallationMethod) => void) | null;
@@ -51,6 +52,7 @@ export interface InstallStoreState extends InstallState {
   setExtensionsToInstall: (extensionsToInstall: {urls: string[]; dir: string} | undefined) => void;
   setProgressBarState: (progressBarState: ProgressBarState) => void;
   setLocateWarnIsOpen: (isOpen: boolean | ((prev: boolean) => boolean)) => void;
+  setCloneDirValid: (valid: boolean) => void;
 
   setStarterResolver: (resolver: ((result: InstallationMethod) => void) | null) => void;
   setCloneResolver: (resolver: ((dir: string) => void) | null) => void;
@@ -98,6 +100,7 @@ const initialStoreState = {
   extensionsToInstall: undefined,
   progressBarState: {title: '', isIndeterminate: true},
   locateWarnIsOpen: false,
+  cloneDirValid: true,
 
   starterResolver: null,
   cloneResolver: null,
@@ -173,6 +176,7 @@ export const useInstallStore = create<InstallStoreState>((set, get) => ({
         typeof locateWarnIsOpen === 'function' ? locateWarnIsOpen(prev.locateWarnIsOpen) : locateWarnIsOpen,
     }));
   },
+  setCloneDirValid: cloneDirValid => set({cloneDirValid}),
 
   setStarterResolver: starterResolver => set({starterResolver}),
   setCloneResolver: cloneResolver => set({cloneResolver}),
@@ -240,6 +244,9 @@ export const useInstallStore = create<InstallStoreState>((set, get) => ({
 }));
 
 export const selectCanContinue = (state: InstallStoreState): boolean => {
+  if (state.body === 'clone') {
+    return state.cloneDirValid;
+  }
   if (state.body === 'user-input') {
     for (const field of state.userInputElements.elements) {
       if (field.isRequired) {

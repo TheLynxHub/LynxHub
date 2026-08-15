@@ -6,7 +6,7 @@ import filesIpc from '@lynx_shared/ipc/files';
 import gitIpc from '@lynx_shared/ipc/git';
 import {Folder2Icon} from '@solar-icons/react/bold-duotone';
 import {capitalize} from 'lodash-es';
-import {memo, useEffect, useState} from 'react';
+import {memo, useEffect, useRef, useState} from 'react';
 import {SimpleGitProgressEvent} from 'simple-git';
 
 import {initGitProgress} from '../../../../../../../utils/constants';
@@ -32,6 +32,7 @@ function CloneRepoView({isOpen}: CloneRepoViewProps) {
   const currentStep = useInstallStore(s => s.steps[s.currentStep]);
   const resolveClone = useInstallStore(s => s.resolveClone);
   const updateState = useInstallStore(s => s.updateState);
+  const setCloneDirValid = useInstallStore(s => s.setCloneDirValid);
 
   const warningModal = useOverlayState();
 
@@ -44,6 +45,8 @@ function CloneRepoView({isOpen}: CloneRepoViewProps) {
   const [downloading, setDownloading] = useState<boolean>(false);
   const [downloadProgress, setDownloadProgress] = useState<SimpleGitProgressEvent>(initGitProgress);
   const [directory, setDirectory] = useState<string>('');
+
+  const isCloningRef = useRef<boolean>(false);
 
   const progressItems: DescriptionGridItem[] = [
     {key: 'stage', label: 'Stage', content: capitalize(downloadProgress.stage)},
@@ -59,35 +62,45 @@ function CloneRepoView({isOpen}: CloneRepoViewProps) {
   }, [url]);
 
   useEffect(() => {
-    if (start) {
+    if (!start) {
+      isCloningRef.current = false;
+      return () => {};
+    }
+
+    const onProgress: GitProgressCallback = (id, state, result) => {
+      if (id || !isOpen) return;
+
+      switch (state) {
+        case 'Progress':
+          setDownloadProgress(result as SimpleGitProgressEvent);
+          break;
+        case 'Failed':
+          isCloningRef.current = false;
+          warningModal.open();
+          setDownloading(false);
+          updateState({startClone: false});
+          break;
+        case 'Completed':
+          isCloningRef.current = false;
+          setDownloading(false);
+          resolveClone(directory);
+          break;
+      }
+    };
+
+    const removeListener = gitIpc.onProgress(onProgress);
+
+    if (!isCloningRef.current) {
+      isCloningRef.current = true;
       setDownloading(true);
 
       const {singleBranch, branch, depth} = cloneOptionsResult;
       gitIpc.cloneShallow({url, directory, singleBranch, depth, branch});
-
-      const onProgress: GitProgressCallback = (id, state, result) => {
-        if (id || !isOpen) return;
-
-        switch (state) {
-          case 'Progress':
-            setDownloadProgress(result as SimpleGitProgressEvent);
-            break;
-          case 'Failed':
-            warningModal.open();
-            setDownloading(false);
-            updateState({startClone: false});
-            break;
-          case 'Completed':
-            setDownloading(false);
-            resolveClone(directory);
-            break;
-        }
-      };
-
-      const removeListener = gitIpc.onProgress(onProgress);
-      return () => removeListener();
     }
-    return () => {};
+
+    return () => {
+      removeListener();
+    };
   }, [start, cloneOptionsResult, url, directory, isOpen, resolveClone, updateState, warningModal]);
 
   return (
@@ -134,6 +147,7 @@ function CloneRepoView({isOpen}: CloneRepoViewProps) {
               <OpenDialog
                 directory={directory}
                 setDirectory={setDirectory}
+                onValidityChange={setCloneDirValid}
                 extraFolder={extractGitUrl(url).repo}
                 dialogType={{properties: ['openDirectory']}}
               />

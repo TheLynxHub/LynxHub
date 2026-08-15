@@ -285,30 +285,18 @@ export default class GitManager {
   }
 
   /**
-   * Handles clone completion by checking for false-positive errors.
+   * Handles clone errors by logging and propagating failure.
    */
-  private async handleCloneCompletion(
+  private handleCloneCompletion(
     error: any,
-    targetDirectory: string,
-    resolve: () => void,
+    _targetDirectory: string,
+    _resolve: () => void,
     reject: (error: any) => void,
     operationType: string = 'Clone',
-  ): Promise<void> {
-    const errorType = this.classifyError(error);
-    const isValidRepo = await GitManager.isGitRepository(targetDirectory);
-
-    if (errorType === GitErrorType.ProgressOutput && isValidRepo) {
-      console.log(`${operationType} completed successfully (stderr progress output was misinterpreted as error)`);
-      this.handleProgressComplete();
-      resolve();
-    } else if (errorType === GitErrorType.DestinationExists && isValidRepo) {
-      console.log(`${operationType} skipped: destination already exists and is a valid git repository`);
-      this.handleProgressComplete();
-      resolve();
-    } else {
-      this.handleError(error);
-      reject(error);
-    }
+  ): void {
+    console.error(`${operationType} failed:`, error);
+    this.handleError(error);
+    reject(error);
   }
 
   /**

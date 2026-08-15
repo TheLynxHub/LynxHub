@@ -15,13 +15,15 @@ type Props = {
   setDirectory: (directory: string) => void;
   /** Optional extra folder to append to the selected path */
   extraFolder?: string;
+  /** Callback when validity status changes */
+  onValidityChange?: (isValid: boolean) => void;
 };
 
 /**
  * Input field with a button to open a file/directory dialog.
  * Validates if the selected directory is empty or if it is the app folder.
  */
-export default function OpenDialog({dialogType, directory, extraFolder = '', setDirectory}: Props) {
+export default function OpenDialog({dialogType, directory, extraFolder = '', onValidityChange, setDirectory}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInvalid, setIsInvalid] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -31,12 +33,20 @@ export default function OpenDialog({dialogType, directory, extraFolder = '', set
 
     const validateDirectory = async () => {
       try {
+        if (!directory) {
+          setIsInvalid(true);
+          setErrorMessage('Please specify a destination directory.');
+          onValidityChange?.(false);
+          return;
+        }
+
         const isEmpty = await filesIpc.isEmptyDir(directory);
         if (!isMounted) return;
 
         if (!isEmpty) {
           setIsInvalid(true);
           setErrorMessage('Selected directory is not empty. Please choose an empty directory.');
+          onValidityChange?.(false);
           return;
         }
 
@@ -44,7 +54,13 @@ export default function OpenDialog({dialogType, directory, extraFolder = '', set
         if (!isMounted) return;
 
         setIsInvalid(isAppDir);
-        setErrorMessage('Selecting the app folder can be dangerous and may lead to data loss.');
+        if (isAppDir) {
+          setErrorMessage('Selecting the app folder can be dangerous and may lead to data loss.');
+          onValidityChange?.(false);
+        } else {
+          setErrorMessage('');
+          onValidityChange?.(true);
+        }
       } catch (error) {
         console.error('Failed to validate directory:', error);
       }
@@ -55,7 +71,7 @@ export default function OpenDialog({dialogType, directory, extraFolder = '', set
     return () => {
       isMounted = false;
     };
-  }, [directory]);
+  }, [directory, onValidityChange]);
 
   const changeDirectory = useCallback(
     (value: string) => {

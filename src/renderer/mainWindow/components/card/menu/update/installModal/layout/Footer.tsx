@@ -108,7 +108,7 @@ function InstallFooter({handleClose, stepper, xtermRef}: InstallFooterProps) {
         )}
 
         {body === 'clone' && !startClone && (
-          <Button className="flex-1" onPress={() => updateState({startClone: true})}>
+          <Button className="flex-1" isDisabled={!canContinue} onPress={() => updateState({startClone: true})}>
             <DownloadIcon className="size-4" />
             Download
           </Button>
