@@ -20,87 +20,51 @@ export interface UserInputsProps {
  * or extra functional elements injected from external extensions.
  */
 export default function UserInputs({inputElements, extensionElements}: UserInputsProps) {
-  const [selectedFolder, setSelectedFolder] = useState<string>('Click here to select folder');
-  const [selectedFile, setSelectedFile] = useState<string>('Click here to select file');
+  const [selectedPaths, setSelectedPaths] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, boolean>>({});
 
   const updateResult = useInstallStore(s => s.updateUserElementResult);
 
-  const updateError = useCallback((id: string, hasError: boolean) => {
-    setErrors(prev => ({
-      ...prev,
-      [id]: hasError,
-    }));
-  }, []);
-
   const selectPath = useCallback(
     (type: 'folder' | 'file', id: string, isRequired?: boolean) => {
-      switch (type) {
-        case 'folder':
-          filesIpc.openDlg({properties: ['openDirectory']}).then(result => {
-            const folderPath = result || 'Click here to select folder';
-            setSelectedFolder(folderPath);
-            updateResult(id, result || '');
+      const properties: ('openDirectory' | 'openFile')[] = type === 'folder' ? ['openDirectory'] : ['openFile'];
 
+      filesIpc
+        .openDlg({properties})
+        .then(result => {
+          if (result) {
+            setSelectedPaths(prev => ({...prev, [id]: result}));
+            updateResult(id, result);
             if (isRequired) {
-              updateError(id, !result || result.trim() === '');
+              setErrors(prev => ({...prev, [id]: false}));
             }
-          });
-          break;
-        case 'file':
-          filesIpc.openDlg({properties: ['openFile']}).then(result => {
-            const filePath = result || 'Click here to select file';
-            setSelectedFile(filePath);
-            updateResult(id, result || '');
-
-            if (isRequired) {
-              updateError(id, !result || result.trim() === '');
-            }
-          });
-          break;
-      }
+          } else if (isRequired && !selectedPaths[id]) {
+            setErrors(prev => ({...prev, [id]: true}));
+          }
+        })
+        .catch(err => {
+          console.error('Failed to open file dialog:', err);
+        });
     },
-    [updateResult, updateError],
-  );
-
-  const onSwitchChange = useCallback(
-    (value: boolean, id: string) => {
-      updateResult(id, value);
-    },
-    [updateResult],
-  );
-
-  const onInputChange = useCallback(
-    (value: string, id: string) => {
-      updateResult(id, value);
-    },
-    [updateResult],
-  );
-
-  const onSelectChange = useCallback(
-    (value: string, id: string) => {
-      updateResult(id, value);
-    },
-    [updateResult],
+    [updateResult, selectedPaths],
   );
 
   useEffect(() => {
     inputElements.elements.forEach(element => {
-      const {id, type, defaultValue} = element;
+      const {defaultValue, id, type} = element;
       if (!isNil(defaultValue)) {
         switch (type) {
           case 'checkbox':
-            if (typeof defaultValue === 'boolean') {
-              updateResult(id, defaultValue);
-            }
+            if (typeof defaultValue === 'boolean') updateResult(id, defaultValue);
             break;
           case 'text-input':
           case 'select':
+          case 'directory':
+          case 'file':
             if (typeof defaultValue === 'string') {
               updateResult(id, defaultValue);
+              setSelectedPaths(prev => ({...prev, [id]: defaultValue}));
             }
-            break;
-          default:
             break;
         }
       }
@@ -113,26 +77,29 @@ export default function UserInputs({inputElements, extensionElements}: UserInput
         {inputElements.title || 'Please fill in the required information and click Next'}
       </span>
       {inputElements.elements.map(element => {
-        const {id, label, type, selectOptions, isRequired, defaultValue} = element;
+        const {defaultValue, id, isRequired, label, selectOptions, type} = element;
         const hasError = errors[id] || false;
+        const currentPath =
+          selectedPaths[id] || (type === 'directory' ? 'Click here to select folder' : 'Click here to select file');
 
         switch (type) {
           case 'checkbox':
             return (
               <LynxSwitch
-                key={label}
+                key={id}
                 title={label}
                 variant="secondary"
                 enabled={!!defaultValue}
-                onEnabledChange={value => onSwitchChange(value, id)}
+                onEnabledChange={value => updateResult(id, value)}
               />
             );
           case 'text-input':
             return (
               <TextField
+                key={id}
                 variant="secondary"
                 isRequired={isRequired}
-                onChange={value => onInputChange(value, id)}
+                onChange={value => updateResult(id, value)}
                 defaultValue={defaultValue as string | undefined}
                 fullWidth>
                 <Label>{label}</Label>
@@ -145,8 +112,9 @@ export default function UserInputs({inputElements, extensionElements}: UserInput
             return (
               <Select
                 onChange={key => {
-                  if (key) onSelectChange(key.toString(), id);
+                  if (key) updateResult(id, key.toString());
                 }}
+                key={id}
                 variant="secondary"
                 isRequired={isRequired}
                 defaultValue={defaultValue ? (defaultValue as string) : undefined}
@@ -158,60 +126,48 @@ export default function UserInputs({inputElements, extensionElements}: UserInput
                 </Select.Trigger>
                 <Select.Popover>
                   <ListBox>
-                    {selectOptions!.map(option => {
-                      return (
-                        <ListBox.Item id={option} key={option} textValue={option}>
-                          {option}
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                      );
-                    })}
+                    {selectOptions?.map(option => (
+                      <ListBox.Item id={option} key={option} textValue={option}>
+                        {option}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                    ))}
                   </ListBox>
                 </Select.Popover>
               </Select>
             );
           case 'directory':
             return (
-              <div key={`${label}_div`} className="flex w-full flex-col gap-y-2">
-                <Label
-                  key={`${label}_text`}
-                  className={`text-sm ${isRequired ? 'after:content-["*"] after:text-red-500 after:ml-1' : ''}`}>
+              <div key={id} className="flex w-full flex-col gap-y-2">
+                <Label className={`text-sm ${isRequired ? 'after:content-["*"] after:text-danger after:ml-1' : ''}`}>
                   {label}
                 </Label>
                 <Button
-                  key={label}
-                  variant="tertiary"
+                  variant="secondary"
                   onPress={() => selectPath('folder', id, isRequired)}
-                  className={`${hasError ? 'border-red-500 border-2' : ''} justify-start text-foreground`}
+                  className={`justify-start text-foreground ${hasError ? 'border-2 border-danger' : ''}`}
                   fullWidth>
                   <FolderOpenIcon />
-                  <span className={selectedFolder === 'Click here to select folder' && hasError ? 'text-red-500' : ''}>
-                    {selectedFolder}
-                  </span>
+                  <span className={hasError && !selectedPaths[id] ? 'text-danger' : ''}>{currentPath}</span>
                 </Button>
-                {hasError && <span className="text-xs text-red-500">{label} is required. Please select a folder.</span>}
+                {hasError && <span className="text-xs text-danger">{label} is required. Please select a folder.</span>}
               </div>
             );
           case 'file':
             return (
-              <div key={`${label}_div`} className="flex w-full flex-col gap-y-2">
-                <Label
-                  key={`${label}_text`}
-                  className={`text-sm ${isRequired ? 'after:content-["*"] after:text-red-500 after:ml-1' : ''}`}>
+              <div key={id} className="flex w-full flex-col gap-y-2">
+                <Label className={`text-sm ${isRequired ? 'after:content-["*"] after:text-danger after:ml-1' : ''}`}>
                   {label}
                 </Label>
                 <Button
-                  key={label}
                   variant="secondary"
                   onPress={() => selectPath('file', id, isRequired)}
-                  className={`${hasError ? 'border-red-500 border-2' : ''}`}
+                  className={`justify-start text-foreground ${hasError ? 'border-2 border-danger' : ''}`}
                   fullWidth>
                   <FileIcon />
-                  <span className={selectedFile === 'Click here to select file' && hasError ? 'text-red-500' : ''}>
-                    {selectedFile}
-                  </span>
+                  <span className={hasError && !selectedPaths[id] ? 'text-danger' : ''}>{currentPath}</span>
                 </Button>
-                {hasError && <span className="text-xs text-red-500">{label} is required. Please select a file.</span>}
+                {hasError && <span className="text-xs text-danger">{label} is required. Please select a file.</span>}
               </div>
             );
         }
