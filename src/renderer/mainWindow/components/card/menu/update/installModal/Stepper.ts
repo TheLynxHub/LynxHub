@@ -132,22 +132,22 @@ export default class InstallStepper implements InstallationStepper {
 
   public async nextStep() {
     return new Promise<void>(resolve => {
-      if (!this.nextStepResolver) this.nextStepResolver = resolve;
-      useInstallStore.getState().setCurrentStep(prevState => {
-        const stepNumber = prevState < this.totalSteps ? prevState + 1 : prevState;
-        const customStep = this.customStepContents.find(step => step.index === stepNumber);
+      const current = useInstallStore.getState().currentStep;
+      const stepNumber = current < this.totalSteps ? current + 1 : current;
+      const customStep = this.customStepContents.find(step => step.index === stepNumber);
 
-        if (customStep) {
-          useInstallStore
-            .getState()
-            .updateState({body: 'extension-custom', extensionCustomContent: customStep?.content});
-        } else if (this.nextStepResolver) {
+      useInstallStore.getState().setCurrentStep(stepNumber);
+
+      if (customStep) {
+        useInstallStore.getState().updateState({body: 'extension-custom', extensionCustomContent: customStep.content});
+        this.nextStepResolver = resolve;
+      } else {
+        if (this.nextStepResolver) {
           this.nextStepResolver();
           this.nextStepResolver = undefined;
         }
-
-        return stepNumber;
-      });
+        resolve();
+      }
     });
   }
 
