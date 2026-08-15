@@ -97,11 +97,11 @@ export type OnUpdatingExtensions = {id: string; step: string | 'done'};
 
 export type DownloadProgress = {
   stage: 'done' | 'progress' | 'failed';
-  finalPath: string;
-  percentage: number;
-  fileName: string;
-  downloaded: number;
-  total: number;
+  finalPath?: string;
+  percentage?: number;
+  fileName?: string;
+  downloaded?: number;
+  total?: number;
 };
 
 export type CanGoType = {back: boolean; forward: boolean};

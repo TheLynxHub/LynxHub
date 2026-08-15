@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import {utilsIpc} from '@lynx_main/ipc/utils';
 import classHolder from '@lynx_main/managers/classHolder';
-import {app, DownloadItem} from 'electron';
+import {app, DownloadItem, net} from 'electron';
 import {download} from 'electron-dl';
 
 // Tracks the currently active download item.
@@ -26,13 +26,59 @@ export function downloadFile(url: string): void {
     return;
   }
 
+  // Cancel any existing download before starting a new one
+  if (currentDownloadItem) {
+    try {
+      currentDownloadItem.cancel();
+    } catch {
+      // Ignore error during cancellation
+    }
+    currentDownloadItem = undefined;
+  }
+
+  if (net && typeof net.isOnline === 'function' && !net.isOnline()) {
+    console.warn('Cannot download file: network is offline');
+    utilsIpc.send.onDownloadFile({
+      stage: 'failed',
+    });
+    return;
+  }
+
+  let hasFailed = false;
+
+  const notifyFailure = (err?: unknown) => {
+    if (hasFailed) return;
+    hasFailed = true;
+    if (err) {
+      console.error('Failed to download file: ', err);
+    }
+    utilsIpc.send.onDownloadFile({
+      stage: 'failed',
+    });
+    if (currentDownloadItem) {
+      try {
+        currentDownloadItem.cancel();
+      } catch {
+        // Ignore error during cancellation
+      }
+      currentDownloadItem = undefined;
+    }
+  };
+
   download(window, url, {
     showBadge: false,
     directory: path.join(app.getPath('downloads'), 'LynxHub'),
     onStarted: item => {
       currentDownloadItem = item;
+      item.on('updated', (_event, state) => {
+        if (state === 'interrupted') {
+          console.warn('Download interrupted (e.g. network lost or disconnected)');
+          notifyFailure('Download item state became interrupted');
+        }
+      });
     },
     onProgress: progress => {
+      if (hasFailed) return;
       utilsIpc.send.onDownloadFile({
         stage: 'progress',
         percentage: progress.percent,
@@ -43,6 +89,7 @@ export function downloadFile(url: string): void {
     },
   })
     .then(item => {
+      if (hasFailed) return;
       utilsIpc.send.onDownloadFile({
         stage: 'done',
         finalPath: item.savePath,
@@ -53,12 +100,7 @@ export function downloadFile(url: string): void {
       }
     })
     .catch(e => {
-      utilsIpc.send.onDownloadFile({
-        stage: 'failed',
-      });
-      console.error('Failed to download file: ', e);
-      // Clear the current item reference on failure
-      currentDownloadItem = undefined;
+      notifyFailure(e);
     });
 }
 
@@ -67,7 +109,11 @@ export function downloadFile(url: string): void {
  */
 export function cancelDownload(): void {
   if (currentDownloadItem) {
-    currentDownloadItem.cancel();
+    try {
+      currentDownloadItem.cancel();
+    } catch {
+      // Ignore error during cancellation
+    }
     currentDownloadItem = undefined;
   }
 }

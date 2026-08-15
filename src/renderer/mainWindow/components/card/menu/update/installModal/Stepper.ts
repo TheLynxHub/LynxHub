@@ -228,20 +228,42 @@ export default class InstallStepper implements InstallationStepper {
 
   private startDownload = (url: string) => {
     const store = useInstallStore.getState();
+
+    if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      store.setProgressInfo({stage: 'failed'});
+      return;
+    }
+
+    const handleOffline = () => {
+      utilsIpc.cancelDownload();
+      useInstallStore.getState().setProgressInfo({stage: 'failed'});
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('offline', handleOffline);
+    }
+
     utilsIpc.downloadFile(url);
-    const removeListener = utilsIpc.onDownloadFile(progress => {
+    const removeIpcListener = utilsIpc.onDownloadFile(progress => {
       if (progress.stage === 'done') {
         const currentStore = useInstallStore.getState();
         currentStore.setProgressInfo(undefined);
-        removeListener();
-        currentStore.setRemoveProgressListenerFn(null);
-        currentStore.resolveDownload(progress.finalPath);
+        cleanup();
+        currentStore.resolveDownload(progress.finalPath || '');
       } else {
         useInstallStore.getState().setProgressInfo(progress);
       }
     });
 
-    store.setRemoveProgressListenerFn(removeListener);
+    const cleanup = () => {
+      removeIpcListener();
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('offline', handleOffline);
+      }
+      useInstallStore.getState().setRemoveProgressListenerFn(null);
+    };
+
+    store.setRemoveProgressListenerFn(cleanup);
   };
 
   public collectUserInput = async (inputFields: UserInputField[], title?: string) => {
