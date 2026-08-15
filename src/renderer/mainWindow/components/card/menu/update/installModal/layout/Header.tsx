@@ -10,6 +10,8 @@ import {useInstallStore} from '../store';
 function InstallHeader() {
   const steps = useInstallStore(s => s.steps);
   const currentStep = useInstallStore(s => s.currentStep);
+  const body = useInstallStore(s => s.body);
+  const doneAll = useInstallStore(s => s.doneAll);
 
   const maxTitleWidth = useMemo(() => (steps.length > 5 ? 'max-w-16' : 'max-w-24'), [steps.length]);
 
@@ -21,6 +23,8 @@ function InstallHeader() {
             steps={steps}
             current={currentStep}
             className="max-w-full"
+            doneType={doneAll.type}
+            isDone={body === 'done'}
             orientation="horizontal"
             titleClassName={maxTitleWidth}
           />

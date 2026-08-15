@@ -1,5 +1,6 @@
 import {cn, Spinner} from '@heroui/react';
 import {InitialSteps} from '@lynx_common/types/plugins/modules';
+import {CheckCircleIcon, CloseCircleIcon} from '@solar-icons/react/bold-duotone';
 import {UnreadIcon} from '@solar-icons/react/linear';
 import {memo, useEffect, useRef} from 'react';
 
@@ -8,18 +9,59 @@ import {useHasScroll} from '../../../../../../utils/hooks';
 export interface StepProgressProps {
   steps: InitialSteps;
   current: number;
+  isDone?: boolean;
+  doneType?: 'success' | 'error';
   orientation?: 'horizontal' | 'vertical';
   className?: string;
   titleClassName?: string;
 }
 
-function getStatus(index: number, current: number): 'complete' | 'current' | 'upcoming' {
+type StepStatus = 'complete' | 'current' | 'upcoming' | 'final-success' | 'final-error';
+
+function getStatus(
+  index: number,
+  current: number,
+  isDone?: boolean,
+  doneType?: 'success' | 'error',
+  totalSteps?: number,
+): StepStatus {
+  if (isDone) {
+    const lastIndex = (totalSteps ?? current + 1) - 1;
+    if (index === lastIndex) {
+      return doneType === 'error' ? 'final-error' : 'final-success';
+    }
+    if (index <= current) return 'complete';
+  }
   if (index < current) return 'complete';
   if (index === current) return 'current';
   return 'upcoming';
 }
 
-function StepIndicator({status}: {status: 'complete' | 'current' | 'upcoming'}) {
+function StepIndicator({status}: {status: StepStatus}) {
+  if (status === 'final-success') {
+    return (
+      <div
+        className={cn(
+          'flex size-5 items-center justify-center rounded-full',
+          'bg-success text-success-foreground shadow-xs ring-2 ring-success/30',
+        )}>
+        <CheckCircleIcon className="size-4" />
+      </div>
+    );
+  }
+
+  if (status === 'final-error') {
+    return (
+      <div
+        className={cn(
+          'flex size-5 items-center justify-center rounded-full',
+          'bg-danger text-danger-foreground shadow-xs ring-2 ring-danger/30',
+        )}>
+        <CloseCircleIcon className="size-4" />
+      </div>
+    );
+  }
+
   if (status === 'current') {
     return (
       <div className="flex size-5 items-center justify-center rounded-full border border-accent/40 bg-accent/10">
@@ -42,7 +84,15 @@ function StepIndicator({status}: {status: 'complete' | 'current' | 'upcoming'}) 
 /**
  * Visual progress stepper component supporting both horizontal and vertical orientations.
  */
-function StepProgress({steps, current, orientation = 'horizontal', className, titleClassName}: StepProgressProps) {
+function StepProgress({
+  steps,
+  current,
+  isDone,
+  doneType = 'success',
+  orientation = 'horizontal',
+  className,
+  titleClassName,
+}: StepProgressProps) {
   const {hasScroll, containerRef, setContainerRef} = useHasScroll();
   const currentActiveItem = useRef<HTMLDivElement | null>(null);
 
@@ -74,7 +124,7 @@ function StepProgress({steps, current, orientation = 'horizontal', className, ti
     return (
       <div className={cn('space-y-3', className)}>
         {steps.map((item, index) => {
-          const status = getStatus(index, current);
+          const status = getStatus(index, current, isDone, doneType, steps.length);
           const title = typeof item === 'string' ? item : item.title;
 
           return (
@@ -85,8 +135,10 @@ function StepProgress({steps, current, orientation = 'horizontal', className, ti
               <div className="flex min-w-0 flex-col">
                 <span
                   className={cn(
-                    'truncate text-sm',
+                    'truncate text-sm transition-colors',
                     status === 'complete' && 'text-muted',
+                    status === 'final-success' && 'font-bold text-success',
+                    status === 'final-error' && 'font-bold text-danger',
                     status === 'current' && 'font-semibold text-surface-foreground',
                     status === 'upcoming' && 'text-semi-muted',
                     titleClassName,
@@ -105,14 +157,14 @@ function StepProgress({steps, current, orientation = 'horizontal', className, ti
     <div ref={setContainerRef} className={cn('overflow-x-scroll scrollbar-hide px-1 py-1', className)}>
       <div className="flex min-w-max items-start">
         {steps.map((item, index) => {
-          const status = getStatus(index, current);
+          const status = getStatus(index, current, isDone, doneType, steps.length);
           const isLast = index === steps.length - 1;
           const title = typeof item === 'string' ? item : item.title;
 
           return (
             <div
               ref={node => {
-                if (status === 'current') {
+                if (status === 'current' || status === 'final-success' || status === 'final-error') {
                   currentActiveItem.current = node;
                 }
               }}
@@ -122,8 +174,10 @@ function StepProgress({steps, current, orientation = 'horizontal', className, ti
                 <StepIndicator status={status} />
                 <span
                   className={cn(
-                    'truncate text-center text-xs',
+                    'truncate text-center text-xs transition-colors',
                     status === 'complete' && 'text-muted',
+                    status === 'final-success' && 'font-bold text-success',
+                    status === 'final-error' && 'font-bold text-danger',
                     status === 'current' && 'font-semibold text-surface-foreground',
                     status === 'upcoming' && 'text-semi-muted',
                     titleClassName,
@@ -135,8 +189,8 @@ function StepProgress({steps, current, orientation = 'horizontal', className, ti
               {!isLast && (
                 <div
                   className={cn(
-                    'mx-2 mt-2.5 h-px w-12 sm:w-20',
-                    index < current ? 'bg-success/40' : 'bg-surface-secondary',
+                    'mx-2 mt-2.5 h-px w-12 sm:w-20 transition-colors',
+                    index < current || (isDone && index < steps.length - 1) ? 'bg-success/60' : 'bg-surface-secondary',
                   )}
                 />
               )}
