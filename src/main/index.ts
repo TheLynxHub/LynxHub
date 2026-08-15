@@ -23,7 +23,6 @@ import {fetchAndCacheSentryDsn} from './monitoring/sentry';
 import {PluginMigrate} from './setup/migration';
 import {getPrivilegeText} from './utils';
 import {initSession, sendCollectedActions} from './utils/actionLogger';
-import downloadDU from './utils/calcFolderSize/downloadDiskUsageUtility';
 
 /**
  * Initializes logging for production environments.
@@ -149,8 +148,6 @@ async function initializeLynxHub(): Promise<void> {
 
   await classHolder.initializeManagers();
   await classHolder.checkStaticsRequirements();
-
-  await downloadDU();
 
   await registerCustomProtocols();
 

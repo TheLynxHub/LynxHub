@@ -1,36 +1,53 @@
-import {exec} from 'node:child_process';
 import {stat} from 'node:fs/promises';
-import {platform} from 'node:os';
-import path from 'node:path';
-import {promisify} from 'node:util';
+import {Worker} from 'node:worker_threads';
 
-import {isMac, isWin} from '@lynx_common/utils';
 import {applicationIpc} from '@lynx_main/ipc/application';
-import {getAppDirectory} from '@lynx_main/managers/dataFolder';
 
-const execPromise = promisify(exec);
+const WORKER_CODE = `
+  const {parentPort, workerData} = require('node:worker_threads');
+  const {opendir} = require('node:fs/promises');
+  const {statSync} = require('node:fs');
+  const path = require('node:path');
 
-/**
- * Processes the output of the du command across different platforms.
- * @param stdout - The standard output from the du command execution.
- * @returns The folder size in bytes.
- * @throws {Error} If the operating system is not supported.
- */
-function processDuOutput(stdout: string): number {
-  if (isWin) {
-    const stats = stdout.trim().split('\n')[1]?.split(',') ?? [];
-    return Number(stats.at(-2)) || 0;
+  async function calculateSize(dir) {
+    let totalSize = 0;
+    async function walk(current) {
+      try {
+        const dirHandle = await opendir(current);
+        const subdirs = [];
+        for await (const entry of dirHandle) {
+          const fullPath = path.join(current, entry.name);
+          if (entry.isFile()) {
+            try {
+              totalSize += statSync(fullPath).size;
+            } catch {
+              // Skip unreadable files or permission errors
+            }
+          } else if (entry.isDirectory() && !entry.isSymbolicLink()) {
+            subdirs.push(fullPath);
+          }
+        }
+        await Promise.all(subdirs.map(walk));
+      } catch {
+        // Skip inaccessible subdirectories
+      }
+    }
+    await walk(dir);
+    return totalSize;
   }
 
-  const match = /^(\d+)/.exec(stdout);
-  if (!match) return 0;
-
-  const bytes = Number(match[1]);
-  return isMac ? bytes * 1024 : bytes;
-}
+  calculateSize(workerData.target)
+    .then(size => {
+      parentPort.postMessage({size});
+    })
+    .catch(err => {
+      parentPort.postMessage({error: err?.message || String(err)});
+    });
+`;
 
 /**
- * Calculates the size of a folder using system utilities (du or du64.exe).
+ * Calculates the size of a folder recursively on a background worker thread
+ * so the Electron main event loop and UI remain 100% smooth and non-blocking.
  *
  * @param target - The absolute path to the target folder.
  * @returns A promise that resolves to the folder size in bytes. Returns 0 on error.
@@ -59,38 +76,33 @@ export default async function calcFolderSize(target: string): Promise<number> {
     return 0;
   }
 
-  let command: string;
-  const currentPlatform = platform();
+  return new Promise<number>(resolve => {
+    try {
+      const worker = new Worker(WORKER_CODE, {eval: true, workerData: {target}});
 
-  switch (currentPlatform) {
-    case 'linux': {
-      command = 'du -sb .';
-      break;
-    }
-    case 'darwin': {
-      command = 'du -sk .';
-      break;
-    }
-    case 'win32': {
-      const duPath = path.join(getAppDirectory('Binaries'), 'DiskUsage', 'du64.exe');
-      command = `"${duPath}" -nobanner -accepteula -q -c .`;
-      break;
-    }
-    default: {
-      const message = `Unsupported operating system: ${currentPlatform}`;
-      console.error(message);
-      applicationIpc.send.showToast(message, 'danger');
-      return 0;
-    }
-  }
+      worker.on('message', (data: {size?: number; error?: string}) => {
+        if (data.error) {
+          console.error(`Error in folder size worker for '${target}':`, data.error);
+          resolve(0);
+        } else {
+          resolve(data.size ?? 0);
+        }
+      });
 
-  try {
-    const {stdout} = await execPromise(command, {cwd: target});
-    return processDuOutput(stdout);
-  } catch (err) {
-    const message = `Failed to calculate folder size for '${target}'. Please check the folder and try again.`;
-    console.error('Error calculating folder size:', err);
-    applicationIpc.send.showToast(message, 'danger');
-    return 0;
-  }
+      worker.on('error', err => {
+        console.error(`Folder size worker error on '${target}':`, err);
+        resolve(0);
+      });
+
+      worker.on('exit', code => {
+        if (code !== 0) {
+          console.error(`Folder size worker stopped with exit code ${code} on '${target}'`);
+          resolve(0);
+        }
+      });
+    } catch (err) {
+      console.error('Failed to spawn folder size worker:', err);
+      resolve(0);
+    }
+  });
 }
