@@ -58,8 +58,11 @@ function CloneOptions({url, setCloneOptionsResult}: CloneOptionsProps) {
         // Only query GitHub API if the repository is specifically on GitHub
         if (!gitInfo || gitInfo.platform !== 'github') {
           if (!abortController.signal.aborted) {
-            setBranches([]);
-            setSelectedBranch(null);
+            setSelectedBranch('main');
+            setBranches([
+              {key: 'main', value: 'main'},
+              {key: 'master', value: 'master'},
+            ]);
             setLoading(false);
           }
           return;
@@ -73,8 +76,11 @@ function CloneOptions({url, setCloneOptionsResult}: CloneOptionsProps) {
         if (!repoResponse.ok) {
           console.warn(`GitHub API repo fetch failed: ${repoResponse.status} ${repoResponse.statusText}`);
           if (!abortController.signal.aborted) {
-            setBranches([]);
-            setSelectedBranch(null);
+            setSelectedBranch('main');
+            setBranches([
+              {key: 'main', value: 'main'},
+              {key: 'master', value: 'master'},
+            ]);
           }
           return;
         }
@@ -86,23 +92,28 @@ function CloneOptions({url, setCloneOptionsResult}: CloneOptionsProps) {
           signal: abortController.signal,
         });
 
-        if (!branchesResponse.ok) {
-          console.warn(`GitHub API branches fetch failed: ${branchesResponse.status} ${branchesResponse.statusText}`);
-          if (!abortController.signal.aborted) {
-            setSelectedBranch(defaultBranch);
-            setBranches([{key: defaultBranch, value: defaultBranch}]);
-          }
-          return;
+        let branchNames: string[] = [];
+        if (branchesResponse.ok) {
+          const branchesData: Branch[] = await branchesResponse.json();
+          branchNames = branchesData.map(b => b.name);
         }
 
-        const branchesData: Branch[] = await branchesResponse.json();
+        // Always ensure defaultBranch is included as the primary item in the list
+        if (defaultBranch && !branchNames.includes(defaultBranch)) {
+          branchNames.unshift(defaultBranch);
+        }
+
+        if (branchNames.length === 0) {
+          branchNames = [defaultBranch || 'main'];
+        }
 
         if (!abortController.signal.aborted) {
-          setSelectedBranch(defaultBranch);
+          const targetBranch = defaultBranch && branchNames.includes(defaultBranch) ? defaultBranch : branchNames[0];
+          setSelectedBranch(targetBranch);
           setBranches(
-            branchesData.map(b => ({
-              key: b.name,
-              value: b.name,
+            branchNames.map(name => ({
+              key: name,
+              value: name,
             })),
           );
         }
@@ -111,6 +122,13 @@ function CloneOptions({url, setCloneOptionsResult}: CloneOptionsProps) {
           return;
         }
         console.warn('Error fetching repository details:', err);
+        if (!abortController.signal.aborted) {
+          setSelectedBranch('main');
+          setBranches([
+            {key: 'main', value: 'main'},
+            {key: 'master', value: 'master'},
+          ]);
+        }
       } finally {
         if (!abortController.signal.aborted) {
           setLoading(false);
@@ -146,7 +164,12 @@ function CloneOptions({url, setCloneOptionsResult}: CloneOptionsProps) {
         ) : (
           <div className="flex flex-col gap-y-4">
             <div className="flex flex-row items-center space-x-2">
-              <Select value={selectedBranch} onChange={setSelectedBranch} placeholder="Select target branch" fullWidth>
+              <Select
+                variant="secondary"
+                value={selectedBranch}
+                onChange={setSelectedBranch}
+                placeholder="Select target branch"
+                fullWidth>
                 <Label>Branch:</Label>
                 <Select.Trigger>
                   <Select.Value />
