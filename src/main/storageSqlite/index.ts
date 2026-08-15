@@ -295,7 +295,8 @@ export class BaseSqliteStorage {
         extension_name TEXT NOT NULL,
         key TEXT NOT NULL,
         value TEXT NOT NULL,
-        updated_at TEXT NOT NULL
+        updated_at TEXT NOT NULL,
+        UNIQUE(extension_name, key)
       );
 
       CREATE TABLE IF NOT EXISTS module_storage (
@@ -303,8 +304,12 @@ export class BaseSqliteStorage {
         module_name TEXT NOT NULL,
         key TEXT NOT NULL,
         value TEXT NOT NULL,
-        updated_at TEXT NOT NULL
+        updated_at TEXT NOT NULL,
+        UNIQUE(module_name, key)
       );
+
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_extension_storage_key ON extension_storage(extension_name, key);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_module_storage_key ON module_storage(module_name, key);
 
       CREATE TABLE IF NOT EXISTS statics_storage (
         id TEXT PRIMARY KEY,

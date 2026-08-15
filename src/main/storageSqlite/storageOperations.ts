@@ -345,19 +345,15 @@ export class SqliteStorageManager {
 
   public setExtensionData(extensionName: string, key: string, value: any): void {
     const now = new Date().toISOString();
-    const existing = this.sqlite
-      .prepare('SELECT id FROM extension_storage WHERE extension_name = ? AND key = ?')
-      .get(extensionName, key) as {id: number} | undefined;
-
-    if (existing) {
-      this.sqlite
-        .prepare('UPDATE extension_storage SET value = ?, updated_at = ? WHERE id = ?')
-        .run(JSON.stringify(value), now, existing.id);
-    } else {
-      this.sqlite
-        .prepare('INSERT INTO extension_storage (extension_name, key, value, updated_at) VALUES (?, ?, ?, ?)')
-        .run(extensionName, key, JSON.stringify(value), now);
-    }
+    this.sqlite
+      .prepare(
+        `INSERT INTO extension_storage (extension_name, key, value, updated_at)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(extension_name, key) DO UPDATE SET
+          value = excluded.value,
+          updated_at = excluded.updated_at`,
+      )
+      .run(extensionName, key, JSON.stringify(value), now);
   }
 
   /**
@@ -372,19 +368,15 @@ export class SqliteStorageManager {
 
   public setModuleData(moduleName: string, key: string, value: any): void {
     const now = new Date().toISOString();
-    const existing = this.sqlite
-      .prepare('SELECT id FROM module_storage WHERE module_name = ? AND key = ?')
-      .get(moduleName, key) as {id: number} | undefined;
-
-    if (existing) {
-      this.sqlite
-        .prepare('UPDATE module_storage SET value = ?, updated_at = ? WHERE id = ?')
-        .run(JSON.stringify(value), now, existing.id);
-    } else {
-      this.sqlite
-        .prepare('INSERT INTO module_storage (module_name, key, value, updated_at) VALUES (?, ?, ?, ?)')
-        .run(moduleName, key, JSON.stringify(value), now);
-    }
+    this.sqlite
+      .prepare(
+        `INSERT INTO module_storage (module_name, key, value, updated_at)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(module_name, key) DO UPDATE SET
+          value = excluded.value,
+          updated_at = excluded.updated_at`,
+      )
+      .run(moduleName, key, JSON.stringify(value), now);
   }
 
   /**

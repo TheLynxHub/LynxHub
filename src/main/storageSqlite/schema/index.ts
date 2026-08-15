@@ -1,4 +1,4 @@
-import {integer, sqliteTable, text} from 'drizzle-orm/sqlite-core';
+import {integer, sqliteTable, text, uniqueIndex} from 'drizzle-orm/sqlite-core';
 
 /**
  * Metadata table storing version and app-level metadata.
@@ -123,24 +123,32 @@ export const customStorage = sqliteTable('custom_storage', {
 /**
  * Storage table for extensions (separated by extension_name and key).
  */
-export const extensionStorage = sqliteTable('extension_storage', {
-  id: integer('id').primaryKey({autoIncrement: true}),
-  extensionName: text('extension_name').notNull(),
-  key: text('key').notNull(),
-  value: text('value', {mode: 'json'}).notNull(),
-  updatedAt: text('updated_at').notNull(),
-});
+export const extensionStorage = sqliteTable(
+  'extension_storage',
+  {
+    id: integer('id').primaryKey({autoIncrement: true}),
+    extensionName: text('extension_name').notNull(),
+    key: text('key').notNull(),
+    value: text('value', {mode: 'json'}).notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  table => [uniqueIndex('idx_extension_storage_key').on(table.extensionName, table.key)],
+);
 
 /**
  * Storage table for modules (separated by module_name and key).
  */
-export const moduleStorage = sqliteTable('module_storage', {
-  id: integer('id').primaryKey({autoIncrement: true}),
-  moduleName: text('module_name').notNull(),
-  key: text('key').notNull(),
-  value: text('value', {mode: 'json'}).notNull(),
-  updatedAt: text('updated_at').notNull(),
-});
+export const moduleStorage = sqliteTable(
+  'module_storage',
+  {
+    id: integer('id').primaryKey({autoIncrement: true}),
+    moduleName: text('module_name').notNull(),
+    key: text('key').notNull(),
+    value: text('value', {mode: 'json'}).notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  table => [uniqueIndex('idx_module_storage_key').on(table.moduleName, table.key)],
+);
 
 /**
  * Statics version metadata table storing active version, broken versions, and check timestamps.
