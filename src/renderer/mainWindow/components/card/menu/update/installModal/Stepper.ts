@@ -21,7 +21,6 @@ export interface InstallStepperData {
   cardId: string;
   topToast: ToastFunction;
   bottomToast: ToastFunction;
-  allMethods: any[];
 }
 
 /**
