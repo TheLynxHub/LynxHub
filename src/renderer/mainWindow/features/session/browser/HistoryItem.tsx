@@ -5,7 +5,7 @@ import {AppDispatch} from '@lynx/redux/store';
 import {FavIcons} from '@lynx_common/types/ipc';
 import {formatWebAddress, getCacheUrl, getUrlName} from '@lynx_common/utils';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
-import {EarthIcon} from '@solar-icons/react/bold-duotone';
+import {EarthIcon, TrashBin2Icon} from '@solar-icons/react/bold-duotone';
 import {memo, MouseEvent, useCallback, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -55,7 +55,7 @@ const HistoryItem = memo(({recent, type, favIconMap, onDataChange}: Props) => {
           variant="secondary"
           onClick={openRecent}
           onMouseUp={openNewTab}
-          className="h-32 w-40 rounded-4xl cursor-pointer shadow-none">
+          className="h-32 w-40 cursor-pointer shadow-none">
           <Card.Content className="group flex-col items-center justify-center gap-y-3 shrink-0 text-center">
             {favIcon && !imgError ? (
               <img
@@ -71,8 +71,9 @@ const HistoryItem = memo(({recent, type, favIconMap, onDataChange}: Props) => {
 
             <CloseButton
               onPress={handleRemove}
-              className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition duration-200"
-            />
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition duration-200">
+              <TrashBin2Icon className="text-warning size-3.5" />
+            </CloseButton>
           </Card.Content>
         </Card>
       </Tooltip.Trigger>
