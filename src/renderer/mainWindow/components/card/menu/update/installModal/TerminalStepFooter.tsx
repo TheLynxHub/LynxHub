@@ -2,7 +2,7 @@ import {Button, Description, Popover} from '@heroui/react';
 import ptyIpc from '@lynx_shared/ipc/pty';
 import {ArrowRightIcon, RestartIcon} from '@solar-icons/react/bold-duotone';
 import {CheckReadIcon} from '@solar-icons/react/line-duotone';
-import {RefObject, useEffect, useState} from 'react';
+import {RefObject, useEffect, useRef, useState} from 'react';
 
 import {XTermAPI} from '../../../../useXTerm';
 
@@ -25,25 +25,25 @@ export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID,
   const [isRestartOpen, setIsRestartOpen] = useState<boolean>(false);
   const [isNextOpen, setIsNextOpen] = useState<boolean>(false);
 
-  const [isRestartingState, setIsRestartingState] = useState<boolean>(false);
+  const isRestartingRef = useRef<boolean>(false);
 
   useEffect(() => {
     const offExit = ptyIpc.onExit(id => {
-      if (isRestartingState) {
-        setIsRestartingState(false);
+      if (isRestartingRef.current) {
+        isRestartingRef.current = false;
       } else if (id === cardID) {
         setIsNextOpen(true);
       }
     });
     return () => offExit();
-  }, [cardID, isRestartingState]);
+  }, [cardID]);
 
   const handleRestart = () => {
+    isRestartingRef.current = true;
     restartTerminal.current?.();
     if (xtermRef.current) {
       xtermRef.current.terminal.clear();
     }
-    setIsRestartingState(true);
     setIsRestartOpen(false);
   };
 
