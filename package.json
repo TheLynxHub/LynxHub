@@ -30,7 +30,7 @@
     "fix-linter:web": "prettier --write src/renderer --list-different && eslint --fix src/renderer && tailwind-lint --auto --fix",
     "fix-linter:node": "prettier --write src/main --list-different && eslint --fix src/main",
     "fix-linter": "prettier --write src --list-different && eslint --fix src && tailwind-lint --auto --fix",
-    "fix-linter-ext": "prettier --write extension --list-different && eslint --fix extension && tailwind-lint --config ./extension/src/renderer/index.css --fix",
+    "fix-linter-ext": "prettier --write extension --list-different && eslint --fix extension",
     "fix-linter-module": "prettier --write module --list-different && eslint --fix module",
     "validate:web": "npm run fix-linter:web && npm run typecheck:web",
     "validate:node": "npm run fix-linter:node && npm run typecheck:node",
