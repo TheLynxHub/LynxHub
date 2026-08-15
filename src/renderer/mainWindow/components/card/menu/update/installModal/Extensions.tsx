@@ -2,15 +2,14 @@ import {Spinner} from '@heroui/react';
 import {extractGitUrl, validateGitRepoUrl} from '@lynx_common/utils';
 import gitIpc from '@lynx_shared/ipc/git';
 import {startCase} from 'lodash-es';
-import {RefObject, useEffect, useMemo, useState} from 'react';
+import {memo, useEffect, useMemo, useRef, useState} from 'react';
 
 import StepProgress from './StepProgress';
+import {useInstallStore} from './store';
 
 export interface InstallExtensionsProps {
   /** The list of git repository URLs representing the extensions to clone, along with a target directory inside the base module folder. */
   extensionsURLs: {urls: string[]; dir: string} | undefined;
-  /** Ref to a function fired when all extensions have been cloned. */
-  extensionsResolver: RefObject<(() => void) | null>;
 }
 
 /**
@@ -18,8 +17,11 @@ export interface InstallExtensionsProps {
  *
  * @param {InstallExtensionsProps} props - The component props.
  */
-export default function InstallExtensions({extensionsURLs, extensionsResolver}: InstallExtensionsProps) {
+const InstallExtensions = memo(({extensionsURLs}: InstallExtensionsProps) => {
   const [current, setCurrent] = useState<number>(0);
+  const isRunningRef = useRef<boolean>(false);
+  const resolveExtensions = useInstallStore(s => s.resolveExtensions);
+
   const stepItems = useMemo(
     () =>
       (extensionsURLs?.urls || []).map(url => {
@@ -30,6 +32,8 @@ export default function InstallExtensions({extensionsURLs, extensionsResolver}: 
   );
 
   useEffect(() => {
+    if (isRunningRef.current) return;
+    isRunningRef.current = true;
     setCurrent(0);
 
     async function startInstall() {
@@ -45,16 +49,16 @@ export default function InstallExtensions({extensionsURLs, extensionsResolver}: 
             depth: 1,
           });
         } catch (e) {
-          console.error(e);
+          console.error(`Failed to clone extension ${extensionsURL}:`, e);
         } finally {
           setCurrent(index + 1);
         }
       }
-      extensionsResolver.current?.();
+      resolveExtensions();
     }
 
     void startInstall();
-  }, [extensionsURLs, extensionsResolver]);
+  }, [extensionsURLs?.dir, extensionsURLs?.urls, resolveExtensions]);
 
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
@@ -66,4 +70,6 @@ export default function InstallExtensions({extensionsURLs, extensionsResolver}: 
       )}
     </div>
   );
-}
+});
+
+export default InstallExtensions;

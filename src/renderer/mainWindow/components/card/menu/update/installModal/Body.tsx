@@ -42,7 +42,6 @@ const InstallBody = memo(({isOpen, xtermRef}: InstallBodyProps) => {
   const currentStepIndex = useInstallStore(s => s.currentStep);
 
   const resolveClone = useInstallStore(s => s.resolveClone);
-  const resolveExtensions = useInstallStore(s => s.resolveExtensions);
   const updateState = useInstallStore(s => s.updateState);
 
   const currentStep = steps[currentStepIndex];
@@ -183,9 +182,7 @@ const InstallBody = memo(({isOpen, xtermRef}: InstallBodyProps) => {
       case 'user-input':
         return <UserInputs inputElements={userInputElements} extensionElements={extensionUserInput} />;
       case 'install-extensions':
-        return (
-          <InstallExtensions extensionsURLs={extensionsToInstall} extensionsResolver={{current: resolveExtensions}} />
-        );
+        return <InstallExtensions extensionsURLs={extensionsToInstall} />;
       case 'extension-custom':
         return ExtensionCustomContent ? <ExtensionCustomContent /> : null;
     }
