@@ -1,5 +1,5 @@
 import {compress} from '@lynxhub/7zip';
-import {existsSync} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 
 const targetFolder = process.argv[2];
@@ -11,14 +11,37 @@ if (!targetFolder) {
 
 const outDir = resolve(targetFolder);
 const scriptsDir = resolve(outDir, 'scripts');
-const outputArchive = resolve(outDir, 'scripts.7z');
+
+// Resolve source folder (e.g. module_out -> module, extension_out -> extension)
+const sourceFolder = resolve(targetFolder.replace(/_out\/?$/, ''));
+
+let version = '';
+
+const pkgPaths = [resolve(sourceFolder, 'package.json'), resolve(outDir, 'package.json')];
+
+for (const pkgPath of pkgPaths) {
+  if (existsSync(pkgPath)) {
+    try {
+      const pkgData = JSON.parse(readFileSync(pkgPath, 'utf8'));
+      if (pkgData.version) {
+        version = String(pkgData.version).trim().replace(/^v/i, '');
+        break;
+      }
+    } catch {
+      // Fallback if read or parse fails
+    }
+  }
+}
+
+const archiveName = version ? `${version}.7z` : 'scripts.7z';
+const outputArchive = resolve(outDir, archiveName);
 
 if (!existsSync(scriptsDir)) {
   console.error(`Error: Scripts directory not found at ${scriptsDir}`);
   process.exit(1);
 }
 
-console.log(`Creating 7z archive for ${scriptsDir} with highest compression (ultra / lowest size)...`);
+console.log(`Creating 7z archive (${archiveName}) for ${scriptsDir} with highest compression (ultra / lowest size)...`);
 
 try {
   const result = await compress('scripts', outputArchive, {
