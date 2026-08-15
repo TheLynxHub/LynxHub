@@ -1,5 +1,6 @@
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {SubscribeStages, UserAccountData} from '@lynx_common/types';
+import {toMs} from '@lynx_common/utils';
 import {applicationIpc} from '@lynx_main/ipc/application';
 import {userIpc} from '@lynx_main/ipc/user';
 import classHolder from '@lynx_main/managers/classHolder';
@@ -12,6 +13,8 @@ import {deleteTokens, getChannel, getTokens, saveChannel, saveTokens} from './to
 // Constants
 export const AUTH_CHANNEL_KEY = 'LynxHub-Auth-Update-Channel';
 export const AUTH_LOGIN_KEY = 'LynxHub-Auth-Login-User';
+const UPDATE_CHECK_COOLDOWN = toMs(15, 'minutes');
+let lastUpdateCheckTime = 0;
 
 // Internal user data representation including sensitive release tokens
 interface InternalUserAccountData extends UserAccountData {
@@ -52,7 +55,7 @@ async function processTokenLogin(token: string) {
 
     // Update UI and configure auto updater
     await refreshChannel(true, userData.subscribeStage);
-    checkForAppUpdate(userData.subscribeStage, userData.updateToken);
+    checkForAppUpdate(userData.subscribeStage, userData.updateToken, true);
 
     if (pendingLoginResolve) {
       const {updateToken, ...rendererUserData} = userData;
@@ -167,7 +170,7 @@ export async function getValidatedUserStage(): Promise<SubscribeStages> {
 /**
  * Configures the auto-updater based on the subscription stage.
  */
-function checkForAppUpdate(stage: SubscribeStages, updateToken?: string | null) {
+function checkForAppUpdate(stage: SubscribeStages, updateToken?: string | null, force: boolean = false) {
   const provider = 'github';
   const owner = 'TheLynxHub';
 
@@ -199,7 +202,11 @@ function checkForAppUpdate(stage: SubscribeStages, updateToken?: string | null) 
     });
   }
 
-  autoUpdater.checkForUpdates();
+  const now = Date.now();
+  if (force || now - lastUpdateCheckTime >= UPDATE_CHECK_COOLDOWN) {
+    lastUpdateCheckTime = now;
+    autoUpdater.checkForUpdates();
+  }
 }
 
 /**
@@ -212,16 +219,18 @@ export default function Auth() {
 
       if (existingLogin.isLoggedIn && existingLogin.userData) {
         let currentChannel = await getChannel(AUTH_CHANNEL_KEY);
+        let channelChanged = false;
         if (existingLogin.userData.subscribeStage !== currentChannel) {
           await saveChannel(AUTH_CHANNEL_KEY, existingLogin.userData.subscribeStage);
           await refreshChannel(true, existingLogin.userData.subscribeStage);
           currentChannel = existingLogin.userData.subscribeStage;
+          channelChanged = true;
         }
-        checkForAppUpdate(currentChannel, existingLogin.userData.updateToken);
+        checkForAppUpdate(currentChannel, existingLogin.userData.updateToken, channelChanged);
         const {updateToken, ...rendererUserData} = existingLogin.userData;
         return {...rendererUserData, subscribeStage: currentChannel};
       } else {
-        checkForAppUpdate('public');
+        checkForAppUpdate('public', null, false);
         return null;
       }
     } catch (e) {
@@ -252,11 +261,11 @@ export default function Auth() {
     try {
       await deleteTokens(AUTH_LOGIN_KEY);
       await refreshChannel(false, 'public');
-      checkForAppUpdate('public');
+      checkForAppUpdate('public', null, true);
       return;
     } catch (error) {
       await refreshChannel(false, 'public');
-      checkForAppUpdate('public');
+      checkForAppUpdate('public', null, true);
       throw error;
     }
   });

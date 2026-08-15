@@ -9,7 +9,7 @@ import ModuleManager from '@lynx_main/plugins/modules';
 import {ValidateCards} from '@lynx_main/plugins/modules/cardsValidator';
 import StorageManager from '@lynx_main/storageSqlite/storageOperations';
 import axios from 'axios';
-import {app, BrowserWindow} from 'electron';
+import {app, BrowserWindow, net} from 'electron';
 
 import BrowserDownloadManager from '../childWindows/browserDownloadManager';
 import ContextMenuManager from '../childWindows/contextMenu';
@@ -19,9 +19,9 @@ import BrowserManager from './browser';
 import StaticsManager from './statics';
 import TrayManager from './tray';
 
-const ONLINE_CHECK_URL = 'https://google.com';
-const ONLINE_CHECK_TIMEOUT = 4000;
-const ONLINE_CHECK_INTERVAL = toMs(5, 'seconds');
+const ONLINE_CHECK_URL = 'https://clients3.google.com/generate_204';
+const ONLINE_CHECK_TIMEOUT = 8000;
+const ONLINE_CHECK_INTERVAL = toMs(30, 'seconds');
 
 /**
  * Singleton class to hold and manage instances of various managers and services.
@@ -61,6 +61,8 @@ class ClassHolder {
    * Updates the `isOnline` status and notifies the renderer process.
    */
   private async checkOnline() {
+    let consecutiveFailures = 0;
+
     const setResult = (isOnline: boolean) => {
       if (this._isOnline === isOnline) return;
       this.isOnline = isOnline;
@@ -68,13 +70,30 @@ class ClassHolder {
     };
 
     const checkStatus = () => {
+      if (typeof net !== 'undefined' && typeof net.isOnline === 'function' && !net.isOnline()) {
+        consecutiveFailures++;
+        if (consecutiveFailures >= 2 || !this._isOnline) {
+          setResult(false);
+        }
+        return;
+      }
+
       axios
-        .request({url: ONLINE_CHECK_URL, timeout: ONLINE_CHECK_TIMEOUT})
-        .then(response => {
-          setResult(response.statusText.toLowerCase() === 'ok');
+        .request({
+          url: ONLINE_CHECK_URL,
+          method: 'HEAD',
+          timeout: ONLINE_CHECK_TIMEOUT,
+          validateStatus: status => status >= 200 && status < 400,
+        })
+        .then(() => {
+          consecutiveFailures = 0;
+          setResult(true);
         })
         .catch(_ => {
-          setResult(false);
+          consecutiveFailures++;
+          if (consecutiveFailures >= 2) {
+            setResult(false);
+          }
         });
     };
 
