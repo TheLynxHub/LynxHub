@@ -5,6 +5,7 @@ import {Dispatch, memo, SetStateAction, useCallback, useMemo} from 'react';
 import {useGetArgumentsByID} from '../../../../../../plugins/modules';
 import {getArgumentType} from '../../../../../../utils/moduleArguments';
 import CheckBoxArgItem from './ArgumentItems/CheckBox';
+import DeprecatedArgItem from './ArgumentItems/Deprecated';
 import DirectoryArgItem from './ArgumentItems/Directory';
 import DropdownArgItem from './ArgumentItems/Dropdown';
 import FileArgItem from './ArgumentItems/File';
@@ -72,11 +73,9 @@ const ManageArgumentsItem = memo(({argument, setArguments, id}: Props) => {
       case 'CheckBox':
         return CheckBoxArgItem;
       default:
-        return null;
+        return DeprecatedArgItem;
     }
   }, [argument.name, cardArgument]);
-
-  if (!Component) return null;
 
   return <Component id={id} argument={argument} removeArg={removeArg} changeValue={changeValue} />;
 });
