@@ -1,4 +1,4 @@
-import {Modal} from '@heroui/react';
+import {Button, Modal} from '@heroui/react';
 import {ShieldWarningIcon} from '@solar-icons/react/bold-duotone';
 import {Dispatch, memo, SetStateAction} from 'react';
 
@@ -19,7 +19,7 @@ function LocateWarningModal({isOpen, setIsOpen}: LocateWarningModalProps) {
   const onClose = () => setIsOpen(false);
 
   return (
-    <TabModal size="sm" isOpen={isOpen}>
+    <TabModal size="sm" isOpen={isOpen} onOpenChange={setIsOpen}>
       <Modal.CloseTrigger onPress={onClose} />
       <Modal.Header>
         <Modal.Heading className="flex flex-row items-center gap-x-2 text-warning-soft-foreground">
@@ -33,6 +33,12 @@ function LocateWarningModal({isOpen, setIsOpen}: LocateWarningModalProps) {
         <span className="font-semibold text-warning-soft-foreground">data loss</span>. Please move your data to a
         different folder.
       </Modal.Body>
+
+      <Modal.Footer>
+        <Button onPress={onClose} variant="secondary" fullWidth>
+          Close
+        </Button>
+      </Modal.Footer>
     </TabModal>
   );
 }

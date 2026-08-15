@@ -128,14 +128,27 @@ export async function selectNewAppDataFolder(targetWindow?: BrowserWindow): Prom
 }
 
 /**
- * Checks if a given directory is within the application path.
+ * Checks if a given directory is within the application installation path,
+ * the application source root, or the application data path.
  * @param dir - The directory to check
- * @returns True if the directory is inside the app path
+ * @returns True if the directory is inside any application path
  */
 export async function isAppDir(dir: string): Promise<boolean> {
-  const appPath = resolve(dirname(app.getPath('exe')));
-  const target = resolve(dir);
-  return target.startsWith(appPath);
+  if (!dir) return false;
+
+  const target = isWin ? resolve(dir).toLowerCase() : resolve(dir);
+  const exePath = isWin ? resolve(dirname(app.getPath('exe'))).toLowerCase() : resolve(dirname(app.getPath('exe')));
+  const appPath = isWin ? resolve(app.getAppPath()).toLowerCase() : resolve(app.getAppPath());
+
+  const isInsideOrEqual = (basePath: string) => {
+    if (!basePath) return false;
+    if (target === basePath) return true;
+    const separator = isWin ? '\\' : '/';
+    const prefix = basePath.endsWith(separator) ? basePath : `${basePath}${separator}`;
+    return target.startsWith(prefix);
+  };
+
+  return isInsideOrEqual(exePath) || isInsideOrEqual(appPath);
 }
 
 /**
