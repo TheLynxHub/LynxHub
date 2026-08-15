@@ -1,13 +1,13 @@
 import {ModalHeader, ModalHeading} from '@heroui/react';
 import {memo, useMemo} from 'react';
 
-import StepProgress from './StepProgress';
-import {useInstallStore} from './store';
+import StepProgress from '../components/StepProgress';
+import {useInstallStore} from '../store';
 
 /**
- * Renders the header of the installation modal, visualizing progress using `useInstallStore`.
+ * Renders the modal header displaying step-by-step progress visually.
  */
-const InstallHeader = () => {
+function InstallHeader() {
   const steps = useInstallStore(s => s.steps);
   const currentStep = useInstallStore(s => s.currentStep);
 
@@ -28,6 +28,6 @@ const InstallHeader = () => {
       </ModalHeading>
     </ModalHeader>
   );
-};
+}
 
 export default memo(InstallHeader);

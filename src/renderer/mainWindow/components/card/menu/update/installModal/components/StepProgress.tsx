@@ -3,15 +3,15 @@ import {InitialSteps} from '@lynx_common/types/plugins/modules';
 import {UnreadIcon} from '@solar-icons/react/linear';
 import {memo, useEffect, useRef} from 'react';
 
-import {useHasScroll} from '../../../../../utils/hooks';
+import {useHasScroll} from '../../../../../../utils/hooks';
 
-type StepProgressProps = {
+export interface StepProgressProps {
   steps: InitialSteps;
   current: number;
   orientation?: 'horizontal' | 'vertical';
   className?: string;
   titleClassName?: string;
-};
+}
 
 function getStatus(index: number, current: number): 'complete' | 'current' | 'upcoming' {
   if (index < current) return 'complete';
@@ -39,6 +39,9 @@ function StepIndicator({status}: {status: 'complete' | 'current' | 'upcoming'}) 
   return <div className="size-5 rounded-full border border-surface-tertiary bg-surface-secondary/30" />;
 }
 
+/**
+ * Visual progress stepper component supporting both horizontal and vertical orientations.
+ */
 function StepProgress({steps, current, orientation = 'horizontal', className, titleClassName}: StepProgressProps) {
   const {hasScroll, containerRef, setContainerRef} = useHasScroll();
   const currentActiveItem = useRef<HTMLDivElement | null>(null);
@@ -104,7 +107,6 @@ function StepProgress({steps, current, orientation = 'horizontal', className, ti
         {steps.map((item, index) => {
           const status = getStatus(index, current);
           const isLast = index === steps.length - 1;
-
           const title = typeof item === 'string' ? item : item.title;
 
           return (

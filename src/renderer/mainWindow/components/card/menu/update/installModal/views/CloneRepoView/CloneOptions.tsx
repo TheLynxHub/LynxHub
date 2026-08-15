@@ -2,35 +2,34 @@ import {Card, Checkbox, Key, Label, ListBox, NumberField, Select, Spinner} from 
 import {extractGitUrl} from '@lynx_common/utils';
 import {SettingsMinimalisticIcon, ShieldWarningIcon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
-import {Dispatch, SetStateAction, useEffect, useState} from 'react';
+import {Dispatch, memo, SetStateAction, useEffect, useState} from 'react';
 
-import {CloneOptionsResult} from './CloneRepo';
+export interface CloneOptionsResult {
+  branch: string;
+  singleBranch: boolean;
+  depth?: number;
+}
 
-type Branch = {
+interface Branch {
   name: string;
-};
+}
 
 export interface CloneOptionsProps {
-  /** The original git URL used to calculate dynamic repository attributes (like branch lists). */
+  /** The original git URL used to fetch dynamic repository details (branches, default branch). */
   url: string;
-  /** Standard React setState method to hook clone variables up to the parent component. */
+  /** State updater to sync clone parameters with parent view. */
   setCloneOptionsResult: Dispatch<SetStateAction<CloneOptionsResult>>;
 }
 
 /**
- * Handles customizing advanced git settings (ex: specifying a branch to use, or doing shallow depth clones).
- * Dynamically queries Github for meta branches info to pre-fill the selections.
- *
- * @param {CloneOptionsProps} props - The component props.
+ * Handles customizing advanced git settings (branch selection, shallow depth, single branch).
+ * Fetches branch metadata from GitHub API if the target URL is on GitHub.
  */
-export default function CloneOptions({url, setCloneOptionsResult}: CloneOptionsProps) {
+function CloneOptions({url, setCloneOptionsResult}: CloneOptionsProps) {
   const [loading, setLoading] = useState<boolean>(true);
-
   const [enabledDepth, setEnabledDepth] = useState<boolean>(false);
   const [depthValue, setDepthValue] = useState<number>(1);
-
   const [enabledSingleBranch, setEnabledSingleBranch] = useState<boolean>(true);
-
   const [selectedBranch, setSelectedBranch] = useState<Key | null>(null);
   const [branches, setBranches] = useState<{key: string; value: string}[]>([]);
 
@@ -107,8 +106,8 @@ export default function CloneOptions({url, setCloneOptionsResult}: CloneOptionsP
             })),
           );
         }
-      } catch (err: any) {
-        if (err.name === 'AbortError' || abortController.signal.aborted) {
+      } catch (err: unknown) {
+        if (err instanceof Error && (err.name === 'AbortError' || abortController.signal.aborted)) {
           return;
         }
         console.warn('Error fetching repository details:', err);
@@ -128,25 +127,25 @@ export default function CloneOptions({url, setCloneOptionsResult}: CloneOptionsP
 
   return (
     <Card variant="secondary">
-      <Card.Header className="gap-x-2 flex flex-row items-center text-surface-secondary-foreground">
+      <Card.Header className="flex flex-row items-center gap-x-2 text-surface-secondary-foreground">
         <SettingsMinimalisticIcon />
         <span>Clone Options</span>
       </Card.Header>
       <Card.Content>
         {loading ? (
-          <div className="w-full flex flex-col items-center gap-2 mb-2">
+          <div className="mb-2 flex w-full flex-col items-center gap-2">
             <Spinner size="xl" />
             <span className="text-sm text-muted">Fetching repository information...</span>
           </div>
         ) : isEmpty(branches) ? (
-          <div className="flex flex-col items-center justify-center p-2 gap-y-1">
+          <div className="flex flex-col items-center justify-center gap-y-1 p-2">
             <ShieldWarningIcon className="size-14 text-warning" />
             <span className="text-lg font-medium">Unable to retrieve repository branches</span>
             <p className="text-sm text-muted">The default repository branch will be used for cloning.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-y-4">
-            <div className="space-x-2 flex flex-row items-center">
+            <div className="flex flex-row items-center space-x-2">
               <Select value={selectedBranch} onChange={setSelectedBranch} placeholder="Select target branch" fullWidth>
                 <Label>Branch:</Label>
                 <Select.Trigger>
@@ -204,3 +203,5 @@ export default function CloneOptions({url, setCloneOptionsResult}: CloneOptionsP
     </Card>
   );
 }
+
+export default memo(CloneOptions);

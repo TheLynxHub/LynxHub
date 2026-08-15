@@ -2,26 +2,21 @@ import {Button, Description, Popover} from '@heroui/react';
 import ptyIpc from '@lynx_shared/ipc/pty';
 import {ArrowRightIcon, RestartIcon} from '@solar-icons/react/bold-duotone';
 import {CheckReadIcon} from '@solar-icons/react/line-duotone';
-import {RefObject, useEffect, useRef, useState} from 'react';
+import {memo, RefObject, useEffect, useRef, useState} from 'react';
 
-import {XTermAPI} from '../../../../useXTerm';
+import {XTermAPI} from '../../../../../../useXTerm';
 
-export interface FooterTerminalProps {
-  /** A ref containing a function to trigger a terminal restart. */
-  restartTerminal: RefObject<(() => void) | null>;
-  /** Callback fired when the user successfully confirms the terminal commands finished. */
-  onDoneTerminal: () => void;
+export interface TerminalFooterProps {
   cardID: string;
   xtermRef: RefObject<XTermAPI | null>;
+  onDoneTerminal: () => void;
+  restartTerminal: RefObject<(() => void) | null>;
 }
 
 /**
- * Renders the footer specifically for the terminal step in the installation modal.
- * Includes interactive popovers to verify if commands completed successfully or if a restart is needed.
- *
- * @param {FooterTerminalProps} props - The component props.
+ * Terminal-specific footer actions containing restart and completion confirmation popovers.
  */
-export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID, xtermRef}: FooterTerminalProps) {
+function TerminalFooter({cardID, xtermRef, onDoneTerminal, restartTerminal}: TerminalFooterProps) {
   const [isRestartOpen, setIsRestartOpen] = useState<boolean>(false);
   const [isNextOpen, setIsNextOpen] = useState<boolean>(false);
 
@@ -47,7 +42,7 @@ export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID,
     setIsRestartOpen(false);
   };
 
-  const next = () => {
+  const handleNext = () => {
     setIsNextOpen(false);
     onDoneTerminal();
   };
@@ -73,6 +68,7 @@ export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID,
           </Popover.Dialog>
         </Popover.Content>
       </Popover>
+
       <Popover isOpen={isNextOpen} onOpenChange={setIsNextOpen}>
         <Button variant="primary" className="flex-1">
           Next
@@ -85,7 +81,7 @@ export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID,
             <Description className="mt-2">
               Please confirm that all commands finished successfully without any errors.
             </Description>
-            <Button size="sm" onPress={next} className="mt-2" variant="primary" fullWidth>
+            <Button size="sm" className="mt-2" variant="primary" onPress={handleNext} fullWidth>
               <CheckReadIcon className="size-4" />
               All good
             </Button>
@@ -95,3 +91,5 @@ export default function FooterTerminal({restartTerminal, onDoneTerminal, cardID,
     </>
   );
 }
+
+export default memo(TerminalFooter);

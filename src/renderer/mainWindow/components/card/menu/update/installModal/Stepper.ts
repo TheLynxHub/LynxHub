@@ -1,4 +1,4 @@
-import {InitialSteps, InstallationStepper} from '@lynx_common/types/plugins/modules';
+import {InitialSteps, InstallationStepper, UserInputField} from '@lynx_common/types/plugins/modules';
 import {ToastFunction} from '@lynx_common/utils/toast';
 import filesIpc from '@lynx_shared/ipc/files';
 import gitIpc from '@lynx_shared/ipc/git';
@@ -244,7 +244,7 @@ export default class InstallStepper implements InstallationStepper {
     store.setRemoveProgressListenerFn(removeListener);
   };
 
-  public collectUserInput = async (inputFields: any[], title?: string) => {
+  public collectUserInput = async (inputFields: UserInputField[], title?: string) => {
     return new Promise<any[]>(resolve => {
       collectExtensionUserInputs(this.cardId, extensionUserInput => {
         const store = useInstallStore.getState();

@@ -12,22 +12,20 @@ import TabModal from '../../../../TabModal';
 import {XTermAPI} from '../../../../useXTerm';
 import {useCardStore} from '../../../store';
 import {CommonProps} from '../../about/types';
-import InstallBody from './Body';
-import InstallFooter from './Footer';
-import InstallHeader from './Header';
-import {useStepper} from './Hooks';
+import InstallBody from './layout/Body';
+import InstallFooter from './layout/Footer';
+import InstallHeader from './layout/Header';
 import {useInstallStore} from './store';
+import useStepper from './useStepper';
 
-type Props = {type: 'install' | 'update'} & CommonProps;
+export type InstallModalProps = {type: 'install' | 'update'} & CommonProps;
 
 /**
  * The main container mapping Redux, IPC callbacks, and `useInstallStore` to construct the
  * installation wizard for LynxHub extensions and cards.
  * Combines the Header, Body, and Footer layout blocks.
- *
- * @param {Props} props - The component props.
  */
-const InstallModal = memo(({state: modalState, type}: Props) => {
+const InstallModal = memo(({state: modalState, type}: InstallModalProps) => {
   const cardId = useCardStore(st => st.id);
   const installedCard = useInstalledCard(cardId);
   const allMethods = useAllCardMethods();
@@ -102,7 +100,11 @@ const InstallModal = memo(({state: modalState, type}: Props) => {
   );
 });
 
-const InstallCardModal = ({state, type}: Props) => {
+/**
+ * Root installation modal component that delegates to extension custom modal if replaced,
+ * or defaults to `InstallModal`.
+ */
+const InstallCardModal = ({state, type}: InstallModalProps) => {
   const InstallUI = useMemo(() => extensionsData.replaceModals.installUi, []);
 
   if (!state.isOpen) return null;

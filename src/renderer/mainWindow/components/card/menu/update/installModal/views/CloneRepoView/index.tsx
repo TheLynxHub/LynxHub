@@ -1,51 +1,38 @@
 import {Card, Link, ProgressBar, useOverlayState} from '@heroui/react';
 import {GitHub_Icon} from '@lynx_assets/icons';
 import {GitProgressCallback} from '@lynx_common/types/ipc';
-import {InitialStep} from '@lynx_common/types/plugins/modules';
 import {extractGitUrl, isWin} from '@lynx_common/utils';
 import filesIpc from '@lynx_shared/ipc/files';
 import gitIpc from '@lynx_shared/ipc/git';
 import {Folder2Icon} from '@solar-icons/react/bold-duotone';
 import {capitalize} from 'lodash-es';
-import {useEffect, useState} from 'react';
+import {memo, useEffect, useState} from 'react';
 import {SimpleGitProgressEvent} from 'simple-git';
 
-import {initGitProgress} from '../../../../../utils/constants';
-import DescriptionGrid, {DescriptionGridItem} from '../../../../DescriptionGrid';
-import OpenDialog from '../../../../OpenDialog';
-import CloneOptions from './CloneOptions';
-import {renderAlerts} from './CustomAlert';
-import {InstallState} from './types';
-import WarningModal from './WarningModal';
+import {initGitProgress} from '../../../../../../../utils/constants';
+import DescriptionGrid, {DescriptionGridItem} from '../../../../../../DescriptionGrid';
+import OpenDialog from '../../../../../../OpenDialog';
+import StepAlerts from '../../components/StepAlerts';
+import {useInstallStore} from '../../store';
+import CloneOptions, {CloneOptionsResult} from './CloneOptions';
+import CloneWarningModal from './CloneWarningModal';
 
-export type CloneOptionsResult = {
-  branch: string;
-  singleBranch: boolean;
-  depth?: number;
-};
-
-export interface CloneRepoProps {
-  /** The standard Git repository URL to be cloned. */
-  url: string;
-  /** Starts the clone sequence immediately if true. Keeps the options panel visible if false. */
-  start: boolean;
-  /** Callback fired containing the final filesystem path once cloning succeeds. */
-  done: (dir: string) => void;
+export interface CloneRepoViewProps {
   /** Used to detect if the prompt is open to skip duplicate IPC dispatches. */
   isOpen: boolean;
-  /** Utility function to partially mutate the modal state. */
-  updateState: (newState: Partial<InstallState> | ((prev: InstallState) => Partial<InstallState>)) => void;
-
-  currentStep: InitialStep;
 }
 
 /**
  * Orchestrates Git cloning interactions, utilizing the OS filesystem picker for path selection
- * and rendering a simple-git progress visualization.
- *
- * @param {CloneRepoProps} props - The component props.
+ * and rendering a progress visualization.
  */
-export default function CloneRepo({url, start, done, isOpen, updateState, currentStep}: CloneRepoProps) {
+function CloneRepoView({isOpen}: CloneRepoViewProps) {
+  const url = useInstallStore(s => s.cloneUrl);
+  const start = useInstallStore(s => s.startClone);
+  const currentStep = useInstallStore(s => s.steps[s.currentStep]);
+  const resolveClone = useInstallStore(s => s.resolveClone);
+  const updateState = useInstallStore(s => s.updateState);
+
   const warningModal = useOverlayState();
 
   const [cloneOptionsResult, setCloneOptionsResult] = useState<CloneOptionsResult>({
@@ -57,6 +44,7 @@ export default function CloneRepo({url, start, done, isOpen, updateState, curren
   const [downloading, setDownloading] = useState<boolean>(false);
   const [downloadProgress, setDownloadProgress] = useState<SimpleGitProgressEvent>(initGitProgress);
   const [directory, setDirectory] = useState<string>('');
+
   const progressItems: DescriptionGridItem[] = [
     {key: 'stage', label: 'Stage', content: capitalize(downloadProgress.stage)},
     {key: 'item', label: 'Item', content: downloadProgress.processed},
@@ -65,8 +53,8 @@ export default function CloneRepo({url, start, done, isOpen, updateState, curren
 
   useEffect(() => {
     filesIpc.getAppDirectories('AIWorkspaces').then(dir => {
-      const directory = `${dir}${isWin ? '\\' : '/'}${extractGitUrl(url).repo}`;
-      setDirectory(directory);
+      const targetDirectory = `${dir}${isWin ? '\\' : '/'}${extractGitUrl(url).repo}`;
+      setDirectory(targetDirectory);
     });
   }, [url]);
 
@@ -91,19 +79,16 @@ export default function CloneRepo({url, start, done, isOpen, updateState, curren
             break;
           case 'Completed':
             setDownloading(false);
-            done(directory);
+            resolveClone(directory);
             break;
         }
       };
 
-      // Update ui with progress
       const removeListener = gitIpc.onProgress(onProgress);
-
       return () => removeListener();
-    } else {
-      return () => {};
     }
-  }, [start, cloneOptionsResult, url, directory, isOpen, done]);
+    return () => {};
+  }, [start, cloneOptionsResult, url, directory, isOpen, resolveClone, updateState, warningModal]);
 
   return (
     <>
@@ -127,9 +112,9 @@ export default function CloneRepo({url, start, done, isOpen, updateState, curren
           />
         </>
       ) : (
-        <div className="flex flex-col gap-y-4 mt-4">
+        <div className="mt-4 flex flex-col gap-y-4">
           <Card variant="secondary">
-            <Card.Header className="gap-x-2 flex flex-row items-center text-surface-secondary-foreground">
+            <Card.Header className="flex flex-row items-center gap-x-2 text-surface-secondary-foreground">
               <GitHub_Icon />
               <span>Clone Url</span>
             </Card.Header>
@@ -141,7 +126,7 @@ export default function CloneRepo({url, start, done, isOpen, updateState, curren
             </Card.Content>
           </Card>
           <Card variant="secondary">
-            <Card.Header className="gap-x-2 flex flex-row items-center text-surface-secondary-foreground">
+            <Card.Header className="flex flex-row items-center gap-x-2 text-surface-secondary-foreground">
               <Folder2Icon />
               <span>Save to</span>
             </Card.Header>
@@ -155,11 +140,13 @@ export default function CloneRepo({url, start, done, isOpen, updateState, curren
             </Card.Content>
           </Card>
           <CloneOptions url={url} setCloneOptionsResult={setCloneOptionsResult} />
-          {renderAlerts(currentStep)}
+          <StepAlerts currentStep={currentStep} />
         </div>
       )}
 
-      <WarningModal state={warningModal} />
+      <CloneWarningModal state={warningModal} />
     </>
   );
 }
+
+export default memo(CloneRepoView);

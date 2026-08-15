@@ -4,23 +4,18 @@ import gitIpc from '@lynx_shared/ipc/git';
 import {startCase} from 'lodash-es';
 import {memo, useEffect, useMemo, useRef, useState} from 'react';
 
-import StepProgress from './StepProgress';
-import {useInstallStore} from './store';
-
-export interface InstallExtensionsProps {
-  /** The list of git repository URLs representing the extensions to clone, along with a target directory inside the base module folder. */
-  extensionsURLs: {urls: string[]; dir: string} | undefined;
-}
+import StepProgress from '../components/StepProgress';
+import {useInstallStore} from '../store';
 
 /**
- * Handles the background cloning/installation of any required sub-extensions for a module.
- *
- * @param {InstallExtensionsProps} props - The component props.
+ * Handles sequential background cloning and installation of required sub-extensions for a module.
  */
-const InstallExtensions = memo(({extensionsURLs}: InstallExtensionsProps) => {
+function ExtensionsView() {
+  const extensionsURLs = useInstallStore(s => s.extensionsToInstall);
+  const resolveExtensions = useInstallStore(s => s.resolveExtensions);
+
   const [current, setCurrent] = useState<number>(0);
   const isRunningRef = useRef<boolean>(false);
-  const resolveExtensions = useInstallStore(s => s.resolveExtensions);
 
   const stepItems = useMemo(
     () =>
@@ -62,7 +57,7 @@ const InstallExtensions = memo(({extensionsURLs}: InstallExtensionsProps) => {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
-      <span className="mt-4 text-xl font-semibold">Installing extensions, Please wait...</span>
+      <span className="mt-4 text-xl font-semibold">Installing extensions, please wait...</span>
       {stepItems.length === 0 ? (
         <Spinner size="lg" color="accent" />
       ) : (
@@ -70,6 +65,6 @@ const InstallExtensions = memo(({extensionsURLs}: InstallExtensionsProps) => {
       )}
     </div>
   );
-});
+}
 
-export default InstallExtensions;
+export default memo(ExtensionsView);

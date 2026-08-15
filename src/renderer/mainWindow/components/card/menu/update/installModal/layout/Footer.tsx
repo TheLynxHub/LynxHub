@@ -7,12 +7,12 @@ import {CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {X} from 'lucide-react';
 import {memo, RefObject, useCallback} from 'react';
 
-import {XTermAPI} from '../../../../useXTerm';
-import {useCardStore} from '../../../store';
-import LocateWarning from './LocateWarning';
-import InstallStepper from './Stepper';
-import {selectCanContinue, useInstallStore} from './store';
-import FooterTerminal from './TerminalStepFooter';
+import {XTermAPI} from '../../../../../useXTerm';
+import {useCardStore} from '../../../../store';
+import LocateWarningModal from '../components/LocateWarningModal';
+import InstallStepper from '../Stepper';
+import {selectCanContinue, useInstallStore} from '../store';
+import TerminalFooter from '../views/TerminalView/TerminalFooter';
 
 export interface InstallFooterProps {
   handleClose: () => void;
@@ -21,9 +21,9 @@ export interface InstallFooterProps {
 }
 
 /**
- * Renders the dynamic footer container for the InstallModal connected to `useInstallStore`.
+ * Dynamic footer component handling user actions, navigation transitions, and step-specific action controls.
  */
-const InstallFooter = memo(({handleClose, stepper, xtermRef}: InstallFooterProps) => {
+function InstallFooter({handleClose, stepper, xtermRef}: InstallFooterProps) {
   const cardId = useCardStore(st => st.id);
 
   const body = useInstallStore(s => s.body);
@@ -47,7 +47,7 @@ const InstallFooter = memo(({handleClose, stepper, xtermRef}: InstallFooterProps
     resolveTerminal();
   }, [cardId, resolveTerminal]);
 
-  const locate = useCallback(() => {
+  const handleLocate = useCallback(() => {
     filesIpc.openDlg({properties: ['openDirectory']}).then(targetDirectory => {
       if (targetDirectory) {
         applicationIpc.invoke.isValidDataPath(targetDirectory).then(isAppDir => {
@@ -61,15 +61,15 @@ const InstallFooter = memo(({handleClose, stepper, xtermRef}: InstallFooterProps
     });
   }, [resolveStarter, setLocateWarnIsOpen]);
 
-  const nextStep = useCallback(() => {
+  const handleNextStep = useCallback(() => {
     void stepper.nextStep();
   }, [stepper]);
 
-  const retryDownload = useCallback(() => {
+  const handleRetryDownload = useCallback(() => {
     stepper.retryDownload();
   }, [stepper]);
 
-  const renderFooterButtons = () => {
+  const renderButtons = () => {
     const isSuccess = doneAll.type === 'success';
     const isDone = body === 'done';
 
@@ -84,7 +84,7 @@ const InstallFooter = memo(({handleClose, stepper, xtermRef}: InstallFooterProps
         </Button>
 
         {body === 'terminal' && (
-          <FooterTerminal
+          <TerminalFooter
             cardID={cardId}
             xtermRef={xtermRef}
             onDoneTerminal={onDoneTerminal}
@@ -95,7 +95,7 @@ const InstallFooter = memo(({handleClose, stepper, xtermRef}: InstallFooterProps
         {body === 'starter' && (
           <>
             {!disableSelectDir && (
-              <Button onPress={locate} className="flex-1" variant="secondary">
+              <Button className="flex-1" variant="secondary" onPress={handleLocate}>
                 <FolderOpenIcon />
                 Locate
               </Button>
@@ -122,14 +122,14 @@ const InstallFooter = memo(({handleClose, stepper, xtermRef}: InstallFooterProps
         )}
 
         {body === 'extension-custom' && (
-          <Button className="flex-1" onPress={nextStep}>
+          <Button className="flex-1" onPress={handleNextStep}>
             Next
             <ArrowRightIcon className="size-4" />
           </Button>
         )}
 
         {progressInfo?.stage === 'failed' && urlToDownload && (
-          <Button className="flex-1" variant="secondary" onPress={retryDownload}>
+          <Button className="flex-1" variant="secondary" onPress={handleRetryDownload}>
             <RestartIcon className="size-4" />
             Try Again
           </Button>
@@ -140,10 +140,10 @@ const InstallFooter = memo(({handleClose, stepper, xtermRef}: InstallFooterProps
 
   return (
     <ModalFooter>
-      <LocateWarning isOpen={locateWarnIsOpen} setIsOpen={setLocateWarnIsOpen} />
-      <ButtonGroup fullWidth>{renderFooterButtons()}</ButtonGroup>
+      <LocateWarningModal isOpen={locateWarnIsOpen} setIsOpen={setLocateWarnIsOpen} />
+      <ButtonGroup fullWidth>{renderButtons()}</ButtonGroup>
     </ModalFooter>
   );
-});
+}
 
-export default InstallFooter;
+export default memo(InstallFooter);

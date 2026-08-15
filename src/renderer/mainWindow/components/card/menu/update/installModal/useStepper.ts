@@ -14,7 +14,7 @@ export interface UseStepperProps {
  * @param {UseStepperProps} props - Dependencies used by the stepper.
  * @returns {InstallStepper} The configured stepper instance to pass to the module API.
  */
-export function useStepper({cardId}: UseStepperProps) {
+export function useStepper({cardId}: UseStepperProps): InstallStepper {
   return useMemo(() => {
     return new InstallStepper({
       cardId,
@@ -23,3 +23,5 @@ export function useStepper({cardId}: UseStepperProps) {
     });
   }, [cardId]);
 }
+
+export default useStepper;
