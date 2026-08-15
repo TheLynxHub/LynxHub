@@ -2,7 +2,7 @@ import {readdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 
 // Get the file path from the command-line arguments.
-const filePath = './extension_out/renderer/rendererEntry.mjs';
+const filePath = './extension_out/scripts/renderer/rendererEntry.mjs';
 
 try {
   // Read the content of the file synchronously.
@@ -25,7 +25,7 @@ try {
 }
 
 try {
-  const rendererDir = './extension_out/renderer';
+  const rendererDir = './extension_out/scripts/renderer';
 
   // Read all files in the renderer directory
   const files = readdirSync(rendererDir);
@@ -41,3 +41,4 @@ try {
 } catch (e) {
   console.error(`An error occurred: ${e.message}`);
 }
+
