@@ -49,7 +49,14 @@ function InstallBody({isOpen, xtermRef}: InstallBodyProps) {
     }
   };
 
-  return <ModalBody className="scrollbar-hide">{renderContent()}</ModalBody>;
+  return (
+    <ModalBody
+      className={`scrollbar-hide ${
+        bodyState === 'terminal' ? 'flex h-full min-h-0 flex-1 flex-col overflow-hidden' : ''
+      }`}>
+      {renderContent()}
+    </ModalBody>
+  );
 }
 
 export default memo(InstallBody);

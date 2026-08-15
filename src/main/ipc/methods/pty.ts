@@ -10,6 +10,9 @@ import {applicationIpc} from '../application';
 // Store active PTY processes
 let ptyProcesses: LynxTerminal[] = [];
 
+// Store last known dimensions for each terminal ID to preserve sizing across restarts
+const lastTerminalSizes = new Map<string, {cols: number; rows: number}>();
+
 /**
  * Creates a PTY manager with error handling.
  * Shows user-friendly error message if terminal creation fails.
@@ -20,7 +23,8 @@ let ptyProcesses: LynxTerminal[] = [];
  */
 function createPtyManager(id: string, dir: string, useConpty: boolean): LynxTerminal | null {
   try {
-    return new LynxTerminal(id, dir, useConpty);
+    const lastSize = lastTerminalSizes.get(id);
+    return new LynxTerminal(id, dir, useConpty, lastSize?.cols ?? 150, lastSize?.rows ?? 150);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(`Failed to create terminal process [${id}]:`, error);
@@ -81,6 +85,7 @@ export function ptyClear(id: string): void {
  * @param rows - The number of rows.
  */
 export function ptyResize(id: string, cols: number, rows: number): void {
+  lastTerminalSizes.set(id, {cols, rows});
   getPtyByID(id)?.resize(cols, rows);
 }
 
@@ -162,6 +167,7 @@ export async function stopAllPty(): Promise<void> {
  * @param dir - Optional working directory.
  */
 export async function emptyPtyProcess(id: string, dir?: string): Promise<void> {
+  stopPty(id);
   const pty = createPtyManager(id, getValidDir(dir), true);
   if (pty) ptyProcesses.push(pty);
 }
@@ -175,6 +181,7 @@ export async function emptyPtyProcess(id: string, dir?: string): Promise<void> {
 export async function customPtyProcess(id: string, dir?: string, file?: string): Promise<void> {
   if (!file) return;
 
+  stopPty(id);
   const pty = createPtyManager(id, getValidDir(dir), true);
   if (!pty) return;
 
@@ -195,6 +202,7 @@ export async function customPtyProcess(id: string, dir?: string, file?: string):
 export async function customPtyCommands(id: string, commands?: string | string[], dir?: string): Promise<void> {
   if (isEmpty(commands)) return;
 
+  stopPty(id);
   const pty = createPtyManager(id, getValidDir(dir), true);
   if (!pty) return;
 
@@ -224,6 +232,7 @@ export async function ptyProcess(id: string, cardId: string): Promise<void> {
   const card = storageManager.getData('cards').installedCards.find(card => card.id === cardId);
   if (!card) return;
 
+  stopPty(id);
   const cardDir = isPortable() ? getAbsolutePath(getExePath(), card.dir || '') : card.dir;
   const pty = createPtyManager(id, getValidDir(cardDir), true);
   if (!pty) return;

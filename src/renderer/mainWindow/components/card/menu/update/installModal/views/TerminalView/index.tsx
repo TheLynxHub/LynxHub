@@ -22,14 +22,14 @@ function TerminalView({xtermRef}: TerminalViewProps) {
   };
 
   return (
-    <div className="flex size-full flex-col gap-y-2">
+    <div className="flex size-full flex-1 min-h-0 flex-col gap-y-2">
       <XTermCore
         id={cardId}
         key={terminalKey}
         onReady={onReady}
         minResizeCols={0}
         minResizeRows={0}
-        className="my-2 overflow-hidden"
+        className="my-2 flex-1 min-h-0 overflow-hidden"
       />
       <StepAlerts currentStep={currentStep} />
     </div>

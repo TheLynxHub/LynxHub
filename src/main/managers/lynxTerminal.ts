@@ -21,7 +21,7 @@ export default class LynxTerminal {
   public onData?: (data: string) => void;
   public id: string;
 
-  constructor(id: string, dir?: string, sendDataToRenderer = false) {
+  constructor(id: string, dir?: string, sendDataToRenderer = false, cols = 150, rows = 150) {
     const {storageManager} = classHolder;
     this.id = id;
 
@@ -40,8 +40,8 @@ export default class LynxTerminal {
 
     this.process = pty.spawn(determineShell(), [], {
       cwd: validatedDir,
-      cols: 150,
-      rows: 150,
+      cols,
+      rows,
       env: process.env,
       // 'auto' uses default behavior, 'yes' forces ConPTY on Windows
       useConpty: useConpty === 'auto' ? undefined : useConpty === 'yes',
@@ -50,6 +50,7 @@ export default class LynxTerminal {
     this.isRunning = true;
 
     this.process.onData(data => {
+      if (!this.isRunning) return;
       if (this.onData) {
         this.onData(data);
       } else if (sendDataToRenderer) {
@@ -58,7 +59,10 @@ export default class LynxTerminal {
       }
     });
 
-    this.process.onExit(() => ptyIpc.send.onExit(this.id));
+    this.process.onExit(() => {
+      if (!this.isRunning) return;
+      ptyIpc.send.onExit(this.id);
+    });
   }
 
   /**
@@ -68,6 +72,7 @@ export default class LynxTerminal {
   public async stopAsync(): Promise<void> {
     return new Promise<void>(resolve => {
       if (this.isRunning && this.process) {
+        this.isRunning = false;
         const {storageManager} = classHolder;
         const {autoExitSignalBeforeKill, sendYWithExit} = storageManager.getData('terminal');
 
@@ -85,10 +90,9 @@ export default class LynxTerminal {
         });
 
         const doKill = () => {
-          if (this.isRunning && this.process) {
+          if (this.process) {
             this.process.kill();
             treeKill(this.process.pid);
-            this.isRunning = false;
           }
         };
 
@@ -115,6 +119,7 @@ export default class LynxTerminal {
    */
   public stop(): void {
     if (this.isRunning && this.process) {
+      this.isRunning = false;
       const {storageManager} = classHolder;
       const {autoExitSignalBeforeKill, sendYWithExit} = storageManager.getData('terminal');
 
@@ -131,10 +136,9 @@ export default class LynxTerminal {
       });
 
       const doKill = () => {
-        if (this.isRunning && this.process) {
+        if (this.process) {
           this.process.kill();
           treeKill(this.process.pid);
-          this.isRunning = false;
         }
       };
 

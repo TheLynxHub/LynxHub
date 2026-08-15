@@ -31,6 +31,7 @@ export interface XTermAPI {
   terminal: XTerminal;
   fitAddon: FitAddon;
   clear: () => void;
+  reset: () => void;
   getSelection: () => string;
   clearSelection: () => void;
   write: (data: string) => void;
@@ -97,9 +98,10 @@ export const useXTerm = ({
   const apiRef = useRef<XTermAPI | null>(null);
 
   const canResize = useCallback(() => {
+    if (!fitAddon.current) return false;
+    const dims = fitAddon.current.proposeDimensions();
+    if (!dims || dims.cols <= 0 || dims.rows <= 0) return false;
     if (minResizeCols === 0 && minResizeRows === 0) return true;
-    const dims = fitAddon.current?.proposeDimensions();
-    if (!dims) return false;
     return dims.cols > minResizeCols && dims.rows > minResizeRows;
   }, [minResizeCols, minResizeRows]);
 
@@ -221,7 +223,12 @@ export const useXTerm = ({
 
         // Fit after renderer is ready
         try {
-          fitRef?.fit();
+          if (canResize()) {
+            fitRef?.fit();
+          }
+          if (enableResizeNotify && termRef) {
+            ptyIpc.resize(id, termRef.cols, termRef.rows);
+          }
         } catch (e) {
           console.warn('Failed to fit terminal:', e);
         }
@@ -238,6 +245,9 @@ export const useXTerm = ({
           clear: () => {
             termRef?.clear();
             ptyIpc.clear(id);
+          },
+          reset: () => {
+            termRef?.reset();
           },
           getSelection: () => termRef?.getSelection() || '',
           clearSelection: () => termRef?.clearSelection(),
@@ -269,14 +279,27 @@ export const useXTerm = ({
     const handleResize = () => {
       clearTimeout(resizeTimeoutId);
       resizeTimeoutId = setTimeout(() => {
-        if (canResize()) fitAddon.current?.fit();
+        if (!terminal.current || !fitAddon.current) return;
+        if (canResize()) {
+          try {
+            fitAddon.current.fit();
+          } catch (e) {
+            console.warn('Failed to fit terminal on resize:', e);
+          }
+        }
       }, resizeDelay);
     };
 
     window.addEventListener('resize', handleResize);
 
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+    resizeObserver.observe(terminalContainer);
+
     return () => {
       destroyed = true;
+      resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
       clearTimeout(resizeTimeoutId);
       if (rafId !== null) {

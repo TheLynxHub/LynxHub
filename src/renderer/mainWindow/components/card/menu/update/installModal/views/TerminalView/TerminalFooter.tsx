@@ -35,9 +35,13 @@ function TerminalFooter({cardID, xtermRef, onDoneTerminal, restartTerminal}: Ter
 
   const handleRestart = () => {
     isRestartingRef.current = true;
-    restartTerminal.current?.();
     if (xtermRef.current) {
-      xtermRef.current.terminal.clear();
+      xtermRef.current.terminal.reset();
+      xtermRef.current.fit();
+    }
+    restartTerminal.current?.();
+    if (xtermRef.current?.terminal) {
+      ptyIpc.resize(cardID, xtermRef.current.terminal.cols, xtermRef.current.terminal.rows);
     }
     setIsRestartOpen(false);
   };

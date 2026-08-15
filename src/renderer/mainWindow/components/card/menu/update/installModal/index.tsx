@@ -83,16 +83,14 @@ const InstallModal = memo(({state: modalState, type}: InstallModalProps) => {
 
   return (
     <TabModal
-      containerClassName={`${
-        bodyState === 'terminal' ? 'max-w-full! w-full! h-full! max-w-4xl!' : 'w-fit! h-fit! max-w-4xl!'
-      }`}
       dialogClassName={`${
         bodyState === 'terminal' ? 'h-full! w-full! min-w-3xl! max-w-7xl!' : 'h-fit! max-h-full! w-fit! min-w-3xl!'
       }`}
       isDismissable={false}
       backdropVariant="blur"
       isOpen={modalState.isOpen}
-      onOpenChange={modalState.setOpen}>
+      onOpenChange={modalState.setOpen}
+      containerClassName={`${bodyState === 'terminal' ? 'h-full! w-full! max-w-7xl!' : 'h-fit! w-fit! max-w-4xl!'}`}>
       <InstallHeader />
       <InstallBody xtermRef={xtermRef} isOpen={modalState.isOpen} />
       <InstallFooter stepper={stepper} xtermRef={xtermRef} handleClose={handleClose} />

@@ -128,6 +128,7 @@ const XTermCore = memo(
             terminal: null as unknown as XTerminal,
             fitAddon: null as unknown as FitAddon,
             clear: () => {},
+            reset: () => {},
             getSelection: () => '',
             clearSelection: () => {},
             write: () => {},
