@@ -56,7 +56,7 @@ function shouldIgnoreError(event: Event): boolean {
  * @param error - The error to check.
  * @returns boolean - True if the error is a connection error.
  */
-function isConnectionError(error: unknown): boolean {
+export function isConnectionError(error: unknown): boolean {
   if (axios.isAxiosError(error)) {
     const code = error.code;
     if (

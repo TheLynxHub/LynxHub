@@ -20,11 +20,12 @@ import {
   SubscribeStages,
 } from '@lynx_common/types';
 import {PluginMetadata, PluginVersioning} from '@lynx_common/types/plugins';
-import {toMs} from '@lynx_common/utils';
+import {isDev, toMs} from '@lynx_common/utils';
 import {decompress} from '@lynxhub/7zip';
 import axios from 'axios';
 
 import {AUTH_LOGIN_KEY, getValidatedUserStage} from '../monitoring/auth';
+import {isConnectionError} from '../monitoring/sentry';
 import {getTokens} from '../monitoring/token';
 import classHolder from './classHolder';
 import {getAppDirectory} from './dataFolder';
@@ -409,6 +410,12 @@ export default class StaticsManager {
       }
       return [];
     } catch (error) {
+      if (isDev() && isConnectionError(error)) {
+        if (this.cachedNotifications) {
+          return this.cachedNotifications;
+        }
+        return [];
+      }
       console.error('Failed to fetch notifications from website:', axios.isAxiosError(error) ? error.message : error);
       if (this.cachedNotifications) {
         return this.cachedNotifications;
