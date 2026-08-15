@@ -39,7 +39,7 @@ import {
 } from '@lynx_main/utils';
 import AddBreadcrumb_Main from '@lynx_main/utils/breadcrumbs';
 import axios from 'axios';
-import type {Database as SqliteDatabase} from 'better-sqlite3';
+import type {Database as SqliteDatabase, Statement} from 'better-sqlite3';
 import {eq} from 'drizzle-orm';
 import type {BetterSQLite3Database} from 'drizzle-orm/better-sqlite3';
 import {uniqBy} from 'lodash-es';
@@ -57,8 +57,15 @@ export class SqliteStorageManager {
   private readonly baseStorage: BaseSqliteStorage;
   private decryptedBrowserData!: BrowserHistoryData;
 
+  private getExtensionStmt?: Statement;
+  private setExtensionStmt?: Statement;
+  private getModuleStmt?: Statement;
+  private setModuleStmt?: Statement;
+  private getMetaStmt?: Statement;
+  private setMetaStmt?: Statement;
+
   constructor(baseStorage?: BaseSqliteStorage) {
-    this.baseStorage = baseStorage ?? new BaseSqliteStorage();
+    this.baseStorage = baseStorage ?? BaseSqliteStorage.getInstance();
   }
 
   public get db(): BetterSQLite3Database<typeof schema> {
@@ -71,6 +78,67 @@ export class SqliteStorageManager {
 
   public get DEFAULT_DATA(): AppStorageData {
     return this.baseStorage.DEFAULT_DATA;
+  }
+
+  private get getExtensionStatement(): Statement {
+    if (!this.getExtensionStmt) {
+      this.getExtensionStmt = this.sqlite.prepare(
+        'SELECT value FROM extension_storage WHERE extension_name = ? AND key = ?',
+      );
+    }
+    return this.getExtensionStmt;
+  }
+
+  private get setExtensionStatement(): Statement {
+    if (!this.setExtensionStmt) {
+      this.setExtensionStmt = this.sqlite.prepare(
+        `INSERT INTO extension_storage (extension_name, key, value, updated_at)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(extension_name, key) DO UPDATE SET
+          value = excluded.value,
+          updated_at = excluded.updated_at`,
+      );
+    }
+    return this.setExtensionStmt;
+  }
+
+  private get getModuleStatement(): Statement {
+    if (!this.getModuleStmt) {
+      this.getModuleStmt = this.sqlite.prepare('SELECT value FROM module_storage WHERE module_name = ? AND key = ?');
+    }
+    return this.getModuleStmt;
+  }
+
+  private get setModuleStatement(): Statement {
+    if (!this.setModuleStmt) {
+      this.setModuleStmt = this.sqlite.prepare(
+        `INSERT INTO module_storage (module_name, key, value, updated_at)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(module_name, key) DO UPDATE SET
+          value = excluded.value,
+          updated_at = excluded.updated_at`,
+      );
+    }
+    return this.setModuleStmt;
+  }
+
+  private get getMetaStatement(): Statement {
+    if (!this.getMetaStmt) {
+      this.getMetaStmt = this.sqlite.prepare('SELECT value FROM meta_storage WHERE key = ?');
+    }
+    return this.getMetaStmt;
+  }
+
+  private get setMetaStatement(): Statement {
+    if (!this.setMetaStmt) {
+      this.setMetaStmt = this.sqlite.prepare(
+        `INSERT INTO meta_storage (key, value)
+        VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET
+          value = excluded.value`,
+      );
+    }
+    return this.setMetaStmt;
   }
 
   /**
@@ -119,7 +187,7 @@ export class SqliteStorageManager {
         return (res ? res.data : this.baseStorage.DEFAULT_DATA.performance) as AppStorageData[K];
       }
       case 'storage': {
-        const res = this.db.select().from(schema.metaStorage).where(eq(schema.metaStorage.key, 'version')).get();
+        const res = this.getMetaStatement.get('version') as {value: string} | undefined;
         return {version: res ? Number(res.value) : this.baseStorage.DEFAULT_DATA.storage.version} as AppStorageData[K];
       }
       default:
@@ -182,6 +250,7 @@ export class SqliteStorageManager {
             set: {data: data as BrowserStorage, updatedAt: now},
           })
           .run();
+        this.decryptBrowserData();
         break;
       case 'notification':
         this.db
@@ -215,14 +284,7 @@ export class SqliteStorageManager {
         break;
       case 'storage': {
         const versionVal = typeof data === 'object' && data && 'version' in data ? (data as any).version : data;
-        this.db
-          .insert(schema.metaStorage)
-          .values({key: 'version', value: String(versionVal)})
-          .onConflictDoUpdate({
-            target: schema.metaStorage.key,
-            set: {value: String(versionVal)},
-          })
-          .run();
+        this.setMetaStatement.run('version', String(versionVal));
         break;
       }
       default:
@@ -337,46 +399,38 @@ export class SqliteStorageManager {
    * Extension storage getter & setter.
    */
   public getExtensionData(extensionName: string, key: string): any {
-    const res = this.sqlite
-      .prepare('SELECT value FROM extension_storage WHERE extension_name = ? AND key = ?')
-      .get(extensionName, key) as {value: string} | undefined;
+    const res = this.getExtensionStatement.get(extensionName, key) as {value: string} | undefined;
     return res ? JSON.parse(res.value) : undefined;
   }
 
   public setExtensionData(extensionName: string, key: string, value: any): void {
     const now = new Date().toISOString();
-    this.sqlite
-      .prepare(
-        `INSERT INTO extension_storage (extension_name, key, value, updated_at)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(extension_name, key) DO UPDATE SET
-          value = excluded.value,
-          updated_at = excluded.updated_at`,
-      )
-      .run(extensionName, key, JSON.stringify(value), now);
+    this.setExtensionStatement.run(extensionName, key, JSON.stringify(value), now);
   }
 
   /**
    * Module storage getter & setter.
    */
   public getModuleData(moduleName: string, key: string): any {
-    const res = this.sqlite
-      .prepare('SELECT value FROM module_storage WHERE module_name = ? AND key = ?')
-      .get(moduleName, key) as {value: string} | undefined;
+    const res = this.getModuleStatement.get(moduleName, key) as {value: string} | undefined;
     return res ? JSON.parse(res.value) : undefined;
   }
 
   public setModuleData(moduleName: string, key: string, value: any): void {
     const now = new Date().toISOString();
-    this.sqlite
-      .prepare(
-        `INSERT INTO module_storage (module_name, key, value, updated_at)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(module_name, key) DO UPDATE SET
-          value = excluded.value,
-          updated_at = excluded.updated_at`,
-      )
-      .run(moduleName, key, JSON.stringify(value), now);
+    this.setModuleStatement.run(moduleName, key, JSON.stringify(value), now);
+  }
+
+  /**
+   * Meta storage getter & setter.
+   */
+  public getMetaData(key: string): string | undefined {
+    const res = this.getMetaStatement.get(key) as {value: string} | undefined;
+    return res?.value;
+  }
+
+  public setMetaData(key: string, value: string): void {
+    this.setMetaStatement.run(key, value);
   }
 
   /**

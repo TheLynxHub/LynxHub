@@ -20,14 +20,23 @@ import {SqliteStorageManager} from './storageOperations';
  * and high-level CRUD operations using Drizzle ORM and better-sqlite3.
  */
 export class BaseSqliteStorage {
-  public readonly sqlite: SqliteDatabase;
-  public readonly db: BetterSQLite3Database<typeof schema>;
-  public readonly dbPath: string;
+  private static instance?: BaseSqliteStorage;
+
+  public readonly sqlite!: SqliteDatabase;
+  public readonly db!: BetterSQLite3Database<typeof schema>;
+  public readonly dbPath!: string;
 
   public static readonly extensionStorages = new Map<string, any>();
   public static readonly keyToExtensionMap = new Map<string, string>();
   public static readonly moduleStorages = new Map<string, any>();
   public static readonly cardToModuleMap = new Map<string, string>();
+
+  public static getInstance(): BaseSqliteStorage {
+    if (!BaseSqliteStorage.instance) {
+      BaseSqliteStorage.instance = new BaseSqliteStorage();
+    }
+    return BaseSqliteStorage.instance;
+  }
 
   public write(): void {
     // SQLite operates with WAL mode; statements are committed immediately.
@@ -158,10 +167,16 @@ export class BaseSqliteStorage {
   };
 
   constructor() {
+    if (BaseSqliteStorage.instance) {
+      return BaseSqliteStorage.instance;
+    }
+
     const connection = is.dev ? createDevDatabase() : createProdDatabase();
     this.sqlite = connection.sqlite;
     this.db = connection.db;
     this.dbPath = connection.dbPath;
+
+    BaseSqliteStorage.instance = this;
 
     this.ensureTablesExist();
     this.checkAndPerformAutoMigration();
@@ -415,6 +430,9 @@ export class BaseSqliteStorage {
 
   public close(): void {
     this.sqlite.close();
+    if (BaseSqliteStorage.instance === this) {
+      BaseSqliteStorage.instance = undefined;
+    }
   }
 }
 
