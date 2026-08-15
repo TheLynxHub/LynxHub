@@ -81,6 +81,7 @@ export const browserFavorites = sqliteTable('browser_favorites', {
 export const browserFavIcons = sqliteTable('browser_fav_icons', {
   url: text('url').primaryKey(),
   iconData: text('icon_data').notNull(),
+  title: text('title'),
   updatedAt: text('updated_at').notNull(),
 });
 

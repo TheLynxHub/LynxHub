@@ -181,6 +181,7 @@ export class BaseSqliteStorage {
     this.ensureTablesExist();
     this.checkAndPerformAutoMigration();
     this.initializeDefaults();
+    this.migrateLegacyBrowserDataToRowTables();
     this.runStorageMigrations();
   }
 
@@ -278,8 +279,12 @@ export class BaseSqliteStorage {
       CREATE TABLE IF NOT EXISTS browser_fav_icons (
         url TEXT PRIMARY KEY,
         icon_data TEXT NOT NULL,
+        title TEXT,
         updated_at TEXT NOT NULL
       );
+
+      CREATE INDEX IF NOT EXISTS idx_browser_history_visited ON browser_history(visited_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_browser_favorites_added ON browser_favorites(added_at DESC);
 
       CREATE TABLE IF NOT EXISTS notification_settings (
         id TEXT PRIMARY KEY,
@@ -334,6 +339,12 @@ export class BaseSqliteStorage {
         updated_at TEXT NOT NULL
       );
     `);
+
+    try {
+      this.sqlite.exec('ALTER TABLE browser_fav_icons ADD COLUMN title TEXT;');
+    } catch {
+      // Column already exists
+    }
   }
 
   /**
@@ -416,6 +427,88 @@ export class BaseSqliteStorage {
       this.sqlite
         .prepare('INSERT INTO performance_settings (id, data, updated_at) VALUES (?, ?, ?)')
         .run('main', JSON.stringify(this.DEFAULT_DATA.performance), now);
+    }
+  }
+
+  /**
+   * Migrates any legacy browser data (favIcons, historyAddress, favoriteAddress)
+   * stored inside browser_settings.data into dedicated row tables.
+   */
+  public migrateLegacyBrowserDataToRowTables(): void {
+    try {
+      const rawBrowser = this.sqlite.prepare('SELECT data FROM browser_settings WHERE id = ?').get('main') as
+        {data: string} | undefined;
+
+      if (!rawBrowser?.data) return;
+
+      const browserObj = JSON.parse(rawBrowser.data);
+      let modified = false;
+      const now = new Date().toISOString();
+
+      if (Array.isArray(browserObj.favIcons) && browserObj.favIcons.length > 0) {
+        const upsertFavIcon = this.sqlite.prepare(
+          `INSERT INTO browser_fav_icons (url, icon_data, title, updated_at)
+          VALUES (?, ?, ?, ?)
+          ON CONFLICT(url) DO UPDATE SET
+            icon_data = excluded.icon_data,
+            title = COALESCE(excluded.title, browser_fav_icons.title),
+            updated_at = excluded.updated_at`,
+        );
+
+        this.sqlite.transaction(() => {
+          for (const item of browserObj.favIcons) {
+            if (item && item.url && item.favIcon) {
+              upsertFavIcon.run(item.url, item.favIcon, item.title ?? null, now);
+            }
+          }
+        })();
+
+        browserObj.favIcons = [];
+        modified = true;
+      }
+
+      if (Array.isArray(browserObj.historyAddress) && browserObj.historyAddress.length > 0) {
+        const insertHistory = this.sqlite.prepare(
+          'INSERT INTO browser_history (url, title, encrypted_data, visited_at) VALUES (?, ?, ?, ?)',
+        );
+
+        this.sqlite.transaction(() => {
+          for (const url of browserObj.historyAddress) {
+            if (url) {
+              insertHistory.run(url, null, null, now);
+            }
+          }
+        })();
+
+        browserObj.historyAddress = [];
+        modified = true;
+      }
+
+      if (Array.isArray(browserObj.favoriteAddress) && browserObj.favoriteAddress.length > 0) {
+        const insertFavorite = this.sqlite.prepare(
+          'INSERT INTO browser_favorites (url, title, encrypted_data, added_at) VALUES (?, ?, ?, ?)',
+        );
+
+        this.sqlite.transaction(() => {
+          for (const url of browserObj.favoriteAddress) {
+            if (url) {
+              insertFavorite.run(url, null, null, now);
+            }
+          }
+        })();
+
+        browserObj.favoriteAddress = [];
+        modified = true;
+      }
+
+      if (modified) {
+        this.sqlite
+          .prepare('UPDATE browser_settings SET data = ?, updated_at = ? WHERE id = ?')
+          .run(JSON.stringify(browserObj), now, 'main');
+        console.log('[SQLite Storage] Successfully migrated legacy browser data to dedicated row tables.');
+      }
+    } catch (err) {
+      console.warn('[SQLite Storage] Legacy browser data migration warning:', err);
     }
   }
 

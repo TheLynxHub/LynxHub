@@ -4,6 +4,7 @@ import {ChosenArgumentsData, ConfirmMenuTypes} from '@lynx_common/types';
 import {
   BrowserHistoryData,
   CustomRunBehaviorData,
+  FavIcons,
   HomeCategory,
   PreCommands,
   PreOpen,
@@ -63,6 +64,25 @@ export class SqliteStorageManager {
   private setModuleStmt?: Statement;
   private getMetaStmt?: Statement;
   private setMetaStmt?: Statement;
+
+  private getFavIconsStmt?: Statement;
+  private upsertFavIconStmt?: Statement;
+  private updateFavIconTitleStmt?: Statement;
+  private deleteFavIconStmt?: Statement;
+  private clearFavIconsStmt?: Statement;
+  private trimFavIconsStmt?: Statement;
+
+  private getHistoryStmt?: Statement;
+  private insertHistoryStmt?: Statement;
+  private deleteHistoryUrlStmt?: Statement;
+  private clearHistoryStmt?: Statement;
+  private trimHistoryStmt?: Statement;
+
+  private getFavoritesStmt?: Statement;
+  private insertFavoriteStmt?: Statement;
+  private deleteFavoriteUrlStmt?: Statement;
+  private clearFavoritesStmt?: Statement;
+  private trimFavoritesStmt?: Statement;
 
   constructor(baseStorage?: BaseSqliteStorage) {
     this.baseStorage = baseStorage ?? BaseSqliteStorage.getInstance();
@@ -139,6 +159,145 @@ export class SqliteStorageManager {
       );
     }
     return this.setMetaStmt;
+  }
+
+  private get getFavIconsStatement(): Statement {
+    if (!this.getFavIconsStmt) {
+      this.getFavIconsStmt = this.sqlite.prepare(
+        'SELECT url, icon_data, title, updated_at FROM browser_fav_icons ORDER BY updated_at DESC LIMIT ?',
+      );
+    }
+    return this.getFavIconsStmt;
+  }
+
+  private get upsertFavIconStatement(): Statement {
+    if (!this.upsertFavIconStmt) {
+      this.upsertFavIconStmt = this.sqlite.prepare(
+        `INSERT INTO browser_fav_icons (url, icon_data, title, updated_at)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(url) DO UPDATE SET
+          icon_data = excluded.icon_data,
+          title = COALESCE(excluded.title, browser_fav_icons.title),
+          updated_at = excluded.updated_at`,
+      );
+    }
+    return this.upsertFavIconStmt;
+  }
+
+  private get updateFavIconTitleStatement(): Statement {
+    if (!this.updateFavIconTitleStmt) {
+      this.updateFavIconTitleStmt = this.sqlite.prepare(
+        'UPDATE browser_fav_icons SET title = ?, updated_at = ? WHERE url = ?',
+      );
+    }
+    return this.updateFavIconTitleStmt;
+  }
+
+  private get deleteFavIconStatement(): Statement {
+    if (!this.deleteFavIconStmt) {
+      this.deleteFavIconStmt = this.sqlite.prepare('DELETE FROM browser_fav_icons WHERE url = ?');
+    }
+    return this.deleteFavIconStmt;
+  }
+
+  private get clearFavIconsStatement(): Statement {
+    if (!this.clearFavIconsStmt) {
+      this.clearFavIconsStmt = this.sqlite.prepare('DELETE FROM browser_fav_icons');
+    }
+    return this.clearFavIconsStmt;
+  }
+
+  private get trimFavIconsStatement(): Statement {
+    if (!this.trimFavIconsStmt) {
+      this.trimFavIconsStmt = this.sqlite.prepare(
+        `DELETE FROM browser_fav_icons WHERE url NOT IN (
+          SELECT url FROM browser_fav_icons ORDER BY updated_at DESC LIMIT ?
+        )`,
+      );
+    }
+    return this.trimFavIconsStmt;
+  }
+
+  private get getHistoryStatement(): Statement {
+    if (!this.getHistoryStmt) {
+      this.getHistoryStmt = this.sqlite.prepare(
+        'SELECT id, url, title, encrypted_data, visited_at FROM browser_history ORDER BY id DESC LIMIT ?',
+      );
+    }
+    return this.getHistoryStmt;
+  }
+
+  private get insertHistoryStatement(): Statement {
+    if (!this.insertHistoryStmt) {
+      this.insertHistoryStmt = this.sqlite.prepare(
+        'INSERT INTO browser_history (url, title, encrypted_data, visited_at) VALUES (?, ?, ?, ?)',
+      );
+    }
+    return this.insertHistoryStmt;
+  }
+
+  private get deleteHistoryUrlStatement(): Statement {
+    if (!this.deleteHistoryUrlStmt) {
+      this.deleteHistoryUrlStmt = this.sqlite.prepare('DELETE FROM browser_history WHERE url = ?');
+    }
+    return this.deleteHistoryUrlStmt;
+  }
+
+  private get clearHistoryStatement(): Statement {
+    if (!this.clearHistoryStmt) {
+      this.clearHistoryStmt = this.sqlite.prepare('DELETE FROM browser_history');
+    }
+    return this.clearHistoryStmt;
+  }
+
+  private get trimHistoryStatement(): Statement {
+    if (!this.trimHistoryStmt) {
+      this.trimHistoryStmt = this.sqlite.prepare(
+        'DELETE FROM browser_history WHERE id NOT IN (SELECT id FROM browser_history ORDER BY id DESC LIMIT ?)',
+      );
+    }
+    return this.trimHistoryStmt;
+  }
+
+  private get getFavoritesStatement(): Statement {
+    if (!this.getFavoritesStmt) {
+      this.getFavoritesStmt = this.sqlite.prepare(
+        'SELECT id, url, title, encrypted_data, added_at FROM browser_favorites ORDER BY id DESC LIMIT ?',
+      );
+    }
+    return this.getFavoritesStmt;
+  }
+
+  private get insertFavoriteStatement(): Statement {
+    if (!this.insertFavoriteStmt) {
+      this.insertFavoriteStmt = this.sqlite.prepare(
+        'INSERT INTO browser_favorites (url, title, encrypted_data, added_at) VALUES (?, ?, ?, ?)',
+      );
+    }
+    return this.insertFavoriteStmt;
+  }
+
+  private get deleteFavoriteUrlStatement(): Statement {
+    if (!this.deleteFavoriteUrlStmt) {
+      this.deleteFavoriteUrlStmt = this.sqlite.prepare('DELETE FROM browser_favorites WHERE url = ?');
+    }
+    return this.deleteFavoriteUrlStmt;
+  }
+
+  private get clearFavoritesStatement(): Statement {
+    if (!this.clearFavoritesStmt) {
+      this.clearFavoritesStmt = this.sqlite.prepare('DELETE FROM browser_favorites');
+    }
+    return this.clearFavoritesStmt;
+  }
+
+  private get trimFavoritesStatement(): Statement {
+    if (!this.trimFavoritesStmt) {
+      this.trimFavoritesStmt = this.sqlite.prepare(
+        'DELETE FROM browser_favorites WHERE id NOT IN (SELECT id FROM browser_favorites ORDER BY id DESC LIMIT ?)',
+      );
+    }
+    return this.trimFavoritesStmt;
   }
 
   /**
@@ -241,17 +400,60 @@ export class SqliteStorageManager {
           })
           .run();
         break;
-      case 'browser':
+      case 'browser': {
+        const browserData = {...(data as BrowserStorage)};
+        const hasHistory = Array.isArray(browserData.historyAddress) && browserData.historyAddress.length > 0;
+        const hasFavorites = Array.isArray(browserData.favoriteAddress) && browserData.favoriteAddress.length > 0;
+        const hasFavIcons = Array.isArray(browserData.favIcons) && browserData.favIcons.length > 0;
+
+        if (hasHistory || hasFavorites || hasFavIcons) {
+          const nowIso = new Date().toISOString();
+          if (hasHistory) {
+            this.clearHistoryStatement.run();
+            const insertStmt = this.insertHistoryStatement;
+            const tx = this.sqlite.transaction((urls: string[]) => {
+              for (let i = urls.length - 1; i >= 0; i--) {
+                insertStmt.run(urls[i], null, null, nowIso);
+              }
+            });
+            tx(browserData.historyAddress);
+          }
+          if (hasFavorites) {
+            this.clearFavoritesStatement.run();
+            const insertStmt = this.insertFavoriteStatement;
+            const tx = this.sqlite.transaction((urls: string[]) => {
+              for (let i = urls.length - 1; i >= 0; i--) {
+                insertStmt.run(urls[i], null, null, nowIso);
+              }
+            });
+            tx(browserData.favoriteAddress);
+          }
+          if (hasFavIcons) {
+            this.clearFavIconsStatement.run();
+            const upsertStmt = this.upsertFavIconStatement;
+            const tx = this.sqlite.transaction((items: FavIcons[]) => {
+              for (const item of items) {
+                upsertStmt.run(item.url, item.favIcon, item.title ?? null, nowIso);
+              }
+            });
+            tx(browserData.favIcons);
+          }
+          browserData.historyAddress = [];
+          browserData.favoriteAddress = [];
+          browserData.favIcons = [];
+        }
+
         this.db
           .insert(schema.browserSettings)
-          .values({id: 'main', data: data as BrowserStorage, updatedAt: now})
+          .values({id: 'main', data: browserData, updatedAt: now})
           .onConflictDoUpdate({
             target: schema.browserSettings.id,
-            set: {data: data as BrowserStorage, updatedAt: now},
+            set: {data: browserData, updatedAt: now},
           })
           .run();
         this.decryptBrowserData();
         break;
+      }
       case 'notification':
         this.db
           .insert(schema.notificationSettings)
@@ -463,6 +665,9 @@ export class SqliteStorageManager {
     this.setData('notification', this.baseStorage.DEFAULT_DATA.notification);
     this.setData('plugin', this.baseStorage.DEFAULT_DATA.plugin);
     this.setData('performance', this.baseStorage.DEFAULT_DATA.performance);
+    this.clearHistoryStatement.run();
+    this.clearFavoritesStatement.run();
+    this.clearFavIconsStatement.run();
     this.sqlite.exec('DELETE FROM custom_storage;');
   }
 
@@ -475,13 +680,7 @@ export class SqliteStorageManager {
 
   public decryptBrowserData(): void {
     const rawData = this.getData('browser');
-
-    let recentAddress = rawData.recentAddress || [];
-    let historyAddress = rawData.historyAddress || [];
-    let favoriteAddress = rawData.favoriteAddress || [];
-    let favIcons = rawData.favIcons || [];
-
-    let needsSave = false;
+    const recentAddress = rawData.recentAddress || [];
 
     const limits = rawData.historyLimits ?? {
       recentAddress: 100,
@@ -490,39 +689,27 @@ export class SqliteStorageManager {
       favIcons: 100,
     };
 
-    if (recentAddress.length > limits.recentAddress) {
-      recentAddress = recentAddress.slice(0, limits.recentAddress);
-      needsSave = true;
-    }
-    if (historyAddress.length > limits.historyAddress) {
-      historyAddress = historyAddress.slice(0, limits.historyAddress);
-      needsSave = true;
-    }
-    if (favoriteAddress.length > limits.favoriteAddress) {
-      favoriteAddress = favoriteAddress.slice(0, limits.favoriteAddress);
-      needsSave = true;
-    }
-    if (favIcons.length > limits.favIcons) {
-      favIcons = favIcons.slice(favIcons.length - limits.favIcons);
-      needsSave = true;
+    let trimmedRecent = recentAddress;
+    if (trimmedRecent.length > limits.recentAddress) {
+      trimmedRecent = trimmedRecent.slice(0, limits.recentAddress);
+      this.updateData('browser', {recentAddress: trimmedRecent});
     }
 
-    if (needsSave) {
-      this.updateData('browser', {
-        recentAddress,
-        historyAddress,
-        favoriteAddress,
-        favIcons,
-      });
-    }
+    const historyRows = this.getHistoryStatement.all(limits.historyAddress) as {url: string}[];
+    const favoriteRows = this.getFavoritesStatement.all(limits.favoriteAddress) as {url: string}[];
+    const favIconRows = this.getFavIconsStatement.all(limits.favIcons) as {
+      url: string;
+      icon_data: string;
+      title: string | null;
+    }[];
 
     this.decryptedBrowserData = {
-      recentAddress: decryptStrings(recentAddress),
-      favoriteAddress: decryptStrings(favoriteAddress),
-      historyAddress: decryptStrings(historyAddress),
-      favIcons: favIcons.map(item => ({
+      recentAddress: decryptStrings(trimmedRecent),
+      favoriteAddress: favoriteRows.map(r => decryptString(r.url)),
+      historyAddress: historyRows.map(r => decryptString(r.url)),
+      favIcons: favIconRows.map(item => ({
         url: decryptString(item.url),
-        favIcon: decryptString(item.favIcon),
+        favIcon: decryptString(item.icon_data),
         title: item.title ? decryptString(item.title) : undefined,
       })),
     };
@@ -535,32 +722,72 @@ export class SqliteStorageManager {
     return this.decryptedBrowserData;
   }
 
+  public getFavIcons(): FavIcons[] {
+    return this.getBrowserDataSecurely().favIcons;
+  }
+
+  public getBrowserHistory(): string[] {
+    return this.getBrowserDataSecurely().historyAddress;
+  }
+
   public updateBrowserDataSecurely(data: Partial<BrowserHistoryData>): void {
-    const encryptedData: Partial<BrowserHistoryData> = structuredClone(data);
+    const current = this.getBrowserDataSecurely();
 
-    this.decryptedBrowserData = {
-      ...this.getBrowserDataSecurely(),
-      ...encryptedData,
-    };
-
-    if (encryptedData.recentAddress) {
-      encryptedData.recentAddress = encryptStrings(encryptedData.recentAddress);
-    }
-    if (encryptedData.favoriteAddress) {
-      encryptedData.favoriteAddress = encryptStrings(encryptedData.favoriteAddress);
-    }
-    if (encryptedData.historyAddress) {
-      encryptedData.historyAddress = encryptStrings(encryptedData.historyAddress);
-    }
-    if (encryptedData.favIcons) {
-      encryptedData.favIcons = encryptedData.favIcons.map(item => ({
-        url: encryptString(item.url),
-        favIcon: encryptString(item.favIcon),
-        title: item.title ? encryptString(item.title) : undefined,
-      }));
+    if (data.recentAddress !== undefined) {
+      current.recentAddress = data.recentAddress;
+      const encryptedRecent = encryptStrings(data.recentAddress);
+      this.updateData('browser', {recentAddress: encryptedRecent});
     }
 
-    this.updateData('browser', encryptedData);
+    if (data.favoriteAddress !== undefined) {
+      current.favoriteAddress = data.favoriteAddress;
+      this.clearFavoritesStatement.run();
+      if (data.favoriteAddress.length > 0) {
+        const now = new Date().toISOString();
+        const insertStmt = this.insertFavoriteStatement;
+        const tx = this.sqlite.transaction((urls: string[]) => {
+          for (let i = urls.length - 1; i >= 0; i--) {
+            insertStmt.run(encryptString(urls[i]), null, null, now);
+          }
+        });
+        tx(data.favoriteAddress);
+      }
+    }
+
+    if (data.historyAddress !== undefined) {
+      current.historyAddress = data.historyAddress;
+      this.clearHistoryStatement.run();
+      if (data.historyAddress.length > 0) {
+        const now = new Date().toISOString();
+        const insertStmt = this.insertHistoryStatement;
+        const tx = this.sqlite.transaction((urls: string[]) => {
+          for (let i = urls.length - 1; i >= 0; i--) {
+            insertStmt.run(encryptString(urls[i]), null, null, now);
+          }
+        });
+        tx(data.historyAddress);
+      }
+    }
+
+    if (data.favIcons !== undefined) {
+      current.favIcons = data.favIcons;
+      this.clearFavIconsStatement.run();
+      if (data.favIcons.length > 0) {
+        const now = new Date().toISOString();
+        const upsertStmt = this.upsertFavIconStatement;
+        const tx = this.sqlite.transaction((items: FavIcons[]) => {
+          for (const item of items) {
+            upsertStmt.run(
+              encryptString(item.url),
+              encryptString(item.favIcon),
+              item.title ? encryptString(item.title) : null,
+              now,
+            );
+          }
+        });
+        tx(data.favIcons);
+      }
+    }
   }
 
   private async findUrlIndex(addressArray: string[], url: string): Promise<number> {
@@ -573,85 +800,122 @@ export class SqliteStorageManager {
     return -1;
   }
 
-  private async addBrowserUrl(
-    arrayKey: 'recentAddress' | 'favoriteAddress' | 'historyAddress',
-    url: string,
-  ): Promise<void> {
-    const addressArray = this.getBrowserDataSecurely()[arrayKey];
-    const existingUrlIndex = await this.findUrlIndex(addressArray, url);
+  public async addBrowserRecent(recentEntry: string): Promise<void> {
+    const addressArray = this.getBrowserDataSecurely().recentAddress;
+    const existingUrlIndex = await this.findUrlIndex(addressArray, recentEntry);
 
-    let updatedArray =
+    const updatedArray =
       existingUrlIndex !== -1
-        ? [url, ...addressArray.slice(0, existingUrlIndex), ...addressArray.slice(existingUrlIndex + 1)]
-        : [url, ...addressArray];
+        ? [recentEntry, ...addressArray.slice(0, existingUrlIndex), ...addressArray.slice(existingUrlIndex + 1)]
+        : [recentEntry, ...addressArray];
 
     const {historyLimits} = this.getData('browser');
-    const maxLimits = {
-      recentAddress: historyLimits?.recentAddress ?? 100,
-      historyAddress: historyLimits?.historyAddress ?? 1000,
-      favoriteAddress: historyLimits?.favoriteAddress ?? 500,
-    };
-    const limit = maxLimits[arrayKey];
-    if (updatedArray.length > limit) {
-      updatedArray = updatedArray.slice(0, limit);
-    }
+    const limit = historyLimits?.recentAddress ?? 100;
+    const trimmed = updatedArray.length > limit ? updatedArray.slice(0, limit) : updatedArray;
 
-    this.updateBrowserDataSecurely({[arrayKey]: updatedArray});
-  }
-
-  private removeBrowserUrl(arrayKey: 'recentAddress' | 'favoriteAddress' | 'historyAddress', url: string): void {
-    const addressArray = this.getBrowserDataSecurely()[arrayKey];
-    this.updateBrowserDataSecurely({[arrayKey]: addressArray.filter(address => address !== url)});
-  }
-
-  public async addBrowserRecent(recentEntry: string): Promise<void> {
-    await this.addBrowserUrl('recentAddress', recentEntry);
-  }
-
-  public async addBrowserFavorite(favoriteEntry: string): Promise<void> {
-    await this.addBrowserUrl('favoriteAddress', favoriteEntry);
-  }
-
-  public async addBrowserHistory(historyEntry: string): Promise<void> {
-    await this.addBrowserUrl('historyAddress', historyEntry);
+    this.decryptedBrowserData.recentAddress = trimmed;
+    this.updateData('browser', {recentAddress: encryptStrings(trimmed)});
   }
 
   public removeBrowserRecent(url: string): void {
-    this.removeBrowserUrl('recentAddress', url);
+    const addressArray = this.getBrowserDataSecurely().recentAddress;
+    const updated = addressArray.filter(address => address !== url);
+    this.decryptedBrowserData.recentAddress = updated;
+    this.updateData('browser', {recentAddress: encryptStrings(updated)});
+  }
+
+  public async addBrowserFavorite(favoriteEntry: string): Promise<void> {
+    const favoriteAddress = this.getBrowserDataSecurely().favoriteAddress;
+    const existingIndex = await this.findUrlIndex(favoriteAddress, favoriteEntry);
+
+    if (existingIndex !== -1) {
+      favoriteAddress.splice(existingIndex, 1);
+    }
+    favoriteAddress.unshift(favoriteEntry);
+
+    const {historyLimits} = this.getData('browser');
+    const limit = historyLimits?.favoriteAddress ?? 500;
+    if (favoriteAddress.length > limit) {
+      favoriteAddress.length = limit;
+    }
+
+    const encUrl = encryptString(favoriteEntry);
+    const now = new Date().toISOString();
+    this.insertFavoriteStatement.run(encUrl, null, null, now);
+    this.trimFavoritesStatement.run(limit);
   }
 
   public removeBrowserFavorite(url: string): void {
-    this.removeBrowserUrl('favoriteAddress', url);
+    const favoriteAddress = this.getBrowserDataSecurely().favoriteAddress;
+    const filtered = favoriteAddress.filter(u => u !== url);
+    this.decryptedBrowserData.favoriteAddress = filtered;
+
+    const encUrl = encryptString(url);
+    this.deleteFavoriteUrlStatement.run(encUrl);
+  }
+
+  public async addBrowserHistory(historyEntry: string): Promise<void> {
+    const historyAddress = this.getBrowserDataSecurely().historyAddress;
+    const existingIndex = await this.findUrlIndex(historyAddress, historyEntry);
+
+    if (existingIndex !== -1) {
+      historyAddress.splice(existingIndex, 1);
+    }
+    historyAddress.unshift(historyEntry);
+
+    const {historyLimits} = this.getData('browser');
+    const limit = historyLimits?.historyAddress ?? 1000;
+    if (historyAddress.length > limit) {
+      historyAddress.length = limit;
+    }
+
+    const encUrl = encryptString(historyEntry);
+    const now = new Date().toISOString();
+    this.insertHistoryStatement.run(encUrl, null, null, now);
+    this.trimHistoryStatement.run(limit);
   }
 
   public removeBrowserHistory(url: string): void {
-    this.removeBrowserUrl('historyAddress', url);
+    const historyAddress = this.getBrowserDataSecurely().historyAddress;
+    const filtered = historyAddress.filter(u => u !== url);
+    this.decryptedBrowserData.historyAddress = filtered;
+
+    const encUrl = encryptString(url);
+    this.deleteHistoryUrlStatement.run(encUrl);
   }
 
   public async addBrowserFavIcon(url: string, icon: string, title?: string): Promise<void> {
     const favIcons = this.getBrowserDataSecurely().favIcons;
-    let updatedExisting: boolean = false;
+    let foundIndex = -1;
 
-    for (const favIcon of favIcons) {
-      if (!isValidURL([favIcon.url, url])) continue;
-
-      const isSame = await compareUrls(favIcon.url, url);
-      if (isSame) {
-        favIcon.favIcon = icon;
-        if (title) favIcon.title = title;
-        updatedExisting = true;
+    for (let i = 0; i < favIcons.length; i++) {
+      if (!isValidURL([favIcons[i].url, url])) continue;
+      if (await compareUrls(favIcons[i].url, url)) {
+        foundIndex = i;
         break;
       }
     }
 
-    if (!updatedExisting) favIcons.push({url, favIcon: icon, title});
+    const encUrl = encryptString(url);
+    const encIcon = encryptString(icon);
+    const encTitle = title ? encryptString(title) : null;
+    const now = new Date().toISOString();
+
+    if (foundIndex !== -1) {
+      favIcons[foundIndex].favIcon = icon;
+      if (title) favIcons[foundIndex].title = title;
+      const targetEncUrl = encryptString(favIcons[foundIndex].url);
+      this.upsertFavIconStatement.run(targetEncUrl, encIcon, encTitle, now);
+    } else {
+      favIcons.push({url, favIcon: icon, title});
+      this.upsertFavIconStatement.run(encUrl, encIcon, encTitle, now);
+    }
 
     const maxFavIcons = this.getData('browser').historyLimits?.favIcons ?? 100;
     if (favIcons.length > maxFavIcons) {
       favIcons.splice(0, favIcons.length - maxFavIcons);
+      this.trimFavIconsStatement.run(maxFavIcons);
     }
-
-    this.updateBrowserDataSecurely({favIcons});
   }
 
   public async updateBrowserFavIconTitle(url: string, title: string): Promise<void> {
@@ -659,14 +923,23 @@ export class SqliteStorageManager {
 
     for (const favIcon of favIcons) {
       if (!isValidURL([favIcon.url, url])) continue;
-
-      const isSame = await compareUrls(favIcon.url, url);
-      if (isSame) {
+      if (await compareUrls(favIcon.url, url)) {
         favIcon.title = title;
-        this.updateBrowserDataSecurely({favIcons});
+        const encUrl = encryptString(favIcon.url);
+        const encTitle = encryptString(title);
+        const now = new Date().toISOString();
+        this.updateFavIconTitleStatement.run(encTitle, now, encUrl);
         break;
       }
     }
+  }
+
+  public removeBrowserFavIcon(url: string): void {
+    const favIcons = this.getBrowserDataSecurely().favIcons;
+    this.decryptedBrowserData.favIcons = favIcons.filter(item => item.url !== url);
+
+    const encUrl = encryptString(url);
+    this.deleteFavIconStatement.run(encUrl);
   }
 
   // --- Cards & Configurations Helpers ---
