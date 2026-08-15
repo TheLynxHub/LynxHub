@@ -52,6 +52,32 @@ function shouldIgnoreError(event: Event): boolean {
 }
 
 /**
+ * Checks if an error is a network connection error (e.g. offline or server unreachable).
+ * @param error - The error to check.
+ * @returns boolean - True if the error is a connection error.
+ */
+function isConnectionError(error: unknown): boolean {
+  if (axios.isAxiosError(error)) {
+    const code = error.code;
+    if (
+      code === 'ECONNREFUSED' ||
+      code === 'ENOTFOUND' ||
+      code === 'ETIMEDOUT' ||
+      code === 'ECONNABORTED' ||
+      code === 'ENETUNREACH' ||
+      code === 'ERR_NETWORK' ||
+      code === 'EHOSTUNREACH' ||
+      !error.response
+    ) {
+      return true;
+    }
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  return /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|ECONNABORTED|ENETUNREACH|ERR_NETWORK|Network Error/i.test(message);
+}
+
+/**
  * Sends a Sentry error event (with exception stacktrace and breadcrumbs) immediately to the website.
  */
 async function sendErrorToWebsite(event: Event): Promise<void> {
@@ -90,6 +116,9 @@ async function sendErrorToWebsite(event: Event): Promise<void> {
   try {
     await axios.post(`${LYNXHUB_WEBSITE}/api/actions/collect`, payload, {timeout: 5000});
   } catch (err) {
+    if (isDev() && isConnectionError(err)) {
+      return;
+    }
     console.error('Failed to send error event to website:', err instanceof Error ? err.message : err);
   }
 }
@@ -177,6 +206,9 @@ export async function fetchAndCacheSentryDsn(storageManager: StorageManager): Pr
       console.warn('Sentry DSN not found in website response.');
     }
   } catch (error) {
+    if (isDev() && isConnectionError(error)) {
+      return;
+    }
     console.error('Failed to fetch Sentry DSN from website:', axios.isAxiosError(error) ? error.message : error);
   }
 }
