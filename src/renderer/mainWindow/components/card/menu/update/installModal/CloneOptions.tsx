@@ -4,7 +4,6 @@ import {SettingsMinimalisticIcon, ShieldWarningIcon} from '@solar-icons/react/bo
 import {isEmpty} from 'lodash-es';
 import {Dispatch, SetStateAction, useEffect, useState} from 'react';
 
-import {topToast} from '../../../../../layouts/ToastProviders';
 import {CloneOptionsResult} from './CloneRepo';
 
 type Branch = {
@@ -36,49 +35,95 @@ export default function CloneOptions({url, setCloneOptionsResult}: CloneOptionsP
   const [branches, setBranches] = useState<{key: string; value: string}[]>([]);
 
   useEffect(() => {
-    if (selectedBranch || typeof selectedBranch === 'string') {
-      setCloneOptionsResult({
-        branch: selectedBranch.toString(),
-        singleBranch: enabledSingleBranch,
-        depth: enabledDepth ? depthValue : undefined,
-      });
-    }
-  }, [selectedBranch, enabledSingleBranch, enabledDepth, depthValue]);
+    setCloneOptionsResult({
+      branch: selectedBranch ? selectedBranch.toString() : '',
+      singleBranch: enabledSingleBranch,
+      depth: enabledDepth ? depthValue : undefined,
+    });
+  }, [selectedBranch, enabledSingleBranch, enabledDepth, depthValue, setCloneOptionsResult]);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchData = async () => {
       setLoading(true);
       try {
-        const {owner, repo} = extractGitUrl(url);
-        const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
-        if (!repoResponse.ok) {
-          topToast.danger(`Failed to fetch repository details: ${repoResponse.status}`);
-          return;
+        let gitInfo: {owner: string; repo: string; platform: 'github' | 'gitlab'} | null = null;
+        try {
+          gitInfo = extractGitUrl(url);
+        } catch {
+          // Non-standard git URL (e.g. self-hosted, arbitrary url)
+          gitInfo = null;
         }
-        const repoData = await repoResponse.json();
-        const defaultBranch = repoData.default_branch;
 
-        const branchesResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches`);
-        if (!branchesResponse.ok) {
-          topToast.danger(`Failed to fetch branches: ${branchesResponse.status}`);
+        // Only query GitHub API if the repository is specifically on GitHub
+        if (!gitInfo || gitInfo.platform !== 'github') {
+          if (!abortController.signal.aborted) {
+            setBranches([]);
+            setSelectedBranch(null);
+            setLoading(false);
+          }
           return;
         }
+
+        const {owner, repo} = gitInfo;
+        const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+          signal: abortController.signal,
+        });
+
+        if (!repoResponse.ok) {
+          console.warn(`GitHub API repo fetch failed: ${repoResponse.status} ${repoResponse.statusText}`);
+          if (!abortController.signal.aborted) {
+            setBranches([]);
+            setSelectedBranch(null);
+          }
+          return;
+        }
+
+        const repoData = await repoResponse.json();
+        const defaultBranch = repoData.default_branch || 'main';
+
+        const branchesResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches?per_page=100`, {
+          signal: abortController.signal,
+        });
+
+        if (!branchesResponse.ok) {
+          console.warn(`GitHub API branches fetch failed: ${branchesResponse.status} ${branchesResponse.statusText}`);
+          if (!abortController.signal.aborted) {
+            setSelectedBranch(defaultBranch);
+            setBranches([{key: defaultBranch, value: defaultBranch}]);
+          }
+          return;
+        }
+
         const branchesData: Branch[] = await branchesResponse.json();
 
-        setSelectedBranch(defaultBranch);
-        setBranches(
-          branchesData.map(b => {
-            return {key: b.name, value: b.name};
-          }),
-        );
+        if (!abortController.signal.aborted) {
+          setSelectedBranch(defaultBranch);
+          setBranches(
+            branchesData.map(b => ({
+              key: b.name,
+              value: b.name,
+            })),
+          );
+        }
       } catch (err: any) {
-        topToast.danger(err.message || 'An error occurred while fetching data.');
+        if (err.name === 'AbortError' || abortController.signal.aborted) {
+          return;
+        }
+        console.warn('Error fetching repository details:', err);
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      abortController.abort();
+    };
   }, [url]);
 
   return (
