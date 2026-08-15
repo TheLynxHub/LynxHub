@@ -31,6 +31,7 @@ export interface InstallStoreState extends InstallState {
   terminalResolver: (() => void) | null;
   userInputResolver: ((result: UserInputResult[]) => void) | null;
   extensionsResolver: (() => void) | null;
+  downloadResolver: ((path: string) => void) | null;
   restartTerminalFn: (() => void) | null;
   removeProgressListenerFn: (() => void) | null;
 
@@ -56,6 +57,7 @@ export interface InstallStoreState extends InstallState {
   setTerminalResolver: (resolver: (() => void) | null) => void;
   setUserInputResolver: (resolver: ((result: UserInputResult[]) => void) | null) => void;
   setExtensionsResolver: (resolver: (() => void) | null) => void;
+  setDownloadResolver: (resolver: ((path: string) => void) | null) => void;
   setRestartTerminalFn: (fn: (() => void) | null) => void;
   setRemoveProgressListenerFn: (fn: (() => void) | null) => void;
 
@@ -64,6 +66,7 @@ export interface InstallStoreState extends InstallState {
   resolveTerminal: () => void;
   resolveUserInput: () => void;
   resolveExtensions: () => void;
+  resolveDownload: (path: string) => void;
   triggerRestartTerminal: () => void;
 }
 
@@ -101,6 +104,7 @@ const initialStoreState = {
   terminalResolver: null,
   userInputResolver: null,
   extensionsResolver: null,
+  downloadResolver: null,
   restartTerminalFn: null,
   removeProgressListenerFn: null,
 };
@@ -175,6 +179,7 @@ export const useInstallStore = create<InstallStoreState>((set, get) => ({
   setTerminalResolver: terminalResolver => set({terminalResolver}),
   setUserInputResolver: userInputResolver => set({userInputResolver}),
   setExtensionsResolver: extensionsResolver => set({extensionsResolver}),
+  setDownloadResolver: downloadResolver => set({downloadResolver}),
   setRestartTerminalFn: restartTerminalFn => set({restartTerminalFn}),
   setRemoveProgressListenerFn: removeProgressListenerFn => set({removeProgressListenerFn}),
 
@@ -215,6 +220,14 @@ export const useInstallStore = create<InstallStoreState>((set, get) => ({
     if (extensionsResolver) {
       extensionsResolver();
       set({extensionsResolver: null});
+    }
+  },
+
+  resolveDownload: path => {
+    const {downloadResolver} = get();
+    if (downloadResolver) {
+      downloadResolver(path);
+      set({downloadResolver: null});
     }
   },
 

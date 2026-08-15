@@ -65,12 +65,9 @@ const InstallFooter = memo(({handleClose, stepper, xtermRef}: InstallFooterProps
     void stepper.nextStep();
   }, [stepper]);
 
-  const downloadFileFromUrl = useCallback(
-    (url: string) => {
-      void stepper.downloadFileFromUrl(url);
-    },
-    [stepper],
-  );
+  const retryDownload = useCallback(() => {
+    stepper.retryDownload();
+  }, [stepper]);
 
   const renderFooterButtons = () => {
     const isSuccess = doneAll.type === 'success';
@@ -132,7 +129,7 @@ const InstallFooter = memo(({handleClose, stepper, xtermRef}: InstallFooterProps
         )}
 
         {progressInfo?.stage === 'failed' && urlToDownload && (
-          <Button className="flex-1" variant="secondary" onPress={() => downloadFileFromUrl(urlToDownload)}>
+          <Button className="flex-1" variant="secondary" onPress={retryDownload}>
             <RestartIcon className="size-4" />
             Try Again
           </Button>

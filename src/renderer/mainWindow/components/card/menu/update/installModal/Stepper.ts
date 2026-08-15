@@ -197,23 +197,52 @@ export default class InstallStepper implements InstallationStepper {
   public downloadFileFromUrl = async (url: string) => {
     return new Promise<string>(resolve => {
       const store = useInstallStore.getState();
+      if (store.removeProgressListenerFn) {
+        store.removeProgressListenerFn();
+        store.setRemoveProgressListenerFn(null);
+      }
+
+      store.setDownloadResolver(resolve);
       store.setProgressInfo(undefined);
       store.setUrlToDownload(url);
       store.updateState({body: 'progress'});
 
-      utilsIpc.downloadFile(url);
-      const removeListener = utilsIpc.onDownloadFile(progress => {
-        if (progress.stage === 'done') {
-          useInstallStore.getState().setProgressInfo(undefined);
-          removeListener();
-          resolve(progress.finalPath);
-        } else {
-          useInstallStore.getState().setProgressInfo(progress);
-        }
-      });
-
-      store.setRemoveProgressListenerFn(removeListener);
+      this.startDownload(url);
     });
+  };
+
+  public retryDownload = () => {
+    const store = useInstallStore.getState();
+    const url = store.urlToDownload;
+    if (!url) return;
+
+    if (store.removeProgressListenerFn) {
+      store.removeProgressListenerFn();
+      store.setRemoveProgressListenerFn(null);
+    }
+
+    store.setProgressInfo(undefined);
+    store.updateState({body: 'progress'});
+
+    this.startDownload(url);
+  };
+
+  private startDownload = (url: string) => {
+    const store = useInstallStore.getState();
+    utilsIpc.downloadFile(url);
+    const removeListener = utilsIpc.onDownloadFile(progress => {
+      if (progress.stage === 'done') {
+        const currentStore = useInstallStore.getState();
+        currentStore.setProgressInfo(undefined);
+        removeListener();
+        currentStore.setRemoveProgressListenerFn(null);
+        currentStore.resolveDownload(progress.finalPath);
+      } else {
+        useInstallStore.getState().setProgressInfo(progress);
+      }
+    });
+
+    store.setRemoveProgressListenerFn(removeListener);
   };
 
   public collectUserInput = async (inputFields: any[], title?: string) => {
