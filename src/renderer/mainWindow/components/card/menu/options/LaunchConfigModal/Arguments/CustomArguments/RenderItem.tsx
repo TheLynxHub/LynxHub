@@ -25,23 +25,46 @@ import {
   TrashBin2Icon,
 } from '@solar-icons/react/bold-duotone';
 import {CheckReadIcon, UnreadIcon} from '@solar-icons/react/linear';
-import {AnimatePresence, motion} from 'framer-motion';
-import {Dispatch, ReactNode, SetStateAction} from 'react';
+import {AnimatePresence, motion, useReducedMotion} from 'framer-motion';
+import {Dispatch, SetStateAction} from 'react';
 
-type AnimProp = {
-  children: ReactNode;
-  show: boolean;
+type ActionButtonProps = {
+  isAdded: boolean;
+  addItem: (item: CustomArg) => void;
+  item: CustomArg;
+  shouldReduceMotion: boolean | null;
 };
 
-function AnimateChild({show, children}: AnimProp) {
+function ActionButton({isAdded, addItem, item, shouldReduceMotion}: ActionButtonProps) {
   return (
-    <AnimatePresence mode="popLayout">
-      {show && (
+    <AnimatePresence mode="wait" initial={false}>
+      {isAdded ? (
         <motion.div
-          exit={{translateY: 5, opacity: 0, scale: 0.7}}
-          animate={{translateY: 0, opacity: 1, scale: 1}}
-          initial={{translateY: 5, opacity: 0, scale: 0.7}}>
-          {children}
+          exit={{
+            opacity: 0,
+            scale: shouldReduceMotion ? 1 : 0.94,
+            transition: {duration: 0.1, ease: [0.23, 1, 0.32, 1]},
+          }}
+          key="added"
+          initial={{opacity: 0, scale: shouldReduceMotion ? 1 : 0.94}}
+          animate={{opacity: 1, scale: 1, transition: {duration: 0.15, ease: [0.23, 1, 0.32, 1]}}}>
+          <Button size="sm" variant="ghost" className="text-success" isDisabled isIconOnly>
+            <CheckReadIcon className="size-4.5" />
+          </Button>
+        </motion.div>
+      ) : (
+        <motion.div
+          exit={{
+            opacity: 0,
+            scale: shouldReduceMotion ? 1 : 0.94,
+            transition: {duration: 0.1, ease: [0.23, 1, 0.32, 1]},
+          }}
+          key="not-added"
+          initial={{opacity: 0, scale: shouldReduceMotion ? 1 : 0.94}}
+          animate={{opacity: 1, scale: 1, transition: {duration: 0.15, ease: [0.23, 1, 0.32, 1]}}}>
+          <Button size="sm" variant="secondary" onPress={() => addItem(item)} isIconOnly>
+            <UnreadIcon className="size-4.5" />
+          </Button>
         </motion.div>
       )}
     </AnimatePresence>
@@ -90,6 +113,8 @@ const itemTypes: {id: string; label: string; description: string}[] = [
 ];
 
 export default function RenderCustomItem({item, isAdded, setCustomList, addItem, removeItem}: RenderProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   const onNameChange = (value: string) => {
     setCustomList(prevState =>
       prevState.map(listItem => {
@@ -141,9 +166,15 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
     case 'commandLine':
       return (
         <motion.div
-          animate={{translateY: 0, opacity: 1, scale: 1}}
-          initial={{translateY: 5, opacity: 0, scale: 0.9}}
+          exit={{
+            opacity: 0,
+            scale: shouldReduceMotion ? 1 : 0.98,
+            transition: {duration: 0.14, ease: [0.23, 1, 0.32, 1]},
+          }}
+          transition={{layout: {duration: 0.2, ease: [0.23, 1, 0.32, 1]}}}
           className="text-sm bg-surface flex flex-col px-4 py-3 rounded-xl gap-y-2"
+          initial={{translateY: shouldReduceMotion ? 0 : 6, opacity: 0, scale: shouldReduceMotion ? 1 : 0.98}}
+          animate={{translateY: 0, opacity: 1, scale: 1, transition: {duration: 0.18, ease: [0.23, 1, 0.32, 1]}}}
           layout>
           <div className="flex justify-between items-center">
             <div
@@ -155,17 +186,7 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
               <span>{item.kind === 'envVar' ? 'Environment Variable' : 'Command Line'}</span>
             </div>
             <div className="flex items-center gap-x-1">
-              <AnimateChild show={isAdded}>
-                <Button size="sm" variant="ghost" className="text-success" isDisabled isIconOnly>
-                  <CheckReadIcon className="size-4.5" />
-                </Button>
-              </AnimateChild>
-              <AnimateChild show={!isAdded}>
-                <Button size="sm" variant="secondary" onPress={() => addItem(item)} isIconOnly>
-                  <UnreadIcon className="size-4.5" />
-                </Button>
-              </AnimateChild>
-
+              <ActionButton item={item} isAdded={isAdded} addItem={addItem} shouldReduceMotion={shouldReduceMotion} />
               <Button size="sm" variant="danger-soft" onPress={() => removeItem(item)} isIconOnly>
                 <TrashBin2Icon className="size-3.5" />
               </Button>
@@ -312,28 +333,42 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
                   />
                 </div>
                 {item.defaultValue && (
-                  <div className="flex items-center gap-x-2">
-                    {typeof item.defaultValue === 'string' &&
-                      item.defaultValue.split(',').map(value => {
-                        const targetValue = value.trim();
+                  <div className="flex items-center gap-x-2 flex-wrap">
+                    <AnimatePresence mode="popLayout">
+                      {typeof item.defaultValue === 'string' &&
+                        item.defaultValue.split(',').map(value => {
+                          const targetValue = value.trim();
 
-                        if (!targetValue) return null;
+                          if (!targetValue) return null;
 
-                        const removeValue = () => {
-                          const removedResult = (item.defaultValue as string)
-                            .split(',')
-                            .filter(v => v !== value)
-                            .map(v => v.trim());
-                          onDefaultValueChange(removedResult.join(', '));
-                        };
+                          const removeValue = () => {
+                            const removedResult = (item.defaultValue as string)
+                              .split(',')
+                              .filter(v => v !== value)
+                              .map(v => v.trim());
+                            onDefaultValueChange(removedResult.join(', '));
+                          };
 
-                        return (
-                          <Chip size="sm" key={value} variant="soft" color="success">
-                            <Chip.Label>{targetValue}</Chip.Label>
-                            <CloseButton className="scale-70" onPress={removeValue} />
-                          </Chip>
-                        );
-                      })}
+                          return (
+                            <motion.div
+                              exit={{
+                                opacity: 0,
+                                scale: shouldReduceMotion ? 1 : 0.92,
+                                transition: {duration: 0.12, ease: [0.23, 1, 0.32, 1]},
+                              }}
+                              key={value}
+                              initial={{opacity: 0, scale: shouldReduceMotion ? 1 : 0.92}}
+                              transition={{layout: {duration: 0.18, ease: [0.23, 1, 0.32, 1]}}}
+                              animate={{opacity: 1, scale: 1, transition: {duration: 0.15, ease: [0.23, 1, 0.32, 1]}}}
+                              layout>
+                              <Chip size="sm" variant="soft" color="success">
+                                <Chip.Label>{targetValue}</Chip.Label>
+                                <CloseButton className="scale-70" onPress={removeValue} />
+                              </Chip>
+                            </motion.div>
+                          );
+                        })}
+                    </AnimatePresence>
                   </div>
                 )}
               </div>
@@ -346,9 +381,15 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
     default:
       return (
         <motion.div
-          animate={{translateY: 0, opacity: 1, scale: 1}}
-          initial={{translateY: 5, opacity: 0, scale: 0.9}}
+          exit={{
+            opacity: 0,
+            scale: shouldReduceMotion ? 1 : 0.98,
+            transition: {duration: 0.14, ease: [0.23, 1, 0.32, 1]},
+          }}
+          transition={{layout: {duration: 0.2, ease: [0.23, 1, 0.32, 1]}}}
           className="text-sm bg-surface flex flex-col px-4 py-3 rounded-xl gap-y-2"
+          initial={{translateY: shouldReduceMotion ? 0 : 6, opacity: 0, scale: shouldReduceMotion ? 1 : 0.98}}
+          animate={{translateY: 0, opacity: 1, scale: 1, transition: {duration: 0.18, ease: [0.23, 1, 0.32, 1]}}}
           layout>
           <div className="flex justify-between items-center">
             <div
@@ -360,17 +401,7 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
               <span>{item.kind === 'comment' ? 'Comment' : 'Custom'}</span>
             </div>
             <div className="flex items-center gap-x-1">
-              <AnimateChild show={isAdded}>
-                <Button size="sm" variant="ghost" className="text-success" isDisabled isIconOnly>
-                  <CheckReadIcon className="size-4.5" />
-                </Button>
-              </AnimateChild>
-              <AnimateChild show={!isAdded}>
-                <Button size="sm" variant="secondary" onPress={() => addItem(item)} isIconOnly>
-                  <UnreadIcon className="size-4.5" />
-                </Button>
-              </AnimateChild>
-
+              <ActionButton item={item} isAdded={isAdded} addItem={addItem} shouldReduceMotion={shouldReduceMotion} />
               <Button size="sm" variant="danger-soft" onPress={() => removeItem(item)} isIconOnly>
                 <TrashBin2Icon className="size-3.5" />
               </Button>

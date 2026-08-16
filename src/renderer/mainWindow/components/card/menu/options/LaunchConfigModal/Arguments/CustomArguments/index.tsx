@@ -2,7 +2,7 @@ import {Button, Dropdown, Label} from '@heroui/react';
 import {CustomArg, CustomArgKinds} from '@lynx_common/types';
 import storageIpc from '@lynx_shared/ipc/storage';
 import {HomeAddIcon, InboxIcon, NotesIcon, Pen2Icon, SettingsMinimalisticIcon} from '@solar-icons/react/bold-duotone';
-import {AnimatePresence, motion} from 'framer-motion';
+import {AnimatePresence, motion, useReducedMotion} from 'framer-motion';
 import {some} from 'lodash-es';
 import {Plus} from 'lucide-react';
 import {Dispatch, memo, SetStateAction, useEffect, useState} from 'react';
@@ -40,6 +40,8 @@ type Props = {
 };
 
 const CustomArgComp = memo(({title, description, list, setList, addItem, isAdded, removeItem}: Props) => {
+  const shouldReduceMotion = useReducedMotion();
+
   const addCustom = (itemKind: CustomArgKinds) => {
     setList(prevState => {
       let baseName: string;
@@ -116,9 +118,15 @@ const CustomArgComp = memo(({title, description, list, setList, addItem, isAdded
         <AnimatePresence mode="popLayout">
           {list.length === 0 ? (
             <motion.div
+              exit={{
+                opacity: 0,
+                scale: shouldReduceMotion ? 1 : 0.98,
+                transition: {duration: 0.14, ease: [0.23, 1, 0.32, 1]},
+              }}
               className="w-full"
-              animate={{translateY: 0, opacity: 1, scale: 1}}
-              initial={{translateY: 5, opacity: 0, scale: 0.9}}>
+              key="empty_custom_args"
+              initial={{translateY: shouldReduceMotion ? 0 : 6, opacity: 0, scale: shouldReduceMotion ? 1 : 0.98}}
+              animate={{translateY: 0, opacity: 1, scale: 1, transition: {duration: 0.18, ease: [0.23, 1, 0.32, 1]}}}>
               <EmptyStateCard
                 description={
                   <span className="flex items-center gap-x-1 text-sm text-muted">
@@ -130,21 +138,24 @@ const CustomArgComp = memo(({title, description, list, setList, addItem, isAdded
               />
             </motion.div>
           ) : (
-            <div
+            <motion.div
               className={
                 `w-full grid gap-2 ` + `${list.length === 1 ? 'grid-cols-1' : 'max-2xl:grid-cols-1 2xl:grid-cols-2'}`
-              }>
-              {list.map((item, index) => (
+              }
+              key="custom_args_grid"
+              transition={{layout: {duration: 0.2, ease: [0.23, 1, 0.32, 1]}}}
+              layout>
+              {list.map(item => (
                 <RenderCustomItem
                   item={item}
+                  key={item.name}
                   addItem={addItem}
                   removeItem={onRemove}
                   isAdded={isAdded(item)}
                   setCustomList={setList}
-                  key={`custom_item_${index}`}
                 />
               ))}
-            </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
