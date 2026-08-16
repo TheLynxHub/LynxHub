@@ -1,4 +1,4 @@
-import {ModalHeader, ModalHeading} from '@heroui/react';
+import {ModalHeader, ModalHeading, Skeleton} from '@heroui/react';
 import {memo, useMemo} from 'react';
 
 import StepProgress from '../components/StepProgress';
@@ -19,15 +19,21 @@ function InstallHeader() {
     <ModalHeader>
       <ModalHeading>
         <div className="flex w-full justify-center">
-          <StepProgress
-            steps={steps}
-            current={currentStep}
-            className="max-w-full"
-            doneType={doneAll.type}
-            isDone={body === 'done'}
-            orientation="horizontal"
-            titleClassName={maxTitleWidth}
-          />
+          {steps.length === 0 ? (
+            <div className="flex items-center justify-center py-1">
+              <Skeleton className="h-6 w-48 rounded-lg" />
+            </div>
+          ) : (
+            <StepProgress
+              steps={steps}
+              current={currentStep}
+              className="max-w-full"
+              doneType={doneAll.type}
+              isDone={body === 'done'}
+              orientation="horizontal"
+              titleClassName={maxTitleWidth}
+            />
+          )}
         </div>
       </ModalHeading>
     </ModalHeader>

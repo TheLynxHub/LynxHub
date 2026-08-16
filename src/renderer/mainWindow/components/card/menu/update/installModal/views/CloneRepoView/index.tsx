@@ -1,4 +1,4 @@
-import {Card, Link, ProgressBar, useOverlayState} from '@heroui/react';
+import {Card, Label, Link, ProgressBar, Skeleton, useOverlayState} from '@heroui/react';
 import {GitHub_Icon} from '@lynx_assets/icons';
 import {GitProgressCallback} from '@lynx_common/types/ipc';
 import {extractGitUrl, isWin} from '@lynx_common/utils';
@@ -48,10 +48,33 @@ function CloneRepoView({isOpen}: CloneRepoViewProps) {
 
   const isCloningRef = useRef<boolean>(false);
 
+  const isProgressReady = Boolean(
+    downloadProgress.stage &&
+    downloadProgress.stage.toLowerCase() !== 'unknown' &&
+    (downloadProgress.total > 0 || downloadProgress.processed > 0),
+  );
+
   const progressItems: DescriptionGridItem[] = [
-    {key: 'stage', label: 'Stage', content: capitalize(downloadProgress.stage)},
-    {key: 'item', label: 'Item', content: downloadProgress.processed},
-    {key: 'total', label: 'Total', content: downloadProgress.total},
+    {
+      key: 'stage',
+      label: 'Stage',
+      content: isProgressReady ? capitalize(downloadProgress.stage) : <Skeleton className="h-5 w-24 rounded-lg" />,
+    },
+    {
+      key: 'item',
+      label: 'Item',
+      content: isProgressReady ? downloadProgress.processed : <Skeleton className="h-5 w-16 rounded-lg" />,
+    },
+    {
+      key: 'total',
+      label: 'Total',
+      content:
+        isProgressReady && downloadProgress.total > 0 ? (
+          downloadProgress.total
+        ) : (
+          <Skeleton className="h-5 w-16 rounded-lg" />
+        ),
+    },
   ];
 
   useEffect(() => {
@@ -109,8 +132,9 @@ function CloneRepoView({isOpen}: CloneRepoViewProps) {
         <>
           <ProgressBar
             size="lg"
-            value={downloadProgress.progress}
-            isIndeterminate={downloadProgress.stage === 'unknown'}>
+            isIndeterminate={!isProgressReady}
+            value={isProgressReady ? downloadProgress.progress : undefined}>
+            <Label>{isProgressReady ? `${Math.round(downloadProgress.progress)}%` : 'Cloning repository...'}</Label>
             <ProgressBar.Output />
             <ProgressBar.Track>
               <ProgressBar.Fill />
