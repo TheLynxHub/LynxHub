@@ -36,16 +36,24 @@ export default class ExtensionManager {
    */
   private async getExtensionName(rootPath: string): Promise<string> {
     try {
-      const pkgPath = path.join(rootPath, 'package.json');
+      let pkgPath = path.join(rootPath, 'package.json');
+      if (!fs.existsSync(pkgPath)) {
+        pkgPath = path.join(path.dirname(rootPath), 'package.json');
+      }
       if (fs.existsSync(pkgPath)) {
         const data = await fs.promises.readFile(pkgPath, 'utf8');
         const pkg = JSON.parse(data);
-        if (pkg.name) return pkg.name;
+        if (pkg.name) return pkg.name.toLowerCase().replace(/-/g, '_');
       }
     } catch (e) {
       console.error('Failed to read extension name from package.json', e);
     }
-    return path.basename(rootPath);
+
+    const base = path.basename(rootPath);
+    if (/^v\d+/i.test(base)) {
+      return path.basename(path.dirname(rootPath)).toLowerCase().replace(/-/g, '_');
+    }
+    return base.toLowerCase().replace(/-/g, '_');
   }
 
   private getDevFolderPath(folderName: string): string {

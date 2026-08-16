@@ -35,16 +35,26 @@ export default class ModuleManager {
    */
   private async getModuleName(rootPath: string): Promise<string> {
     try {
-      const pkgPath = path.join(rootPath, 'package.json');
+      let pkgPath = path.join(rootPath, 'package.json');
+      if (!fs.existsSync(pkgPath)) {
+        pkgPath = path.join(path.dirname(rootPath), 'package.json');
+      }
       if (fs.existsSync(pkgPath)) {
         const data = await fs.promises.readFile(pkgPath, 'utf8');
         const pkg = JSON.parse(data);
-        if (pkg.name) return pkg.name;
+        if (pkg.name) {
+          const norm = pkg.name.toLowerCase().replace(/-/g, '_');
+          return norm === 'lynxhub_module_offline_container' ? 'local_ai_collection' : norm;
+        }
       }
     } catch (e) {
       console.error('Failed to read module name from package.json', e);
     }
-    return path.basename(rootPath);
+
+    const base = path.basename(rootPath);
+    const resolved = /^v\d+/i.test(base) ? path.basename(path.dirname(rootPath)) : base;
+    const norm = resolved.toLowerCase().replace(/-/g, '_');
+    return norm === 'lynxhub_module_offline_container' ? 'local_ai_collection' : norm;
   }
 
   /**

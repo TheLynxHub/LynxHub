@@ -186,17 +186,24 @@ export class BaseSqliteStorage {
   }
 
   /**
-   * Checks if lowdb migration has run. If not, runs legacy lowdb migrations first,
-   * then copies all lowdb data into SQLite tables.
+   * Checks if lowdb migration has run. If not or if on older migration version,
+   * repairs misclassified plugin tables and copies all lowdb data into SQLite.
    */
   private checkAndPerformAutoMigration(): void {
     try {
-      const res = this.sqlite.prepare('SELECT value FROM meta_storage WHERE key = ?').get('lowdb_migrated') as
+      const MIGRATION_VERSION = '3';
+      const resMigrated = this.sqlite.prepare('SELECT value FROM meta_storage WHERE key = ?').get('lowdb_migrated') as
         {value: string} | undefined;
+      const resVersion = this.sqlite
+        .prepare('SELECT value FROM meta_storage WHERE key = ?')
+        .get('lowdb_migration_version') as {value: string} | undefined;
 
-      if (res?.value === 'true') {
+      if (resMigrated?.value === 'true' && resVersion?.value === MIGRATION_VERSION) {
         return;
       }
+
+      // Repair any misclassified or hyphenated plugin records in SQLite
+      this.repairSqlitePluginTables();
 
       // 1. Run legacy lowdb migrations on existing lowdb files first (if present)
       try {
@@ -209,14 +216,129 @@ export class BaseSqliteStorage {
       const targetManager = new SqliteStorageManager(this);
       migrateLowdbToSqlite(targetManager);
 
-      // 3. Mark lowdb_migrated = 'true'
+      // 3. Mark lowdb_migrated = 'true' and lowdb_migration_version = '3'
       this.sqlite
         .prepare('INSERT OR REPLACE INTO meta_storage (key, value) VALUES (?, ?)')
         .run('lowdb_migrated', 'true');
+      this.sqlite
+        .prepare('INSERT OR REPLACE INTO meta_storage (key, value) VALUES (?, ?)')
+        .run('lowdb_migration_version', MIGRATION_VERSION);
 
       console.log('[SQLite Storage] Successfully completed automatic LowDB -> SQLite migration.');
     } catch (error) {
       console.error('[SQLite Storage] Error during automatic LowDB migration:', error);
+    }
+  }
+
+  /**
+   * Repairs existing SQLite tables by migrating any misclassified or hyphenated plugin records.
+   */
+  private repairSqlitePluginTables(): void {
+    try {
+      this.sqlite.transaction(() => {
+        // 0. Remove invalid version-based plugin entries (e.g. 'v0.15.3') from extension_storage and module_storage
+        this.sqlite
+          .prepare(
+            `DELETE FROM extension_storage
+             WHERE extension_name GLOB 'v[0-9]*' OR extension_name LIKE 'v0.%' OR extension_name LIKE 'v1.%'`,
+          )
+          .run();
+        this.sqlite
+          .prepare(
+            `DELETE FROM module_storage
+             WHERE module_name GLOB 'v[0-9]*' OR module_name LIKE 'v0.%' OR module_name LIKE 'v1.%'`,
+          )
+          .run();
+
+        // 1. Move any known extensions wrongly placed into module_storage over to extension_storage
+        const knownExtensions = [
+          'python_toolkit',
+          'python-toolkit',
+          'hardware_monitor',
+          'hardware-monitor',
+          'ai_news',
+          'ai-news',
+          'custom_actions',
+          'custom-actions',
+          'skills_toolkit',
+          'skills-toolkit',
+        ];
+        const placeholders = knownExtensions.map(() => '?').join(',');
+        const misclassified = this.sqlite
+          .prepare(
+            `SELECT module_name, key, value, updated_at FROM module_storage WHERE module_name IN (${placeholders})`,
+          )
+          .all(...knownExtensions) as {module_name: string; key: string; value: string; updated_at: string}[];
+
+        for (const row of misclassified) {
+          const normExt = row.module_name.toLowerCase().replace(/-/g, '_');
+          this.sqlite
+            .prepare(
+              `INSERT INTO extension_storage (extension_name, key, value, updated_at)
+              VALUES (?, ?, ?, ?)
+              ON CONFLICT(extension_name, key) DO UPDATE SET
+                value = excluded.value,
+                updated_at = excluded.updated_at`,
+            )
+            .run(normExt, row.key, row.value, row.updated_at);
+        }
+
+        if (misclassified.length > 0) {
+          this.sqlite
+            .prepare(`DELETE FROM module_storage WHERE module_name IN (${placeholders})`)
+            .run(...knownExtensions);
+        }
+
+        // 2. Normalize hyphenated extension names in extension_storage
+        const hyphenExts = this.sqlite
+          .prepare(
+            "SELECT extension_name, key, value, updated_at FROM extension_storage WHERE extension_name LIKE '%-%'",
+          )
+          .all() as {extension_name: string; key: string; value: string; updated_at: string}[];
+
+        for (const row of hyphenExts) {
+          const normExt = row.extension_name.toLowerCase().replace(/-/g, '_');
+          this.sqlite
+            .prepare(
+              `INSERT INTO extension_storage (extension_name, key, value, updated_at)
+              VALUES (?, ?, ?, ?)
+              ON CONFLICT(extension_name, key) DO UPDATE SET
+                value = excluded.value,
+                updated_at = excluded.updated_at`,
+            )
+            .run(normExt, row.key, row.value, row.updated_at);
+          this.sqlite
+            .prepare('DELETE FROM extension_storage WHERE extension_name = ? AND key = ?')
+            .run(row.extension_name, row.key);
+        }
+
+        // 3. Migrate old lynxhub_module_offline_container in module_storage to local_ai_collection
+        const oldModules = this.sqlite
+          .prepare(
+            "SELECT key, value, updated_at FROM module_storage WHERE module_name = 'lynxhub_module_offline_container'",
+          )
+          .all() as {key: string; value: string; updated_at: string}[];
+
+        for (const row of oldModules) {
+          this.sqlite
+            .prepare(
+              `INSERT INTO module_storage (module_name, key, value, updated_at)
+              VALUES (?, ?, ?, ?)
+              ON CONFLICT(module_name, key) DO UPDATE SET
+                value = excluded.value,
+                updated_at = excluded.updated_at`,
+            )
+            .run('local_ai_collection', row.key, row.value, row.updated_at);
+        }
+
+        if (oldModules.length > 0) {
+          this.sqlite
+            .prepare("DELETE FROM module_storage WHERE module_name = 'lynxhub_module_offline_container'")
+            .run();
+        }
+      })();
+    } catch (err) {
+      console.warn('[SQLite Storage] Plugin table repair warning:', err);
     }
   }
 
