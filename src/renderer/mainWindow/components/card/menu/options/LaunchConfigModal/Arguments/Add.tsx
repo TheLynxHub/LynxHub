@@ -106,7 +106,12 @@ export default function AddArgumentModal({addArgumentsModal, chosenArguments, se
       newChosenArgs.push(
         ...customArgs.map(item => ({
           name: item.name,
-          value: item.defaultValue,
+          value:
+            item.type === 'CheckBox'
+              ? typeof item.defaultValue === 'boolean'
+                ? item.defaultValue
+                : true
+              : (item.defaultValue ?? ''),
           custom: {kind: item.kind, type: item.type},
         })),
       );

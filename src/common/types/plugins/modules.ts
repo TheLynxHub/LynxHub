@@ -557,10 +557,16 @@ export type PagesData = {
  */
 export type CardModules = PagesData[];
 
+export type ArgumentValue = string | number | boolean;
+
 /**
  * A chosen argument value.
  */
-export type ChosenArgument = {name: string; value: string | number; custom?: Pick<CustomArg, 'type' | 'kind'>};
+export type ChosenArgument = {
+  name: string;
+  value: ArgumentValue;
+  custom?: Pick<CustomArg, 'type' | 'kind'>;
+};
 
 /**
  * Supported argument types.

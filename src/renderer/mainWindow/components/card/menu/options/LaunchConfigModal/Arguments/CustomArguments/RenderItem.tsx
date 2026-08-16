@@ -10,6 +10,7 @@ import {
   NumberField,
   Select,
   Separator,
+  Switch,
   TextArea,
 } from '@heroui/react';
 import {CustomArg} from '@lynx_common/types';
@@ -110,7 +111,14 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
 
     const targetKey = key as ArgumentType;
     setCustomList(prevState =>
-      prevState.map(listItem => (listItem.name === item.name ? {...listItem, type: targetKey} : listItem)),
+      prevState.map(listItem => {
+        if (listItem.name !== item.name) return listItem;
+        let nextDefaultValue = listItem.defaultValue;
+        if (targetKey === 'CheckBox') {
+          nextDefaultValue = typeof listItem.defaultValue === 'boolean' ? listItem.defaultValue : true;
+        }
+        return {...listItem, type: targetKey, defaultValue: nextDefaultValue};
+      }),
     );
   };
 
@@ -209,7 +217,7 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
                 <Input
                   spellCheck="false"
                   variant="secondary"
-                  placeholder="Enter defualt value..."
+                  placeholder="Enter default value..."
                   onChange={e => onDefaultValueChange(e.target.value)}
                   value={typeof item.defaultValue !== 'string' ? '' : item.defaultValue}
                   fullWidth
@@ -253,7 +261,7 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
             )}
             {item.type === 'File' && (
               <>
-                <span className="shrink-0">Folder:</span>
+                <span className="shrink-0">File:</span>
                 <Button
                   size="sm"
                   variant="secondary"
@@ -268,6 +276,27 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
                   )}
                 </Button>
               </>
+            )}
+            {item.type === 'CheckBox' && (
+              <div className="flex items-center gap-x-2">
+                <span className="shrink-0">Default Value:</span>
+                <Switch
+                  size="sm"
+                  onChange={onDefaultValueChange}
+                  aria-label="Toggle boolean default value"
+                  isSelected={typeof item.defaultValue === 'boolean' ? item.defaultValue : true}>
+                  <Switch.Content>
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch.Content>
+                </Switch>
+                <span className="text-xs text-muted">
+                  {(typeof item.defaultValue === 'boolean' ? item.defaultValue : true)
+                    ? 'True (Enabled)'
+                    : 'False (Disabled)'}
+                </span>
+              </div>
             )}
             {item.type === 'DropDown' && (
               <div className="flex flex-col w-full gap-y-2">
@@ -360,7 +389,7 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
                   spellCheck="false"
                   variant="secondary"
                   value={item.defaultValue}
-                  placeholder="Enter defualt value..."
+                  placeholder="Enter default value..."
                   onChange={e => onDefaultValueChange(e.target.value)}
                   fullWidth
                 />
@@ -370,7 +399,7 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
                   spellCheck="false"
                   variant="secondary"
                   value={item.defaultValue}
-                  placeholder="Enter defualt value..."
+                  placeholder="Enter default value..."
                   onChange={e => onDefaultValueChange(e.target.value)}
                   fullWidth
                 />
