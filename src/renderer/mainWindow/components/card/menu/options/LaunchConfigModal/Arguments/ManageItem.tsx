@@ -75,7 +75,7 @@ const ManageArgumentsItem = memo(({argument, setArguments, id}: Props) => {
       default:
         return DeprecatedArgItem;
     }
-  }, [argument.name, cardArgument]);
+  }, [argument.custom?.type, argument.name, cardArgument]);
 
   return <Component id={id} argument={argument} removeArg={removeArg} changeValue={changeValue} />;
 });

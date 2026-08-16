@@ -29,7 +29,14 @@ export type ChosenArgumentsData = {activePreset: string; data: ArgumentsPresets[
 export type StorageChosenArgumentsData = {cardId: string; activePreset: string; data: ArgumentsPresets[]}[];
 
 export type CustomArgKinds = 'envVar' | 'commandLine' | 'custom' | 'comment';
-export type CustomArg = {name: string; kind: CustomArgKinds; type: ArgumentType; defaultValue?: any};
+export type CustomArg = {
+  id?: string;
+  name: string;
+  kind: CustomArgKinds;
+  type: ArgumentType;
+  defaultValue?: any;
+  values?: string[];
+};
 
 /**
  * Progress information for downloads or updates.

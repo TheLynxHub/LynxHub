@@ -565,7 +565,7 @@ export type ArgumentValue = string | number | boolean;
 export type ChosenArgument = {
   name: string;
   value: ArgumentValue;
-  custom?: Pick<CustomArg, 'type' | 'kind'>;
+  custom?: Pick<CustomArg, 'type' | 'kind' | 'values'>;
 };
 
 /**

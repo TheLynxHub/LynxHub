@@ -115,10 +115,12 @@ const itemTypes: {id: string; label: string; description: string}[] = [
 export default function RenderCustomItem({item, isAdded, setCustomList, addItem, removeItem}: RenderProps) {
   const shouldReduceMotion = useReducedMotion();
 
+  const isTargetItem = (listItem: CustomArg) => (item.id ? listItem.id === item.id : listItem.name === item.name);
+
   const onNameChange = (value: string) => {
     setCustomList(prevState =>
       prevState.map(listItem => {
-        return listItem.name !== item.name ? listItem : {...listItem, name: value};
+        return !isTargetItem(listItem) ? listItem : {...listItem, name: value};
       }),
     );
   };
@@ -126,7 +128,15 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
   const onDefaultValueChange = (value: any) => {
     setCustomList(prevState =>
       prevState.map(listItem => {
-        return listItem.name !== item.name ? listItem : {...listItem, defaultValue: value};
+        if (!isTargetItem(listItem)) return listItem;
+        const extraUpdates: Partial<CustomArg> = {};
+        if (listItem.type === 'DropDown' && typeof value === 'string') {
+          extraUpdates.values = value
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+        }
+        return {...listItem, defaultValue: value, ...extraUpdates};
       }),
     );
   };
@@ -137,12 +147,18 @@ export default function RenderCustomItem({item, isAdded, setCustomList, addItem,
     const targetKey = key as ArgumentType;
     setCustomList(prevState =>
       prevState.map(listItem => {
-        if (listItem.name !== item.name) return listItem;
+        if (!isTargetItem(listItem)) return listItem;
         let nextDefaultValue = listItem.defaultValue;
+        let nextValues = listItem.values;
         if (targetKey === 'CheckBox') {
           nextDefaultValue = typeof listItem.defaultValue === 'boolean' ? listItem.defaultValue : true;
+        } else if (targetKey === 'DropDown' && typeof listItem.defaultValue === 'string') {
+          nextValues = listItem.defaultValue
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
         }
-        return {...listItem, type: targetKey, defaultValue: nextDefaultValue};
+        return {...listItem, type: targetKey, defaultValue: nextDefaultValue, values: nextValues};
       }),
     );
   };

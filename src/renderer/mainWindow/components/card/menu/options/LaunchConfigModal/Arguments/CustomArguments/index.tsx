@@ -28,6 +28,10 @@ function generateUniqueName(items: CustomArg[], baseName: string): string {
   return newName;
 }
 
+function ensureCustomArgIds(items: CustomArg[]): CustomArg[] {
+  return items.map(item => (item.id ? item : {...item, id: crypto.randomUUID()}));
+}
+
 type Props = {
   title: string;
   description: string;
@@ -66,6 +70,7 @@ const CustomArgComp = memo(({title, description, list, setList, addItem, isAdded
 
       const uniqueName = generateUniqueName(prevState, baseName);
       const itemToAdd: CustomArg = {
+        id: crypto.randomUUID(),
         name: uniqueName,
         type: 'Input',
         kind: itemKind,
@@ -76,7 +81,9 @@ const CustomArgComp = memo(({title, description, list, setList, addItem, isAdded
   };
 
   const onRemove = (item: CustomArg) => {
-    setList(prevState => prevState.filter(listItem => listItem.name !== item.name));
+    setList(prevState =>
+      prevState.filter(listItem => (item.id ? listItem.id !== item.id : listItem.name !== item.name)),
+    );
     removeItem(item);
   };
 
@@ -148,11 +155,11 @@ const CustomArgComp = memo(({title, description, list, setList, addItem, isAdded
               {list.map(item => (
                 <RenderCustomItem
                   item={item}
-                  key={item.name}
                   addItem={addItem}
                   removeItem={onRemove}
                   isAdded={isAdded(item)}
                   setCustomList={setList}
+                  key={item.id || item.name}
                 />
               ))}
             </motion.div>
@@ -219,10 +226,10 @@ export default function CustomArguments({id, setCustomArgs, selectedArguments, c
     setTitle(cardTitle);
 
     storageIpc.get('cardsConfig').then(value => {
-      setGlobalList(value.customArgs.global);
+      setGlobalList(ensureCustomArgIds(value.customArgs.global || []));
 
       const cardData = value.customArgs.perCard.find(item => item.cardId === id);
-      if (cardData && cardData.args) setPerCardList(cardData.args);
+      if (cardData && cardData.args) setPerCardList(ensureCustomArgIds(cardData.args));
 
       setInitializingLists(false);
     });
@@ -230,12 +237,14 @@ export default function CustomArguments({id, setCustomArgs, selectedArguments, c
 
   const addItem = (item: CustomArg) => {
     setCustomArgs(prevState => {
-      return prevState.some(value => value.name === item.name) ? prevState : [...prevState, item];
+      return prevState.some(value => (item.id ? value.id === item.id : value.name === item.name))
+        ? prevState
+        : [...prevState, item];
     });
   };
 
   const removeItem = (item: CustomArg) => {
-    setCustomArgs(prevState => prevState.filter(value => value.name !== item.name));
+    setCustomArgs(prevState => prevState.filter(value => (item.id ? value.id !== item.id : value.name !== item.name)));
   };
 
   const isAdded = (item: CustomArg) => {

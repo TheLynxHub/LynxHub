@@ -104,16 +104,36 @@ export default function AddArgumentModal({addArgumentsModal, chosenArguments, se
       }));
 
       newChosenArgs.push(
-        ...customArgs.map(item => ({
-          name: item.name,
-          value:
-            item.type === 'CheckBox'
-              ? typeof item.defaultValue === 'boolean'
-                ? item.defaultValue
-                : true
-              : (item.defaultValue ?? ''),
-          custom: {kind: item.kind, type: item.type},
-        })),
+        ...customArgs.map(item => {
+          if (item.type === 'CheckBox') {
+            return {
+              name: item.name,
+              value: typeof item.defaultValue === 'boolean' ? item.defaultValue : true,
+              custom: {kind: item.kind, type: item.type},
+            };
+          }
+          if (item.type === 'DropDown') {
+            const parsedValues =
+              Array.isArray(item.values) && item.values.length > 0
+                ? item.values
+                : typeof item.defaultValue === 'string'
+                  ? item.defaultValue
+                      .split(',')
+                      .map(s => s.trim())
+                      .filter(Boolean)
+                  : [];
+            return {
+              name: item.name,
+              value: parsedValues[0] ?? item.defaultValue ?? '',
+              custom: {kind: item.kind, type: item.type, values: parsedValues},
+            };
+          }
+          return {
+            name: item.name,
+            value: item.defaultValue ?? '',
+            custom: {kind: item.kind, type: item.type},
+          };
+        }),
       );
 
       const newData = prevState.data.map(presetData => {

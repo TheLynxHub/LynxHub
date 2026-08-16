@@ -28,20 +28,60 @@ type Props = {
 export default function DropdownArgItem({argument, changeValue, removeArg, id}: Props) {
   const cardArgument = useGetArgumentsByID(id);
 
-  const defaultValue = useMemo(
-    () => getArgumentDefaultValue(argument.name, cardArgument),
-    [argument.name, cardArgument],
+  const items: ArgumentDropdownValues = useMemo(() => {
+    if (argument.custom?.values && Array.isArray(argument.custom.values) && argument.custom.values.length > 0) {
+      return argument.custom.values.map(value => ({value, description: undefined}));
+    }
+
+    if (typeof argument.value === 'string' && argument.value.includes(',')) {
+      const splitValues = argument.value
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+      if (splitValues.length > 1) {
+        return splitValues.map(value => ({value, description: undefined}));
+      }
+    }
+
+    const values = getArgumentValues(argument.name, cardArgument) || [];
+    if (isStringArray(values)) {
+      return values.map(value => ({value, description: undefined}));
+    }
+
+    return values as ArgumentDropdownValues;
+  }, [argument.name, argument.custom, argument.value, cardArgument]);
+
+  const defaultValue = useMemo(() => {
+    if (argument.custom) {
+      return items[0]?.value ?? '';
+    }
+    return getArgumentDefaultValue(argument.name, cardArgument);
+  }, [argument.custom, argument.name, cardArgument, items]);
+
+  const resolveSelectedKey = useCallback(
+    (rawVal: any) => {
+      if (rawVal) {
+        if (typeof rawVal === 'string' && rawVal.includes(',')) {
+          return items[0]?.value ?? rawVal;
+        }
+        return rawVal;
+      }
+      return defaultValue ? defaultValue : (items[0]?.value ?? null);
+    },
+    [defaultValue, items],
   );
 
-  const [selectedKey, setSelectedKey] = useState<Key | null>(
-    argument.value ? argument.value : defaultValue ? defaultValue : null,
-  );
+  const [selectedKey, setSelectedKey] = useState<Key | null>(resolveSelectedKey(argument.value));
 
   // Sync state with prop updates
   useEffect(() => {
-    const val = argument.value ? argument.value : defaultValue ? defaultValue : null;
+    const val = resolveSelectedKey(argument.value);
     setSelectedKey(val);
-  }, [argument.value, defaultValue]);
+
+    if (items.length > 0 && typeof argument.value === 'string' && argument.value.includes(',')) {
+      changeValue(items[0].value);
+    }
+  }, [argument.value, changeValue, items, resolveSelectedKey]);
 
   const onChange = useCallback(
     (key: Key | null) => {
@@ -52,15 +92,6 @@ export default function DropdownArgItem({argument, changeValue, removeArg, id}: 
     },
     [changeValue],
   );
-
-  const items: ArgumentDropdownValues = useMemo(() => {
-    const values = getArgumentValues(argument.name, cardArgument) || [];
-    if (isStringArray(values)) {
-      return values.map(value => ({value, description: undefined}));
-    }
-
-    return values as ArgumentDropdownValues;
-  }, [argument.name, cardArgument]);
 
   return (
     <ArgumentItemBase
