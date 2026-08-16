@@ -1,6 +1,8 @@
+import {Chip} from '@heroui/react';
 import {APP_ICON_TRANSPARENT, APP_NAME} from '@lynx_common/consts';
 import applicationIpc from '@lynx_shared/ipc/application';
 import storageIpc from '@lynx_shared/ipc/storage';
+import {UnreadIcon} from '@solar-icons/react/line-duotone';
 import {AnimatePresence} from 'framer-motion';
 import {useCallback, useState} from 'react';
 
@@ -13,6 +15,16 @@ import StepWelcome from './WelcomeStep';
 type Props = {
   isUpgradeFlow: boolean;
 };
+
+const steps = [
+  {id: 0, label: 'Welcome'},
+  {id: 1, label: 'System & Extensions'},
+  {id: 2, label: 'Ready'},
+];
+
+const logoBoxClass =
+  'relative size-10 rounded-2xl bg-surface border ' +
+  'border-surface-secondary flex items-center justify-center p-1.5 shadow-sm';
 
 export default function OnboardingWizard({isUpgradeFlow}: Props) {
   const [step, setStep] = useState<number>(isUpgradeFlow ? 99 : 0); // 99 for upgrade flow
@@ -55,21 +67,69 @@ export default function OnboardingWizard({isUpgradeFlow}: Props) {
   };
 
   return (
-    <div className="relative z-10 size-full flex flex-col">
-      <header className="flex items-center justify-between p-6 shrink-0">
+    <div className="relative z-10 size-full flex flex-col justify-between select-none">
+      {/* Top Header & Stepped Progress Bar */}
+      <header className="flex items-center justify-between px-8 py-4 shrink-0">
+        {/* Logo & App Title */}
         <div className="flex items-center gap-3">
-          <img alt="App Logo" className="size-10" src={APP_ICON_TRANSPARENT} />
+          <div className={logoBoxClass}>
+            <img alt="App Logo" src={APP_ICON_TRANSPARENT} className="size-full object-contain" />
+          </div>
           <div>
-            <h1 className="font-semibold text-lg text-gray-800 dark:text-gray-100">{APP_NAME}</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Setup Assistant</p>
+            <h1 className="font-bold text-sm text-foreground tracking-tight">{APP_NAME}</h1>
+            <p className="text-[11px] font-medium text-muted">First-Time Setup Assistant</p>
           </div>
         </div>
+
+        {/* Stepped Progress Indicator */}
         {!isUpgradeFlow && (
-          <div className="text-sm font-medium text-gray-600 dark:text-gray-300">Step {step + 1} of 3</div>
+          <nav aria-label="Onboarding Progress" className="flex items-center gap-2">
+            {steps.map((s, index) => {
+              const isCompleted = step > s.id;
+              const isActive = step === s.id;
+
+              const pillClass = isActive
+                ? 'bg-accent/20 text-accent-foreground border border-accent/40 shadow-xs'
+                : isCompleted
+                  ? 'bg-success/20 text-success border border-success/40'
+                  : 'bg-surface/60 text-muted border border-surface-secondary';
+
+              const circleClass = isActive
+                ? 'bg-accent text-white'
+                : isCompleted
+                  ? 'bg-success text-success-foreground'
+                  : 'bg-foreground/10 text-muted';
+
+              const trackClass = step > index ? 'bg-success/60' : 'bg-surface-secondary';
+              const stepPillWrapperClass =
+                'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs ' +
+                `font-semibold transition-all duration-300 ${pillClass}`;
+
+              return (
+                <div key={s.id} className="flex items-center">
+                  <div className={stepPillWrapperClass}>
+                    <Chip size="sm" className={`size-4 p-0 flex items-center justify-center font-bold ${circleClass}`}>
+                      {isCompleted ? (
+                        <UnreadIcon className="size-3.5" />
+                      ) : (
+                        <span className="text-[8pt] mt-0.5">{index + 1}</span>
+                      )}
+                    </Chip>
+                    <span className="hidden sm:inline text-[11px]">{s.label}</span>
+                  </div>
+
+                  {index < steps.length - 1 && (
+                    <div className={`w-4 h-0.5 mx-1 transition-colors duration-300 ${trackClass}`} />
+                  )}
+                </div>
+              );
+            })}
+          </nav>
         )}
       </header>
 
-      <main className="flex-1 px-8 pb-8 overflow-y-auto">
+      {/* Main Step Content Area with hidden scrollbar */}
+      <main className="flex-1 px-8 py-4 overflow-y-auto scrollbar-hide min-h-0">
         <AnimatePresence mode="wait">{renderStep()}</AnimatePresence>
       </main>
     </div>

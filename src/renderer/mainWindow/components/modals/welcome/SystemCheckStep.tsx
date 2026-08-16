@@ -1,20 +1,25 @@
 import {Button} from '@heroui/react';
-import {motion} from 'framer-motion';
+import {CheckCircleIcon, DangerCircleIcon} from '@solar-icons/react/bold-duotone';
+import {ArrowRightIcon} from '@solar-icons/react/line-duotone';
+import {motion, Variants} from 'framer-motion';
 import {Dispatch, SetStateAction, useMemo, useState} from 'react';
 
 import PluginSelector from './PluginSelector';
 import RequirementsChecker from './RequirementsChecker';
 import {RequirementStatus} from './types';
 
-const containerVariants = {
-  hidden: {opacity: 0, y: 20},
-  enter: {opacity: 1, y: 0, transition: {staggerChildren: 0.1, delayChildren: 0.2}},
-  exit: {opacity: 0, y: -20},
+const containerVariants: Variants = {
+  hidden: {opacity: 0},
+  enter: {
+    opacity: 1,
+    transition: {staggerChildren: 0.08, delayChildren: 0.1},
+  },
+  exit: {opacity: 0, y: -15, transition: {duration: 0.25}},
 };
 
-const itemVariants = {
-  hidden: {opacity: 0, y: 10},
-  enter: {opacity: 1, y: 0},
+const itemVariants: Variants = {
+  hidden: {opacity: 0, y: 14},
+  enter: {opacity: 1, y: 0, transition: {duration: 0.4, ease: [0.16, 1, 0.3, 1]}},
 };
 
 type Props = {
@@ -33,12 +38,6 @@ export default function StepSystemCheck({onNext, setInstalledPlugins, setRequire
     [requirementsSatisfied, isInstallingPlugins],
   );
 
-  const continueButtonText = useMemo(() => {
-    if (canContinue) return 'Continue';
-    if (isInstallingPlugins) return 'Installing Extensions...';
-    return 'Requirements must pass to continue';
-  }, [canContinue, isInstallingPlugins]);
-
   return (
     <motion.div
       exit="exit"
@@ -46,19 +45,23 @@ export default function StepSystemCheck({onNext, setInstalledPlugins, setRequire
       initial="hidden"
       key="system-check"
       variants={containerVariants}
-      className="h-full flex flex-col">
-      <motion.div variants={itemVariants}>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">System Check & Extensions</h2>
-        <p className="text-md text-gray-600 dark:text-gray-300 mb-6">
-          Checking if all requirements are met and letting you pick some useful extensions to start with.
+      className="h-full flex flex-col justify-between py-1">
+      {/* Top Heading */}
+      <motion.div className="mb-2.5" variants={itemVariants}>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">System & Extensions</h2>
+        <p className="text-xs md:text-sm text-muted mt-0.5">
+          Verify core dependencies and optionally pre-install starter plugins for your AI workspace.
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 overflow-hidden">
-        <motion.div variants={itemVariants} className="overflow-y-auto">
+      {/* Two-Column Grid for Requirements & Plugins */}
+      <motion.div
+        variants={itemVariants}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-0 overflow-hidden">
+        <div className="h-full min-h-0">
           <RequirementsChecker onReport={setRequirementStatus} onStatusChange={setRequirementsSatisfied} />
-        </motion.div>
-        <motion.div variants={itemVariants} className="overflow-y-auto">
+        </div>
+        <div className="h-full min-h-0">
           <PluginSelector
             isInstalling={isInstallingPlugins}
             installedPlugins={installedPlugins}
@@ -66,12 +69,35 @@ export default function StepSystemCheck({onNext, setInstalledPlugins, setRequire
             setInstalledPlugins={setInstalledPlugins}
             requirementsSatisfied={requirementsSatisfied}
           />
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
 
-      <motion.div variants={itemVariants} className="flex justify-end items-center pt-6">
-        <Button onPress={onNext} isDisabled={!canContinue}>
-          {continueButtonText}
+      {/* Bottom Action & Status Bar */}
+      <motion.div variants={itemVariants} className="flex items-center justify-between pt-3 mt-2">
+        <div className="flex items-center gap-2 text-xs">
+          {canContinue ? (
+            <div className="flex items-center gap-1.5 text-success font-medium">
+              <CheckCircleIcon className="size-4 shrink-0" />
+              <span>Core requirements satisfied. Ready to proceed.</span>
+            </div>
+          ) : isInstallingPlugins ? (
+            <span className="text-muted font-medium">Installing chosen extensions, please wait...</span>
+          ) : (
+            <div className="flex items-center gap-1.5 text-warning font-medium">
+              <DangerCircleIcon className="size-4 shrink-0" />
+              <span>Core requirements must pass before continuing.</span>
+            </div>
+          )}
+        </div>
+
+        <Button
+          size="md"
+          onPress={onNext}
+          variant="primary"
+          isDisabled={!canContinue}
+          className="font-bold px-7 h-10 text-xs shadow-md shadow-accent/20">
+          Continue
+          <ArrowRightIcon className="size-4 shrink-0" />
         </Button>
       </motion.div>
     </motion.div>

@@ -1,6 +1,6 @@
-import {Avatar, Button, Checkbox, CheckboxGroup, cn, Description, Spinner} from '@heroui/react';
+import {Avatar, Button, Checkbox, Chip, cn, Description, Skeleton, Spinner} from '@heroui/react';
 import {getFallbackString} from '@lynx_common/utils';
-import {ArrowRightIcon} from '@solar-icons/react/bold-duotone';
+import {CheckReadIcon, DownloadMinimalisticIcon, Widget5Icon} from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
 import {Dispatch, SetStateAction, useState} from 'react';
 
@@ -14,12 +14,8 @@ type Props = {
   installedPlugins: string[];
 };
 
-const addon = {
-  description: 'Receive updates via email',
-  icon: ArrowRightIcon,
-  title: 'Email Notifications',
-  value: 'email',
-};
+const containerClass =
+  'bg-surface/60 rounded-3xl border border-surface-secondary p-5 ' + 'h-full flex flex-col backdrop-blur-sm';
 
 export default function PluginSelector({
   requirementsSatisfied,
@@ -28,7 +24,7 @@ export default function PluginSelector({
   setInstalledPlugins,
   installedPlugins,
 }: Props) {
-  const {plugins, setPlugins} = useAvailablePlugins();
+  const {plugins, setPlugins, isLoading} = useAvailablePlugins();
   const [selectedPlugins, setSelectedPlugins] = useState<Set<string>>(new Set());
 
   const {installPlugins} = usePluginInstaller(plugins, setPlugins, setInstalledPlugins, setInstalling);
@@ -49,73 +45,125 @@ export default function PluginSelector({
     installPlugins(selectedPlugins, () => setSelectedPlugins(new Set()));
   };
 
+  const emptyMsg = !isEmpty(installedPlugins)
+    ? 'All Starter Extensions Installed!'
+    : 'No Optional Extensions Available';
+
+  const emptyDesc = !isEmpty(installedPlugins)
+    ? 'Your selected extensions are already set up and ready to go.'
+    : 'You can discover and install more extensions from the Marketplace later.';
+
+  const hasSelection = !isEmpty(selectedPlugins);
+
   return (
-    <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-3xl h-full flex flex-col">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-100">Optional Extensions</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400">Choose which to install</p>
+    <div className={containerClass}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 pb-3 border-b border-surface-secondary">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500">
+            <Widget5Icon className="size-5" />
+          </div>
+          <div>
+            <h2 className="font-bold text-sm text-foreground">Starter Extensions</h2>
+            <p className="text-[11px] text-muted">Enhance your workspace with optional plugins</p>
+          </div>
+        </div>
+
+        <Chip variant="soft" color="default" className="text-xs font-semibold">
+          {isLoading ? 'Loading...' : `${plugins.length} Available`}
+        </Chip>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-2 -mr-2 mb-4">
-        {isEmpty(plugins) ? (
-          isEmpty(installedPlugins) ? (
-            <div className="flex items-center justify-center h-full">
-              <span className="text-gray-500 text-sm">No optional extensions available.</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <span className="text-gray-500 text-sm">
-                You're all set! All optional extensions are currently installed.
-              </span>
-            </div>
-          )
-        ) : (
-          <div className="flex flex-col p-2 gap-y-6 overflow-hidden size-full">
-            {plugins.map(ext => (
-              <CheckboxGroup key={ext.name} isDisabled={!requirementsSatisfied}>
-                <div className="flex flex-col gap-2">
-                  <Checkbox
-                    className={cn(
-                      'group relative flex-col gap-4 rounded-3xl bg-surface px-5 py-4 transition-all',
-                      'data-[selected=true]:bg-accent/10',
-                    )}
-                    key={addon.value}
-                    value={addon.value}
-                    variant="secondary"
-                    isSelected={selectedPlugins.has(ext.id)}
-                    onChange={() => handleSelectionChange(ext.id)}>
-                    <Checkbox.Content className="flex flex-row items-start justify-start gap-4">
-                      <Checkbox.Control className="absolute top-3 right-4 size-5 rounded-full before:rounded-full">
-                        <Checkbox.Indicator />
-                      </Checkbox.Control>
-                      <Avatar>
-                        <Avatar.Image src={ext.icon} alt={`${ext.name} icon`} />
-                        <Avatar.Fallback>{getFallbackString(ext.name)}</Avatar.Fallback>
-                      </Avatar>
-                      <div className="flex flex-col gap-1">
-                        <span className="font-semibold text-sm">{ext.name}</span>
-                      </div>
-                    </Checkbox.Content>
-                    <Description className="ml-14 text-xs text-muted -mt-3">{ext.description}</Description>
-                  </Checkbox>
+      {/* Extension List Container */}
+      <div className="flex-1 overflow-y-auto pr-1 space-y-2 mb-3">
+        {isLoading ? (
+          <div className="space-y-2.5">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="p-3 rounded-2xl bg-surface/50 border border-surface-secondary flex gap-3">
+                <Skeleton className="size-9 rounded-xl shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-4 w-2/3 rounded-lg" />
+                  <Skeleton className="h-3 w-4/5 rounded-lg" />
                 </div>
-              </CheckboxGroup>
+              </div>
             ))}
           </div>
+        ) : isEmpty(plugins) ? (
+          <div className="flex flex-col items-center justify-center h-full text-center py-6 px-4">
+            <div className="p-2.5 rounded-full bg-success/10 text-success mb-2">
+              <CheckReadIcon className="size-5" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">{emptyMsg}</span>
+            <p className="text-xs text-muted mt-1 max-w-xs">{emptyDesc}</p>
+          </div>
+        ) : (
+          plugins.map(ext => {
+            const isSelected = selectedPlugins.has(ext.id);
+            const cardClass = cn(
+              'relative rounded-2xl border transition-all duration-200 overflow-hidden',
+              isSelected
+                ? 'bg-accent/15 border-accent/60 shadow-xs'
+                : 'bg-surface/80 border-surface-secondary hover:bg-surface hover:border-surface-secondary/80',
+              !requirementsSatisfied && 'opacity-60 pointer-events-none',
+            );
+
+            return (
+              <div key={ext.id} className={cardClass} onClick={() => handleSelectionChange(ext.id)}>
+                <Checkbox
+                  variant="secondary"
+                  isSelected={isSelected}
+                  isDisabled={!requirementsSatisfied}
+                  onChange={() => handleSelectionChange(ext.id)}
+                  className="w-full p-3 flex flex-col items-stretch cursor-pointer">
+                  <Checkbox.Content className="flex items-start gap-3 w-full">
+                    <Avatar className="size-9 rounded-xl shrink-0">
+                      <Avatar.Image src={ext.icon} alt={`${ext.name} icon`} />
+                      <Avatar.Fallback className="rounded-xl font-bold text-xs">
+                        {getFallbackString(ext.name)}
+                      </Avatar.Fallback>
+                    </Avatar>
+
+                    <div className="flex-1 min-w-0 pr-6">
+                      <div className="font-semibold text-xs md:text-sm text-foreground truncate">{ext.name}</div>
+                      {ext.description && (
+                        <Description className="text-[11px] text-muted line-clamp-2 mt-0.5 leading-tight">
+                          {ext.description}
+                        </Description>
+                      )}
+                    </div>
+
+                    <Checkbox.Control className="absolute top-0 right-0 size-4.5 rounded-md">
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                  </Checkbox.Content>
+                </Checkbox>
+              </div>
+            );
+          })
         )}
       </div>
 
+      {/* Action CTA */}
       <Button
         onPress={handleInstall}
         isPending={isInstalling}
-        isDisabled={!requirementsSatisfied || isEmpty(selectedPlugins)}
-        fullWidth>
+        variant={hasSelection ? 'primary' : 'secondary'}
+        isDisabled={!requirementsSatisfied || !hasSelection}
+        className={cn('w-full font-bold h-10 text-xs transition-all', hasSelection && 'shadow-md shadow-accent/20')}>
         {isInstalling ? (
-          <Spinner size="sm" color="current" />
-        ) : requirementsSatisfied ? (
-          'Install Selected'
+          <div className="flex items-center gap-2">
+            <Spinner size="sm" color="current" />
+            <span>Installing Extensions...</span>
+          </div>
+        ) : !requirementsSatisfied ? (
+          'Complete Requirements to Install'
+        ) : !hasSelection ? (
+          'Select Extensions to Install'
         ) : (
-          'Complete Requirements First'
+          <div className="flex items-center gap-2">
+            <DownloadMinimalisticIcon className="size-4" />
+            <span>Install Selected ({selectedPlugins.size})</span>
+          </div>
         )}
       </Button>
     </div>
