@@ -1,6 +1,6 @@
 import {Button, Chip} from '@heroui/react';
 import {APP_NAME} from '@lynx_common/consts';
-import {CheckCircleIcon, CpuIcon, Rocket2Icon, Widget5Icon} from '@solar-icons/react/bold-duotone';
+import {CheckCircleIcon, CpuIcon, Widget5Icon} from '@solar-icons/react/bold-duotone';
 import {CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {motion, Variants} from 'framer-motion';
 
