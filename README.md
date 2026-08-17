@@ -38,10 +38,6 @@ _An open-source, highly modular environment built for AI power users to configur
 
 LynxHub consolidates your AI workflow into a single, unified workspace.
 
-> [!IMPORTANT]
-> **Not a One-Click Installer**  
-> LynxHub is an advanced manager and environment wrapper, not a one-click magic installer. While it offers robust installation support, it assumes you have a basic understanding of your preferred AI WebUIs. You can clone and configure new interfaces or seamlessly connect existing ones on your drive.
-
 ### Core Capabilities
 
 🧩 **Extensible & Modular:** Build and expand LynxHub to fit your needs.
