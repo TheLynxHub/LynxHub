@@ -15,6 +15,8 @@
 [![Website][website-shield]](https://lynxhub.app)
 [![Docs][docs-shield]](https://docs.lynxhub.app)
 
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/e8rBzhtcnK)
+
 ![LynxHub Dashboard](/readme/lynxhub_screenshot.png)
 
 _An open-source, highly modular environment built for AI power users to configure, manage, and run local AI interfaces._
@@ -90,7 +92,7 @@ LynxHub consolidates your AI workflow into a single, unified workspace.
 ### 2. Download LynxHub
 
 | Channel          | Version                                                         | Release Date |
-| ---------------- |-----------------------------------------------------------------|--------------|
+| ---------------- | --------------------------------------------------------------- | ------------ |
 | **Insider**      | [V3.5.8](https://www.patreon.com/collection/1557749)            | 2026-07-25   |
 | **Early Access** | [V3.5.8](https://www.patreon.com/collection/714004)             | 2026-07-25   |
 | **Public**       | [V3.5.8](https://github.com/TheLynxHub/LynxHub/releases/latest) | 2026-08-06   |
@@ -203,8 +205,6 @@ Massive thanks to my Gold Sponsors:
 [![Reddit](https://img.shields.io/badge/Reddit-FF4500?style=for-the-badge&logo=reddit&logoColor=white)](https://www.reddit.com/r/LynxHubAI)
 [![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:kindofbrazy@gmail.com)
 [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/LynxHub)
-
-[![LynxHub Discord](http://invidget.switchblade.xyz/e8rBzhtcnK)](https://discord.gg/e8rBzhtcnK)
 
 **© 2026 LynxHub.**
 
