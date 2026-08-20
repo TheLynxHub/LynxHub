@@ -83,7 +83,7 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
 
   const activeTab = useTabsState('activeTab');
   const dispatch = useDispatch<AppDispatch>();
-  const {all, openAddModal, openEditModal} = useBookmarks();
+  const {all, addBookmark, openEditModal} = useBookmarks();
 
   const effectiveAddress = useMemo(() => {
     const addr = currentAddress || customAddress || webUIAddress || '';
@@ -202,7 +202,7 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
   const isBookmarked = !!existingBookmark;
 
   const handleBookmarkToggle = useCallback(
-    (e?: React.MouseEvent) => {
+    async (e?: React.MouseEvent) => {
       if (e) e.stopPropagation();
       const url = formatWebAddress(effectiveAddress || '');
       if (!url) return;
@@ -210,19 +210,22 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
       if (existingBookmark) {
         openEditModal(existingBookmark);
       } else {
-        openAddModal('bookmarks_bar', {
-          id: '',
-          type: 'bookmark',
-          title: browserTitle || url,
-          url,
-          parentId: 'bookmarks_bar',
-          order: 0,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        });
+        try {
+          const created = await addBookmark({
+            type: 'bookmark',
+            title: browserTitle || url,
+            url,
+            parentId: 'bookmarks_bar',
+          });
+          if (created) {
+            openEditModal(created);
+          }
+        } catch (err) {
+          console.error('Failed to auto-add bookmark from address bar:', err);
+        }
       }
     },
-    [effectiveAddress, existingBookmark, browserTitle, openEditModal, openAddModal],
+    [effectiveAddress, existingBookmark, browserTitle, addBookmark, openEditModal],
   );
 
   const handleKeyDown = useCallback(
