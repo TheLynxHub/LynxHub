@@ -44,6 +44,10 @@ const contextMenuIpc = {
     // Forces reload of browser page with unsaved changes
     forceReload: (id: string) => lynxIpc.send(contextMenuChannels.forceReload, id),
 
+    // Opens bookmark context menu
+    openBookmarkContextMenu: (payload: any, customPosition?: ContextMenuPosition) =>
+      lynxIpc.send(contextMenuChannels.openBookmarkContextMenu, payload, customPosition),
+
     rightClickItems: {
       copy: (id: number) => lynxIpc.send(contextMenuChannels.copy, id),
 
@@ -139,6 +143,10 @@ const contextMenuIpc = {
     // Listens for force reload confirmation events
     forceReload: (callback: (id: string) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onForceReload, callback),
+
+    // Listens for bookmark context menu events
+    bookmarkContextMenu: (callback: (payload: any) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onBookmarkContextMenu, callback),
   },
 };
 

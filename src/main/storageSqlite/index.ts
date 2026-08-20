@@ -132,6 +132,7 @@ export class BaseSqliteStorage {
       downloadLocation: '',
       downloadBehavior: 'default',
       clearedDownloads: [],
+      bookmarksBarVisibility: 'browser_open',
       volumeSettings: {
         globalMuted: false,
         tabVolumes: {},
@@ -398,6 +399,18 @@ export class BaseSqliteStorage {
         added_at TEXT NOT NULL
       );
 
+      CREATE TABLE IF NOT EXISTS browser_bookmarks (
+        id TEXT PRIMARY KEY,
+        parent_id TEXT,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        url TEXT,
+        fav_icon TEXT,
+        \`order\` INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS browser_fav_icons (
         url TEXT PRIMARY KEY,
         icon_data TEXT NOT NULL,
@@ -407,6 +420,7 @@ export class BaseSqliteStorage {
 
       CREATE INDEX IF NOT EXISTS idx_browser_history_visited ON browser_history(visited_at DESC);
       CREATE INDEX IF NOT EXISTS idx_browser_favorites_added ON browser_favorites(added_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_browser_bookmarks_parent ON browser_bookmarks(parent_id, \`order\` ASC);
 
       CREATE TABLE IF NOT EXISTS notification_settings (
         id TEXT PRIMARY KEY,
@@ -621,6 +635,30 @@ export class BaseSqliteStorage {
 
         browserObj.favoriteAddress = [];
         modified = true;
+      }
+
+      // Auto-migrate legacy browser_favorites to browser_bookmarks
+      const bookmarkCountRow = this.sqlite.prepare('SELECT COUNT(*) as count FROM browser_bookmarks').get() as
+        {count: number} | undefined;
+      if (!bookmarkCountRow || bookmarkCountRow.count === 0) {
+        const favorites = this.sqlite
+          .prepare('SELECT url, title, added_at FROM browser_favorites ORDER BY id ASC')
+          .all() as {url: string; title: string | null; added_at: string}[];
+        if (favorites.length > 0) {
+          const insertBookmark = this.sqlite.prepare(
+            'INSERT INTO browser_bookmarks (id, parent_id, type, title, url, fav_icon,' +
+              ' `order`, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          );
+          this.sqlite.transaction(() => {
+            favorites.forEach((fav, index) => {
+              const id = randomUUID();
+              const url = fav.url;
+              const title = fav.title || url;
+              insertBookmark.run(id, 'bookmarks_bar', 'bookmark', title, url, null, index, fav.added_at || now, now);
+            });
+          })();
+          console.log('[SQLite Storage] Migrated legacy favorites to browser_bookmarks.');
+        }
       }
 
       if (modified) {

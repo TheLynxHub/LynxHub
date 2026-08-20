@@ -91,7 +91,7 @@ export default class MainWindowManager {
 
   /** Creates and configures the main application window. */
   private createMainWindow(): void {
-    const {contextMenuManager, linkPreviewManager} = classHolder;
+    const {contextMenuManager, linkPreviewManager, bookmarkTooltipManager} = classHolder;
 
     this.mainWindow = new BrowserWindow(MainWindowManager.MAIN_WINDOW_CONFIG);
     this.mainWindow.setBackgroundColor(getWindowColor());
@@ -107,6 +107,7 @@ export default class MainWindowManager {
     // Initialize child windows that depend on the main window
     contextMenuManager?.createWindow(this.mainWindow);
     linkPreviewManager?.createWindow(this.mainWindow);
+    bookmarkTooltipManager?.createWindow(this.mainWindow);
   }
 
   /** Sets up event listeners for the main window. */

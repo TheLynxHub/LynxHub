@@ -2,6 +2,8 @@ import classHolder from '@lynx_main/managers/classHolder';
 
 import listenActions from './actions';
 import listenApplication from './application';
+import {listenBookmarks} from './bookmarks';
+import {listenBookmarkTooltip} from './bookmarkTooltip';
 import listenContextMenu from './contextMenu';
 import listenFiles from './filesIpc';
 import listenGit from './gitIpc';
@@ -55,6 +57,8 @@ export async function listenToIpcChannels() {
 
   await listenPlugins();
   await listenContextMenu();
+  await listenBookmarks();
+  await listenBookmarkTooltip();
 
   await listenStatics();
 }

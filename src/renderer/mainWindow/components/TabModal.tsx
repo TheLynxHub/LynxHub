@@ -1,7 +1,9 @@
 import {Modal, ModalBackdropProps, ModalContainerProps} from '@heroui/react';
-import {MouseEvent, ReactNode, useCallback, useEffect, useState} from 'react';
+import browserIpc from '@lynx_shared/ipc/browser';
+import {MouseEvent, ReactNode, useCallback, useEffect, useMemo, useState} from 'react';
 import {UNSAFE_PortalProvider} from 'react-aria';
 
+import {useCardsState} from '../redux/reducers/cards';
 import {useTabsState} from '../redux/reducers/tabs';
 
 type Props = {
@@ -28,12 +30,28 @@ export default function TabModal({
   isKeyboardDismissDisabled,
 }: Props) {
   const activeTab = useTabsState('activeTab');
+  const runningCards = useCardsState('runningCard');
 
   const [targetContainer, setTargetContainer] = useState<HTMLElement | null>(null);
 
+  const currentRunningCard = useMemo(
+    () => runningCards.find(card => card.tabId === activeTab),
+    [runningCards, activeTab],
+  );
+
   useEffect(() => {
     setTargetContainer(isOpen ? document.getElementById(`${activeTab}_wrapper`) : null);
-  }, [isOpen]);
+  }, [isOpen, activeTab]);
+
+  useEffect(() => {
+    if (isOpen && currentRunningCard && currentRunningCard.currentView === 'browser') {
+      browserIpc.send.setVisible(currentRunningCard.id, false);
+      return () => {
+        browserIpc.send.setVisible(currentRunningCard.id, true);
+      };
+    }
+    return undefined;
+  }, [isOpen, currentRunningCard]);
 
   const handleBackdropClick = useCallback(
     (e: MouseEvent<HTMLElement>) => {

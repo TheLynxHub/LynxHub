@@ -1,3 +1,4 @@
+import {BookmarkBarVisibility, BookmarkFolder, BookmarkNode} from '@lynx_common/types/bookmarks';
 import {LynxHotkey, LynxInput, OnUpdatingExtensions, TooltipStatus} from '@lynx_common/types/ipc';
 import StorageTypes, {InstalledCards} from '@lynx_common/types/storage';
 
@@ -106,6 +107,21 @@ export type VolumeState = {
 };
 
 /**
+ * Redux `bookmarks` reducer state shape.
+ */
+export type BookmarksState = {
+  tree: BookmarkFolder;
+  all: BookmarkNode[];
+  visibility: BookmarkBarVisibility;
+  editModal: {
+    isOpen: boolean;
+    mode: 'add' | 'edit';
+    item?: BookmarkNode;
+    parentId?: string;
+  };
+};
+
+/**
  * Root preload state passed into Redux store initialization.
  */
 export type PreloadState = {
@@ -115,4 +131,5 @@ export type PreloadState = {
   settings: SettingState;
   terminal: TerminalState;
   volume: VolumeState;
+  bookmarks: BookmarksState;
 };

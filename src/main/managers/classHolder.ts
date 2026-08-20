@@ -11,6 +11,7 @@ import StorageManager from '@lynx_main/storageSqlite/storageOperations';
 import axios from 'axios';
 import {app, BrowserWindow, net} from 'electron';
 
+import BookmarkTooltipManager from '../childWindows/bookmarkTooltip';
 import BrowserDownloadManager from '../childWindows/browserDownloadManager';
 import ContextMenuManager from '../childWindows/contextMenu';
 import LinkPreviewManager from '../childWindows/linkPreview';
@@ -40,6 +41,7 @@ class ClassHolder {
   private _cardsValidator?: ValidateCards;
   private _contextMenuManager?: ContextMenuManager;
   private _linkPreviewManager?: LinkPreviewManager;
+  private _bookmarkTooltipManager?: BookmarkTooltipManager;
   private _browserDownloadManager?: BrowserDownloadManager;
   private _shareScreenManager?: ShareScreenManager;
   private _browserManager?: BrowserManager;
@@ -128,6 +130,7 @@ class ClassHolder {
     this.cardsValidator = new ValidateCards();
     this.contextMenuManager = new ContextMenuManager();
     this.linkPreviewManager = new LinkPreviewManager();
+    this.bookmarkTooltipManager = new BookmarkTooltipManager();
   }
 
   /**
@@ -191,6 +194,9 @@ class ClassHolder {
   private set linkPreviewManager(value: ClassHolder['_linkPreviewManager']) {
     this._linkPreviewManager = value;
   }
+  private set bookmarkTooltipManager(value: ClassHolder['_bookmarkTooltipManager']) {
+    this._bookmarkTooltipManager = value;
+  }
   private set moduleManager(value: ClassHolder['_moduleManager']) {
     this._moduleManager = value;
   }
@@ -252,6 +258,9 @@ class ClassHolder {
   }
   get linkPreviewManager() {
     return this._linkPreviewManager;
+  }
+  get bookmarkTooltipManager() {
+    return this._bookmarkTooltipManager;
   }
   get isOnline(): boolean {
     return this._isOnline;

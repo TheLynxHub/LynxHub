@@ -49,4 +49,6 @@ export const contextMenuChannels = {
   openSendExitSignal: 'context:open-send-exit-signal',
   openTerminateTab: 'context:open-terminate-tab',
   openCloseApp: 'context:open-close-app',
+  openBookmarkContextMenu: 'context:open-bookmark-context-menu',
+  onBookmarkContextMenu: 'context:on-bookmark-context-menu',
 } as const;

@@ -1,14 +1,16 @@
 import {contextMenuChannels} from '@lynx_common/consts/ipcChannels/contextMenu';
 import {ElementResizeData} from '@lynx_common/types';
+import {BookmarkContextMenuPayload} from '@lynx_common/types/bookmarks';
 import {ContextMenuVolumeData, NavHistory} from '@lynx_common/types/ipc';
 import {isLinux, terminalLineEnding} from '@lynx_common/utils';
 import {ptyWrite} from '@lynx_main/ipc/methods/pty';
 import {changeWindowState} from '@lynx_main/ipc/methods/windowUtils';
 import BrowserManager from '@lynx_main/managers/browser';
 import classHolder from '@lynx_main/managers/classHolder';
-import {BrowserWindow, ContextMenuParams, dialog} from 'electron';
+import {BrowserWindow, clipboard, ContextMenuParams, dialog, Menu} from 'electron';
 
 import {applicationIpc} from './application';
+import {bookmarksIpc} from './bookmarks';
 import {browserIpc} from './browser';
 import {downloadManagerIpc} from './downloadManager';
 import lynxIpc from './ipcWrapper';
@@ -240,6 +242,108 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
     contextMenuIpc.send.onDownloads();
     contextMenuManager.showContextMenu();
   });
+
+  // Open Bookmark Context Menu
+  contextMenuIpc.on.openBookmarkContextMenu((payload, customPosition) => {
+    if (isLinux) {
+      const mainWindow = appManager.getMainWindow();
+      const storageManager = classHolder.storageManager;
+      const template: Electron.MenuItemConstructorOptions[] = [];
+
+      if (payload.targetType === 'bookmark' && payload.url) {
+        template.push({
+          label: 'Open',
+          click: () => applicationIpc.send.onNewTab(payload.url!, false),
+        });
+        template.push({
+          label: 'Open in New Tab',
+          click: () => applicationIpc.send.onNewTab(payload.url!, true),
+        });
+        template.push({type: 'separator'});
+        template.push({
+          label: 'Edit...',
+          click: () => {
+            if (payload.bookmarkId) {
+              const all = storageManager.getAllBookmarks();
+              const item = all.find(b => b.id === payload.bookmarkId);
+              if (item) bookmarksIpc.send.openAddEditModal({mode: 'edit', item});
+            }
+          },
+        });
+        template.push({
+          label: 'Copy Link Address',
+          click: () => clipboard.writeText(payload.url!),
+        });
+        template.push({
+          label: 'Delete',
+          click: () => {
+            if (payload.bookmarkId) storageManager.removeBookmark(payload.bookmarkId);
+            bookmarksIpc.send.onChanged();
+          },
+        });
+        template.push({type: 'separator'});
+      } else if (payload.targetType === 'folder') {
+        template.push({
+          label: 'Open All in New Tabs',
+          click: () => {
+            if (payload.folderId) {
+              const all = storageManager.getAllBookmarks();
+              const children = all.filter(b => b.parentId === payload.folderId && b.type === 'bookmark' && b.url);
+              children.forEach(c => applicationIpc.send.onNewTab(c.url!, true));
+            }
+          },
+        });
+        template.push({
+          label: 'Rename...',
+          click: () => {
+            if (payload.folderId) {
+              const all = storageManager.getAllBookmarks();
+              const item = all.find(b => b.id === payload.folderId);
+              if (item) bookmarksIpc.send.openAddEditModal({mode: 'edit', item});
+            }
+          },
+        });
+        template.push({
+          label: 'Delete',
+          click: () => {
+            if (payload.folderId) storageManager.removeBookmark(payload.folderId);
+            bookmarksIpc.send.onChanged();
+          },
+        });
+        template.push({type: 'separator'});
+      }
+
+      template.push({
+        label: 'Add Bookmark...',
+        click: () => bookmarksIpc.send.openAddEditModal({mode: 'add', parentId: payload.folderId || 'bookmarks_bar'}),
+      });
+      template.push({
+        label: 'Add Folder...',
+        click: () =>
+          bookmarksIpc.send.openAddEditModal({
+            mode: 'add',
+            parentId: payload.folderId || 'bookmarks_bar',
+            item: {
+              id: '',
+              type: 'folder',
+              title: 'New Folder',
+              parentId: payload.folderId || 'bookmarks_bar',
+              order: 0,
+              createdAt: 0,
+              updatedAt: 0,
+            },
+          }),
+      });
+
+      const menu = Menu.buildFromTemplate(template);
+      menu.popup({window: mainWindow as BrowserWindow});
+      return;
+    }
+
+    setPosition(customPosition);
+    contextMenuIpc.send.onBookmarkContextMenu(payload);
+    contextMenuManager.showContextMenu();
+  });
 }
 
 /**
@@ -278,6 +382,9 @@ export const contextMenuIpc = {
     onDownloads: () => sendToContextMenu(contextMenuChannels.onDownloads),
     /** Sends force reload event to context menu */
     onForceReload: (id: string) => sendToContextMenu(contextMenuChannels.onForceReload, id),
+    /** Sends bookmark context menu event to context menu */
+    onBookmarkContextMenu: (payload: BookmarkContextMenuPayload) =>
+      sendToContextMenu(contextMenuChannels.onBookmarkContextMenu, payload),
   },
   on: {
     /** Listens for force reload request */
@@ -337,6 +444,10 @@ export const contextMenuIpc = {
       lynxIpc.on(contextMenuChannels.openTerminateTab, callback),
     /** Listens for open close app request */
     openCloseApp: (callback: () => void) => lynxIpc.on(contextMenuChannels.openCloseApp, callback),
+    /** Listens for open bookmark context menu request */
+    openBookmarkContextMenu: (
+      callback: (payload: BookmarkContextMenuPayload, customPosition?: {x: number; y: number}) => void,
+    ) => lynxIpc.on(contextMenuChannels.openBookmarkContextMenu, callback),
   },
   handle: {},
 };

@@ -104,7 +104,8 @@ const BrowserAddressBar = memo(({runningCard, setCustomAddress}: Props) => {
             whileHover={{scale: 1.15}}
             onClick={handleFavoriteToggle}
             className="p-1 rounded-full cursor-pointer"
-            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
+            aria-label={isFavorite ? 'Edit bookmark' : 'Add bookmark'}
+            title={isFavorite ? 'Edit bookmark (Ctrl+D)' : 'Bookmark this tab (Ctrl+D)'}>
             <StarIcon
               className={cn(
                 'transition-colors duration-200 size-5',

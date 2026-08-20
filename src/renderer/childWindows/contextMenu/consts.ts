@@ -15,4 +15,5 @@ export enum MenuTypes {
   Confirm,
   ProcessExitSignal,
   ForceReloadConfirm,
+  BookmarkContextMenu,
 }

@@ -15,6 +15,8 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
 import {XTermAPI} from '../../components/useXTerm';
+import BookmarkEditModal from '../bookmarks/BookmarkEditModal';
+import BookmarksBar from '../bookmarks/BookmarksBar';
 import Browser from './browser';
 import Terminal from './terminal';
 import SessionTopBar from './topBar';
@@ -127,6 +129,8 @@ const SessionView = ({runningCard}: Props) => {
         serializeAddon={serializeAddon}
         selectedTerminalText={selectedTerminalText}
       />
+      <BookmarksBar runningCard={runningCard} />
+      <BookmarkEditModal />
       {showTerminal &&
         (isNil(ExtTerminal) ? (
           <Terminal

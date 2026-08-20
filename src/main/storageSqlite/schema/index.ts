@@ -76,6 +76,21 @@ export const browserFavorites = sqliteTable('browser_favorites', {
 });
 
 /**
+ * Browser bookmarks and bookmark folders table.
+ */
+export const browserBookmarks = sqliteTable('browser_bookmarks', {
+  id: text('id').primaryKey(),
+  parentId: text('parent_id'),
+  type: text('type').notNull(),
+  title: text('title').notNull(),
+  url: text('url'),
+  favIcon: text('fav_icon'),
+  order: integer('order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+/**
  * Browser favicons cache table.
  */
 export const browserFavIcons = sqliteTable('browser_fav_icons', {

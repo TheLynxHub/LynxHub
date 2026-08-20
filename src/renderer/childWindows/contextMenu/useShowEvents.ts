@@ -211,6 +211,17 @@ export default function useShowEvents() {
       );
     });
 
+    // Bookmark Context Menu
+    const offBookmark = contextMenuIpc.on.bookmarkContextMenu(payload => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'bookmarkContextMenu',
+          value: payload,
+          layout: MenuTypes.BookmarkContextMenu,
+        }),
+      );
+    });
+
     return () => {
       offZoom();
       offFind();
@@ -228,6 +239,7 @@ export default function useShowEvents() {
       offDlStart();
       offProgress();
       offDone();
+      offBookmark();
     };
   }, [dispatch]);
 }

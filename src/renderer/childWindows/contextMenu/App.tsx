@@ -3,6 +3,7 @@ import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {useEffect} from 'react';
 
 import {MenuTypes} from './consts';
+import BookmarkContextMenu from './layouts/BookmarkContextMenu';
 import BrowserScale from './layouts/BrowserScale';
 import CloseApp from './layouts/confirm_warn/CloseApp';
 import ForceReload from './layouts/confirm_warn/ForceReload';
@@ -64,6 +65,7 @@ export default function ContextMenu() {
       {activeLayout === MenuTypes.Confirm && <ConfirmWindow />}
       {activeLayout === MenuTypes.ProcessExitSignal && <ProcessExitSignal />}
       {activeLayout === MenuTypes.ForceReloadConfirm && <ForceReload />}
+      {activeLayout === MenuTypes.BookmarkContextMenu && <BookmarkContextMenu />}
     </div>
   );
 }

@@ -4,12 +4,11 @@ import {isEmpty} from 'lodash-es';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
+import {useBookmarks} from '../../../../features/bookmarks/useBookmarks';
 import {cardsActions} from '../../../../redux/reducers/cards';
 import {useTabsState} from '../../../../redux/reducers/tabs';
-import {triggerActions} from '../../../../redux/reducers/triggers';
 import {AppDispatch} from '../../../../redux/store';
 import {RunningCard} from '../../../../types';
-import {invalidateHistoryCache} from '../../browser/utils';
 
 const findAutocomplete = (input: string, historyUrls: string[]): string => {
   if (!input || input.length < 2) return '';
@@ -74,17 +73,17 @@ type UseAddressBarProps = {
 };
 
 export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProps) => {
-  const {id: cardId, tabId, webUIAddress, customAddress, currentAddress, currentView} = runningCard;
+  const {tabId, webUIAddress, customAddress, currentAddress, currentView, browserTitle} = runningCard;
 
   const [inputValue, setInputValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [historyUrls, setHistoryUrls] = useState<string[]>([]);
   const [autocomplete, setAutocomplete] = useState('');
   const editableRef = useRef<HTMLDivElement>(null);
 
   const activeTab = useTabsState('activeTab');
   const dispatch = useDispatch<AppDispatch>();
+  const {all, openAddModal, openEditModal} = useBookmarks();
 
   const effectiveAddress = useMemo(() => {
     const addr = currentAddress || customAddress || webUIAddress || '';
@@ -94,14 +93,13 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
 
   useEffect(() => {
     const fetchBrowserData = async () => {
-      const {favoriteAddress, historyAddress, recentAddress} = await storageUtilsIpc.invoke.getBrowserHistoryData();
-      setFavorites(favoriteAddress);
-      // Combine and dedupe: recent first, then history, then favorites
-      const combined = [...new Set([...recentAddress, ...historyAddress, ...favoriteAddress])];
+      const {historyAddress, recentAddress} = await storageUtilsIpc.invoke.getBrowserHistoryData();
+      const bookmarkUrls = all.filter(b => b.type === 'bookmark' && b.url).map(b => b.url as string);
+      const combined = [...new Set([...recentAddress, ...historyAddress, ...bookmarkUrls])];
       setHistoryUrls(combined);
     };
     fetchBrowserData();
-  }, []);
+  }, [all]);
 
   useEffect(() => {
     let displayValue = effectiveAddress;
@@ -120,11 +118,6 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
       editableRef.current?.focus();
     }
   }, [activeTab, tabId, currentView, effectiveAddress]);
-
-  const getFavorites = useCallback(async () => {
-    const {favoriteAddress} = await storageUtilsIpc.invoke.getBrowserHistoryData();
-    setFavorites(favoriteAddress);
-  }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (document.activeElement !== e.currentTarget) {
@@ -200,8 +193,47 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
     }
   }, [autocomplete, inputValue]);
 
+  const existingBookmark = useMemo(() => {
+    if (!effectiveAddress) return undefined;
+    const formattedCurrent = formatWebAddress(effectiveAddress);
+    return all.find(b => b.type === 'bookmark' && b.url && formatWebAddress(b.url) === formattedCurrent);
+  }, [all, effectiveAddress]);
+
+  const isBookmarked = !!existingBookmark;
+
+  const handleBookmarkToggle = useCallback(
+    (e?: React.MouseEvent) => {
+      if (e) e.stopPropagation();
+      const url = formatWebAddress(effectiveAddress || '');
+      if (!url) return;
+
+      if (existingBookmark) {
+        openEditModal(existingBookmark);
+      } else {
+        openAddModal('bookmarks_bar', {
+          id: '',
+          type: 'bookmark',
+          title: browserTitle || url,
+          url,
+          parentId: 'bookmarks_bar',
+          order: 0,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+      }
+    },
+    [effectiveAddress, existingBookmark, browserTitle, openEditModal, openAddModal],
+  );
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
+      // Hotkey Ctrl+D / Cmd+D to bookmark
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        handleBookmarkToggle();
+        return;
+      }
+
       // Accept autocomplete with Tab or Right Arrow (when at end of input)
       if (autocomplete && (e.key === 'Tab' || e.key === 'ArrowRight')) {
         const selection = window.getSelection();
@@ -231,15 +263,13 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
             dispatch(cardsActions.setRunningCardCustomAddress({tabId: activeTab, address: url}));
           }
           storageUtilsIpc.send.addBrowserRecent(url);
-          // History is now tracked in main process on navigation events
           editableRef.current?.blur();
-          // Don't call reload() here - the useEffect in browser/index.tsx will handle loading the URL
         } catch (err) {
           console.error(`Invalid URL: ${err}`);
         }
       }
     },
-    [setCustomAddress, dispatch, activeTab, cardId, autocomplete, inputValue, acceptAutocomplete],
+    [setCustomAddress, dispatch, activeTab, autocomplete, inputValue, acceptAutocomplete, handleBookmarkToggle],
   );
 
   const handleContainerClick = useCallback(() => {
@@ -247,29 +277,6 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
       editableRef.current?.focus();
     }
   }, []);
-
-  const isFavorite = useMemo(() => {
-    if (!effectiveAddress) return false;
-    const formattedCurrentAddress = formatWebAddress(effectiveAddress);
-    return favorites.some(fav => formatWebAddress(fav) === formattedCurrentAddress);
-  }, [favorites, effectiveAddress]);
-
-  const handleFavoriteToggle = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      const url = formatWebAddress(effectiveAddress || '');
-      if (!url) return;
-
-      const action = isFavorite ? storageUtilsIpc.send.removeBrowserFavorite : storageUtilsIpc.send.addBrowserFavorite;
-
-      invalidateHistoryCache();
-      dispatch(triggerActions.trigger('reloadBrowserHomePage'));
-
-      action(url);
-      getFavorites();
-    },
-    [effectiveAddress, isFavorite, getFavorites],
-  );
 
   const isAddress = !!effectiveAddress;
   const displayParts = useMemo(
@@ -281,7 +288,7 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
     editableRef,
     isAddress,
     isFocused,
-    isFavorite,
+    isFavorite: isBookmarked,
     displayParts,
     autocomplete,
     inputValue,
@@ -291,7 +298,7 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
     handleInput,
     handleKeyDown,
     handlePaste,
-    handleFavoriteToggle,
+    handleFavoriteToggle: handleBookmarkToggle,
     handleContainerClick,
   };
 };

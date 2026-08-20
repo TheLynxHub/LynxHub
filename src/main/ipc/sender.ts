@@ -74,5 +74,6 @@ const createSender = <K extends keyof typeof classHolder>(managerKey: K) => {
 const sendToMain = createSender('appManager');
 const sendToLinkPreview = createSender('linkPreviewManager');
 const sendToContextMenu = createSender('contextMenuManager');
+const sendToBookmarkTooltip = createSender('bookmarkTooltipManager');
 
-export {sendToContextMenu, sendToLinkPreview, sendToMain};
+export {sendToBookmarkTooltip, sendToContextMenu, sendToLinkPreview, sendToMain};

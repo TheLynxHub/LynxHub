@@ -1,3 +1,4 @@
+import {BookmarkBarVisibility} from './bookmarks';
 import {CustomArg, StorageChosenArgumentsData} from './index';
 import {
   AgentTypes,
@@ -144,6 +145,7 @@ export type BrowserStorage = {
   downloadLocation: string;
   downloadBehavior: 'ask' | 'default';
   clearedDownloads: string[];
+  bookmarksBarVisibility: BookmarkBarVisibility;
   volumeSettings: {
     globalMuted: boolean;
     tabVolumes: {[cardId: string]: number};

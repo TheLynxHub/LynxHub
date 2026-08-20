@@ -8,6 +8,7 @@ import {isEmpty} from 'lodash-es';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
+import {useBookmarksState} from '../../../../redux/reducers/bookmarks';
 import {triggerActions, useTriggerState} from '../../../../redux/reducers/triggers';
 import {FailedLoad} from '../BrowserError';
 
@@ -20,6 +21,7 @@ export function useBrowser(runningCard: RunningCard) {
   const tabMuted = useVolumeState('tabMuted');
   const globalMuted = useVolumeState('globalMuted');
   const clearBrowserFail = useTriggerState('clearBrowserFail');
+  const editModal = useBookmarksState('editModal');
 
   const volumeAppliedRef = useRef(false);
 
@@ -129,9 +131,11 @@ export function useBrowser(runningCard: RunningCard) {
   useEffect(() => {
     const validAddress = !isEmpty(runningCard.customAddress || runningCard.webUIAddress) && !failedLoad;
     const isOnBlankPage = currentUrl === 'about:blank';
-    const shouldShowWebview = validAddress && !isOnBlankPage && isActiveTab && runningCard.currentView === 'browser';
+    const isBookmarkModalOpen = editModal.isOpen;
+    const shouldShowWebview =
+      validAddress && !isOnBlankPage && isActiveTab && runningCard.currentView === 'browser' && !isBookmarkModalOpen;
     browserIpc.send.setVisible(runningCard.id, shouldShowWebview);
-  }, [runningCard, isActiveTab, failedLoad, currentUrl]);
+  }, [runningCard, isActiveTab, failedLoad, currentUrl, editModal.isOpen]);
 
   const handleReload = useCallback(() => {
     browserIpc.send.reload(id);

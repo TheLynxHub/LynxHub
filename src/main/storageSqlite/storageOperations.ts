@@ -1,6 +1,9 @@
+import {randomUUID} from 'node:crypto';
+
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {storageUtilsChannels} from '@lynx_common/consts/ipcChannels/storage';
 import {ChosenArgumentsData, ConfirmMenuTypes} from '@lynx_common/types';
+import {BookmarkFolder, BookmarkNode, CreateBookmarkInput, UpdateBookmarkInput} from '@lynx_common/types/bookmarks';
 import {
   BrowserHistoryData,
   CustomRunBehaviorData,
@@ -1520,6 +1523,196 @@ export class SqliteStorageManager {
         },
       })
       .run();
+  }
+
+  // ===================== Bookmarks Operations =====================
+
+  public getAllBookmarks(): BookmarkNode[] {
+    const rows = this.sqlite
+      .prepare(
+        'SELECT id, parent_id, type, title, url, fav_icon, `order`, created_at, updated_at' +
+          ' FROM browser_bookmarks ORDER BY parent_id ASC, `order` ASC, id ASC',
+      )
+      .all() as {
+      id: string;
+      parent_id: string | null;
+      type: 'bookmark' | 'folder';
+      title: string;
+      url: string | null;
+      fav_icon: string | null;
+      order: number;
+      created_at: string;
+      updated_at: string;
+    }[];
+
+    return rows.map(r => ({
+      id: r.id,
+      parentId: r.parent_id,
+      type: r.type,
+      title: r.title,
+      url: r.url ?? undefined,
+      favIcon: r.fav_icon ?? undefined,
+      order: r.order,
+      createdAt: new Date(r.created_at).getTime(),
+      updatedAt: new Date(r.updated_at).getTime(),
+    }));
+  }
+
+  public getBookmarksTree(): BookmarkFolder {
+    const all = this.getAllBookmarks();
+    const map = new Map<string, BookmarkFolder>();
+
+    const root: BookmarkFolder = {
+      id: 'bookmarks_bar',
+      type: 'folder',
+      title: 'Bookmarks Bar',
+      parentId: null,
+      order: 0,
+      createdAt: 0,
+      updatedAt: 0,
+      children: [],
+    };
+    map.set('bookmarks_bar', root);
+
+    // First create folder entries in map
+    for (const item of all) {
+      if (item.type === 'folder') {
+        map.set(item.id, {...item, type: 'folder', children: []});
+      }
+    }
+
+    // Attach items to their parent folders
+    for (const item of all) {
+      const parentId = item.parentId || 'bookmarks_bar';
+      const parent = map.get(parentId) || root;
+      if (item.type === 'folder') {
+        const folder = map.get(item.id);
+        if (folder && folder !== parent) {
+          parent.children.push(folder);
+        }
+      } else {
+        parent.children.push(item);
+      }
+    }
+
+    return root;
+  }
+
+  public addBookmark(input: CreateBookmarkInput): BookmarkNode {
+    const parentId = input.parentId ?? 'bookmarks_bar';
+    const now = new Date().toISOString();
+    const id = randomUUID();
+
+    const maxOrderRow = this.sqlite
+      .prepare(
+        'SELECT MAX(`order`) as maxOrder FROM browser_bookmarks' +
+          ' WHERE parent_id = ? OR (parent_id IS NULL AND ? IS NULL)',
+      )
+      .get(parentId, parentId) as {maxOrder: number | null} | undefined;
+    const order = (maxOrderRow?.maxOrder ?? -1) + 1;
+
+    this.sqlite
+      .prepare(
+        'INSERT INTO browser_bookmarks (id, parent_id, type, title, url, fav_icon, `order`, created_at, updated_at)' +
+          ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run(id, parentId, input.type, input.title, input.url ?? null, input.favIcon ?? null, order, now, now);
+
+    return {
+      id,
+      parentId,
+      type: input.type,
+      title: input.title,
+      url: input.url,
+      favIcon: input.favIcon,
+      order,
+      createdAt: new Date(now).getTime(),
+      updatedAt: new Date(now).getTime(),
+    };
+  }
+
+  public updateBookmark(id: string, updates: UpdateBookmarkInput): BookmarkNode | null {
+    const existing = this.sqlite.prepare('SELECT * FROM browser_bookmarks WHERE id = ?').get(id) as
+      | {
+          id: string;
+          parent_id: string | null;
+          type: 'bookmark' | 'folder';
+          title: string;
+          url: string | null;
+          fav_icon: string | null;
+          order: number;
+          created_at: string;
+          updated_at: string;
+        }
+      | undefined;
+
+    if (!existing) return null;
+
+    const now = new Date().toISOString();
+    const parentId = updates.parentId !== undefined ? updates.parentId : existing.parent_id;
+    const title = updates.title !== undefined ? updates.title : existing.title;
+    const url = updates.url !== undefined ? updates.url : existing.url;
+    const favIcon = updates.favIcon !== undefined ? updates.favIcon : existing.fav_icon;
+    const order = updates.order !== undefined ? updates.order : existing.order;
+
+    this.sqlite
+      .prepare(
+        'UPDATE browser_bookmarks SET parent_id = ?, title = ?, url = ?,' +
+          ' fav_icon = ?, `order` = ?, updated_at = ? WHERE id = ?',
+      )
+      .run(parentId, title, url, favIcon, order, now, id);
+
+    return {
+      id,
+      parentId,
+      type: existing.type,
+      title,
+      url: url ?? undefined,
+      favIcon: favIcon ?? undefined,
+      order,
+      createdAt: new Date(existing.created_at).getTime(),
+      updatedAt: new Date(now).getTime(),
+    };
+  }
+
+  public removeBookmark(id: string): void {
+    const toDelete = new Set<string>([id]);
+    const findChildren = (parentIds: string[]) => {
+      if (parentIds.length === 0) return;
+      const placeholders = parentIds.map(() => '?').join(',');
+      const rows = this.sqlite
+        .prepare(`SELECT id, type FROM browser_bookmarks WHERE parent_id IN (${placeholders})`)
+        .all(...parentIds) as {id: string; type: string}[];
+
+      const nextFolderIds: string[] = [];
+      for (const row of rows) {
+        toDelete.add(row.id);
+        if (row.type === 'folder') {
+          nextFolderIds.push(row.id);
+        }
+      }
+      if (nextFolderIds.length > 0) {
+        findChildren(nextFolderIds);
+      }
+    };
+
+    findChildren([id]);
+
+    const allIds = Array.from(toDelete);
+    const placeholders = allIds.map(() => '?').join(',');
+    this.sqlite.prepare(`DELETE FROM browser_bookmarks WHERE id IN (${placeholders})`).run(...allIds);
+  }
+
+  public reorderBookmarks(items: {id: string; order: number; parentId: string | null}[]): void {
+    const now = new Date().toISOString();
+    const stmt = this.sqlite.prepare(
+      'UPDATE browser_bookmarks SET `order` = ?, parent_id = ?, updated_at = ? WHERE id = ?',
+    );
+    this.sqlite.transaction(() => {
+      for (const item of items) {
+        stmt.run(item.order, item.parentId, now, item.id);
+      }
+    })();
   }
 
   public close(): void {

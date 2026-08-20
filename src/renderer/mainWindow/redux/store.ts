@@ -7,6 +7,7 @@ import {createReduxEnhancer} from '@sentry/react';
 
 import {actionLoggerMiddleware} from './middleware/actionLogger';
 import app from './reducers/app';
+import bookmarks from './reducers/bookmarks';
 import cards from './reducers/cards';
 import hotkeys from './reducers/hotkeys';
 import modals from './reducers/modals';
@@ -31,6 +32,7 @@ const staticReducers = {
   plugins,
   volume,
   trigger,
+  bookmarks,
 };
 
 const emptyHotkeyInput = {
@@ -133,6 +135,24 @@ const buildPreloadedState = (): PreloadState | undefined => {
       tabMuted: {},
       tabAudioPlaying: {},
       globalMuted: storage.browser.volumeSettings?.globalMuted ?? false,
+    },
+    bookmarks: {
+      tree: {
+        id: 'bookmarks_bar',
+        type: 'folder',
+        title: 'Bookmarks Bar',
+        parentId: null,
+        order: 0,
+        createdAt: 0,
+        updatedAt: 0,
+        children: [],
+      },
+      all: [],
+      visibility: storage.browser.bookmarksBarVisibility ?? 'browser_open',
+      editModal: {
+        isOpen: false,
+        mode: 'add',
+      },
     },
   };
 };
