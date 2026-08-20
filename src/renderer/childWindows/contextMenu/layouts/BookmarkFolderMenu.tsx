@@ -3,13 +3,12 @@ import {BookmarkFolder, BookmarkItem as BookmarkItemType, BookmarkNode} from '@l
 import {getCacheUrl} from '@lynx_common/utils';
 import bookmarksIpc from '@lynx_shared/ipc/bookmarks';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {EarthIcon, FolderIcon, FolderOpenIcon} from '@solar-icons/react/bold-duotone';
+import {EarthIcon, FolderIcon} from '@solar-icons/react/bold-duotone';
 import {AltArrowLeftIcon, AltArrowRightIcon} from '@solar-icons/react/line-duotone';
 import {memo, useCallback, useEffect, useMemo, useState} from 'react';
 
 import {useContextState} from '../redux/reducer';
 import Separator from './right_click/Separator';
-import {ActionButton, createActionHandler} from './right_click/Utils';
 
 type BookmarkRowProps = {
   item: BookmarkItemType;
@@ -196,19 +195,8 @@ export default function BookmarkFolderMenu() {
     setFolderStack(prev => (prev.length > 1 ? prev.slice(0, -1) : prev));
   }, []);
 
-  const handleOpenAllInTabs = createActionHandler(() => {
-    if (!currentFolder) return;
-    currentFolder.children.forEach(child => {
-      if (child.type === 'bookmark' && child.url) {
-        bookmarksIpc.openBookmark({url: child.url, newTab: true});
-      }
-    });
-  });
-
-  const hasBookmarks = currentFolder ? currentFolder.children.some(c => c.type === 'bookmark' && c.url) : false;
-
   return (
-    <div className="overflow-hidden px-1.5 flex flex-col gap-y-1 py-2 min-w-[230px] max-w-[320px]">
+    <div className="overflow-hidden px-1.5 flex flex-col gap-y-1 py-2 min-w-57.5 max-w-[320px]">
       {folderStack.length > 1 && (
         <>
           <div
@@ -222,18 +210,6 @@ export default function BookmarkFolderMenu() {
             <AltArrowLeftIcon className="size-3.5 shrink-0" />
             <span className="truncate">Back to {parentFolderTitle}</span>
           </div>
-          <Separator />
-        </>
-      )}
-
-      {hasBookmarks && (
-        <>
-          <ActionButton
-            title="Open All in Tabs"
-            onPress={handleOpenAllInTabs}
-            className="text-xs py-2 text-primary"
-            icon={<FolderOpenIcon className="size-4 text-primary" />}
-          />
           <Separator />
         </>
       )}
