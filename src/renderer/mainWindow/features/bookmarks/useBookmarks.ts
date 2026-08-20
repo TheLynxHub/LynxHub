@@ -1,7 +1,6 @@
 import {BookmarkNode, CreateBookmarkInput, UpdateBookmarkInput} from '@lynx_common/types/bookmarks';
 import bookmarksIpc from '@lynx_shared/ipc/bookmarks';
-import storageIpc from '@lynx_shared/ipc/storage';
-import {useCallback, useEffect} from 'react';
+import {useCallback} from 'react';
 import {useDispatch} from 'react-redux';
 
 import {bookmarksActions, useBookmarksState} from '../../redux/reducers/bookmarks';
@@ -22,33 +21,6 @@ export function useBookmarks() {
     } catch (err) {
       console.error('Failed to fetch bookmarks:', err);
     }
-  }, [dispatch]);
-
-  // Initial load and listen for changes
-  useEffect(() => {
-    fetchBookmarks();
-
-    const offChanged = bookmarksIpc.on.changed(() => {
-      fetchBookmarks();
-    });
-
-    const offOpenModal = bookmarksIpc.on.openAddEditModal(payload => {
-      dispatch(bookmarksActions.openEditModal(payload));
-    });
-
-    return () => {
-      offChanged();
-      offOpenModal();
-    };
-  }, [fetchBookmarks, dispatch]);
-
-  // Sync visibility with storage
-  useEffect(() => {
-    storageIpc.get('browser').then(data => {
-      if (data?.bookmarksBarVisibility) {
-        dispatch(bookmarksActions.setVisibility(data.bookmarksBarVisibility));
-      }
-    });
   }, [dispatch]);
 
   const addBookmark = useCallback(

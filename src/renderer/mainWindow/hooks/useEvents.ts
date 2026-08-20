@@ -1,5 +1,6 @@
 import {
   useAppTitleEvents,
+  useBookmarksEvents,
   useBrowserEvents,
   useCheckCardsUpdate,
   useCheckPluginsUpdate,
@@ -26,6 +27,7 @@ export default function useAppEvents() {
   useHotkeyEvents();
   useNewTabEvents();
   useBrowserEvents();
+  useBookmarksEvents();
   useContextEvents();
   useShowToast();
   useListenForUpdateError();

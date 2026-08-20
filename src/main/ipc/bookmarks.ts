@@ -33,9 +33,18 @@ export async function listenBookmarks() {
     storageManager.reorderBookmarks(items);
     bookmarksIpc.send.onChanged();
   });
+
+  // Forward openAddEditModal requests from child windows to mainWindow
+  bookmarksIpc.on.openAddEditModal(payload => {
+    bookmarksIpc.send.openAddEditModal(payload);
+  });
 }
 
 export const bookmarksIpc = {
+  on: {
+    openAddEditModal: (callback: (payload: {mode: 'add' | 'edit'; item?: BookmarkNode; parentId?: string}) => void) =>
+      lynxIpc.on(bookmarksChannels.openAddEditModal, callback),
+  },
   send: {
     onChanged: () => sendToMain(bookmarksChannels.onChanged),
     openAddEditModal: (payload: {mode: 'add' | 'edit'; item?: BookmarkNode; parentId?: string}) =>

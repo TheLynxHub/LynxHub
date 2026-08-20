@@ -61,15 +61,14 @@ const BookmarkFolder = memo(({folder, inDropdown}: Props) => {
       <Popover.Trigger>
         <div tabIndex={0} role="button" className={folderClass} onContextMenu={handleContextMenu}>
           <div className="flex items-center gap-1.5 min-w-0">
-            <FolderIcon className="size-3.5 text-amber-500 shrink-0" />
+            <FolderIcon className="size-3.5 text-warning shrink-0" />
             <span className="truncate text-xs font-medium leading-none">{folder.title}</span>
           </div>
-          <AltArrowDownIcon className="size-3 text-muted-foreground shrink-0 ml-0.5" />
         </div>
       </Popover.Trigger>
 
       <Popover.Content placement="bottom start">
-        <Popover.Dialog className="w-[220px] p-1.5 flex flex-col gap-1">
+        <Popover.Dialog className="w-55 p-1.5 flex flex-col gap-1">
           {hasBookmarks && (
             <>
               <Button
