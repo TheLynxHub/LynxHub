@@ -246,7 +246,7 @@ export default function BookmarkFolderMenu() {
       {!currentFolder || currentFolder.children.length === 0 ? (
         <div className="py-4 text-center text-xs text-muted-foreground italic select-none">Empty folder</div>
       ) : (
-        <ScrollShadow orientation="vertical" className="max-h-72 flex flex-col gap-0.5">
+        <ScrollShadow size={24} orientation="vertical" className="max-h-72 flex flex-col gap-0.5" hideScrollBar>
           {currentFolder.children.map(child =>
             child.type === 'folder' ? (
               <FolderRow key={child.id} onDrillDown={handleDrillDown} folder={child as BookmarkFolder} />

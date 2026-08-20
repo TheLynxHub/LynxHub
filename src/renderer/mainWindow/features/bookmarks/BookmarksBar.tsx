@@ -1,3 +1,4 @@
+import {ScrollShadow} from '@heroui/react';
 import {RunningCard} from '@lynx/types';
 import {BookmarkFolder as BookmarkFolderType, BookmarkItem as BookmarkItemType} from '@lynx_common/types/bookmarks';
 import {isLinux} from '@lynx_common/utils';
@@ -48,18 +49,28 @@ const BookmarksBar = memo(({runningCard, className}: Props) => {
     );
   }, []);
 
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.deltaY !== 0) {
+      e.currentTarget.scrollLeft += e.deltaY;
+    }
+  }, []);
+
   if (!isVisible) return null;
 
   return (
-    <div
+    <ScrollShadow
       className={
         (runningCard ? 'absolute top-10 left-0 right-0 z-10 ' : 'w-full mb-1 shrink-0 rounded-xl ') +
-        'h-8 px-2 flex items-center gap-1 bg-surface overflow-x-auto select-none no-scrollbar ' +
+        'h-8 px-2 flex items-center gap-1 bg-surface select-none ' +
         (className || '')
       }
+      size={24}
       role="toolbar"
+      onWheel={handleWheel}
+      orientation="horizontal"
       aria-label="Bookmarks bar"
-      onContextMenu={handleBarContextMenu}>
+      onContextMenu={handleBarContextMenu}
+      hideScrollBar>
       {tree.children.length === 0 ? (
         <span className="text-[11px] text-muted-foreground italic px-2 select-none">
           No bookmarks yet. Right click to add.
@@ -73,7 +84,7 @@ const BookmarksBar = memo(({runningCard, className}: Props) => {
           ),
         )
       )}
-    </div>
+    </ScrollShadow>
   );
 });
 
