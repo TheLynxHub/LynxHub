@@ -7,7 +7,7 @@ import {
   FolderOpenIcon,
   PenIcon,
   SquareShareLineIcon,
-  TrashBinTrashIcon,
+  TrashBin2Icon,
 } from '@solar-icons/react/bold-duotone';
 import {memo} from 'react';
 
@@ -105,11 +105,7 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
             icon={<CopyIcon className="size-4 text-default-500" />}
           />
           <ActionButton title="Edit..." onPress={handleEdit} icon={<PenIcon className="size-4 text-warning" />} />
-          <ActionButton
-            title="Delete"
-            onPress={handleDelete}
-            icon={<TrashBinTrashIcon className="size-4 text-danger" />}
-          />
+          <ActionButton title="Delete" onPress={handleDelete} icon={<TrashBin2Icon className="size-4 text-danger" />} />
           <Separator />
         </>
       )}
@@ -125,7 +121,7 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
           <ActionButton
             title="Delete Folder"
             onPress={handleDelete}
-            icon={<TrashBinTrashIcon className="size-4 text-danger" />}
+            icon={<TrashBin2Icon className="size-4 text-danger" />}
           />
           <Separator />
         </>
