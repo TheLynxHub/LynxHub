@@ -53,3 +53,10 @@ export type BookmarkFolderMenuPayload = {
   folderId: string;
   title: string;
 };
+
+export type BookmarkEditMenuPayload = {
+  mode: 'add' | 'edit';
+  item?: BookmarkNode;
+  parentId?: string | null;
+  isAutoAdded?: boolean;
+};

@@ -1,4 +1,5 @@
 import {formatWebAddress} from '@lynx_common/utils';
+import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import {isEmpty} from 'lodash-es';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -83,7 +84,7 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
 
   const activeTab = useTabsState('activeTab');
   const dispatch = useDispatch<AppDispatch>();
-  const {all, addBookmark, openEditModal} = useBookmarks();
+  const {all, addBookmark} = useBookmarks();
 
   const effectiveAddress = useMemo(() => {
     const addr = currentAddress || customAddress || webUIAddress || '';
@@ -207,8 +208,19 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
       const url = formatWebAddress(effectiveAddress || '');
       if (!url) return;
 
+      const targetEl = (e?.currentTarget || editableRef.current) as HTMLElement | null;
+      const rect = targetEl?.getBoundingClientRect();
+      const customPosition = rect ? {x: Math.floor(rect.x), y: Math.floor(rect.y + rect.height + 4)} : undefined;
+
       if (existingBookmark) {
-        openEditModal(existingBookmark);
+        contextMenuIpc.send.openBookmarkEditMenu(
+          {
+            mode: 'edit',
+            item: existingBookmark,
+            parentId: existingBookmark.parentId,
+          },
+          customPosition,
+        );
       } else {
         try {
           const created = await addBookmark({
@@ -218,14 +230,22 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
             parentId: 'bookmarks_bar',
           });
           if (created) {
-            openEditModal(created);
+            contextMenuIpc.send.openBookmarkEditMenu(
+              {
+                mode: 'edit',
+                item: created,
+                parentId: 'bookmarks_bar',
+                isAutoAdded: true,
+              },
+              customPosition,
+            );
           }
         } catch (err) {
           console.error('Failed to auto-add bookmark from address bar:', err);
         }
       }
     },
-    [effectiveAddress, existingBookmark, browserTitle, addBookmark, openEditModal],
+    [effectiveAddress, existingBookmark, browserTitle, addBookmark],
   );
 
   const handleKeyDown = useCallback(

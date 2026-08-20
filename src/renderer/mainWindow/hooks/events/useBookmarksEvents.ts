@@ -31,10 +31,6 @@ export const useBookmarksEvents = () => {
       fetchBookmarks();
     });
 
-    const offOpenModal = bookmarksIpc.on.openAddEditModal(payload => {
-      dispatch(bookmarksActions.openEditModal(payload));
-    });
-
     const offOpenBookmark = bookmarksIpc.on.openBookmark(({url, newTab}) => {
       if (newTab) {
         contextMenuIpc.send.rightClickItems.newTab(url);
@@ -57,7 +53,6 @@ export const useBookmarksEvents = () => {
 
     return () => {
       offChanged();
-      offOpenModal();
       offOpenBookmark();
     };
   }, [dispatch]);

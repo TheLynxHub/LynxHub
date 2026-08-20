@@ -1,6 +1,11 @@
 import {contextMenuChannels} from '@lynx_common/consts/ipcChannels/contextMenu';
 import {ElementResizeData} from '@lynx_common/types';
-import {BookmarkContextMenuPayload, BookmarkFolder, BookmarkFolderMenuPayload} from '@lynx_common/types/bookmarks';
+import {
+  BookmarkContextMenuPayload,
+  BookmarkEditMenuPayload,
+  BookmarkFolder,
+  BookmarkFolderMenuPayload,
+} from '@lynx_common/types/bookmarks';
 import {ContextMenuVolumeData, NavHistory} from '@lynx_common/types/ipc';
 import {isLinux, terminalLineEnding} from '@lynx_common/utils';
 import {ptyWrite} from '@lynx_main/ipc/methods/pty';
@@ -266,7 +271,11 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
             if (payload.bookmarkId) {
               const all = storageManager.getAllBookmarks();
               const item = all.find(b => b.id === payload.bookmarkId);
-              if (item) bookmarksIpc.send.openAddEditModal({mode: 'edit', item});
+              if (item) {
+                setPosition(undefined);
+                contextMenuIpc.send.onBookmarkEditMenu({mode: 'edit', item});
+                contextMenuManager.showContextMenu();
+              }
             }
           },
         });
@@ -299,7 +308,11 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
             if (payload.folderId) {
               const all = storageManager.getAllBookmarks();
               const item = all.find(b => b.id === payload.folderId);
-              if (item) bookmarksIpc.send.openAddEditModal({mode: 'edit', item});
+              if (item) {
+                setPosition(undefined);
+                contextMenuIpc.send.onBookmarkEditMenu({mode: 'edit', item});
+                contextMenuManager.showContextMenu();
+              }
             }
           },
         });
@@ -315,12 +328,17 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
       template.push({
         label: 'Add Bookmark...',
-        click: () => bookmarksIpc.send.openAddEditModal({mode: 'add', parentId: payload.folderId || 'bookmarks_bar'}),
+        click: () => {
+          setPosition(undefined);
+          contextMenuIpc.send.onBookmarkEditMenu({mode: 'add', parentId: payload.folderId || 'bookmarks_bar'});
+          contextMenuManager.showContextMenu();
+        },
       });
       template.push({
         label: 'Add Folder...',
-        click: () =>
-          bookmarksIpc.send.openAddEditModal({
+        click: () => {
+          setPosition(undefined);
+          contextMenuIpc.send.onBookmarkEditMenu({
             mode: 'add',
             parentId: payload.folderId || 'bookmarks_bar',
             item: {
@@ -332,7 +350,9 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
               createdAt: 0,
               updatedAt: 0,
             },
-          }),
+          });
+          contextMenuManager.showContextMenu();
+        },
       });
 
       const menu = Menu.buildFromTemplate(template);
@@ -342,6 +362,13 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
     setPosition(customPosition);
     contextMenuIpc.send.onBookmarkContextMenu(payload);
+    contextMenuManager.showContextMenu();
+  });
+
+  // Open Bookmark Edit Menu
+  contextMenuIpc.on.openBookmarkEditMenu((payload, customPosition) => {
+    setPosition(customPosition);
+    contextMenuIpc.send.onBookmarkEditMenu(payload);
     contextMenuManager.showContextMenu();
   });
 
@@ -456,6 +483,9 @@ export const contextMenuIpc = {
     /** Sends bookmark folder menu event to context menu */
     onBookmarkFolderMenu: (payload: BookmarkFolderMenuPayload) =>
       sendToContextMenu(contextMenuChannels.onBookmarkFolderMenu, payload),
+    /** Sends bookmark edit menu event to context menu */
+    onBookmarkEditMenu: (payload: BookmarkEditMenuPayload) =>
+      sendToContextMenu(contextMenuChannels.onBookmarkEditMenu, payload),
   },
   on: {
     /** Listens for force reload request */
@@ -523,6 +553,10 @@ export const contextMenuIpc = {
     openBookmarkFolderMenu: (
       callback: (payload: BookmarkFolderMenuPayload, customPosition?: {x: number; y: number}) => void,
     ) => lynxIpc.on(contextMenuChannels.openBookmarkFolderMenu, callback),
+    /** Listens for open bookmark edit menu request */
+    openBookmarkEditMenu: (
+      callback: (payload: BookmarkEditMenuPayload, customPosition?: {x: number; y: number}) => void,
+    ) => lynxIpc.on(contextMenuChannels.openBookmarkEditMenu, callback),
   },
   handle: {},
 };

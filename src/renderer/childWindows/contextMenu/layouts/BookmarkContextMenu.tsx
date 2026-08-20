@@ -9,9 +9,12 @@ import {
   SquareShareLineIcon,
   TrashBin2Icon,
 } from '@solar-icons/react/bold-duotone';
-import {memo} from 'react';
+import {memo, useCallback} from 'react';
+import {useDispatch} from 'react-redux';
 
-import {useContextState} from '../redux/reducer';
+import {MenuTypes} from '../consts';
+import {contextActions, useContextState} from '../redux/reducer';
+import {ContextDispatch} from '../redux/store';
 import Separator from './right_click/Separator';
 import {ActionButton, createActionHandler} from './right_click/Utils';
 
@@ -20,6 +23,7 @@ import {ActionButton, createActionHandler} from './right_click/Utils';
  * Supports context actions for Bookmark items, Folder items, and empty bar area.
  */
 const BookmarkContextMenu = memo(function BookmarkContextMenu() {
+  const dispatch = useDispatch<ContextDispatch>();
   const payload = useContextState('bookmarkContextMenu');
 
   const targetType = payload?.targetType ?? 'bar';
@@ -49,16 +53,22 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
     }
   });
 
-  const handleEdit = createActionHandler(async () => {
+  const handleEdit = useCallback(async () => {
     const id = bookmarkId || folderId;
     if (id) {
       const all = await bookmarksIpc.getAll();
       const item = all.find(b => b.id === id);
       if (item) {
-        bookmarksIpc.openAddEditModal({mode: 'edit', item});
+        dispatch(
+          contextActions.showLayout({
+            key: 'bookmarkEditMenu',
+            value: {mode: 'edit', item},
+            layout: MenuTypes.BookmarkEditMenu,
+          }),
+        );
       }
     }
-  });
+  }, [bookmarkId, folderId, dispatch]);
 
   const handleDelete = createActionHandler(async () => {
     const id = bookmarkId || folderId;
@@ -67,28 +77,40 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
     }
   });
 
-  const handleAddBookmark = createActionHandler(() => {
-    bookmarksIpc.openAddEditModal({
-      mode: 'add',
-      parentId: folderId || 'bookmarks_bar',
-    });
-  });
+  const handleAddBookmark = useCallback(() => {
+    dispatch(
+      contextActions.showLayout({
+        key: 'bookmarkEditMenu',
+        value: {
+          mode: 'add',
+          parentId: folderId || 'bookmarks_bar',
+        },
+        layout: MenuTypes.BookmarkEditMenu,
+      }),
+    );
+  }, [folderId, dispatch]);
 
-  const handleAddFolder = createActionHandler(() => {
-    bookmarksIpc.openAddEditModal({
-      mode: 'add',
-      parentId: folderId || 'bookmarks_bar',
-      item: {
-        id: '',
-        type: 'folder',
-        title: 'New folder',
-        parentId: folderId || 'bookmarks_bar',
-        order: 0,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-    });
-  });
+  const handleAddFolder = useCallback(() => {
+    dispatch(
+      contextActions.showLayout({
+        key: 'bookmarkEditMenu',
+        value: {
+          mode: 'add',
+          parentId: folderId || 'bookmarks_bar',
+          item: {
+            id: '',
+            type: 'folder',
+            title: 'New folder',
+            parentId: folderId || 'bookmarks_bar',
+            order: 0,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        },
+        layout: MenuTypes.BookmarkEditMenu,
+      }),
+    );
+  }, [folderId, dispatch]);
 
   return (
     <div className="overflow-hidden px-1.5 flex flex-col gap-y-1 py-2 min-w-[210px]">

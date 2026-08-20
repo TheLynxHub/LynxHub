@@ -233,6 +233,17 @@ export default function useShowEvents() {
       );
     });
 
+    // Bookmark Edit Menu
+    const offBookmarkEdit = contextMenuIpc.on.bookmarkEditMenu(payload => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'bookmarkEditMenu',
+          value: payload,
+          layout: MenuTypes.BookmarkEditMenu,
+        }),
+      );
+    });
+
     return () => {
       offZoom();
       offFind();
@@ -252,6 +263,7 @@ export default function useShowEvents() {
       offDone();
       offBookmark();
       offBookmarkFolder();
+      offBookmarkEdit();
     };
   }, [dispatch]);
 }

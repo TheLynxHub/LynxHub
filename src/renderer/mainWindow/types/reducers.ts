@@ -113,12 +113,6 @@ export type BookmarksState = {
   tree: BookmarkFolder;
   all: BookmarkNode[];
   visibility: BookmarkBarVisibility;
-  editModal: {
-    isOpen: boolean;
-    mode: 'add' | 'edit';
-    item?: BookmarkNode;
-    parentId?: string;
-  };
 };
 
 /**

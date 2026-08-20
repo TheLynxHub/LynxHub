@@ -4,6 +4,7 @@ import {useEffect} from 'react';
 
 import {MenuTypes} from './consts';
 import BookmarkContextMenu from './layouts/BookmarkContextMenu';
+import BookmarkEditMenu from './layouts/BookmarkEditMenu';
 import BookmarkFolderMenu from './layouts/BookmarkFolderMenu';
 import BrowserScale from './layouts/BrowserScale';
 import CloseApp from './layouts/confirm_warn/CloseApp';
@@ -68,6 +69,7 @@ export default function ContextMenu() {
       {activeLayout === MenuTypes.ForceReloadConfirm && <ForceReload />}
       {activeLayout === MenuTypes.BookmarkContextMenu && <BookmarkContextMenu />}
       {activeLayout === MenuTypes.BookmarkFolderMenu && <BookmarkFolderMenu />}
+      {activeLayout === MenuTypes.BookmarkEditMenu && <BookmarkEditMenu />}
     </div>
   );
 }

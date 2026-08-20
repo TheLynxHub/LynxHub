@@ -1,4 +1,8 @@
-import {BookmarkContextMenuPayload, BookmarkFolderMenuPayload} from '@lynx_common/types/bookmarks';
+import {
+  BookmarkContextMenuPayload,
+  BookmarkEditMenuPayload,
+  BookmarkFolderMenuPayload,
+} from '@lynx_common/types/bookmarks';
 import {DownloadItemInfo} from '@lynx_common/types/downloadManager';
 import {ContextMenuVolumeData, NavHistory} from '@lynx_common/types/ipc';
 import {ContextMenuParams} from 'electron';
@@ -42,6 +46,7 @@ export type ContextState = {
   downloads: DownloadItemInfo[];
   bookmarkContextMenu?: BookmarkContextMenuPayload;
   bookmarkFolderMenu?: BookmarkFolderMenuPayload;
+  bookmarkEditMenu?: BookmarkEditMenuPayload;
 };
 
 export type NavBtnProps = {icon?: ReactNode; onPress?: () => void; className?: string; isDisabled?: boolean};

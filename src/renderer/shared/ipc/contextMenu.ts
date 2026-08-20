@@ -1,5 +1,10 @@
 import {contextMenuChannels} from '@lynx_common/consts/ipcChannels/contextMenu';
 import type {ElementResizeData} from '@lynx_common/types';
+import type {
+  BookmarkContextMenuPayload,
+  BookmarkEditMenuPayload,
+  BookmarkFolderMenuPayload,
+} from '@lynx_common/types/bookmarks';
 import type {ContextMenuVolumeData, NavHistory} from '@lynx_common/types/ipc';
 import type {ContextMenuParams} from 'electron';
 
@@ -45,12 +50,16 @@ const contextMenuIpc = {
     forceReload: (id: string) => lynxIpc.send(contextMenuChannels.forceReload, id),
 
     // Opens bookmark context menu
-    openBookmarkContextMenu: (payload: any, customPosition?: ContextMenuPosition) =>
+    openBookmarkContextMenu: (payload: BookmarkContextMenuPayload, customPosition?: ContextMenuPosition) =>
       lynxIpc.send(contextMenuChannels.openBookmarkContextMenu, payload, customPosition),
 
     // Opens bookmark folder menu
-    openBookmarkFolderMenu: (payload: any, customPosition?: ContextMenuPosition) =>
+    openBookmarkFolderMenu: (payload: BookmarkFolderMenuPayload, customPosition?: ContextMenuPosition) =>
       lynxIpc.send(contextMenuChannels.openBookmarkFolderMenu, payload, customPosition),
+
+    // Opens bookmark edit menu
+    openBookmarkEditMenu: (payload: BookmarkEditMenuPayload, customPosition?: ContextMenuPosition) =>
+      lynxIpc.send(contextMenuChannels.openBookmarkEditMenu, payload, customPosition),
 
     rightClickItems: {
       copy: (id: number) => lynxIpc.send(contextMenuChannels.copy, id),
@@ -149,12 +158,16 @@ const contextMenuIpc = {
       lynxIpc.on(contextMenuChannels.onForceReload, callback),
 
     // Listens for bookmark context menu events
-    bookmarkContextMenu: (callback: (payload: any) => void): (() => void) =>
+    bookmarkContextMenu: (callback: (payload: BookmarkContextMenuPayload) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onBookmarkContextMenu, callback),
 
     // Listens for bookmark folder menu events
-    bookmarkFolderMenu: (callback: (payload: any) => void): (() => void) =>
+    bookmarkFolderMenu: (callback: (payload: BookmarkFolderMenuPayload) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onBookmarkFolderMenu, callback),
+
+    // Listens for bookmark edit menu events
+    bookmarkEditMenu: (callback: (payload: BookmarkEditMenuPayload) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onBookmarkEditMenu, callback),
   },
 };
 

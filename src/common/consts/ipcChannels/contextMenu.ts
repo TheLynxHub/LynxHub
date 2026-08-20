@@ -53,4 +53,6 @@ export const contextMenuChannels = {
   onBookmarkContextMenu: 'context:on-bookmark-context-menu',
   openBookmarkFolderMenu: 'context:open-bookmark-folder-menu',
   onBookmarkFolderMenu: 'context:on-bookmark-folder-menu',
+  openBookmarkEditMenu: 'context:open-bookmark-edit-menu',
+  onBookmarkEditMenu: 'context:on-bookmark-edit-menu',
 } as const;

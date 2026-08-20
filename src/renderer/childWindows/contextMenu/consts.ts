@@ -17,4 +17,5 @@ export enum MenuTypes {
   ForceReloadConfirm,
   BookmarkContextMenu,
   BookmarkFolderMenu,
+  BookmarkEditMenu,
 }

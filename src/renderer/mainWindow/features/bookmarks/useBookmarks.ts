@@ -1,4 +1,4 @@
-import {BookmarkNode, CreateBookmarkInput, UpdateBookmarkInput} from '@lynx_common/types/bookmarks';
+import {CreateBookmarkInput, UpdateBookmarkInput} from '@lynx_common/types/bookmarks';
 import bookmarksIpc from '@lynx_shared/ipc/bookmarks';
 import {useCallback} from 'react';
 import {useDispatch} from 'react-redux';
@@ -11,7 +11,6 @@ export function useBookmarks() {
   const tree = useBookmarksState('tree');
   const all = useBookmarksState('all');
   const visibility = useBookmarksState('visibility');
-  const editModal = useBookmarksState('editModal');
 
   const fetchBookmarks = useCallback(async () => {
     try {
@@ -57,48 +56,14 @@ export function useBookmarks() {
     [fetchBookmarks],
   );
 
-  const openAddModal = useCallback(
-    (parentId?: string, defaultItem?: Partial<BookmarkNode>) => {
-      dispatch(
-        bookmarksActions.openEditModal({
-          mode: 'add',
-          parentId: parentId || 'bookmarks_bar',
-          item: defaultItem as BookmarkNode | undefined,
-        }),
-      );
-    },
-    [dispatch],
-  );
-
-  const openEditModal = useCallback(
-    (item: BookmarkNode) => {
-      dispatch(
-        bookmarksActions.openEditModal({
-          mode: 'edit',
-          item,
-          parentId: item.parentId || 'bookmarks_bar',
-        }),
-      );
-    },
-    [dispatch],
-  );
-
-  const closeModal = useCallback(() => {
-    dispatch(bookmarksActions.closeEditModal());
-  }, [dispatch]);
-
   return {
     tree,
     all,
     visibility,
-    editModal,
     addBookmark,
     updateBookmark,
     removeBookmark,
     reorderBookmarks,
-    openAddModal,
-    openEditModal,
-    closeModal,
     fetchBookmarks,
   };
 }

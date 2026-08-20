@@ -149,10 +149,6 @@ const buildPreloadedState = (): PreloadState | undefined => {
       },
       all: [],
       visibility: storage.browser.bookmarksBarVisibility ?? 'browser_open',
-      editModal: {
-        isOpen: false,
-        mode: 'add',
-      },
     },
   };
 };

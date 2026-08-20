@@ -9,6 +9,5 @@ export const bookmarksChannels = {
   remove: 'bookmarks:remove',
   reorder: 'bookmarks:reorder',
   onChanged: 'bookmarks:onChanged',
-  openAddEditModal: 'bookmarks:openAddEditModal',
   openBookmark: 'bookmarks:openBookmark',
 } as const;

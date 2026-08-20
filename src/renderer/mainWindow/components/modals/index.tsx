@@ -1,7 +1,6 @@
 import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {memo, useMemo} from 'react';
 
-import BookmarkEditModal from '../../features/bookmarks/BookmarkEditModal';
 import {RestartModal} from './RestartModal';
 import StarRepoModal from './StarRepoModal';
 import UpdateApp from './updateApp';
@@ -25,7 +24,6 @@ const Modals = memo(() => {
       <UpdatingNotification />
       <UpgradePromoModal />
       <StarRepoModal />
-      <BookmarkEditModal />
 
       {ReplaceUpdateApp ? <ReplaceUpdateApp /> : <UpdateApp />}
 

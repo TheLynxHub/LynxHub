@@ -22,10 +22,6 @@ const initialState: BookmarksState = {
   },
   all: [],
   visibility: 'browser_open',
-  editModal: {
-    isOpen: false,
-    mode: 'add',
-  },
 };
 
 const bookmarksSlice = createSlice({
@@ -40,19 +36,6 @@ const bookmarksSlice = createSlice({
     },
     setVisibility: (state, action: PayloadAction<BookmarkBarVisibility>) => {
       state.visibility = action.payload;
-    },
-    openEditModal: (state, action: PayloadAction<{mode: 'add' | 'edit'; item?: BookmarkNode; parentId?: string}>) => {
-      state.editModal = {
-        isOpen: true,
-        mode: action.payload.mode,
-        item: action.payload.item,
-        parentId: action.payload.parentId,
-      };
-    },
-    closeEditModal: state => {
-      state.editModal.isOpen = false;
-      state.editModal.item = undefined;
-      state.editModal.parentId = undefined;
     },
   },
 });
