@@ -28,7 +28,7 @@ import AppStorageData, {
   PluginStorage,
   TerminalStorage,
 } from '@lynx_common/types/storage';
-import {compareUrls, isValidURL, terminalLineEnding} from '@lynx_common/utils';
+import {compareUrls, formatWebAddress, isValidURL, terminalLineEnding} from '@lynx_common/utils';
 import {sendToMain} from '@lynx_main/ipc/sender';
 import classHolder from '@lynx_main/managers/classHolder';
 import {
@@ -1602,6 +1602,7 @@ export class SqliteStorageManager {
     const parentId = input.parentId ?? 'bookmarks_bar';
     const now = new Date().toISOString();
     const id = randomUUID();
+    const formattedUrl = input.type === 'bookmark' && input.url ? formatWebAddress(input.url) : input.url;
 
     const maxOrderRow = this.sqlite
       .prepare(
@@ -1616,14 +1617,14 @@ export class SqliteStorageManager {
         'INSERT INTO browser_bookmarks (id, parent_id, type, title, url, fav_icon, `order`, created_at, updated_at)' +
           ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       )
-      .run(id, parentId, input.type, input.title, input.url ?? null, input.favIcon ?? null, order, now, now);
+      .run(id, parentId, input.type, input.title, formattedUrl ?? null, input.favIcon ?? null, order, now, now);
 
     return {
       id,
       parentId,
       type: input.type,
       title: input.title,
-      url: input.url,
+      url: formattedUrl,
       favIcon: input.favIcon,
       order,
       createdAt: new Date(now).getTime(),
@@ -1651,7 +1652,8 @@ export class SqliteStorageManager {
     const now = new Date().toISOString();
     const parentId = updates.parentId !== undefined ? updates.parentId : existing.parent_id;
     const title = updates.title !== undefined ? updates.title : existing.title;
-    const url = updates.url !== undefined ? updates.url : existing.url;
+    const rawUrl = updates.url !== undefined ? updates.url : existing.url;
+    const formattedUrl = existing.type === 'bookmark' && rawUrl ? formatWebAddress(rawUrl) : rawUrl;
     const favIcon = updates.favIcon !== undefined ? updates.favIcon : existing.fav_icon;
     const order = updates.order !== undefined ? updates.order : existing.order;
 
@@ -1660,14 +1662,14 @@ export class SqliteStorageManager {
         'UPDATE browser_bookmarks SET parent_id = ?, title = ?, url = ?,' +
           ' fav_icon = ?, `order` = ?, updated_at = ? WHERE id = ?',
       )
-      .run(parentId, title, url, favIcon, order, now, id);
+      .run(parentId, title, formattedUrl, favIcon, order, now, id);
 
     return {
       id,
       parentId,
       type: existing.type,
       title,
-      url: url ?? undefined,
+      url: formattedUrl ?? undefined,
       favIcon: favIcon ?? undefined,
       order,
       createdAt: new Date(existing.created_at).getTime(),

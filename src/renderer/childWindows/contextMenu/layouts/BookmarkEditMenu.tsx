@@ -1,5 +1,6 @@
 import {Button, FieldError, Form, Input, Label, ListBox, Select, TextField} from '@heroui/react';
 import {BookmarkNode} from '@lynx_common/types/bookmarks';
+import {formatWebAddress} from '@lynx_common/utils';
 import bookmarksIpc from '@lynx_shared/ipc/bookmarks';
 import {BookmarkIcon, FolderIcon, TrashBinTrashIcon} from '@solar-icons/react/bold-duotone';
 import {X} from 'lucide-react';
@@ -68,17 +69,18 @@ const BookmarkEditMenu = memo(function BookmarkEditMenu() {
     setIsSubmitting(true);
 
     try {
+      const formattedUrl = isFolder ? undefined : formatWebAddress(url.trim());
       if (mode === 'edit' && item?.id) {
         await bookmarksIpc.update(item.id, {
           title: title.trim(),
-          url: isFolder ? undefined : url.trim(),
+          url: formattedUrl,
           parentId: selectedParentId,
         });
       } else {
         await bookmarksIpc.add({
           type: isFolder ? 'folder' : 'bookmark',
           title: title.trim(),
-          url: isFolder ? undefined : url.trim(),
+          url: formattedUrl,
           parentId: selectedParentId,
         });
       }
