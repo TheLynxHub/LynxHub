@@ -4,7 +4,6 @@ import {getCacheUrl, isLinux} from '@lynx_common/utils';
 import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {EarthIcon} from '@solar-icons/react/bold-duotone';
-import {motion, Transition, Variants} from 'framer-motion';
 import {memo, useCallback, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -12,24 +11,13 @@ import {cardsActions, useCardsState} from '../../redux/reducers/cards';
 import {useTabsState} from '../../redux/reducers/tabs';
 import {AppDispatch} from '../../redux/store';
 
-const itemVariants: Variants = {
-  initial: {opacity: 0, scale: 0.85},
-  animate: {opacity: 1, scale: 1},
-  exit: {opacity: 0, scale: 0.8},
-};
-
-const itemTransition: Transition = {
-  layout: {type: 'spring', stiffness: 500, damping: 30},
-  opacity: {duration: 0.15},
-  scale: {duration: 0.15},
-};
-
 type Props = {
   item: BookmarkItemType;
   inDropdown?: boolean;
+  isOrdering?: boolean;
 };
 
-const BookmarkItem = memo(({item, inDropdown}: Props) => {
+const BookmarkItem = memo(({item, inDropdown, isOrdering}: Props) => {
   const [imgError, setImgError] = useState(false);
   const btnRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch<AppDispatch>();
@@ -67,7 +55,7 @@ const BookmarkItem = memo(({item, inDropdown}: Props) => {
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      if (!item.url) return;
+      if (isOrdering || !item.url) return;
       if (e.button === 1 || e.ctrlKey || e.metaKey) {
         // Middle click or Ctrl+Click: Open in new tab
         contextMenuIpc.send.rightClickItems.newTab(item.url);
@@ -85,7 +73,7 @@ const BookmarkItem = memo(({item, inDropdown}: Props) => {
         }
       }
     },
-    [item.url, activeTab, runningCards, dispatch],
+    [isOrdering, item.url, activeTab, runningCards, dispatch],
   );
 
   const handleContextMenu = useCallback(
@@ -117,21 +105,15 @@ const BookmarkItem = memo(({item, inDropdown}: Props) => {
       'text-foreground shrink-0 max-w-[180px] select-none';
 
   return (
-    <motion.div
+    <div
       onMouseDown={e => {
-        if (e.button === 1) handleClick(e);
+        if (e.button === 1 && !isOrdering) handleClick(e);
       }}
-      exit="exit"
       ref={btnRef}
       tabIndex={0}
       role="button"
-      layout="position"
-      initial="initial"
-      animate="animate"
       className={itemClass}
       onClick={handleClick}
-      variants={itemVariants}
-      transition={itemTransition}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
@@ -150,7 +132,7 @@ const BookmarkItem = memo(({item, inDropdown}: Props) => {
       </div>
 
       <span className="truncate text-xs font-normal leading-none">{item.title || item.url}</span>
-    </motion.div>
+    </div>
   );
 });
 

@@ -49,6 +49,14 @@ export function useBookmarks() {
     [fetchBookmarks],
   );
 
+  const reorderBookmarks = useCallback(
+    async (items: {id: string; order: number; parentId: string | null}[]) => {
+      await bookmarksIpc.reorder(items);
+      await fetchBookmarks();
+    },
+    [fetchBookmarks],
+  );
+
   const openAddModal = useCallback(
     (parentId?: string, defaultItem?: Partial<BookmarkNode>) => {
       dispatch(
@@ -87,6 +95,7 @@ export function useBookmarks() {
     addBookmark,
     updateBookmark,
     removeBookmark,
+    reorderBookmarks,
     openAddModal,
     openEditModal,
     closeModal,
