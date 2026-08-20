@@ -128,8 +128,8 @@ export default function UserAgent() {
 
   return (
     <SettingsFilterItem searchTexts={filterSearchTexts}>
-      <div className="flex flex-col gap-y-2">
-        <Select value={selectedAgent} onChange={handleAgentSelection}>
+      <div className="flex flex-col gap-y-2 bg-surface rounded-2xl px-4 py-3">
+        <Select variant="secondary" value={selectedAgent} onChange={handleAgentSelection}>
           <Label>
             <SettingsSearchHighlight text="User Agent" />
           </Label>
