@@ -8,7 +8,7 @@ import {
 import {isLinux} from '@lynx_common/utils';
 import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {AnimatePresence, motion, Reorder, Transition, Variants} from 'framer-motion';
+import {AnimatePresence, Reorder, Transition, Variants} from 'framer-motion';
 import {memo, useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -60,7 +60,6 @@ const BookmarksBar = memo(({runningCard, className}: Props) => {
   const [localNodes, setLocalNodes] = useState<BookmarkNode[]>(tree.children);
   const [isOrdering, setIsOrdering] = useState(false);
   const isDraggingRef = useRef(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!isDraggingRef.current) {
@@ -86,10 +85,16 @@ const BookmarksBar = memo(({runningCard, className}: Props) => {
     }
   }, []);
 
-  const onReorder = useCallback((newNodes: BookmarkNode[]) => {
+  const onReorder = useCallback((reorderedIds: string[]) => {
     isDraggingRef.current = true;
     setIsOrdering(true);
-    setLocalNodes(newNodes);
+    setLocalNodes(prevNodes => {
+      const newOrder = reorderedIds
+        .map(id => prevNodes.find(node => node.id === id))
+        .filter((node): node is BookmarkNode => node !== undefined);
+
+      return newOrder.length === prevNodes.length ? newOrder : prevNodes;
+    });
   }, []);
 
   const handleDragStart = useCallback(() => {
@@ -134,37 +139,30 @@ const BookmarksBar = memo(({runningCard, className}: Props) => {
       }
       size={24}
       role="toolbar"
-      ref={containerRef}
       onWheel={handleWheel}
       orientation="horizontal"
       aria-label="Bookmarks bar"
       onContextMenu={handleBarContextMenu}
       hideScrollBar>
-      <AnimatePresence initial={false} mode="popLayout">
-        {localNodes.length === 0 ? (
-          <motion.span
-            exit={{opacity: 0}}
-            key="empty-bookmarks"
-            initial={{opacity: 0}}
-            animate={{opacity: 1}}
-            transition={{duration: 0.15}}
-            className="text-[11px] text-muted-foreground italic px-2 select-none shrink-0">
-            No bookmarks yet. Right click to add.
-          </motion.span>
-        ) : (
-          <Reorder.Group
-            axis="x"
-            as="div"
-            values={localNodes}
-            onReorder={onReorder}
-            onMouseUp={handleReorderEnd}
-            className="flex items-center gap-1 h-full min-w-0">
+      {localNodes.length === 0 ? (
+        <span className="text-[11px] text-muted-foreground italic px-2 select-none shrink-0">
+          No bookmarks yet. Right click to add.
+        </span>
+      ) : (
+        <Reorder.Group
+          axis="x"
+          as="div"
+          onReorder={onReorder}
+          onMouseUp={handleReorderEnd}
+          values={localNodes.map(node => node.id)}
+          className="flex items-center gap-1 h-full min-w-max">
+          <AnimatePresence initial={false} mode="popLayout">
             {localNodes.map(node => (
               <Reorder.Item
                 as="div"
                 exit="exit"
-                value={node}
                 key={node.id}
+                value={node.id}
                 layout="position"
                 initial="initial"
                 animate="animate"
@@ -174,8 +172,7 @@ const BookmarksBar = memo(({runningCard, className}: Props) => {
                 transition={itemTransition}
                 onDragEnd={handleReorderEnd}
                 onDragStart={handleDragStart}
-                className="relative shrink-0"
-                dragConstraints={containerRef}>
+                className="relative shrink-0">
                 {node.type === 'folder' ? (
                   <BookmarkFolder isOrdering={isOrdering} folder={node as BookmarkFolderType} />
                 ) : (
@@ -183,9 +180,9 @@ const BookmarksBar = memo(({runningCard, className}: Props) => {
                 )}
               </Reorder.Item>
             ))}
-          </Reorder.Group>
-        )}
-      </AnimatePresence>
+          </AnimatePresence>
+        </Reorder.Group>
+      )}
     </ScrollShadow>
   );
 });
