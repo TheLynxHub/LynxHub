@@ -3,13 +3,8 @@ import {BookmarkFolder, BookmarkItem as BookmarkItemType, BookmarkNode} from '@l
 import {getCacheUrl} from '@lynx_common/utils';
 import bookmarksIpc from '@lynx_shared/ipc/bookmarks';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {
-  AltArrowLeftIcon,
-  AltArrowRightIcon,
-  EarthIcon,
-  FolderIcon,
-  FolderOpenIcon,
-} from '@solar-icons/react/bold-duotone';
+import {EarthIcon, FolderIcon, FolderOpenIcon} from '@solar-icons/react/bold-duotone';
+import {AltArrowLeftIcon, AltArrowRightIcon} from '@solar-icons/react/line-duotone';
 import {memo, useCallback, useEffect, useMemo, useState} from 'react';
 
 import {useContextState} from '../redux/reducer';

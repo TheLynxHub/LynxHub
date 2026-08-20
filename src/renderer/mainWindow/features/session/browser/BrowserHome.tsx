@@ -152,11 +152,20 @@ export default function BrowserHome({type}: Props) {
             </div>
 
             <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="flex flex-wrap gap-4">
-              {bookmarksList.slice(0, 18).map(bookmark => (
-                <motion.div key={bookmark.id} variants={itemFade}>
-                  <BookmarkCard bookmark={bookmark} />
-                </motion.div>
-              ))}
+              <AnimatePresence mode="popLayout">
+                {bookmarksList.slice(0, 18).map(bookmark => (
+                  <motion.div
+                    initial="hidden"
+                    key={bookmark.id}
+                    layout="position"
+                    animate="visible"
+                    variants={itemFade}
+                    exit={{opacity: 0, scale: 0.8, transition: {duration: 0.15}}}
+                    transition={{layout: {type: 'spring', stiffness: 500, damping: 30}}}>
+                    <BookmarkCard bookmark={bookmark} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </motion.div>
           </motion.section>
         ) : (

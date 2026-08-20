@@ -3,7 +3,20 @@ import {isLinux} from '@lynx_common/utils';
 import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {FolderIcon} from '@solar-icons/react/bold-duotone';
+import {motion, Transition, Variants} from 'framer-motion';
 import {memo, useCallback, useRef} from 'react';
+
+const folderVariants: Variants = {
+  initial: {opacity: 0, scale: 0.85},
+  animate: {opacity: 1, scale: 1},
+  exit: {opacity: 0, scale: 0.8},
+};
+
+const folderTransition: Transition = {
+  layout: {type: 'spring', stiffness: 500, damping: 30},
+  opacity: {duration: 0.15},
+  scale: {duration: 0.15},
+};
 
 type Props = {
   folder: BookmarkFolderType;
@@ -44,22 +57,28 @@ const BookmarkFolder = memo(({folder}: Props) => {
   );
 
   return (
-    <div
+    <motion.div
       className={
         'flex items-center gap-1.5 h-7 px-2 rounded-lg text-xs ' +
         'hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer transition-colors ' +
         'text-foreground shrink-0 max-w-[180px] select-none'
       }
+      exit="exit"
       ref={btnRef}
       tabIndex={0}
       role="button"
+      layout="position"
+      initial="initial"
+      animate="animate"
       onClick={handleClick}
+      variants={folderVariants}
+      transition={folderTransition}
       onContextMenu={handleContextMenu}>
       <div className="flex items-center gap-1.5 min-w-0">
         <FolderIcon className="size-3.5 text-warning shrink-0" />
         <span className="truncate text-xs font-medium leading-none">{folder.title}</span>
       </div>
-    </div>
+    </motion.div>
   );
 });
 

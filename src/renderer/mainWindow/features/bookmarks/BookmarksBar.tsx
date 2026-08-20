@@ -4,6 +4,7 @@ import {BookmarkFolder as BookmarkFolderType, BookmarkItem as BookmarkItemType} 
 import {isLinux} from '@lynx_common/utils';
 import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
+import {AnimatePresence, motion} from 'framer-motion';
 import {memo, useCallback} from 'react';
 
 import BookmarkFolder from './BookmarkFolder';
@@ -71,19 +72,27 @@ const BookmarksBar = memo(({runningCard, className}: Props) => {
       aria-label="Bookmarks bar"
       onContextMenu={handleBarContextMenu}
       hideScrollBar>
-      {tree.children.length === 0 ? (
-        <span className="text-[11px] text-muted-foreground italic px-2 select-none">
-          No bookmarks yet. Right click to add.
-        </span>
-      ) : (
-        tree.children.map(node =>
-          node.type === 'folder' ? (
-            <BookmarkFolder key={node.id} folder={node as BookmarkFolderType} />
-          ) : (
-            <BookmarkItem key={node.id} item={node as BookmarkItemType} />
-          ),
-        )
-      )}
+      <AnimatePresence initial={false} mode="popLayout">
+        {tree.children.length === 0 ? (
+          <motion.span
+            exit={{opacity: 0}}
+            key="empty-bookmarks"
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            transition={{duration: 0.15}}
+            className="text-[11px] text-muted-foreground italic px-2 select-none shrink-0">
+            No bookmarks yet. Right click to add.
+          </motion.span>
+        ) : (
+          tree.children.map(node =>
+            node.type === 'folder' ? (
+              <BookmarkFolder key={node.id} folder={node as BookmarkFolderType} />
+            ) : (
+              <BookmarkItem key={node.id} item={node as BookmarkItemType} />
+            ),
+          )
+        )}
+      </AnimatePresence>
     </ScrollShadow>
   );
 });

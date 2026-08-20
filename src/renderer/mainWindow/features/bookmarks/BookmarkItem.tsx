@@ -4,12 +4,25 @@ import {getCacheUrl, isLinux} from '@lynx_common/utils';
 import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {EarthIcon} from '@solar-icons/react/bold-duotone';
+import {motion, Transition, Variants} from 'framer-motion';
 import {memo, useCallback, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
 import {cardsActions, useCardsState} from '../../redux/reducers/cards';
 import {useTabsState} from '../../redux/reducers/tabs';
 import {AppDispatch} from '../../redux/store';
+
+const itemVariants: Variants = {
+  initial: {opacity: 0, scale: 0.85},
+  animate: {opacity: 1, scale: 1},
+  exit: {opacity: 0, scale: 0.8},
+};
+
+const itemTransition: Transition = {
+  layout: {type: 'spring', stiffness: 500, damping: 30},
+  opacity: {duration: 0.15},
+  scale: {duration: 0.15},
+};
 
 type Props = {
   item: BookmarkItemType;
@@ -104,15 +117,21 @@ const BookmarkItem = memo(({item, inDropdown}: Props) => {
       'text-foreground shrink-0 max-w-[180px] select-none';
 
   return (
-    <div
+    <motion.div
       onMouseDown={e => {
         if (e.button === 1) handleClick(e);
       }}
+      exit="exit"
       ref={btnRef}
       tabIndex={0}
       role="button"
+      layout="position"
+      initial="initial"
+      animate="animate"
       className={itemClass}
       onClick={handleClick}
+      variants={itemVariants}
+      transition={itemTransition}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
@@ -131,7 +150,7 @@ const BookmarkItem = memo(({item, inDropdown}: Props) => {
       </div>
 
       <span className="truncate text-xs font-normal leading-none">{item.title || item.url}</span>
-    </div>
+    </motion.div>
   );
 });
 
