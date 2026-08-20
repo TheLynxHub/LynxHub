@@ -1,7 +1,7 @@
 import {Button, FieldError, Form, Input, Label, ListBox, Modal, Select, TextField} from '@heroui/react';
 import {BookmarkNode} from '@lynx_common/types/bookmarks';
 import {BookmarkIcon, FolderIcon, TrashBinTrashIcon} from '@solar-icons/react/bold-duotone';
-import {memo, useCallback, useEffect, useMemo, useState} from 'react';
+import {FormEvent, KeyboardEvent, memo, useCallback, useEffect, useMemo, useState} from 'react';
 
 import TabModal from '../../components/TabModal';
 import {useBookmarks} from './useBookmarks';
@@ -80,7 +80,7 @@ const BookmarkEditModal = memo(function BookmarkEditModal() {
   ]);
 
   const handleFormSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+    (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       handleSubmit();
     },
@@ -88,7 +88,7 @@ const BookmarkEditModal = memo(function BookmarkEditModal() {
   );
 
   const handleInputKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         handleSubmit();
@@ -133,14 +133,14 @@ const BookmarkEditModal = memo(function BookmarkEditModal() {
         </Modal.Header>
 
         <Modal.Body className="space-y-4 py-2">
-          <TextField value={title} onChange={setTitle} fullWidth isRequired>
+          <TextField value={title} variant="secondary" onChange={setTitle} fullWidth isRequired>
             <Label>Name</Label>
             <Input placeholder="e.g. GitHub" onKeyDown={handleInputKeyDown} autoFocus />
             <FieldError />
           </TextField>
 
           {!isFolder && (
-            <TextField value={url} onChange={setUrl} fullWidth isRequired>
+            <TextField value={url} onChange={setUrl} variant="secondary" fullWidth isRequired>
               <Label>URL</Label>
               <Input onKeyDown={handleInputKeyDown} placeholder="https://example.com" />
               <FieldError />
