@@ -51,4 +51,6 @@ export const contextMenuChannels = {
   openCloseApp: 'context:open-close-app',
   openBookmarkContextMenu: 'context:open-bookmark-context-menu',
   onBookmarkContextMenu: 'context:on-bookmark-context-menu',
+  openBookmarkFolderMenu: 'context:open-bookmark-folder-menu',
+  onBookmarkFolderMenu: 'context:on-bookmark-folder-menu',
 } as const;

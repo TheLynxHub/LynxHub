@@ -1,6 +1,6 @@
 import {contextMenuChannels} from '@lynx_common/consts/ipcChannels/contextMenu';
 import {ElementResizeData} from '@lynx_common/types';
-import {BookmarkContextMenuPayload} from '@lynx_common/types/bookmarks';
+import {BookmarkContextMenuPayload, BookmarkFolder, BookmarkFolderMenuPayload} from '@lynx_common/types/bookmarks';
 import {ContextMenuVolumeData, NavHistory} from '@lynx_common/types/ipc';
 import {isLinux, terminalLineEnding} from '@lynx_common/utils';
 import {ptyWrite} from '@lynx_main/ipc/methods/pty';
@@ -344,6 +344,74 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
     contextMenuIpc.send.onBookmarkContextMenu(payload);
     contextMenuManager.showContextMenu();
   });
+
+  // Open Bookmark Folder Menu
+  contextMenuIpc.on.openBookmarkFolderMenu((payload, customPosition) => {
+    if (isLinux) {
+      const mainWindow = appManager.getMainWindow();
+      const storageManager = classHolder.storageManager;
+      const tree = storageManager.getBookmarksTree();
+
+      const findFolder = (node: BookmarkFolder, id: string): BookmarkFolder | null => {
+        if (node.id === id) return node;
+        for (const child of node.children) {
+          if (child.type === 'folder') {
+            const found = findFolder(child as BookmarkFolder, id);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const folder = findFolder(tree, payload.folderId);
+      if (!folder) return;
+
+      const buildMenuTemplate = (f: BookmarkFolder): Electron.MenuItemConstructorOptions[] => {
+        const items: Electron.MenuItemConstructorOptions[] = [];
+        const hasBookmarks = f.children.some(c => c.type === 'bookmark');
+        if (hasBookmarks) {
+          items.push({
+            label: 'Open All in Tabs',
+            click: () => {
+              f.children.forEach(c => {
+                if (c.type === 'bookmark' && c.url) applicationIpc.send.onNewTab(c.url, true);
+              });
+            },
+          });
+          items.push({type: 'separator'});
+        }
+
+        if (f.children.length === 0) {
+          items.push({label: '(Empty folder)', enabled: false});
+        } else {
+          for (const child of f.children) {
+            if (child.type === 'folder') {
+              items.push({
+                label: child.title,
+                submenu: buildMenuTemplate(child as BookmarkFolder),
+              });
+            } else {
+              items.push({
+                label: child.title || child.url || 'Bookmark',
+                click: () => {
+                  if (child.url) applicationIpc.send.onNewTab(child.url, false);
+                },
+              });
+            }
+          }
+        }
+        return items;
+      };
+
+      const menu = Menu.buildFromTemplate(buildMenuTemplate(folder));
+      menu.popup({window: mainWindow as BrowserWindow});
+      return;
+    }
+
+    setPosition(customPosition);
+    contextMenuIpc.send.onBookmarkFolderMenu(payload);
+    contextMenuManager.showContextMenu();
+  });
 }
 
 /**
@@ -385,6 +453,9 @@ export const contextMenuIpc = {
     /** Sends bookmark context menu event to context menu */
     onBookmarkContextMenu: (payload: BookmarkContextMenuPayload) =>
       sendToContextMenu(contextMenuChannels.onBookmarkContextMenu, payload),
+    /** Sends bookmark folder menu event to context menu */
+    onBookmarkFolderMenu: (payload: BookmarkFolderMenuPayload) =>
+      sendToContextMenu(contextMenuChannels.onBookmarkFolderMenu, payload),
   },
   on: {
     /** Listens for force reload request */
@@ -448,6 +519,10 @@ export const contextMenuIpc = {
     openBookmarkContextMenu: (
       callback: (payload: BookmarkContextMenuPayload, customPosition?: {x: number; y: number}) => void,
     ) => lynxIpc.on(contextMenuChannels.openBookmarkContextMenu, callback),
+    /** Listens for open bookmark folder menu request */
+    openBookmarkFolderMenu: (
+      callback: (payload: BookmarkFolderMenuPayload, customPosition?: {x: number; y: number}) => void,
+    ) => lynxIpc.on(contextMenuChannels.openBookmarkFolderMenu, callback),
   },
   handle: {},
 };

@@ -48,6 +48,10 @@ const contextMenuIpc = {
     openBookmarkContextMenu: (payload: any, customPosition?: ContextMenuPosition) =>
       lynxIpc.send(contextMenuChannels.openBookmarkContextMenu, payload, customPosition),
 
+    // Opens bookmark folder menu
+    openBookmarkFolderMenu: (payload: any, customPosition?: ContextMenuPosition) =>
+      lynxIpc.send(contextMenuChannels.openBookmarkFolderMenu, payload, customPosition),
+
     rightClickItems: {
       copy: (id: number) => lynxIpc.send(contextMenuChannels.copy, id),
 
@@ -147,6 +151,10 @@ const contextMenuIpc = {
     // Listens for bookmark context menu events
     bookmarkContextMenu: (callback: (payload: any) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onBookmarkContextMenu, callback),
+
+    // Listens for bookmark folder menu events
+    bookmarkFolderMenu: (callback: (payload: any) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onBookmarkFolderMenu, callback),
   },
 };
 

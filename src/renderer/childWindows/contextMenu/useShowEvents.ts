@@ -222,6 +222,17 @@ export default function useShowEvents() {
       );
     });
 
+    // Bookmark Folder Menu
+    const offBookmarkFolder = contextMenuIpc.on.bookmarkFolderMenu(payload => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'bookmarkFolderMenu',
+          value: payload,
+          layout: MenuTypes.BookmarkFolderMenu,
+        }),
+      );
+    });
+
     return () => {
       offZoom();
       offFind();
@@ -240,6 +251,7 @@ export default function useShowEvents() {
       offProgress();
       offDone();
       offBookmark();
+      offBookmarkFolder();
     };
   }, [dispatch]);
 }

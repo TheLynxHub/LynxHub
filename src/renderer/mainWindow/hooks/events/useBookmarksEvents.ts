@@ -1,13 +1,15 @@
 import bookmarksIpc from '@lynx_shared/ipc/bookmarks';
+import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import storageIpc from '@lynx_shared/ipc/storage';
 import {useEffect} from 'react';
 import {useDispatch} from 'react-redux';
 
 import {bookmarksActions} from '../../redux/reducers/bookmarks';
-import {AppDispatch} from '../../redux/store';
+import {cardsActions} from '../../redux/reducers/cards';
+import {AppDispatch, getStore} from '../../redux/store';
 
 /**
- * Global listener for bookmarks events (tree changes, modal open triggers, storage sync).
+ * Global listener for bookmarks events (tree changes, modal open triggers, storage sync, bookmark open navigation).
  */
 export const useBookmarksEvents = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -33,9 +35,21 @@ export const useBookmarksEvents = () => {
       dispatch(bookmarksActions.openEditModal(payload));
     });
 
+    const offOpenBookmark = bookmarksIpc.on.openBookmark(({url, newTab}) => {
+      if (newTab) {
+        contextMenuIpc.send.rightClickItems.newTab(url);
+      } else {
+        const store = getStore();
+        const activeTab = store.getState().tabs.activeTab;
+        dispatch(cardsActions.setRunningCardCustomAddress({tabId: activeTab, address: url}));
+        dispatch(cardsActions.setRunningCardView({tabId: activeTab, view: 'browser'}));
+      }
+    });
+
     return () => {
       offChanged();
       offOpenModal();
+      offOpenBookmark();
     };
   }, [dispatch]);
 

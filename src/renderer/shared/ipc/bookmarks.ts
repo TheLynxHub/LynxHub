@@ -19,11 +19,14 @@ const bookmarksIpc = {
   reorder: (items: {id: string; order: number; parentId: string | null}[]) =>
     lynxIpc.invoke<void>(bookmarksChannels.reorder, items),
   openAddEditModal: (payload: OpenAddEditModalPayload) => lynxIpc.send(bookmarksChannels.openAddEditModal, payload),
+  openBookmark: (payload: {url: string; newTab?: boolean}) => lynxIpc.send(bookmarksChannels.openBookmark, payload),
 
   on: {
     changed: (callback: () => void): (() => void) => lynxIpc.on(bookmarksChannels.onChanged, callback),
     openAddEditModal: (callback: (payload: OpenAddEditModalPayload) => void): (() => void) =>
       lynxIpc.on(bookmarksChannels.openAddEditModal, callback),
+    openBookmark: (callback: (payload: {url: string; newTab?: boolean}) => void): (() => void) =>
+      lynxIpc.on(bookmarksChannels.openBookmark, callback),
   },
 };
 

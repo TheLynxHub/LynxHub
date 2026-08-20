@@ -38,17 +38,25 @@ export async function listenBookmarks() {
   bookmarksIpc.on.openAddEditModal(payload => {
     bookmarksIpc.send.openAddEditModal(payload);
   });
+
+  // Forward openBookmark requests from child windows to mainWindow
+  bookmarksIpc.on.openBookmark(payload => {
+    bookmarksIpc.send.openBookmark(payload);
+  });
 }
 
 export const bookmarksIpc = {
   on: {
     openAddEditModal: (callback: (payload: {mode: 'add' | 'edit'; item?: BookmarkNode; parentId?: string}) => void) =>
       lynxIpc.on(bookmarksChannels.openAddEditModal, callback),
+    openBookmark: (callback: (payload: {url: string; newTab?: boolean}) => void) =>
+      lynxIpc.on(bookmarksChannels.openBookmark, callback),
   },
   send: {
     onChanged: () => sendToMain(bookmarksChannels.onChanged),
     openAddEditModal: (payload: {mode: 'add' | 'edit'; item?: BookmarkNode; parentId?: string}) =>
       sendToMain(bookmarksChannels.openAddEditModal, payload),
+    openBookmark: (payload: {url: string; newTab?: boolean}) => sendToMain(bookmarksChannels.openBookmark, payload),
   },
   handle: {
     getTree: (callback: () => MainHT<BookmarkFolder>) => lynxIpc.handle(bookmarksChannels.getTree, callback),
