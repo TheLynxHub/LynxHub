@@ -1,4 +1,4 @@
-import {Button, FieldError, Input, Label, ListBox, Modal, Select, TextField} from '@heroui/react';
+import {Button, FieldError, Form, Input, Label, ListBox, Modal, Select, TextField} from '@heroui/react';
 import {BookmarkNode} from '@lynx_common/types/bookmarks';
 import {BookmarkIcon, FolderIcon, TrashBinTrashIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback, useEffect, useMemo, useState} from 'react';
@@ -79,6 +79,24 @@ const BookmarkEditModal = memo(function BookmarkEditModal() {
     closeModal,
   ]);
 
+  const handleFormSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      handleSubmit();
+    },
+    [handleSubmit],
+  );
+
+  const handleInputKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSubmit();
+      }
+    },
+    [handleSubmit],
+  );
+
   const handleDelete = useCallback(async () => {
     if (mode === 'edit' && item?.id) {
       setIsSubmitting(true);
@@ -102,93 +120,92 @@ const BookmarkEditModal = memo(function BookmarkEditModal() {
 
   return (
     <TabModal size="md" isOpen={isOpen} onOpenChange={open => !open && closeModal()}>
-      <Modal.Header>
-        <Modal.Heading className="flex items-center gap-x-2 text-foreground font-semibold">
-          {isFolder ? (
-            <FolderIcon className="size-5 text-amber-500 shrink-0" />
-          ) : (
-            <BookmarkIcon className="size-5 text-primary shrink-0" />
-          )}
-          <span>{modalTitle}</span>
-        </Modal.Heading>
-      </Modal.Header>
+      <Form onSubmit={handleFormSubmit} className="flex flex-col gap-0 w-full">
+        <Modal.Header>
+          <Modal.Heading className="flex items-center gap-x-2 text-foreground font-semibold">
+            {isFolder ? (
+              <FolderIcon className="size-5 text-amber-500 shrink-0" />
+            ) : (
+              <BookmarkIcon className="size-5 text-primary shrink-0" />
+            )}
+            <span>{modalTitle}</span>
+          </Modal.Heading>
+        </Modal.Header>
 
-      <Modal.Body className="space-y-4 py-2">
-        <TextField value={title} onChange={setTitle} fullWidth isRequired>
-          <Label>Name</Label>
-          <Input placeholder="e.g. GitHub" autoFocus />
-          <FieldError />
-        </TextField>
-
-        {!isFolder && (
-          <TextField value={url} onChange={setUrl} fullWidth isRequired>
-            <Label>URL</Label>
-            <Input placeholder="https://example.com" />
+        <Modal.Body className="space-y-4 py-2">
+          <TextField value={title} onChange={setTitle} fullWidth isRequired>
+            <Label>Name</Label>
+            <Input placeholder="e.g. GitHub" onKeyDown={handleInputKeyDown} autoFocus />
             <FieldError />
           </TextField>
-        )}
 
-        <Select
-          variant="secondary"
-          aria-label="Folder"
-          placeholder="Folder"
-          selectionMode="single"
-          selectedKey={selectedParentId}
-          onSelectionChange={key => setSelectedParentId((key as string) || 'bookmarks_bar')}
-          fullWidth>
-          <Label>Folder</Label>
-          <Select.Trigger>
-            <Select.Value>
-              {selectedParentId === 'bookmarks_bar'
-                ? 'Bookmarks Bar'
-                : folderOptions.find(f => f.id === selectedParentId)?.title || 'Bookmarks Bar'}
-            </Select.Value>
-            <Select.Indicator />
-          </Select.Trigger>
-          <Select.Popover>
-            <ListBox>
-              <ListBox.Item id="bookmarks_bar" key="bookmarks_bar" textValue="Bookmarks Bar">
-                <ListBox.ItemIndicator />
-                Bookmarks Bar
-              </ListBox.Item>
-              {folderOptions.map(folder => (
-                <ListBox.Item id={folder.id} key={folder.id} textValue={folder.title}>
-                  <ListBox.ItemIndicator />
-                  {folder.title}
-                </ListBox.Item>
-              ))}
-            </ListBox>
-          </Select.Popover>
-        </Select>
-      </Modal.Body>
-
-      <Modal.Footer className="flex justify-between items-center w-full">
-        <div>
-          {mode === 'edit' && (
-            <Button
-              variant="ghost"
-              onPress={handleDelete}
-              isDisabled={isSubmitting}
-              className="text-danger hover:bg-danger/10">
-              <TrashBinTrashIcon className="size-4" />
-              Delete
-            </Button>
+          {!isFolder && (
+            <TextField value={url} onChange={setUrl} fullWidth isRequired>
+              <Label>URL</Label>
+              <Input onKeyDown={handleInputKeyDown} placeholder="https://example.com" />
+              <FieldError />
+            </TextField>
           )}
-        </div>
 
-        <div className="flex gap-2">
-          <Button variant="tertiary" onPress={closeModal} isDisabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onPress={handleSubmit}
-            isPending={isSubmitting}
-            isDisabled={!isValid || isSubmitting}>
-            Save
-          </Button>
-        </div>
-      </Modal.Footer>
+          <Select
+            variant="secondary"
+            aria-label="Folder"
+            placeholder="Folder"
+            selectionMode="single"
+            selectedKey={selectedParentId}
+            onSelectionChange={key => setSelectedParentId((key as string) || 'bookmarks_bar')}
+            fullWidth>
+            <Label>Folder</Label>
+            <Select.Trigger>
+              <Select.Value>
+                {selectedParentId === 'bookmarks_bar'
+                  ? 'Bookmarks Bar'
+                  : folderOptions.find(f => f.id === selectedParentId)?.title || 'Bookmarks Bar'}
+              </Select.Value>
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                <ListBox.Item id="bookmarks_bar" key="bookmarks_bar" textValue="Bookmarks Bar">
+                  <ListBox.ItemIndicator />
+                  Bookmarks Bar
+                </ListBox.Item>
+                {folderOptions.map(folder => (
+                  <ListBox.Item id={folder.id} key={folder.id} textValue={folder.title}>
+                    <ListBox.ItemIndicator />
+                    {folder.title}
+                  </ListBox.Item>
+                ))}
+              </ListBox>
+            </Select.Popover>
+          </Select>
+        </Modal.Body>
+
+        <Modal.Footer className="flex justify-between items-center w-full">
+          <div>
+            {mode === 'edit' && (
+              <Button
+                type="button"
+                variant="ghost"
+                onPress={handleDelete}
+                isDisabled={isSubmitting}
+                className="text-danger hover:bg-danger/10">
+                <TrashBinTrashIcon className="size-4" />
+                Delete
+              </Button>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <Button type="button" variant="tertiary" onPress={closeModal} isDisabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isPending={isSubmitting} isDisabled={!isValid || isSubmitting}>
+              Save
+            </Button>
+          </div>
+        </Modal.Footer>
+      </Form>
     </TabModal>
   );
 });
