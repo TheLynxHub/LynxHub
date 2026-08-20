@@ -10,7 +10,8 @@ import BookmarkItem from './BookmarkItem';
 import {useBookmarks} from './useBookmarks';
 
 type Props = {
-  runningCard: RunningCard;
+  runningCard?: RunningCard;
+  className?: string;
 };
 
 /**
@@ -18,43 +19,43 @@ type Props = {
  */
 export function isBookmarksBarVisible(
   visibility: 'always' | 'browser_open' | 'never',
-  runningCard: RunningCard,
+  runningCard?: RunningCard,
 ): boolean {
   if (visibility === 'never') return false;
-  if (runningCard.type === 'terminal') return false;
   if (visibility === 'always') return true;
-  if (visibility === 'browser_open') return runningCard.currentView === 'browser';
+  if (visibility === 'browser_open') {
+    if (!runningCard) return false;
+    if (runningCard.type === 'terminal') return false;
+    return runningCard.currentView === 'browser';
+  }
   return false;
 }
 
-const BookmarksBar = memo(({runningCard}: Props) => {
+const BookmarksBar = memo(({runningCard, className}: Props) => {
   const {tree, visibility} = useBookmarks();
 
   const isVisible = isBookmarksBarVisible(visibility, runningCard);
 
-  const handleBarContextMenu = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      if (!isLinux) bookmarkTooltipIpc.hide();
+  const handleBarContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isLinux) bookmarkTooltipIpc.hide();
 
-      contextMenuIpc.send.openBookmarkContextMenu(
-        {
-          targetType: 'bar',
-          bookmarksBarVisibility: visibility,
-        },
-        {x: e.clientX, y: e.clientY},
-      );
-    },
-    [visibility],
-  );
+    contextMenuIpc.send.openBookmarkContextMenu(
+      {
+        targetType: 'bar',
+      },
+      {x: e.clientX, y: e.clientY},
+    );
+  }, []);
 
   if (!isVisible) return null;
 
   return (
     <div
       className={
-        'absolute top-10 left-0 right-0 h-8 px-2 flex items-center gap-1 ' +
-        'bg-surface overflow-x-auto select-none no-scrollbar z-10'
+        (runningCard ? 'absolute top-10 left-0 right-0 z-10 ' : 'w-full mb-1 shrink-0 rounded-xl ') +
+        'h-8 px-2 flex items-center gap-1 bg-surface overflow-x-auto select-none no-scrollbar ' +
+        (className || '')
       }
       role="toolbar"
       aria-label="Bookmarks bar"

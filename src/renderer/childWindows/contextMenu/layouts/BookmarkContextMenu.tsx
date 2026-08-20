@@ -1,7 +1,5 @@
-import {BookmarkBarVisibility} from '@lynx_common/types/bookmarks';
 import bookmarksIpc from '@lynx_shared/ipc/bookmarks';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import storageIpc from '@lynx_shared/ipc/storage';
 import {
   AddFolderIcon,
   BookmarkIcon,
@@ -11,7 +9,7 @@ import {
   SquareShareLineIcon,
   TrashBinTrashIcon,
 } from '@solar-icons/react/bold-duotone';
-import {memo, useCallback} from 'react';
+import {memo} from 'react';
 
 import {useContextState} from '../redux/reducer';
 import Separator from './right_click/Separator';
@@ -28,7 +26,6 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
   const bookmarkId = payload?.bookmarkId;
   const folderId = payload?.folderId;
   const url = payload?.url;
-  const currentVisibility = payload?.bookmarksBarVisibility ?? 'browser_open';
 
   const handleOpenInNewTab = createActionHandler(() => {
     if (url) {
@@ -93,12 +90,6 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
     });
   });
 
-  const handleSetVisibility = useCallback((visibility: BookmarkBarVisibility) => {
-    createActionHandler(() => {
-      storageIpc.update('browser', {bookmarksBarVisibility: visibility});
-    })();
-  }, []);
-
   return (
     <div className="overflow-hidden px-1.5 flex flex-col gap-y-1 py-2 min-w-[210px]">
       {targetType === 'bookmark' && url && (
@@ -149,27 +140,6 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
         title="Add Folder..."
         onPress={handleAddFolder}
         icon={<AddFolderIcon className="size-4 text-amber-500" />}
-      />
-
-      <Separator />
-
-      <div className="px-3 py-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-        Bookmarks Bar
-      </div>
-      <ActionButton
-        onPress={() => handleSetVisibility('always')}
-        title={currentVisibility === 'always' ? '✓ Always Show' : 'Always Show'}
-        className={currentVisibility === 'always' ? 'font-semibold text-primary' : ''}
-      />
-      <ActionButton
-        onPress={() => handleSetVisibility('browser_open')}
-        className={currentVisibility === 'browser_open' ? 'font-semibold text-primary' : ''}
-        title={currentVisibility === 'browser_open' ? '✓ When Browser is Open' : 'When Browser is Open'}
-      />
-      <ActionButton
-        onPress={() => handleSetVisibility('never')}
-        title={currentVisibility === 'never' ? '✓ Never Show' : 'Never Show'}
-        className={currentVisibility === 'never' ? 'font-semibold text-primary' : ''}
       />
     </div>
   );

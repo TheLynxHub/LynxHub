@@ -5,15 +5,12 @@ import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {FolderIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback, useRef} from 'react';
 
-import {useBookmarks} from './useBookmarks';
-
 type Props = {
   folder: BookmarkFolderType;
 };
 
 const BookmarkFolder = memo(({folder}: Props) => {
   const btnRef = useRef<HTMLDivElement>(null);
-  const {visibility} = useBookmarks();
 
   const handleClick = useCallback(() => {
     if (!btnRef.current) return;
@@ -39,12 +36,11 @@ const BookmarkFolder = memo(({folder}: Props) => {
           targetType: 'folder',
           folderId: folder.id,
           title: folder.title,
-          bookmarksBarVisibility: visibility,
         },
         {x: e.clientX, y: e.clientY},
       );
     },
-    [folder.id, folder.title, visibility],
+    [folder.id, folder.title],
   );
 
   return (

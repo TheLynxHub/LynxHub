@@ -40,9 +40,18 @@ export const useBookmarksEvents = () => {
         contextMenuIpc.send.rightClickItems.newTab(url);
       } else {
         const store = getStore();
-        const activeTab = store.getState().tabs.activeTab;
-        dispatch(cardsActions.setRunningCardCustomAddress({tabId: activeTab, address: url}));
-        dispatch(cardsActions.setRunningCardView({tabId: activeTab, view: 'browser'}));
+        const state = store.getState();
+        const activeTab = state.tabs.activeTab;
+        const runningCards = state.cards.runningCard;
+        const activeRunningCard = runningCards.find(card => card.tabId === activeTab);
+        const hasBrowser = activeRunningCard && activeRunningCard.type !== 'terminal';
+
+        if (hasBrowser) {
+          dispatch(cardsActions.setRunningCardCustomAddress({tabId: activeTab, address: url}));
+          dispatch(cardsActions.setRunningCardView({tabId: activeTab, view: 'browser'}));
+        } else {
+          contextMenuIpc.send.rightClickItems.newTab(url);
+        }
       }
     });
 

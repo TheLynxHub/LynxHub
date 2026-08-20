@@ -1,3 +1,5 @@
+import BookmarksBar from '@lynx/features/bookmarks/BookmarksBar';
+import {useBookmarks} from '@lynx/features/bookmarks/useBookmarks';
 import SessionView from '@lynx/features/session';
 import Agents from '@lynx/pages/agents';
 import AudioGenerationPage from '@lynx/pages/audio';
@@ -14,6 +16,10 @@ import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {useCardsState} from '@lynx/redux/reducers/cards';
 import {useTerminalState} from '@lynx/redux/reducers/terminal';
 import {PageID} from '@lynx_common/consts';
+import ptyIpc from '@lynx_shared/ipc/pty';
+import {ComponentType, memo, useEffect, useMemo} from 'react';
+
+import {useRemoveTab} from './tabs/utils';
 
 const PageComponents = {
   [PageID.home]: HomePage,
@@ -29,11 +35,6 @@ const PageComponents = {
   [PageID.settings]: SettingsPage,
 };
 
-import ptyIpc from '@lynx_shared/ipc/pty';
-import {ComponentType, memo, useEffect, useMemo} from 'react';
-
-import {useRemoveTab} from './tabs/utils';
-
 type Props = {tabID: string; pageID: string};
 
 /**
@@ -43,7 +44,9 @@ type Props = {tabID: string; pageID: string};
 const AppPages = memo(({tabID, pageID}: Props) => {
   const runningCards = useCardsState('runningCard');
   const closeTabOnExit = useTerminalState('closeTabOnExit');
+  const {visibility} = useBookmarks();
 
+  const isAlwaysBar = visibility === 'always';
   const foundRunningCard = runningCards.find(card => card.tabId === tabID);
 
   const removeTab = useRemoveTab();
@@ -64,31 +67,40 @@ const AppPages = memo(({tabID, pageID}: Props) => {
 
   if (foundRunningCard) return <RunningView runningCard={foundRunningCard} />;
 
-  const customPage = (extensionsData.router.pages || []).find(p => p.id === pageID);
-  if (customPage) {
-    const Component = customPage.component as ComponentType<{tabID?: string}>;
+  const renderPageComponent = () => {
+    const customPage = (extensionsData.router.pages || []).find(p => p.id === pageID);
+    if (customPage) {
+      const Component = customPage.component as ComponentType<{tabID?: string}>;
+      return <Component tabID={tabID} />;
+    }
+
+    const routerReplace = extensionsData.router.replace;
+    const ReplacedComponent = {
+      [PageID.home]: routerReplace.homePage,
+      [PageID.imageGen]: routerReplace.imageGenerationPage,
+      [PageID.textGen]: routerReplace.textGenerationPage,
+      [PageID.audioGen]: routerReplace.audioGenerationPage,
+      [PageID.tools]: routerReplace.toolsPage,
+      [PageID.games]: routerReplace.gamesPage,
+      [PageID.dashboard]: routerReplace.dashboardPage,
+      [PageID.plugins]: routerReplace.extensionsPage,
+      [PageID.settings]: routerReplace.settingsPage,
+    }[pageID] as ComponentType<{tabID?: string}> | undefined;
+
+    if (ReplacedComponent) {
+      return <ReplacedComponent tabID={tabID} />;
+    }
+
+    const Component = (PageComponents[pageID] || HomePage) as ComponentType<{tabID?: string}>;
     return <Component tabID={tabID} />;
-  }
+  };
 
-  const routerReplace = extensionsData.router.replace;
-  const ReplacedComponent = {
-    [PageID.home]: routerReplace.homePage,
-    [PageID.imageGen]: routerReplace.imageGenerationPage,
-    [PageID.textGen]: routerReplace.textGenerationPage,
-    [PageID.audioGen]: routerReplace.audioGenerationPage,
-    [PageID.tools]: routerReplace.toolsPage,
-    [PageID.games]: routerReplace.gamesPage,
-    [PageID.dashboard]: routerReplace.dashboardPage,
-    [PageID.plugins]: routerReplace.extensionsPage,
-    [PageID.settings]: routerReplace.settingsPage,
-  }[pageID] as ComponentType<{tabID?: string}> | undefined;
-
-  if (ReplacedComponent) {
-    return <ReplacedComponent tabID={tabID} />;
-  }
-
-  const Component = (PageComponents[pageID] || HomePage) as ComponentType<{tabID?: string}>;
-  return <Component tabID={tabID} />;
+  return (
+    <div className="flex flex-col size-full overflow-hidden">
+      {isAlwaysBar && <BookmarksBar />}
+      <div className="flex-1 size-full overflow-hidden relative">{renderPageComponent()}</div>
+    </div>
+  );
 });
 
 export default AppPages;

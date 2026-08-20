@@ -5,6 +5,8 @@ import {SerializeAddon} from '@xterm/addon-serialize';
 import {Dispatch, memo, RefObject, SetStateAction, useEffect, useMemo} from 'react';
 
 import {useTabsState} from '../../../redux/reducers/tabs';
+import {isBookmarksBarVisible} from '../../bookmarks/BookmarksBar';
+import {useBookmarks} from '../../bookmarks/useBookmarks';
 import {useTerminalBrowserIntegration} from './hooks/useTerminalBrowserIntegration';
 import {useTerminalClipboard} from './hooks/useTerminalClipboard';
 import {useTerminalHotkeys} from './hooks/useTerminalHotkeys';
@@ -25,6 +27,9 @@ const Terminal = memo(
   ({runningCard, serializeAddon, searchAddon, clearTerminal, setSelectedTerminalText, xtermRef}: Props) => {
     const {webUIAddress, id, currentView, tabId, type} = useMemo(() => runningCard, [runningCard]);
     const activeTab = useTabsState('activeTab');
+    const {visibility} = useBookmarks();
+
+    const isBarVisible = isBookmarksBarVisible(visibility, runningCard);
 
     useEffect(() => {
       if (currentView === 'terminal' && activeTab === tabId) {
@@ -58,9 +63,15 @@ const Terminal = memo(
       copySelection,
     });
 
+    const terminalTopClass = isBarVisible ? 'top-[72px]!' : 'top-10!';
+
     return (
       <div className={`${currentView === 'terminal' ? 'block' : 'hidden'}`}>
-        <div className="absolute inset-0 top-10! overflow-hidden bg-white pl-3 pr-1 shadow-md dark:bg-LynxNearBlack">
+        <div
+          className={
+            `absolute inset-0 ${terminalTopClass} overflow-hidden bg-white pl-3 pr-1 ` +
+            'shadow-md dark:bg-LynxNearBlack'
+          }>
           <XTermCore
             id={id}
             type={type}

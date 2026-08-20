@@ -47,7 +47,6 @@ export type BookmarkContextMenuPayload = {
   title?: string;
   url?: string;
   parentId?: string | null;
-  bookmarksBarVisibility: BookmarkBarVisibility;
 };
 
 export type BookmarkFolderMenuPayload = {

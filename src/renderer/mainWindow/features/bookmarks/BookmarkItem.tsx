@@ -7,10 +7,9 @@ import {EarthIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {cardsActions} from '../../redux/reducers/cards';
+import {cardsActions, useCardsState} from '../../redux/reducers/cards';
 import {useTabsState} from '../../redux/reducers/tabs';
 import {AppDispatch} from '../../redux/store';
-import {useBookmarks} from './useBookmarks';
 
 type Props = {
   item: BookmarkItemType;
@@ -22,7 +21,7 @@ const BookmarkItem = memo(({item, inDropdown}: Props) => {
   const btnRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch<AppDispatch>();
   const activeTab = useTabsState('activeTab');
-  const {visibility} = useBookmarks();
+  const runningCards = useCardsState('runningCard');
 
   const domainFavicon = useMemo(() => {
     if (item.favIcon) return item.favIcon;
@@ -60,12 +59,20 @@ const BookmarkItem = memo(({item, inDropdown}: Props) => {
         // Middle click or Ctrl+Click: Open in new tab
         contextMenuIpc.send.rightClickItems.newTab(item.url);
       } else if (e.button === 0) {
-        // Left click: Navigate in current active tab
-        dispatch(cardsActions.setRunningCardCustomAddress({tabId: activeTab, address: item.url}));
-        dispatch(cardsActions.setRunningCardView({tabId: activeTab, view: 'browser'}));
+        const activeRunningCard = runningCards.find(card => card.tabId === activeTab);
+        const hasBrowser = activeRunningCard && activeRunningCard.type !== 'terminal';
+
+        if (hasBrowser) {
+          // Open in current tab
+          dispatch(cardsActions.setRunningCardCustomAddress({tabId: activeTab, address: item.url}));
+          dispatch(cardsActions.setRunningCardView({tabId: activeTab, view: 'browser'}));
+        } else {
+          // Not running with a browser -> open in new tab
+          contextMenuIpc.send.rightClickItems.newTab(item.url);
+        }
       }
     },
-    [item.url, activeTab, dispatch],
+    [item.url, activeTab, runningCards, dispatch],
   );
 
   const handleContextMenu = useCallback(
@@ -80,12 +87,12 @@ const BookmarkItem = memo(({item, inDropdown}: Props) => {
           bookmarkId: item.id,
           title: item.title,
           url: item.url,
-          bookmarksBarVisibility: visibility,
+          parentId: item.parentId,
         },
         {x: e.clientX, y: e.clientY},
       );
     },
-    [item.id, item.title, item.url, visibility],
+    [item.id, item.title, item.url, item.parentId],
   );
 
   const itemClass = inDropdown

@@ -55,7 +55,6 @@ const BookmarkRow = memo(function BookmarkRow({item}: BookmarkRowProps) {
           title: item.title,
           url: item.url,
           parentId: item.parentId,
-          bookmarksBarVisibility: 'always',
         },
         {x: e.clientX, y: e.clientY},
       );
@@ -113,7 +112,6 @@ const FolderRow = memo(function FolderRow({folder, onDrillDown}: FolderRowProps)
           folderId: folder.id,
           title: folder.title,
           parentId: folder.parentId,
-          bookmarksBarVisibility: 'always',
         },
         {x: e.clientX, y: e.clientY},
       );
