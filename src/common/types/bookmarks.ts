@@ -2,6 +2,8 @@ export type BookmarkItemType = 'bookmark' | 'folder';
 
 export type BookmarkBarVisibility = 'browser_open' | 'always' | 'never';
 
+export type BookmarkNewTabBehavior = 'browser' | 'both';
+
 export type BookmarkNode = {
   id: string;
   type: BookmarkItemType;

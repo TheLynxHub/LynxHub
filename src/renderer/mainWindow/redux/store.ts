@@ -149,6 +149,7 @@ const buildPreloadedState = (): PreloadState | undefined => {
       },
       all: [],
       visibility: storage.browser.bookmarksBarVisibility ?? 'browser_open',
+      newTabBehavior: storage.browser.bookmarkNewTabBehavior ?? 'browser',
     },
   };
 };

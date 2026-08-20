@@ -2,6 +2,7 @@ import SettingsSection from '@lynx/components/SettingsSection';
 import {EarthIcon} from '@solar-icons/react/bold-duotone';
 
 import AudioControl from './AudioControl';
+import BookmarkNewTabSetting from './BookmarkNewTab';
 import BookmarksBarSetting from './BookmarksBar';
 import ClearBrowserData from './ClearBrowserData';
 import Downloads from './Downloads';
@@ -15,6 +16,7 @@ export default function SettingsBrowser() {
   return (
     <SettingsSection title="Browser" id={SettingsBrowserId} icon={<EarthIcon className="size-5" />}>
       <BookmarksBarSetting />
+      <BookmarkNewTabSetting />
       <ExternalLinks />
       <UserAgent />
       <Downloads />

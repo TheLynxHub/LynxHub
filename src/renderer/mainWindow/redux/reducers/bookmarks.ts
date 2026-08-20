@@ -1,5 +1,10 @@
 import {BookmarksState} from '@lynx/types/reducers';
-import {BookmarkBarVisibility, BookmarkFolder, BookmarkNode} from '@lynx_common/types/bookmarks';
+import {
+  BookmarkBarVisibility,
+  BookmarkFolder,
+  BookmarkNewTabBehavior,
+  BookmarkNode,
+} from '@lynx_common/types/bookmarks';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {useSelector} from 'react-redux';
 
@@ -22,6 +27,7 @@ const initialState: BookmarksState = {
   },
   all: [],
   visibility: 'browser_open',
+  newTabBehavior: 'browser',
 };
 
 const bookmarksSlice = createSlice({
@@ -36,6 +42,9 @@ const bookmarksSlice = createSlice({
     },
     setVisibility: (state, action: PayloadAction<BookmarkBarVisibility>) => {
       state.visibility = action.payload;
+    },
+    setNewTabBehavior: (state, action: PayloadAction<BookmarkNewTabBehavior>) => {
+      state.newTabBehavior = action.payload;
     },
   },
 });

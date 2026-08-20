@@ -1,4 +1,5 @@
 import {appActions, useAppState} from '@lynx/redux/reducers/app';
+import {useBookmarksState} from '@lynx/redux/reducers/bookmarks';
 import {cardsActions, useCardsState} from '@lynx/redux/reducers/cards';
 import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
@@ -77,6 +78,7 @@ export const useAppTitleEvents = () => {
 export const useNewTabEvents = () => {
   const dispatch = useDispatch<AppDispatch>();
   const tabs = useTabsState('tabs');
+  const newTabBehavior = useBookmarksState('newTabBehavior');
 
   const [pendingTab, setPendingTab] = useState<{url: string; background: boolean} | null>(null);
   const prevTabsLength = useRef(tabs.length);
@@ -87,10 +89,11 @@ export const useNewTabEvents = () => {
       // Find the newly added tab (last one in the array)
       const newTab = tabs[tabs.length - 1];
       if (newTab) {
+        const cardType = newTabBehavior === 'both' ? 'both' : 'browser';
         dispatch(
           cardsActions.addRunningEmpty({
             tabId: newTab.id,
-            type: 'browser',
+            type: cardType,
           }),
         );
         dispatch(
@@ -99,11 +102,19 @@ export const useNewTabEvents = () => {
             address: pendingTab.url,
           }),
         );
+        if (cardType === 'both') {
+          dispatch(
+            cardsActions.setRunningCardView({
+              tabId: newTab.id,
+              view: 'browser',
+            }),
+          );
+        }
       }
       setPendingTab(null);
     }
     prevTabsLength.current = tabs.length;
-  }, [tabs.length, pendingTab, tabs, dispatch]);
+  }, [tabs.length, pendingTab, tabs, newTabBehavior, dispatch]);
 
   useEffect(() => {
     const offNewTab = applicationIpc.on.onNewTab((url, background = false) => {

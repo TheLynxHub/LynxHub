@@ -1,4 +1,9 @@
-import {BookmarkBarVisibility, BookmarkFolder, BookmarkNode} from '@lynx_common/types/bookmarks';
+import {
+  BookmarkBarVisibility,
+  BookmarkFolder,
+  BookmarkNewTabBehavior,
+  BookmarkNode,
+} from '@lynx_common/types/bookmarks';
 import {LynxHotkey, LynxInput, OnUpdatingExtensions, TooltipStatus} from '@lynx_common/types/ipc';
 import StorageTypes, {InstalledCards} from '@lynx_common/types/storage';
 
@@ -113,6 +118,7 @@ export type BookmarksState = {
   tree: BookmarkFolder;
   all: BookmarkNode[];
   visibility: BookmarkBarVisibility;
+  newTabBehavior: BookmarkNewTabBehavior;
 };
 
 /**

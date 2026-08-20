@@ -133,6 +133,7 @@ export class BaseSqliteStorage {
       downloadBehavior: 'default',
       clearedDownloads: [],
       bookmarksBarVisibility: 'browser_open',
+      bookmarkNewTabBehavior: 'browser',
       volumeSettings: {
         globalMuted: false,
         tabVolumes: {},

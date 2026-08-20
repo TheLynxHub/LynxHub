@@ -57,11 +57,14 @@ export const useBookmarksEvents = () => {
     };
   }, [dispatch]);
 
-  // Sync visibility with storage
+  // Sync visibility and new tab behavior with storage
   useEffect(() => {
     storageIpc.get('browser').then(data => {
       if (data?.bookmarksBarVisibility) {
         dispatch(bookmarksActions.setVisibility(data.bookmarksBarVisibility));
+      }
+      if (data?.bookmarkNewTabBehavior) {
+        dispatch(bookmarksActions.setNewTabBehavior(data.bookmarkNewTabBehavior));
       }
     });
   }, [dispatch]);
