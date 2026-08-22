@@ -17,6 +17,7 @@ import {isEmpty} from 'lodash-es';
 import {Dispatch, SetStateAction, useCallback, useMemo, useState} from 'react';
 
 import {convertArrToObject} from '../../../../../../utils';
+import TabAlertDialog from '../../../../../TabAlertDialog';
 
 type Props = {
   presets: string[];
@@ -169,36 +170,33 @@ export default function PresetsManager({chosenArguments, presets, setChosenArgum
       )}
 
       {chosenArguments.activePreset !== 'Default' && (
-        <AlertDialog>
-          <Button variant="danger-soft" isDisabled={!chosenArguments.activePreset}>
-            Delete
-          </Button>
-          <AlertDialog.Backdrop>
-            <AlertDialog.Container>
-              <AlertDialog.Dialog className="sm:max-w-100">
-                <AlertDialog.CloseTrigger />
-                <AlertDialog.Header>
-                  <AlertDialog.Icon status="danger" />
-                  <AlertDialog.Heading>Delete Preset</AlertDialog.Heading>
-                </AlertDialog.Header>
-                <AlertDialog.Body>
-                  <p>
-                    Are you sure you want to delete preset <strong>{chosenArguments.activePreset}</strong>? This action
-                    cannot be undone.
-                  </p>
-                </AlertDialog.Body>
-                <AlertDialog.Footer>
-                  <Button slot="close" variant="tertiary">
-                    Cancel
-                  </Button>
-                  <Button slot="close" variant="danger" onPress={() => deletePreset(chosenArguments.activePreset)}>
-                    Delete
-                  </Button>
-                </AlertDialog.Footer>
-              </AlertDialog.Dialog>
-            </AlertDialog.Container>
-          </AlertDialog.Backdrop>
-        </AlertDialog>
+        <TabAlertDialog
+          trigger={
+            <Button variant="danger-soft" isDisabled={!chosenArguments.activePreset}>
+              Delete
+            </Button>
+          }
+          dialogClassName="sm:max-w-[400px]">
+          <AlertDialog.CloseTrigger />
+          <AlertDialog.Header>
+            <AlertDialog.Icon status="danger" />
+            <AlertDialog.Heading>Delete Preset</AlertDialog.Heading>
+          </AlertDialog.Header>
+          <AlertDialog.Body>
+            <p>
+              Are you sure you want to delete preset <strong>{chosenArguments.activePreset}</strong>? This action cannot
+              be undone.
+            </p>
+          </AlertDialog.Body>
+          <AlertDialog.Footer>
+            <Button slot="close" variant="tertiary">
+              Cancel
+            </Button>
+            <Button slot="close" variant="danger" onPress={() => deletePreset(chosenArguments.activePreset)}>
+              Delete
+            </Button>
+          </AlertDialog.Footer>
+        </TabAlertDialog>
       )}
 
       {chosenArguments.activePreset !== 'Default' && (
