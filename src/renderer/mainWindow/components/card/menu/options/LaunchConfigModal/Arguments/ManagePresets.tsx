@@ -1,7 +1,7 @@
 import {
+  AlertDialog,
   Button,
   ButtonGroup,
-  CloseButton,
   FieldError,
   Input,
   Key,
@@ -169,12 +169,36 @@ export default function PresetsManager({chosenArguments, presets, setChosenArgum
       )}
 
       {chosenArguments.activePreset !== 'Default' && (
-        <Button
-          variant="danger-soft"
-          isDisabled={!chosenArguments.activePreset}
-          onPress={() => deletePreset(chosenArguments.activePreset)}>
-          Delete
-        </Button>
+        <AlertDialog>
+          <Button variant="danger-soft" isDisabled={!chosenArguments.activePreset}>
+            Delete
+          </Button>
+          <AlertDialog.Backdrop>
+            <AlertDialog.Container>
+              <AlertDialog.Dialog className="sm:max-w-100">
+                <AlertDialog.CloseTrigger />
+                <AlertDialog.Header>
+                  <AlertDialog.Icon status="danger" />
+                  <AlertDialog.Heading>Delete Preset</AlertDialog.Heading>
+                </AlertDialog.Header>
+                <AlertDialog.Body>
+                  <p>
+                    Are you sure you want to delete preset <strong>{chosenArguments.activePreset}</strong>? This action
+                    cannot be undone.
+                  </p>
+                </AlertDialog.Body>
+                <AlertDialog.Footer>
+                  <Button slot="close" variant="tertiary">
+                    Cancel
+                  </Button>
+                  <Button slot="close" variant="danger" onPress={() => deletePreset(chosenArguments.activePreset)}>
+                    Delete
+                  </Button>
+                </AlertDialog.Footer>
+              </AlertDialog.Dialog>
+            </AlertDialog.Container>
+          </AlertDialog.Backdrop>
+        </AlertDialog>
       )}
 
       {chosenArguments.activePreset !== 'Default' && (
