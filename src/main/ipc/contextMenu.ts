@@ -266,6 +266,23 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
         });
         template.push({type: 'separator'});
         template.push({
+          label: 'Copy Link Address',
+          click: () => clipboard.writeText(payload.url!),
+        });
+        template.push({
+          label: 'Show Icon Only',
+          type: 'checkbox',
+          checked: Boolean(payload.showIconOnly),
+          click: () => {
+            if (payload.bookmarkId) {
+              storageManager.updateBookmark(payload.bookmarkId, {
+                showIconOnly: !payload.showIconOnly,
+              });
+              bookmarksIpc.send.onChanged();
+            }
+          },
+        });
+        template.push({
           label: 'Edit...',
           click: () => {
             if (payload.bookmarkId) {
@@ -278,10 +295,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
               }
             }
           },
-        });
-        template.push({
-          label: 'Copy Link Address',
-          click: () => clipboard.writeText(payload.url!),
         });
         template.push({
           label: 'Delete',

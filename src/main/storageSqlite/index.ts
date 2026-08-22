@@ -407,6 +407,7 @@ export class BaseSqliteStorage {
         title TEXT NOT NULL,
         url TEXT,
         fav_icon TEXT,
+        show_icon_only INTEGER DEFAULT 0,
         \`order\` INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
@@ -479,6 +480,12 @@ export class BaseSqliteStorage {
 
     try {
       this.sqlite.exec('ALTER TABLE browser_fav_icons ADD COLUMN title TEXT;');
+    } catch {
+      // Column already exists
+    }
+
+    try {
+      this.sqlite.exec('ALTER TABLE browser_bookmarks ADD COLUMN show_icon_only INTEGER DEFAULT 0;');
     } catch {
       // Column already exists
     }

@@ -89,20 +89,27 @@ const BookmarkItem = memo(({item, inDropdown, isOrdering}: Props) => {
           title: item.title,
           url: item.url,
           parentId: item.parentId,
+          showIconOnly: item.showIconOnly,
         },
         {x: e.clientX, y: e.clientY},
       );
     },
-    [item.id, item.title, item.url, item.parentId],
+    [item.id, item.title, item.url, item.parentId, item.showIconOnly],
   );
+
+  const isIconOnly = !inDropdown && Boolean(item.showIconOnly);
 
   const itemClass = inDropdown
     ? 'flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-xs ' +
       'hover:bg-default-100 dark:hover:bg-default-50/10 cursor-pointer transition-colors ' +
       'text-foreground select-none'
-    : 'flex items-center gap-1.5 h-7 px-2 rounded-lg text-xs ' +
-      'hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer transition-colors ' +
-      'text-foreground shrink-0 max-w-[180px] select-none';
+    : isIconOnly
+      ? 'flex items-center justify-center size-7 rounded-lg text-xs ' +
+        'hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer transition-colors ' +
+        'text-foreground shrink-0 select-none'
+      : 'flex items-center gap-1.5 h-7 px-2 rounded-lg text-xs ' +
+        'hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer transition-colors ' +
+        'text-foreground shrink-0 max-w-[180px] select-none';
 
   return (
     <div
@@ -131,7 +138,7 @@ const BookmarkItem = memo(({item, inDropdown, isOrdering}: Props) => {
         )}
       </div>
 
-      <span className="truncate text-xs font-normal leading-none">{item.title || item.url}</span>
+      {!isIconOnly && <span className="truncate text-xs font-normal leading-none">{item.title || item.url}</span>}
     </div>
   );
 });

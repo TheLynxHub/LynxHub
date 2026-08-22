@@ -10,6 +10,7 @@ export type BookmarkNode = {
   title: string;
   url?: string;
   favIcon?: string;
+  showIconOnly?: boolean;
   parentId: string | null; // 'bookmarks_bar' or folder id
   order: number;
   createdAt: number;
@@ -31,6 +32,7 @@ export type CreateBookmarkInput = {
   title: string;
   url?: string;
   favIcon?: string;
+  showIconOnly?: boolean;
   parentId?: string | null;
 };
 
@@ -38,6 +40,7 @@ export type UpdateBookmarkInput = {
   title?: string;
   url?: string;
   favIcon?: string;
+  showIconOnly?: boolean;
   parentId?: string | null;
   order?: number;
 };
@@ -49,6 +52,7 @@ export type BookmarkContextMenuPayload = {
   title?: string;
   url?: string;
   parentId?: string | null;
+  showIconOnly?: boolean;
 };
 
 export type BookmarkFolderMenuPayload = {

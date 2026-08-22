@@ -1530,7 +1530,7 @@ export class SqliteStorageManager {
   public getAllBookmarks(): BookmarkNode[] {
     const rows = this.sqlite
       .prepare(
-        'SELECT id, parent_id, type, title, url, fav_icon, `order`, created_at, updated_at' +
+        'SELECT id, parent_id, type, title, url, fav_icon, show_icon_only, `order`, created_at, updated_at' +
           ' FROM browser_bookmarks ORDER BY parent_id ASC, `order` ASC, id ASC',
       )
       .all() as {
@@ -1540,6 +1540,7 @@ export class SqliteStorageManager {
       title: string;
       url: string | null;
       fav_icon: string | null;
+      show_icon_only: number | null;
       order: number;
       created_at: string;
       updated_at: string;
@@ -1552,6 +1553,7 @@ export class SqliteStorageManager {
       title: r.title,
       url: r.url ?? undefined,
       favIcon: r.fav_icon ?? undefined,
+      showIconOnly: Boolean(r.show_icon_only),
       order: r.order,
       createdAt: new Date(r.created_at).getTime(),
       updatedAt: new Date(r.updated_at).getTime(),
@@ -1603,6 +1605,7 @@ export class SqliteStorageManager {
     const now = new Date().toISOString();
     const id = randomUUID();
     const formattedUrl = input.type === 'bookmark' && input.url ? formatWebAddress(input.url) : input.url;
+    const showIconOnly = input.showIconOnly ? 1 : 0;
 
     const maxOrderRow = this.sqlite
       .prepare(
@@ -1614,10 +1617,21 @@ export class SqliteStorageManager {
 
     this.sqlite
       .prepare(
-        'INSERT INTO browser_bookmarks (id, parent_id, type, title, url, fav_icon, `order`, created_at, updated_at)' +
-          ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO browser_bookmarks (id, parent_id, type, title, url, fav_icon, show_icon_only,' +
+          ' `order`, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       )
-      .run(id, parentId, input.type, input.title, formattedUrl ?? null, input.favIcon ?? null, order, now, now);
+      .run(
+        id,
+        parentId,
+        input.type,
+        input.title,
+        formattedUrl ?? null,
+        input.favIcon ?? null,
+        showIconOnly,
+        order,
+        now,
+        now,
+      );
 
     return {
       id,
@@ -1626,6 +1640,7 @@ export class SqliteStorageManager {
       title: input.title,
       url: formattedUrl,
       favIcon: input.favIcon,
+      showIconOnly: Boolean(input.showIconOnly),
       order,
       createdAt: new Date(now).getTime(),
       updatedAt: new Date(now).getTime(),
@@ -1641,6 +1656,7 @@ export class SqliteStorageManager {
           title: string;
           url: string | null;
           fav_icon: string | null;
+          show_icon_only: number | null;
           order: number;
           created_at: string;
           updated_at: string;
@@ -1655,14 +1671,16 @@ export class SqliteStorageManager {
     const rawUrl = updates.url !== undefined ? updates.url : existing.url;
     const formattedUrl = existing.type === 'bookmark' && rawUrl ? formatWebAddress(rawUrl) : rawUrl;
     const favIcon = updates.favIcon !== undefined ? updates.favIcon : existing.fav_icon;
+    const showIconOnly =
+      updates.showIconOnly !== undefined ? (updates.showIconOnly ? 1 : 0) : (existing.show_icon_only ?? 0);
     const order = updates.order !== undefined ? updates.order : existing.order;
 
     this.sqlite
       .prepare(
         'UPDATE browser_bookmarks SET parent_id = ?, title = ?, url = ?,' +
-          ' fav_icon = ?, `order` = ?, updated_at = ? WHERE id = ?',
+          ' fav_icon = ?, show_icon_only = ?, `order` = ?, updated_at = ? WHERE id = ?',
       )
-      .run(parentId, title, formattedUrl, favIcon, order, now, id);
+      .run(parentId, title, formattedUrl, favIcon, showIconOnly, order, now, id);
 
     return {
       id,
@@ -1671,6 +1689,7 @@ export class SqliteStorageManager {
       title,
       url: formattedUrl ?? undefined,
       favIcon: favIcon ?? undefined,
+      showIconOnly: Boolean(showIconOnly),
       order,
       createdAt: new Date(existing.created_at).getTime(),
       updatedAt: new Date(now).getTime(),

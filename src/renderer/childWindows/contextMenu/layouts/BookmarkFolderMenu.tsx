@@ -49,11 +49,12 @@ const BookmarkRow = memo(function BookmarkRow({item}: BookmarkRowProps) {
           title: item.title,
           url: item.url,
           parentId: item.parentId,
+          showIconOnly: item.showIconOnly,
         },
         {x: e.clientX, y: e.clientY},
       );
     },
-    [item.id, item.title, item.url, item.parentId],
+    [item.id, item.title, item.url, item.parentId, item.showIconOnly],
   );
 
   return (

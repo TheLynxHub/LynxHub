@@ -1,3 +1,4 @@
+import {Checkbox} from '@heroui/react';
 import bookmarksIpc from '@lynx_shared/ipc/bookmarks';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {
@@ -30,6 +31,7 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
   const bookmarkId = payload?.bookmarkId;
   const folderId = payload?.folderId;
   const url = payload?.url;
+  const isIconOnly = Boolean(payload?.showIconOnly);
 
   const handleOpenInNewTab = createActionHandler(() => {
     if (url) {
@@ -52,6 +54,18 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
       navigator.clipboard.writeText(url);
     }
   });
+
+  const handleToggleShowIconOnly = useCallback(
+    (selected: boolean) => {
+      contextMenuIpc.send.hideWindow();
+      if (bookmarkId) {
+        bookmarksIpc.update(bookmarkId, {
+          showIconOnly: selected,
+        });
+      }
+    },
+    [bookmarkId],
+  );
 
   const handleEdit = useCallback(async () => {
     const id = bookmarkId || folderId;
@@ -126,6 +140,18 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
             title="Copy Link Address"
             icon={<CopyIcon className="size-4 text-default-500" />}
           />
+          <Checkbox className="w-full" isSelected={isIconOnly} onChange={handleToggleShowIconOnly}>
+            <Checkbox.Content
+              className={
+                'w-full flex items-center gap-x-2 text-sm text-foreground select-none ' +
+                'py-2.5 px-3 rounded-xl cursor-pointer hover:bg-surface-tertiary transition-colors duration-100'
+              }>
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+              <span className="pointer-events-none text-nowrap">Show Icon Only</span>
+            </Checkbox.Content>
+          </Checkbox>
           <ActionButton title="Edit..." onPress={handleEdit} icon={<PenIcon className="size-4 text-warning" />} />
           <ActionButton title="Delete" onPress={handleDelete} icon={<TrashBin2Icon className="size-4 text-danger" />} />
           <Separator />

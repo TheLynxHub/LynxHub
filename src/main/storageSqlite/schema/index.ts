@@ -85,6 +85,7 @@ export const browserBookmarks = sqliteTable('browser_bookmarks', {
   title: text('title').notNull(),
   url: text('url'),
   favIcon: text('fav_icon'),
+  showIconOnly: integer('show_icon_only', {mode: 'boolean'}).default(false),
   order: integer('order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
