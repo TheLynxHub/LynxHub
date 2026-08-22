@@ -26,23 +26,43 @@ type Props = {
 
 /**
  * PresetsManager component for managing and switching between multiple presets for arguments.
- * Allows creating new presets, duplicating existing ones, and deleting presets.
+ * Allows creating new presets, duplicating existing ones, renaming presets, and deleting presets.
  */
 export default function PresetsManager({chosenArguments, presets, setChosenArguments}: Props) {
   const [inputValue, setInputValue] = useState<string>('');
   const [createIsOpen, setCreateIsOpen] = useState<boolean>(false);
+  const [renameValue, setRenameValue] = useState<string>('');
+  const [renameIsOpen, setRenameIsOpen] = useState<boolean>(false);
 
   // Derive error message directly from input value and existing presets
   const inputErrorMessage = useMemo(() => {
     if (!createIsOpen) return '';
-    if (isEmpty(inputValue)) return 'Please enter preset name!';
-    if (chosenArguments.data.some(data => data.preset === inputValue)) {
+    const trimmed = inputValue.trim();
+    if (isEmpty(trimmed)) return 'Please enter preset name!';
+    if (chosenArguments.data.some(data => data.preset.toLowerCase() === trimmed.toLowerCase())) {
       return 'The chosen name already exists!';
     }
     return '';
   }, [inputValue, chosenArguments.data, createIsOpen]);
 
-  const isInputValid = isEmpty(inputErrorMessage) && !isEmpty(inputValue);
+  const isInputValid = isEmpty(inputErrorMessage) && !isEmpty(inputValue.trim());
+
+  // Derive error message for rename input
+  const renameErrorMessage = useMemo(() => {
+    if (!renameIsOpen) return '';
+    const trimmed = renameValue.trim();
+    if (isEmpty(trimmed)) return 'Please enter preset name!';
+    if (
+      trimmed.toLowerCase() !== chosenArguments.activePreset.toLowerCase() &&
+      chosenArguments.data.some(data => data.preset.toLowerCase() === trimmed.toLowerCase())
+    ) {
+      return 'The chosen name already exists!';
+    }
+    return '';
+  }, [renameValue, chosenArguments.data, chosenArguments.activePreset, renameIsOpen]);
+
+  const isRenameValid =
+    isEmpty(renameErrorMessage) && !isEmpty(renameValue.trim()) && renameValue.trim() !== chosenArguments.activePreset;
 
   const deletePreset = useCallback(
     (name: string) => {
@@ -73,29 +93,47 @@ export default function PresetsManager({chosenArguments, presets, setChosenArgum
   );
 
   const handleCreateNew = useCallback(() => {
-    if (!isInputValid) return;
+    const trimmed = inputValue.trim();
+    if (!isInputValid || !trimmed) return;
 
     setChosenArguments(prevState => ({
-      activePreset: inputValue,
-      data: [...prevState.data, {arguments: [], preset: inputValue}],
+      activePreset: trimmed,
+      data: [...prevState.data, {arguments: [], preset: trimmed}],
     }));
     setCreateIsOpen(false);
     setInputValue('');
   }, [inputValue, isInputValid, setChosenArguments]);
 
   const handleDuplicateExisting = useCallback(() => {
-    if (!isInputValid) return;
+    const trimmed = inputValue.trim();
+    if (!isInputValid || !trimmed) return;
 
     setChosenArguments(prevState => {
       const existingArgs = prevState.data.find(data => data.preset === prevState.activePreset)?.arguments || [];
       return {
-        activePreset: inputValue,
-        data: [...prevState.data, {arguments: existingArgs, preset: inputValue}],
+        activePreset: trimmed,
+        data: [...prevState.data, {arguments: existingArgs, preset: trimmed}],
       };
     });
     setCreateIsOpen(false);
     setInputValue('');
   }, [inputValue, isInputValid, setChosenArguments]);
+
+  const handleRename = useCallback(() => {
+    const trimmed = renameValue.trim();
+    if (!isRenameValid || !trimmed || !chosenArguments.activePreset) return;
+
+    setChosenArguments(prevState => {
+      const oldName = prevState.activePreset;
+      const newData = prevState.data.map(data => (data.preset === oldName ? {...data, preset: trimmed} : data));
+      return {
+        activePreset: trimmed,
+        data: newData,
+      };
+    });
+    setRenameIsOpen(false);
+    setRenameValue('');
+  }, [isRenameValid, renameValue, chosenArguments.activePreset, setChosenArguments]);
 
   const sectionItems = useMemo(() => convertArrToObject(presets), [presets]);
 
@@ -131,6 +169,44 @@ export default function PresetsManager({chosenArguments, presets, setChosenArgum
       )}
       <Popover
         onOpenChange={isOpen => {
+          setRenameIsOpen(isOpen);
+          if (isOpen) {
+            setRenameValue(chosenArguments.activePreset);
+          } else {
+            setRenameValue('');
+          }
+        }}
+        isOpen={renameIsOpen}>
+        <Button variant="secondary" isDisabled={!chosenArguments.activePreset}>
+          Rename
+        </Button>
+        <Popover.Content>
+          <Popover.Dialog className="gap-y-2 flex flex-col">
+            <Popover.Arrow />
+            <Popover.Heading>Rename Preset</Popover.Heading>
+            <TextField
+              onKeyUp={e => {
+                if (e.key === 'Enter' && isRenameValid) handleRename();
+              }}
+              spellCheck="false"
+              value={renameValue}
+              variant="secondary"
+              onChange={setRenameValue}
+              isInvalid={!!renameErrorMessage && !isEmpty(renameValue.trim())}
+              fullWidth
+              autoFocus>
+              <Input placeholder="Preset name..." />
+              <FieldError>{renameErrorMessage}</FieldError>
+            </TextField>
+
+            <Button size="sm" onPress={handleRename} isDisabled={!isRenameValid} fullWidth>
+              Rename
+            </Button>
+          </Popover.Dialog>
+        </Popover.Content>
+      </Popover>
+      <Popover
+        onOpenChange={isOpen => {
           setCreateIsOpen(isOpen);
           if (!isOpen) setInputValue('');
         }}
@@ -142,13 +218,13 @@ export default function PresetsManager({chosenArguments, presets, setChosenArgum
             <Popover.Heading>New Preset</Popover.Heading>
             <TextField
               onKeyUp={e => {
-                if (e.key === 'Enter') handleCreateNew();
+                if (e.key === 'Enter' && isInputValid) handleCreateNew();
               }}
               value={inputValue}
               spellCheck="false"
               variant="secondary"
               onChange={setInputValue}
-              isInvalid={!!inputErrorMessage && !isEmpty(inputValue)}
+              isInvalid={!!inputErrorMessage && !isEmpty(inputValue.trim())}
               fullWidth
               autoFocus>
               <Input placeholder="Preset name..." />
