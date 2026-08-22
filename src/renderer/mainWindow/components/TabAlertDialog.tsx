@@ -3,6 +3,7 @@ import browserIpc from '@lynx_shared/ipc/browser';
 import {MouseEvent, ReactNode, useCallback, useEffect, useMemo, useState} from 'react';
 import {UNSAFE_PortalProvider} from 'react-aria';
 
+import {useCurrentTabId} from '../layouts/tabs/TabContext';
 import {useCardsState} from '../redux/reducers/cards';
 import {useTabsState} from '../redux/reducers/tabs';
 
@@ -18,6 +19,7 @@ type Props = {
   dialogClassName?: string;
   containerClassName?: string;
   isKeyboardDismissDisabled?: boolean;
+  tabId?: string;
 };
 
 export default function TabAlertDialog({
@@ -32,24 +34,40 @@ export default function TabAlertDialog({
   dialogClassName,
   containerClassName,
   isKeyboardDismissDisabled,
+  tabId: explicitTabId,
 }: Props) {
+  const contextTabId = useCurrentTabId();
   const activeTab = useTabsState('activeTab');
   const runningCards = useCardsState('runningCard');
 
-  const [uncontrolledOpen, setUncontrolledOpen] = useState<boolean>(false);
-  const [targetContainer, setTargetContainer] = useState<HTMLElement | null>(null);
+  const resolvedTabId = explicitTabId ?? contextTabId;
 
+  const [uncontrolledOpen, setUncontrolledOpen] = useState<boolean>(false);
   const isControlled = typeof isOpen === 'boolean';
   const effectiveIsOpen = isControlled ? isOpen : uncontrolledOpen;
 
+  const [targetContainer, setTargetContainer] = useState<HTMLElement | null>(() => {
+    if (typeof document === 'undefined') return null;
+    return resolvedTabId ? document.getElementById(`${resolvedTabId}_wrapper`) : null;
+  });
+
   const currentRunningCard = useMemo(
-    () => runningCards.find(card => card.tabId === activeTab),
-    [runningCards, activeTab],
+    () => runningCards.find(card => card.tabId === (resolvedTabId ?? activeTab)),
+    [runningCards, resolvedTabId, activeTab],
   );
 
   useEffect(() => {
-    setTargetContainer(effectiveIsOpen ? document.getElementById(`${activeTab}_wrapper`) : null);
-  }, [effectiveIsOpen, activeTab]);
+    if (!effectiveIsOpen) {
+      setTargetContainer(null);
+      return;
+    }
+
+    if (resolvedTabId) {
+      setTargetContainer(document.getElementById(`${resolvedTabId}_wrapper`));
+    } else {
+      setTargetContainer(null);
+    }
+  }, [effectiveIsOpen, resolvedTabId]);
 
   useEffect(() => {
     if (effectiveIsOpen && currentRunningCard && currentRunningCard.currentView === 'browser') {
@@ -88,7 +106,7 @@ export default function TabAlertDialog({
   return (
     <AlertDialog isOpen={isOpen} onOpenChange={handleOpenChange}>
       {trigger}
-      {targetContainer && (
+      {targetContainer ? (
         <UNSAFE_PortalProvider getContainer={() => targetContainer}>
           <AlertDialog.Backdrop
             className="h-full"
@@ -113,6 +131,29 @@ export default function TabAlertDialog({
             </AlertDialog.Container>
           </AlertDialog.Backdrop>
         </UNSAFE_PortalProvider>
+      ) : (
+        <AlertDialog.Backdrop
+          className="h-full"
+          isDismissable={false}
+          variant={backdropVariant}
+          onClick={handleBackdropClick}
+          isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
+          <AlertDialog.Container
+            size={size}
+            placement={placement}
+            className={containerClassName ? `h-full max-h-full ${containerClassName}` : 'h-full max-h-full'}>
+            <AlertDialog.Dialog
+              className={
+                size === 'cover'
+                  ? dialogClassName
+                    ? `h-full max-h-full ${dialogClassName}`
+                    : 'h-full max-h-full'
+                  : dialogClassName
+              }>
+              {children}
+            </AlertDialog.Dialog>
+          </AlertDialog.Container>
+        </AlertDialog.Backdrop>
       )}
     </AlertDialog>
   );
