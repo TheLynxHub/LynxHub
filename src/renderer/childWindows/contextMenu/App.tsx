@@ -10,6 +10,7 @@ import BrowserScale from './layouts/BrowserScale';
 import CloseApp from './layouts/confirm_warn/CloseApp';
 import ForceReload from './layouts/confirm_warn/ForceReload';
 import ProcessExitSignal from './layouts/confirm_warn/ProcessExitSignal';
+import TerminateMultipleTabs from './layouts/confirm_warn/TerminateMultipleTabs';
 import TerminateProcess from './layouts/confirm_warn/TerminateProcess';
 import TerminateTab from './layouts/confirm_warn/TerminateTab';
 import DownloadMenu from './layouts/downloads';
@@ -61,6 +62,7 @@ export default function ContextMenu() {
       {activeLayout === MenuTypes.CloseAppConfirm && <CloseApp />}
       {activeLayout === MenuTypes.TerminateProcessConfirm && <TerminateProcess />}
       {activeLayout === MenuTypes.TerminateTabConfirm && <TerminateTab />}
+      {activeLayout === MenuTypes.TerminateMultipleTabsConfirm && <TerminateMultipleTabs />}
       {activeLayout === MenuTypes.Volume && <VolumeMenu />}
       {activeLayout === MenuTypes.Downloads && <DownloadMenu />}
       {activeLayout === MenuTypes.Prompt && <PromptWindow />}

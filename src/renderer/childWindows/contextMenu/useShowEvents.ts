@@ -255,6 +255,17 @@ export default function useShowEvents() {
       );
     });
 
+    // Terminate Multiple Tabs Confirmation
+    const offTerminateMultipleTabs = contextMenuIpc.on.terminateMultipleTabs(payload => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'terminateMultipleTabs',
+          value: payload,
+          layout: MenuTypes.TerminateMultipleTabsConfirm,
+        }),
+      );
+    });
+
     return () => {
       offZoom();
       offFind();
@@ -276,6 +287,7 @@ export default function useShowEvents() {
       offBookmarkFolder();
       offBookmarkEdit();
       offTabContextMenu();
+      offTerminateMultipleTabs();
     };
   }, [dispatch]);
 }

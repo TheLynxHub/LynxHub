@@ -1,4 +1,6 @@
 import {Separator} from '@heroui/react';
+import {useCardsState} from '@lynx/redux/reducers/cards';
+import {useSettingsState} from '@lynx/redux/reducers/settings';
 import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
 import {TabInfo} from '@lynx_common/types';
@@ -23,6 +25,8 @@ const TabsList = memo(() => {
 
   const tabsFromRedux = useTabsState('tabs');
   const activeTab = useTabsState('activeTab');
+  const runningCards = useCardsState('runningCard');
+  const closeTabConfirm = useSettingsState('closeTabConfirm');
   const removeTab = useRemoveTab();
   const onFocus = useAppState('onFocus');
 
@@ -70,6 +74,15 @@ const TabsList = memo(() => {
       removeTab({tabId});
     });
 
+    const offClose = contextMenuIpc.on.tabActionClose(tabId => {
+      const running = runningCards.find(card => card.tabId === tabId);
+      if (running && running.type !== 'browser' && closeTabConfirm) {
+        contextMenuIpc.send.openTerminateTab(tabId);
+      } else {
+        removeTab({tabId});
+      }
+    });
+
     const offPin = contextMenuIpc.on.tabActionPin(tabId => {
       dispatch(tabsActions.togglePinTab(tabId));
     });
@@ -84,26 +97,60 @@ const TabsList = memo(() => {
 
     const offCloseOthers = contextMenuIpc.on.tabActionCloseOthers(tabId => {
       const toRemove = tabsFromRedux.filter(t => !t.isPinned && t.id !== tabId);
-      toRemove.forEach(t => removeTab({tabId: t.id}));
-    });
+      if (toRemove.length === 0) return;
 
-    const offCloseRight = contextMenuIpc.on.tabActionCloseRight(tabId => {
-      const targetIndex = tabsFromRedux.findIndex(t => t.id === tabId);
-      if (targetIndex !== -1) {
-        const toRemove = tabsFromRedux.slice(targetIndex + 1).filter(t => !t.isPinned);
+      const runningCount = toRemove.filter(t =>
+        runningCards.some(card => card.tabId === t.id && card.type !== 'browser'),
+      ).length;
+
+      if (runningCount > 0 && closeTabConfirm) {
+        contextMenuIpc.send.openTerminateMultipleTabs({
+          tabIds: toRemove.map(t => t.id),
+          count: toRemove.length,
+          runningCount,
+        });
+      } else {
         toRemove.forEach(t => removeTab({tabId: t.id}));
       }
     });
 
+    const offCloseRight = contextMenuIpc.on.tabActionCloseRight(tabId => {
+      const targetIndex = tabsFromRedux.findIndex(t => t.id === tabId);
+      if (targetIndex === -1) return;
+
+      const toRemove = tabsFromRedux.slice(targetIndex + 1).filter(t => !t.isPinned);
+      if (toRemove.length === 0) return;
+
+      const runningCount = toRemove.filter(t =>
+        runningCards.some(card => card.tabId === t.id && card.type !== 'browser'),
+      ).length;
+
+      if (runningCount > 0 && closeTabConfirm) {
+        contextMenuIpc.send.openTerminateMultipleTabs({
+          tabIds: toRemove.map(t => t.id),
+          count: toRemove.length,
+          runningCount,
+        });
+      } else {
+        toRemove.forEach(t => removeTab({tabId: t.id}));
+      }
+    });
+
+    const offRemoveMultiple = contextMenuIpc.on.removeMultipleTabs(tabIds => {
+      tabIds.forEach(id => removeTab({tabId: id}));
+    });
+
     return () => {
       offRemoveTab();
+      offClose();
       offPin();
       offIconOnly();
       offForceClose();
       offCloseOthers();
       offCloseRight();
+      offRemoveMultiple();
     };
-  }, [removeTab, tabsFromRedux, dispatch]);
+  }, [removeTab, tabsFromRedux, runningCards, closeTabConfirm, dispatch]);
 
   const onReorder = useCallback((reorderedIds: string[]) => {
     setIsOrdering(true);

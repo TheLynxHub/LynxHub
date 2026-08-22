@@ -1,5 +1,5 @@
 import {contextMenuChannels} from '@lynx_common/consts/ipcChannels/contextMenu';
-import type {ElementResizeData, TabContextMenuPayload} from '@lynx_common/types';
+import type {ElementResizeData, TabContextMenuPayload, TerminateMultipleTabsPayload} from '@lynx_common/types';
 import type {
   BookmarkContextMenuPayload,
   BookmarkEditMenuPayload,
@@ -71,6 +71,9 @@ const contextMenuIpc = {
     // Toggle tab show icon only action
     tabActionIconOnly: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionIconOnly, tabId),
 
+    // Close tab action (checks confirmation)
+    tabActionClose: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionClose, tabId),
+
     // Force close tab action
     tabActionForceClose: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionForceClose, tabId),
 
@@ -79,6 +82,13 @@ const contextMenuIpc = {
 
     // Close tabs to right action
     tabActionCloseRight: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionCloseRight, tabId),
+
+    // Opens terminate multiple tabs dialog
+    openTerminateMultipleTabs: (payload: TerminateMultipleTabsPayload, customPosition?: ContextMenuPosition) =>
+      lynxIpc.send(contextMenuChannels.openTerminateMultipleTabs, payload, customPosition),
+
+    // Removes multiple tabs
+    removeMultipleTabs: (tabIds: string[]) => lynxIpc.send(contextMenuChannels.removeMultipleTabs, tabIds),
 
     rightClickItems: {
       copy: (id: number) => lynxIpc.send(contextMenuChannels.copy, id),
@@ -200,6 +210,10 @@ const contextMenuIpc = {
     tabActionIconOnly: (callback: (tabId: string) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onTabActionIconOnly, callback),
 
+    // Listens for close tab action
+    tabActionClose: (callback: (tabId: string) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onTabActionClose, callback),
+
     // Listens for force close tab action
     tabActionForceClose: (callback: (tabId: string) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onTabActionForceClose, callback),
@@ -211,6 +225,14 @@ const contextMenuIpc = {
     // Listens for close tabs to right action
     tabActionCloseRight: (callback: (tabId: string) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onTabActionCloseRight, callback),
+
+    // Listens for terminate multiple tabs events
+    terminateMultipleTabs: (callback: (payload: TerminateMultipleTabsPayload) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onTerminateMultipleTabs, callback),
+
+    // Listens for remove multiple tabs events
+    removeMultipleTabs: (callback: (tabIds: string[]) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onRemoveMultipleTabs, callback),
   },
 };
 

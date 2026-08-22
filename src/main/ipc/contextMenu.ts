@@ -1,5 +1,5 @@
 import {contextMenuChannels} from '@lynx_common/consts/ipcChannels/contextMenu';
-import {ElementResizeData, TabContextMenuPayload} from '@lynx_common/types';
+import {ElementResizeData, TabContextMenuPayload, TerminateMultipleTabsPayload} from '@lynx_common/types';
 import {
   BookmarkContextMenuPayload,
   BookmarkEditMenuPayload,
@@ -91,9 +91,11 @@ export default async function listenContextMenu() {
   contextMenuIpc.on.removeTab(tabID => contextMenuIpc.send.onRemoveTab(tabID));
   contextMenuIpc.on.tabActionPin(tabId => contextMenuIpc.send.onTabActionPin(tabId));
   contextMenuIpc.on.tabActionIconOnly(tabId => contextMenuIpc.send.onTabActionIconOnly(tabId));
+  contextMenuIpc.on.tabActionClose(tabId => contextMenuIpc.send.onTabActionClose(tabId));
   contextMenuIpc.on.tabActionForceClose(tabId => contextMenuIpc.send.onTabActionForceClose(tabId));
   contextMenuIpc.on.tabActionCloseOthers(tabId => contextMenuIpc.send.onTabActionCloseOthers(tabId));
   contextMenuIpc.on.tabActionCloseRight(tabId => contextMenuIpc.send.onTabActionCloseRight(tabId));
+  contextMenuIpc.on.removeMultipleTabs(tabIds => contextMenuIpc.send.onRemoveMultipleTabs(tabIds));
 }
 
 /**
@@ -503,6 +505,30 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
     contextMenuIpc.send.onTabContextMenu(payload);
     contextMenuManager.showContextMenu();
   });
+
+  // Open Terminate Multiple Tabs Confirmation
+  contextMenuIpc.on.openTerminateMultipleTabs((payload, customPosition) => {
+    if (isLinux) {
+      const mainWindow = appManager.getMainWindow();
+      const choice = dialog.showMessageBoxSync(mainWindow as BrowserWindow, {
+        type: 'question',
+        buttons: ['Cancel', 'Terminate All'],
+        defaultId: 1,
+        cancelId: 0,
+        message: `Confirm Terminate ${payload.count} Tabs`,
+        detail:
+          `Are you sure you want to close ${payload.count} tabs ` + `(${payload.runningCount} with running processes)?`,
+      });
+      if (choice === 1) {
+        contextMenuIpc.send.onRemoveMultipleTabs(payload.tabIds);
+      }
+      return;
+    }
+
+    setPosition(customPosition);
+    contextMenuIpc.send.onTerminateMultipleTabs(payload);
+    contextMenuManager.showContextMenu();
+  });
 }
 
 /**
@@ -516,6 +542,8 @@ export const contextMenuIpc = {
     onStopAI: (id: string) => sendToMain(contextMenuChannels.onStopAI, id),
     /** Sends event to remove a tab */
     onRemoveTab: (tabID: string) => sendToMain(contextMenuChannels.onRemoveTab, tabID),
+    /** Sends event to remove multiple tabs */
+    onRemoveMultipleTabs: (tabIds: string[]) => sendToMain(contextMenuChannels.onRemoveMultipleTabs, tabIds),
 
     /** Sends request to show context menu to renderer */
     requestShow: () => sendToContextMenu(contextMenuChannels.requestShow),
@@ -557,12 +585,17 @@ export const contextMenuIpc = {
     onTabActionPin: (tabId: string) => sendToMain(contextMenuChannels.onTabActionPin, tabId),
     /** Sends tab toggle icon only action to main window renderer */
     onTabActionIconOnly: (tabId: string) => sendToMain(contextMenuChannels.onTabActionIconOnly, tabId),
+    /** Sends tab close action to main window renderer */
+    onTabActionClose: (tabId: string) => sendToMain(contextMenuChannels.onTabActionClose, tabId),
     /** Sends tab force close action to main window renderer */
     onTabActionForceClose: (tabId: string) => sendToMain(contextMenuChannels.onTabActionForceClose, tabId),
     /** Sends tab close others action to main window renderer */
     onTabActionCloseOthers: (tabId: string) => sendToMain(contextMenuChannels.onTabActionCloseOthers, tabId),
     /** Sends tab close right action to main window renderer */
     onTabActionCloseRight: (tabId: string) => sendToMain(contextMenuChannels.onTabActionCloseRight, tabId),
+    /** Sends terminate multiple tabs event to context menu */
+    onTerminateMultipleTabs: (payload: TerminateMultipleTabsPayload) =>
+      sendToContextMenu(contextMenuChannels.onTerminateMultipleTabs, payload),
   },
   on: {
     /** Listens for force reload request */
@@ -616,6 +649,8 @@ export const contextMenuIpc = {
     /** Listens for tab icon only action from context menu */
     tabActionIconOnly: (callback: (tabId: string) => void) =>
       lynxIpc.on(contextMenuChannels.tabActionIconOnly, callback),
+    /** Listens for tab close action from context menu */
+    tabActionClose: (callback: (tabId: string) => void) => lynxIpc.on(contextMenuChannels.tabActionClose, callback),
     /** Listens for tab force close action from context menu */
     tabActionForceClose: (callback: (tabId: string) => void) =>
       lynxIpc.on(contextMenuChannels.tabActionForceClose, callback),
@@ -651,6 +686,13 @@ export const contextMenuIpc = {
     /** Listens for open tab context menu request */
     openTabContextMenu: (callback: (payload: TabContextMenuPayload, customPosition?: {x: number; y: number}) => void) =>
       lynxIpc.on(contextMenuChannels.openTabContextMenu, callback),
+    /** Listens for open terminate multiple tabs request */
+    openTerminateMultipleTabs: (
+      callback: (payload: TerminateMultipleTabsPayload, customPosition?: {x: number; y: number}) => void,
+    ) => lynxIpc.on(contextMenuChannels.openTerminateMultipleTabs, callback),
+    /** Listens for remove multiple tabs request */
+    removeMultipleTabs: (callback: (tabIds: string[]) => void) =>
+      lynxIpc.on(contextMenuChannels.removeMultipleTabs, callback),
   },
   handle: {},
 };

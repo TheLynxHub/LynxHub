@@ -1,4 +1,4 @@
-import type {TabContextMenuPayload} from '@lynx_common/types';
+import type {TabContextMenuPayload, TerminateMultipleTabsPayload} from '@lynx_common/types';
 import {
   BookmarkContextMenuPayload,
   BookmarkEditMenuPayload,
@@ -49,6 +49,7 @@ export type ContextState = {
   bookmarkFolderMenu?: BookmarkFolderMenuPayload;
   bookmarkEditMenu?: BookmarkEditMenuPayload;
   tabContextMenu?: TabContextMenuPayload;
+  terminateMultipleTabs?: TerminateMultipleTabsPayload;
 };
 
 export type NavBtnProps = {icon?: ReactNode; onPress?: () => void; className?: string; isDisabled?: boolean};

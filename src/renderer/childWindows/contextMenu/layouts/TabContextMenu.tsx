@@ -37,7 +37,7 @@ const TabContextMenu = memo(function TabContextMenu() {
 
   const handleClose = createActionHandler(() => {
     if (tabId) {
-      contextMenuIpc.send.removeTab(tabId);
+      contextMenuIpc.send.tabActionClose(tabId);
     }
   });
 

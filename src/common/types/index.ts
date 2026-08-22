@@ -191,6 +191,12 @@ export type TabContextMenuPayload = {
   hasRunningCard?: boolean;
 };
 
+export type TerminateMultipleTabsPayload = {
+  tabIds: string[];
+  count: number;
+  runningCount: number;
+};
+
 export interface NotificationAction {
   label: string;
   url: string;

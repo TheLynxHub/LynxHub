@@ -19,4 +19,5 @@ export enum MenuTypes {
   BookmarkFolderMenu,
   BookmarkEditMenu,
   TabContextMenu,
+  TerminateMultipleTabsConfirm,
 }
