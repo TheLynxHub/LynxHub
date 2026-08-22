@@ -160,51 +160,64 @@ export default function PresetsManager({chosenArguments, presets, setChosenArgum
                 <ListBox.Item id={item.name} key={item.name} textValue={item.name}>
                   <ListBox.ItemIndicator />
                   {item.name}
-                  {item.name !== 'Default' && <CloseButton onPress={() => deletePreset(item.name)} />}
+                  {item.name !== 'Default'}
                 </ListBox.Item>
               ))}
             </ListBox>
           </Select.Popover>
         </Select>
       )}
-      <Popover
-        onOpenChange={isOpen => {
-          setRenameIsOpen(isOpen);
-          if (isOpen) {
-            setRenameValue(chosenArguments.activePreset);
-          } else {
-            setRenameValue('');
-          }
-        }}
-        isOpen={renameIsOpen}>
-        <Button variant="secondary" isDisabled={!chosenArguments.activePreset}>
-          Rename
-        </Button>
-        <Popover.Content>
-          <Popover.Dialog className="gap-y-2 flex flex-col">
-            <Popover.Arrow />
-            <Popover.Heading>Rename Preset</Popover.Heading>
-            <TextField
-              onKeyUp={e => {
-                if (e.key === 'Enter' && isRenameValid) handleRename();
-              }}
-              spellCheck="false"
-              value={renameValue}
-              variant="secondary"
-              onChange={setRenameValue}
-              isInvalid={!!renameErrorMessage && !isEmpty(renameValue.trim())}
-              fullWidth
-              autoFocus>
-              <Input placeholder="Preset name..." />
-              <FieldError>{renameErrorMessage}</FieldError>
-            </TextField>
 
-            <Button size="sm" onPress={handleRename} isDisabled={!isRenameValid} fullWidth>
-              Rename
-            </Button>
-          </Popover.Dialog>
-        </Popover.Content>
-      </Popover>
+      {chosenArguments.activePreset !== 'Default' && (
+        <Button
+          variant="danger-soft"
+          isDisabled={!chosenArguments.activePreset}
+          onPress={() => deletePreset(chosenArguments.activePreset)}>
+          Delete
+        </Button>
+      )}
+
+      {chosenArguments.activePreset !== 'Default' && (
+        <Popover
+          onOpenChange={isOpen => {
+            setRenameIsOpen(isOpen);
+            if (isOpen) {
+              setRenameValue(chosenArguments.activePreset);
+            } else {
+              setRenameValue('');
+            }
+          }}
+          isOpen={renameIsOpen}>
+          <Button variant="secondary" isDisabled={!chosenArguments.activePreset}>
+            Rename
+          </Button>
+
+          <Popover.Content>
+            <Popover.Dialog className="gap-y-2 flex flex-col">
+              <Popover.Arrow />
+              <Popover.Heading>Rename Preset</Popover.Heading>
+              <TextField
+                onKeyUp={e => {
+                  if (e.key === 'Enter' && isRenameValid) handleRename();
+                }}
+                spellCheck="false"
+                value={renameValue}
+                variant="secondary"
+                onChange={setRenameValue}
+                isInvalid={!!renameErrorMessage && !isEmpty(renameValue.trim())}
+                fullWidth
+                autoFocus>
+                <Input placeholder="Preset name..." />
+                <FieldError>{renameErrorMessage}</FieldError>
+              </TextField>
+
+              <Button size="sm" onPress={handleRename} isDisabled={!isRenameValid} fullWidth>
+                Rename
+              </Button>
+            </Popover.Dialog>
+          </Popover.Content>
+        </Popover>
+      )}
       <Popover
         onOpenChange={isOpen => {
           setCreateIsOpen(isOpen);
