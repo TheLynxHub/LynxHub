@@ -1,5 +1,5 @@
 import {contextMenuChannels} from '@lynx_common/consts/ipcChannels/contextMenu';
-import type {ElementResizeData} from '@lynx_common/types';
+import type {ElementResizeData, TabContextMenuPayload} from '@lynx_common/types';
 import type {
   BookmarkContextMenuPayload,
   BookmarkEditMenuPayload,
@@ -60,6 +60,25 @@ const contextMenuIpc = {
     // Opens bookmark edit menu
     openBookmarkEditMenu: (payload: BookmarkEditMenuPayload, customPosition?: ContextMenuPosition) =>
       lynxIpc.send(contextMenuChannels.openBookmarkEditMenu, payload, customPosition),
+
+    // Opens tab context menu
+    openTabContextMenu: (payload: TabContextMenuPayload, customPosition?: ContextMenuPosition) =>
+      lynxIpc.send(contextMenuChannels.openTabContextMenu, payload, customPosition),
+
+    // Pin/unpin tab action
+    tabActionPin: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionPin, tabId),
+
+    // Toggle tab show icon only action
+    tabActionIconOnly: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionIconOnly, tabId),
+
+    // Force close tab action
+    tabActionForceClose: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionForceClose, tabId),
+
+    // Close other tabs action
+    tabActionCloseOthers: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionCloseOthers, tabId),
+
+    // Close tabs to right action
+    tabActionCloseRight: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionCloseRight, tabId),
 
     rightClickItems: {
       copy: (id: number) => lynxIpc.send(contextMenuChannels.copy, id),
@@ -168,6 +187,30 @@ const contextMenuIpc = {
     // Listens for bookmark edit menu events
     bookmarkEditMenu: (callback: (payload: BookmarkEditMenuPayload) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onBookmarkEditMenu, callback),
+
+    // Listens for tab context menu events
+    tabContextMenu: (callback: (payload: TabContextMenuPayload) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onTabContextMenu, callback),
+
+    // Listens for pin tab action
+    tabActionPin: (callback: (tabId: string) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onTabActionPin, callback),
+
+    // Listens for toggle icon only action
+    tabActionIconOnly: (callback: (tabId: string) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onTabActionIconOnly, callback),
+
+    // Listens for force close tab action
+    tabActionForceClose: (callback: (tabId: string) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onTabActionForceClose, callback),
+
+    // Listens for close other tabs action
+    tabActionCloseOthers: (callback: (tabId: string) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onTabActionCloseOthers, callback),
+
+    // Listens for close tabs to right action
+    tabActionCloseRight: (callback: (tabId: string) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onTabActionCloseRight, callback),
   },
 };
 

@@ -244,6 +244,17 @@ export default function useShowEvents() {
       );
     });
 
+    // Tab Context Menu
+    const offTabContextMenu = contextMenuIpc.on.tabContextMenu(payload => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'tabContextMenu',
+          value: payload,
+          layout: MenuTypes.TabContextMenu,
+        }),
+      );
+    });
+
     return () => {
       offZoom();
       offFind();
@@ -264,6 +275,7 @@ export default function useShowEvents() {
       offBookmark();
       offBookmarkFolder();
       offBookmarkEdit();
+      offTabContextMenu();
     };
   }, [dispatch]);
 }

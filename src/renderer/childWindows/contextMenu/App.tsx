@@ -15,6 +15,7 @@ import TerminateTab from './layouts/confirm_warn/TerminateTab';
 import DownloadMenu from './layouts/downloads';
 import FindInPage from './layouts/FindInPage';
 import RightClick from './layouts/right_click';
+import TabContextMenu from './layouts/TabContextMenu';
 import VolumeMenu from './layouts/Volume';
 import AlertWindow from './layouts/window_dialogs/Alert';
 import ConfirmWindow from './layouts/window_dialogs/Confirm';
@@ -70,6 +71,7 @@ export default function ContextMenu() {
       {activeLayout === MenuTypes.BookmarkContextMenu && <BookmarkContextMenu />}
       {activeLayout === MenuTypes.BookmarkFolderMenu && <BookmarkFolderMenu />}
       {activeLayout === MenuTypes.BookmarkEditMenu && <BookmarkEditMenu />}
+      {activeLayout === MenuTypes.TabContextMenu && <TabContextMenu />}
     </div>
   );
 }

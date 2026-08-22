@@ -176,6 +176,19 @@ export type TabInfo = {
   favIcon: {show: boolean; url: string};
   // Terminal progress state (ConEmu OSC 9;4 sequence)
   progress?: {state: 0 | 1 | 2 | 3 | 4; value: number};
+  isPinned?: boolean;
+  showIconOnly?: boolean;
+};
+
+export type TabContextMenuPayload = {
+  tabId: string;
+  title: string;
+  isPinned?: boolean;
+  showIconOnly?: boolean;
+  canCloseOthers: boolean;
+  canCloseRight: boolean;
+  isOnlyTab: boolean;
+  hasRunningCard?: boolean;
 };
 
 export interface NotificationAction {

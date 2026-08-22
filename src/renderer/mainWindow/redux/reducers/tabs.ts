@@ -156,6 +156,32 @@ const tabsSlice = createSlice({
       }
       state.activePage = action.payload.pageID;
     },
+    togglePinTab: (state: TabState, action: PayloadAction<string>) => {
+      const tabId = action.payload;
+      const tabIndex = state.tabs.findIndex(t => t.id === tabId);
+      if (tabIndex === -1) return;
+
+      const currentTab = state.tabs[tabIndex];
+      const nextPinned = !currentTab.isPinned;
+      state.tabs[tabIndex] = {...currentTab, isPinned: nextPinned};
+
+      // Keep pinned tabs at the front
+      const pinned = state.tabs.filter(t => t.isPinned);
+      const unpinned = state.tabs.filter(t => !t.isPinned);
+      state.tabs = [...pinned, ...unpinned];
+    },
+    toggleTabIconOnly: (state: TabState, action: PayloadAction<string>) => {
+      const tabId = action.payload;
+      state.tabs = updateTabById(state.tabs, tabId, tab => ({
+        ...tab,
+        showIconOnly: !tab.showIconOnly,
+      }));
+    },
+    reorderTabs: (state: TabState, action: PayloadAction<TabInfo[]>) => {
+      const pinned = action.payload.filter(t => t.isPinned);
+      const unpinned = action.payload.filter(t => !t.isPinned);
+      state.tabs = [...pinned, ...unpinned];
+    },
   },
 });
 

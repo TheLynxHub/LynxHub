@@ -1,5 +1,5 @@
 import {contextMenuChannels} from '@lynx_common/consts/ipcChannels/contextMenu';
-import {ElementResizeData} from '@lynx_common/types';
+import {ElementResizeData, TabContextMenuPayload} from '@lynx_common/types';
 import {
   BookmarkContextMenuPayload,
   BookmarkEditMenuPayload,
@@ -89,6 +89,11 @@ export default async function listenContextMenu() {
   contextMenuIpc.on.relaunchAI(id => contextMenuIpc.send.onRelaunchAI(id));
   contextMenuIpc.on.stopAI(id => contextMenuIpc.send.onStopAI(id));
   contextMenuIpc.on.removeTab(tabID => contextMenuIpc.send.onRemoveTab(tabID));
+  contextMenuIpc.on.tabActionPin(tabId => contextMenuIpc.send.onTabActionPin(tabId));
+  contextMenuIpc.on.tabActionIconOnly(tabId => contextMenuIpc.send.onTabActionIconOnly(tabId));
+  contextMenuIpc.on.tabActionForceClose(tabId => contextMenuIpc.send.onTabActionForceClose(tabId));
+  contextMenuIpc.on.tabActionCloseOthers(tabId => contextMenuIpc.send.onTabActionCloseOthers(tabId));
+  contextMenuIpc.on.tabActionCloseRight(tabId => contextMenuIpc.send.onTabActionCloseRight(tabId));
 }
 
 /**
@@ -452,6 +457,52 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
     contextMenuIpc.send.onBookmarkFolderMenu(payload);
     contextMenuManager.showContextMenu();
   });
+
+  // Open Tab Context Menu
+  contextMenuIpc.on.openTabContextMenu((payload, customPosition) => {
+    if (isLinux) {
+      const mainWindow = appManager.getMainWindow();
+      const template: Electron.MenuItemConstructorOptions[] = [
+        {
+          label: payload.isPinned ? 'Unpin Tab' : 'Pin Tab',
+          click: () => contextMenuIpc.send.onTabActionPin(payload.tabId),
+        },
+        {
+          label: 'Show Icon Only',
+          type: 'checkbox',
+          checked: Boolean(payload.showIconOnly),
+          click: () => contextMenuIpc.send.onTabActionIconOnly(payload.tabId),
+        },
+        {type: 'separator'},
+        {
+          label: 'Close',
+          click: () => contextMenuIpc.send.onRemoveTab(payload.tabId),
+        },
+        {
+          label: 'Close (Bypass Confirmation)',
+          click: () => contextMenuIpc.send.onTabActionForceClose(payload.tabId),
+        },
+        {
+          label: 'Close Other Tabs',
+          enabled: payload.canCloseOthers,
+          click: () => contextMenuIpc.send.onTabActionCloseOthers(payload.tabId),
+        },
+        {
+          label: 'Close Tabs to the Right',
+          enabled: payload.canCloseRight,
+          click: () => contextMenuIpc.send.onTabActionCloseRight(payload.tabId),
+        },
+      ];
+
+      const menu = Menu.buildFromTemplate(template);
+      menu.popup({window: mainWindow as BrowserWindow});
+      return;
+    }
+
+    setPosition(customPosition);
+    contextMenuIpc.send.onTabContextMenu(payload);
+    contextMenuManager.showContextMenu();
+  });
 }
 
 /**
@@ -499,6 +550,19 @@ export const contextMenuIpc = {
     /** Sends bookmark edit menu event to context menu */
     onBookmarkEditMenu: (payload: BookmarkEditMenuPayload) =>
       sendToContextMenu(contextMenuChannels.onBookmarkEditMenu, payload),
+    /** Sends tab context menu event to context menu */
+    onTabContextMenu: (payload: TabContextMenuPayload) =>
+      sendToContextMenu(contextMenuChannels.onTabContextMenu, payload),
+    /** Sends tab pin action to main window renderer */
+    onTabActionPin: (tabId: string) => sendToMain(contextMenuChannels.onTabActionPin, tabId),
+    /** Sends tab toggle icon only action to main window renderer */
+    onTabActionIconOnly: (tabId: string) => sendToMain(contextMenuChannels.onTabActionIconOnly, tabId),
+    /** Sends tab force close action to main window renderer */
+    onTabActionForceClose: (tabId: string) => sendToMain(contextMenuChannels.onTabActionForceClose, tabId),
+    /** Sends tab close others action to main window renderer */
+    onTabActionCloseOthers: (tabId: string) => sendToMain(contextMenuChannels.onTabActionCloseOthers, tabId),
+    /** Sends tab close right action to main window renderer */
+    onTabActionCloseRight: (tabId: string) => sendToMain(contextMenuChannels.onTabActionCloseRight, tabId),
   },
   on: {
     /** Listens for force reload request */
@@ -547,6 +611,20 @@ export const contextMenuIpc = {
     stopAI: (callback: (id: string) => void) => lynxIpc.on(contextMenuChannels.stopAI, callback),
     /** Listens for remove tab request */
     removeTab: (callback: (tabID: string) => void) => lynxIpc.on(contextMenuChannels.removeTab, callback),
+    /** Listens for tab pin action from context menu */
+    tabActionPin: (callback: (tabId: string) => void) => lynxIpc.on(contextMenuChannels.tabActionPin, callback),
+    /** Listens for tab icon only action from context menu */
+    tabActionIconOnly: (callback: (tabId: string) => void) =>
+      lynxIpc.on(contextMenuChannels.tabActionIconOnly, callback),
+    /** Listens for tab force close action from context menu */
+    tabActionForceClose: (callback: (tabId: string) => void) =>
+      lynxIpc.on(contextMenuChannels.tabActionForceClose, callback),
+    /** Listens for tab close others action from context menu */
+    tabActionCloseOthers: (callback: (tabId: string) => void) =>
+      lynxIpc.on(contextMenuChannels.tabActionCloseOthers, callback),
+    /** Listens for tab close right action from context menu */
+    tabActionCloseRight: (callback: (tabId: string) => void) =>
+      lynxIpc.on(contextMenuChannels.tabActionCloseRight, callback),
 
     /** Listens for open terminate AI request */
     openTerminateAI: (callback: (id: string) => void) => lynxIpc.on(contextMenuChannels.openTerminateAI, callback),
@@ -570,6 +648,9 @@ export const contextMenuIpc = {
     openBookmarkEditMenu: (
       callback: (payload: BookmarkEditMenuPayload, customPosition?: {x: number; y: number}) => void,
     ) => lynxIpc.on(contextMenuChannels.openBookmarkEditMenu, callback),
+    /** Listens for open tab context menu request */
+    openTabContextMenu: (callback: (payload: TabContextMenuPayload, customPosition?: {x: number; y: number}) => void) =>
+      lynxIpc.on(contextMenuChannels.openTabContextMenu, callback),
   },
   handle: {},
 };

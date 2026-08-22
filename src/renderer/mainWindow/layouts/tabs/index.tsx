@@ -64,14 +64,46 @@ const TabsList = memo(() => {
     return undefined;
   }, []);
 
-  // Listen for remove tab events from context menu
+  // Listen for tab context menu events
   useEffect(() => {
     const offRemoveTab = contextMenuIpc.on.removeTab(tabId => {
       removeTab({tabId});
     });
 
-    return () => offRemoveTab();
-  }, [removeTab]);
+    const offPin = contextMenuIpc.on.tabActionPin(tabId => {
+      dispatch(tabsActions.togglePinTab(tabId));
+    });
+
+    const offIconOnly = contextMenuIpc.on.tabActionIconOnly(tabId => {
+      dispatch(tabsActions.toggleTabIconOnly(tabId));
+    });
+
+    const offForceClose = contextMenuIpc.on.tabActionForceClose(tabId => {
+      removeTab({tabId});
+    });
+
+    const offCloseOthers = contextMenuIpc.on.tabActionCloseOthers(tabId => {
+      const toRemove = tabsFromRedux.filter(t => !t.isPinned && t.id !== tabId);
+      toRemove.forEach(t => removeTab({tabId: t.id}));
+    });
+
+    const offCloseRight = contextMenuIpc.on.tabActionCloseRight(tabId => {
+      const targetIndex = tabsFromRedux.findIndex(t => t.id === tabId);
+      if (targetIndex !== -1) {
+        const toRemove = tabsFromRedux.slice(targetIndex + 1).filter(t => !t.isPinned);
+        toRemove.forEach(t => removeTab({tabId: t.id}));
+      }
+    });
+
+    return () => {
+      offRemoveTab();
+      offPin();
+      offIconOnly();
+      offForceClose();
+      offCloseOthers();
+      offCloseRight();
+    };
+  }, [removeTab, tabsFromRedux, dispatch]);
 
   const onReorder = useCallback((reorderedIds: string[]) => {
     setIsOrdering(true);
@@ -80,14 +112,19 @@ const TabsList = memo(() => {
         .map(tabID => prevTabs.find(tab => tab.id === tabID))
         .filter((tab): tab is TabInfo => tab !== undefined);
 
-      return newOrder.length === prevTabs.length ? newOrder : prevTabs;
+      // Maintain pinned tabs partition at front
+      const pinned = newOrder.filter(t => t.isPinned);
+      const unpinned = newOrder.filter(t => !t.isPinned);
+      const combined = [...pinned, ...unpinned];
+
+      return combined.length === prevTabs.length ? combined : prevTabs;
     });
   }, []);
 
   const handleReorderEnd = useCallback(() => {
     setTimeout(() => setIsOrdering(false), 100);
     if (!isEqual(tabsFromRedux, localTabs)) {
-      dispatch(tabsActions.setTabState({key: 'tabs', value: localTabs}));
+      dispatch(tabsActions.reorderTabs(localTabs));
     }
   }, [tabsFromRedux, localTabs, dispatch]);
 
@@ -110,6 +147,9 @@ const TabsList = memo(() => {
               transition={{
                 layout: {duration: 0.2, type: 'spring', bounce: 0, visualDuration: 0.2},
               }}
+              className={
+                'h-full flex items-center ' + (tab.isPinned || tab.showIconOnly ? 'min-w-fit' : 'max-w-60 min-w-24')
+              }
               animate={{
                 scale: 1,
                 translateY: 0,
@@ -121,7 +161,6 @@ const TabsList = memo(() => {
               value={tab.id}
               layout="position"
               initial={{scale: 0.9, translateY: 10, opacity: 0}}
-              className="h-full flex items-center max-w-60 min-w-24"
               exit={{scale: 0.9, translateY: 10, transition: {duration: 0.07, ease: 'backIn'}}}>
               <TabItem tab={tab} isOrdering={isOrdering} />
               {index < localTabs.length - 1 && (
