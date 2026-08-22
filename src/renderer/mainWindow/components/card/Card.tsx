@@ -1,6 +1,8 @@
 import {Card, Description, useOverlayState} from '@heroui/react';
 import {extensionsData} from '@lynx/plugins/extensions/loader';
+import {useHotkeysState} from '@lynx/redux/reducers/hotkeys';
 import {getAccentColorAsHex} from '@lynx/utils/accentColorGenerator';
+import {useInstalledCard} from '@lynx/utils/hooks';
 import {extractGitUrl} from '@lynx_common/utils';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {motion} from 'framer-motion';
@@ -29,13 +31,14 @@ const LynxCard = memo(() => {
   const setMenuIsOpen = useCardStore(state => state.setMenuIsOpen);
   const id = useCardStore(state => state.id);
 
+  const isCtrlPressed = useHotkeysState('isCtrlPressed');
+  const card = useInstalledCard(id);
+
   const installModal = useOverlayState();
   const [installModalType, setInstallModalType] = useState<'install' | 'update'>('install');
 
-  const {startAi, install, isRunning, updating, updateAvailable, isUpdatingExtensions, updateCount} = useCardActions(
-    installModal,
-    setInstallModalType,
-  );
+  const {startAi, install, openSession, isRunning, updating, updateAvailable, isUpdatingExtensions, updateCount} =
+    useCardActions(installModal, setInstallModalType);
 
   const {modifiedTitle, onTitleChange} = useCardTitle();
 
@@ -58,17 +61,23 @@ const LynxCard = memo(() => {
   return (
     <>
       <MotionCard
-        onClick={() => {
+        className={
+          'relative h-46 w-75 border border-surface/50 transition-all duration-200 overflow-hidden ' +
+          `group hover:scale-[1.02] hover:shadow-lg ${isPressable && 'cursor-pointer'}`
+        }
+        onClick={e => {
           if (!isPressable) return;
+
+          if ((e.ctrlKey || isCtrlPressed) && isInstalled && card?.dir) {
+            AddBreadcrumb_Renderer(`Card Interaction: Ctrl+Clicked card "${title}" - Opening Session`);
+            openSession();
+            return;
+          }
 
           AddBreadcrumb_Renderer(`Card Interaction: Clicked card "${title}"`);
           if (isInstalled) startAi();
           else install();
         }}
-        className={
-          'relative h-46 w-75 border border-surface/50 transition-all duration-200 overflow-hidden ' +
-          `group hover:scale-[1.02] hover:shadow-lg ${isPressable && 'cursor-pointer'}`
-        }
         whileHover="hover"
         onContextMenu={() => setMenuIsOpen(true)}>
         <div

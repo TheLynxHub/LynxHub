@@ -13,7 +13,7 @@ import {CommonProps} from './about/types';
 import {UnAssignMenuItem, UninstallMenuItem} from './dangerZone';
 import UnassignModal from './dangerZone/UnassignModal';
 import UninstallModal from './dangerZone/UninstallModal';
-import {ExtensionsMenuItem, LaunchConfigMenuItem, RepoConfigMenuItem} from './options';
+import {ExtensionsMenuItem, LaunchConfigMenuItem, RepoConfigMenuItem, SessionMenuItem} from './options';
 import ExtensionsModal from './options/ExtensionsModal';
 import GitManagerModal from './options/GitModal';
 import LaunchConfigModal from './options/LaunchConfigModal';
@@ -111,6 +111,7 @@ export const InstalledMenu = memo(({setType, state}: {setType: (type: 'install' 
                     <Dropdown.Section key="info">
                       <AboutMenuItem state={infoModal} />
                       <HomePageMenuItem state={readmeModal} />
+                      <SessionMenuItem />
                     </Dropdown.Section>
 
                     <Separator className="bg-surface-secondary/70" />

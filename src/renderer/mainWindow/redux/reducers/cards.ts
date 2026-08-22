@@ -107,8 +107,11 @@ const cardsSlice = createSlice({
       }
     },
 
-    addRunningEmpty: (state, action: PayloadAction<{tabId: string; type: 'browser' | 'terminal' | 'both'}>) => {
-      const {tabId, type} = action.payload;
+    addRunningEmpty: (
+      state,
+      action: PayloadAction<{tabId: string; type: 'browser' | 'terminal' | 'both'; dir?: string}>,
+    ) => {
+      const {tabId, type, dir} = action.payload;
 
       const id = `${tabId}_${type}`;
       const currentView = type === 'browser' ? 'browser' : 'terminal';
@@ -116,7 +119,7 @@ const cardsSlice = createSlice({
       state.runningCard.push({...buildRunningCardBase(tabId, id), type, currentView, isEmptyRunning: true});
 
       if (type !== 'terminal') browserIpc.send.createBrowser(id);
-      if (type !== 'browser') ptyIpc.emptyProcess(id);
+      if (type !== 'browser') ptyIpc.emptyProcess(id, dir);
     },
 
     addRunningCard: (state, action: PayloadAction<{tabId: string; id: string}>) => {

@@ -69,11 +69,24 @@ export const useCardActions = (state: UseOverlayStateReturn, setType: (type: 'in
       setType('install');
       state.open();
     }
-  }, [id, allMethods]);
+  }, [id, allMethods, setType, state]);
+
+  const openSession = useCallback(() => {
+    if (!card?.dir) return;
+    AddBreadcrumb_Renderer(`Open Session in card directory: ${id}`);
+    dispatch(
+      cardsActions.addRunningEmpty({
+        tabId: activeTab,
+        type: 'both',
+        dir: card.dir,
+      }),
+    );
+  }, [id, activeTab, dispatch, card?.dir]);
 
   return {
     startAi,
     install,
+    openSession,
     isRunning,
     updating,
     updateAvailable,

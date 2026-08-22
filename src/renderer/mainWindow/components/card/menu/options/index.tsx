@@ -1,8 +1,13 @@
 import {DropdownItem} from '@heroui/react';
-import {Extensions2_Icon, GitHub_Icon} from '@lynx_assets/icons';
+import {cardsActions} from '@lynx/redux/reducers/cards';
+import {useTabsState} from '@lynx/redux/reducers/tabs';
+import {AppDispatch} from '@lynx/redux/store';
+import {useInstalledCard} from '@lynx/utils/hooks';
+import {Extensions2_Icon, GitHub_Icon, Terminal_Icon} from '@lynx_assets/icons';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {SettingsMinimalisticIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback} from 'react';
+import {useDispatch} from 'react-redux';
 
 import {useGetInstallType} from '../../../../plugins/modules';
 import {useCardStore} from '../../store';
@@ -77,6 +82,42 @@ export const RepoConfigMenuItem = ({state}: CommonProps) => {
     <DropdownItem key="repoSetting" onPress={onPress}>
       <GitHub_Icon className="ml-0.5 size-3.5" />
       Repository
+    </DropdownItem>
+  );
+};
+
+/**
+ * Menu item to open a session in the card's installation folder.
+ * Hidden if the card has no directory.
+ */
+export const SessionMenuItem = () => {
+  const id = useCardStore(st => st.id);
+  const setMenuIsOpen = useCardStore(st => st.setMenuIsOpen);
+  const title = useCardStore(st => st.title);
+
+  const card = useInstalledCard(id);
+  const activeTab = useTabsState('activeTab');
+  const dispatch = useDispatch<AppDispatch>();
+
+  const onPress = useCallback(() => {
+    if (!card?.dir) return;
+    AddBreadcrumb_Renderer(`Card Menu Action: Clicked "session" on "${title}"`);
+    dispatch(
+      cardsActions.addRunningEmpty({
+        tabId: activeTab,
+        type: 'both',
+        dir: card.dir,
+      }),
+    );
+    setMenuIsOpen(false);
+  }, [activeTab, card?.dir, dispatch, setMenuIsOpen, title]);
+
+  if (!card?.dir) return null;
+
+  return (
+    <DropdownItem key="session" onPress={onPress}>
+      <Terminal_Icon className="size-4" />
+      Session
     </DropdownItem>
   );
 };

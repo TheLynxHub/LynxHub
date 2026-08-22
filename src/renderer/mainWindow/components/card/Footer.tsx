@@ -3,6 +3,7 @@ import ShinyText from '@lynx/components/ShinyText';
 import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {useAppState} from '@lynx/redux/reducers/app';
 import {useInstalledCard, useIsPinnedCard} from '@lynx/utils/hooks';
+import {Terminal_Icon} from '@lynx_assets/icons';
 import filesIpc from '@lynx_shared/ipc/files';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
@@ -105,10 +106,20 @@ const Footer = memo(({isRunning, updatingExtensions, updating, updateCount, id, 
         !isOnline && (
           <div
             className={
-              'translate-y-2 opacity-0 transition duration-400 group-hover:translate-y-0 group-hover:opacity-100'
+              'transition duration-400 ' +
+              (isCtrlPressed && isInstalled && webUI?.dir
+                ? 'translate-y-0 opacity-100'
+                : 'translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100')
             }>
             {isInstalled ? (
-              <PlayIcon className="size-4 text-accent" />
+              isCtrlPressed && webUI?.dir ? (
+                <div className="flex items-center gap-1 text-xs font-semibold text-accent">
+                  <Terminal_Icon className="size-4" />
+                  <span className="text-[11px]">Session</span>
+                </div>
+              ) : (
+                <PlayIcon className="size-4 text-accent" />
+              )
             ) : (
               <DownloadMinimalisticIcon className="size-4" />
             )}
