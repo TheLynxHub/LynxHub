@@ -88,17 +88,17 @@ export default function Theme() {
           <ListBox>
             <ListBox.Item id="dark" textValue="dark">
               <ListBox.ItemIndicator />
-              <MoonIcon />
+              <MoonIcon className="size-4" />
               <Label>Dark</Label>
             </ListBox.Item>
             <ListBox.Item id="light" textValue="light">
               <ListBox.ItemIndicator />
-              <Sun2Icon />
+              <Sun2Icon className="size-4" />
               <Label>Light</Label>
             </ListBox.Item>
             <ListBox.Item id="system" textValue="system">
               <ListBox.ItemIndicator />
-              <DisplayIcon />
+              <DisplayIcon className="size-4" />
 
               <div className="flex flex-col">
                 <Label>System Default</Label>
