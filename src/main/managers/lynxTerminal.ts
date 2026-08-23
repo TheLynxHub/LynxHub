@@ -91,8 +91,20 @@ export default class LynxTerminal {
 
         const doKill = () => {
           if (this.process) {
-            this.process.kill();
-            treeKill(this.process.pid);
+            try {
+              this.process.kill();
+            } catch (e) {
+              console.warn('Failed to kill pty process:', e);
+            }
+            try {
+              if (this.process?.pid) {
+                treeKill(this.process.pid, err => {
+                  if (err) console.warn('treeKill error:', err);
+                });
+              }
+            } catch (e) {
+              console.warn('Failed to execute treeKill:', e);
+            }
           }
         };
 
@@ -137,8 +149,20 @@ export default class LynxTerminal {
 
       const doKill = () => {
         if (this.process) {
-          this.process.kill();
-          treeKill(this.process.pid);
+          try {
+            this.process.kill();
+          } catch (e) {
+            console.warn('Failed to kill pty process:', e);
+          }
+          try {
+            if (this.process?.pid) {
+              treeKill(this.process.pid, err => {
+                if (err) console.warn('treeKill error:', err);
+              });
+            }
+          } catch (e) {
+            console.warn('Failed to execute treeKill:', e);
+          }
         }
       };
 
