@@ -1,6 +1,7 @@
 import {NavHistory} from '@lynx_common/types/ipc';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {ArrowLeftIcon, ArrowRightIcon, RefreshIcon} from '@solar-icons/react/bold-duotone';
+import {RefreshIcon} from '@solar-icons/react/bold-duotone';
+import {ArrowLeftIcon, ArrowRightIcon} from '@solar-icons/react/line-duotone';
 import {memo} from 'react';
 
 import {NavBtnProps} from '../../types';
