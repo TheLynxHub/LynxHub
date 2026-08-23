@@ -1,4 +1,4 @@
-import {Button, ButtonGroup, Input, Spinner} from '@heroui/react';
+import {Button, Input, Spinner} from '@heroui/react';
 import type {QuickWebNavState} from '@lynx_common/types/ipc';
 import type {QuickWebStorage} from '@lynx_common/types/storage';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';

@@ -1,4 +1,5 @@
-import {Button, ButtonGroup, Card, Chip, ScrollShadow, Switch, Tooltip} from '@heroui/react';
+import {Button, Card, Chip, Dropdown, Label, ScrollShadow, Switch, Tooltip} from '@heroui/react';
+import EmptyStateCard from '@lynx/components/EmptyStateCard';
 import type {QuickWebItem, QuickWebStorage} from '@lynx_common/types/storage';
 import quickWebIpc from '@lynx_shared/ipc/quickWeb';
 import {PlayIcon} from '@solar-icons/react/bold';
@@ -8,11 +9,12 @@ import {
   BookmarkIcon,
   EarthIcon,
   History2Icon,
+  ImportIcon,
   PenIcon,
   TrashBin2Icon,
 } from '@solar-icons/react/bold-duotone';
 import {AltArrowDownIcon, AltArrowUpIcon} from '@solar-icons/react/line-duotone';
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
 import SettingsSearchHighlight from '../../SettingsSearchHighlight';
@@ -32,6 +34,10 @@ export default function UrlList({config}: Props) {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const items = config.items || [];
+
+  const preloadedCount = useMemo(() => {
+    return items.filter(i => i.preload).length;
+  }, [items]);
 
   const handleOpenAdd = () => {
     setEditingItem(null);
@@ -98,39 +104,65 @@ export default function UrlList({config}: Props) {
   };
 
   const title = 'Configured Websites & Preloading';
-  const description = 'Manage URLs accessible in the Quick Web floating window and mark items to preload in background';
+  const description = 'Manage URLs accessible in the Quick Web floating window and configure startup preloading';
 
   return (
     <SettingsFilterItem searchTexts={[title, description, 'url', 'websites', 'preload', 'quick web list']}>
       <Card>
-        <Card.Header className="flex flex-row items-center justify-between">
-          <div className="flex flex-col gap-y-0.5">
-            <Card.Title>
-              <SettingsSearchHighlight text={title} />
-            </Card.Title>
+        <Card.Header className="flex flex-row items-center justify-between gap-4">
+          <div className="flex flex-col gap-y-1">
+            <div className="flex items-center gap-x-2">
+              <Card.Title>
+                <SettingsSearchHighlight text={title} />
+              </Card.Title>
+              <Chip size="sm" variant="soft" color="accent" className="h-5 text-[11px] px-2 font-medium">
+                {items.length} {items.length === 1 ? 'website' : 'websites'}
+              </Chip>
+              {preloadedCount > 0 && (
+                <Chip size="sm" variant="soft" color="warning" className="h-5 text-[11px] px-2 font-medium gap-x-1">
+                  <BoltIcon className="size-3 text-warning" />
+                  {preloadedCount} preloaded
+                </Chip>
+              )}
+            </div>
             <Card.Description>
               <SettingsSearchHighlight text={description} />
             </Card.Description>
           </div>
 
-          <div className="flex items-center gap-x-1.5">
-            <Tooltip delay={300}>
-              <Button size="sm" variant="secondary" onPress={() => setIsBookmarksOpen(true)}>
-                <BookmarkIcon className="size-4" />
-                Bookmarks
-              </Button>
-              <Tooltip.Content>Import from Bookmarks</Tooltip.Content>
-            </Tooltip>
+          <div className="flex items-center gap-x-2 shrink-0">
+            {/* Import Dropdown */}
+            <Dropdown>
+              <Dropdown.Trigger>
+                <Button size="sm" variant="secondary">
+                  <ImportIcon className="size-4" />
+                  Import
+                  <AltArrowDownIcon className="size-3 text-muted ml-0.5" />
+                </Button>
+              </Dropdown.Trigger>
+              <Dropdown.Popover>
+                <Dropdown.Menu
+                  onAction={key => {
+                    if (key === 'bookmarks') setIsBookmarksOpen(true);
+                    if (key === 'history') setIsHistoryOpen(true);
+                  }}>
+                  <Dropdown.Item id="bookmarks" textValue="Import from Bookmarks">
+                    <div className="flex items-center gap-x-2">
+                      <BookmarkIcon className="size-4 text-accent-foreground" />
+                      <Label>From Bookmarks</Label>
+                    </div>
+                  </Dropdown.Item>
+                  <Dropdown.Item id="history" textValue="Import from History">
+                    <div className="flex items-center gap-x-2">
+                      <History2Icon className="size-4 text-accent-foreground" />
+                      <Label>From Browser History</Label>
+                    </div>
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown.Popover>
+            </Dropdown>
 
-            <Tooltip delay={300}>
-              <Button size="sm" variant="secondary" onPress={() => setIsHistoryOpen(true)}>
-                <History2Icon className="size-4" />
-                History
-              </Button>
-              <Tooltip.Content>Import from Browser History</Tooltip.Content>
-            </Tooltip>
-
-            <Button size="sm" onPress={handleOpenAdd}>
+            <Button size="sm" variant="primary" onPress={handleOpenAdd}>
               <AddCircleIcon className="size-4" />
               Add Website
             </Button>
@@ -139,137 +171,157 @@ export default function UrlList({config}: Props) {
 
         <Card.Content>
           {items.length === 0 ? (
-            <div
-              className={
-                'p-8 border border-dashed border-surface-tertiary rounded-xl text-center ' +
-                'flex flex-col items-center gap-y-3'
-              }>
-              <EarthIcon className="size-10 text-muted" />
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold">No Quick Websites Configured</span>
-                <span className="text-xs text-muted">
-                  Add websites or import from bookmarks to access them instantly using your global hotkey.
-                </span>
-              </div>
-              <Button size="sm" onPress={handleOpenAdd}>
-                <AddCircleIcon className="size-4" />
-                Add Your First Website
-              </Button>
-            </div>
+            <EmptyStateCard
+              description={
+                'Add websites or import existing bookmarks to access them ' +
+                'instantaneously with your global shortcut.'
+              }
+              action={
+                <div className="flex items-center gap-x-2 mt-2">
+                  <Button size="sm" variant="secondary" onPress={() => setIsBookmarksOpen(true)}>
+                    <BookmarkIcon className="size-4" />
+                    Import Bookmarks
+                  </Button>
+                  <Button size="sm" variant="primary" onPress={handleOpenAdd}>
+                    <AddCircleIcon className="size-4" />
+                    Add Website
+                  </Button>
+                </div>
+              }
+              title="No Quick Websites Configured"
+              icon={<EarthIcon className="size-12 text-accent-foreground/60 mb-1" />}
+            />
           ) : (
             <ScrollShadow className="max-h-96 flex flex-col gap-y-2">
               {items.map((item, idx) => (
                 <div
                   className={
                     'flex items-center justify-between p-3 rounded-2xl border ' +
-                    'border-border bg-surface-secondary/30 hover:bg-surface-secondary/50 transition gap-x-3'
+                    'border-border bg-surface-secondary/30 hover:bg-surface-secondary/50 ' +
+                    'transition-colors gap-x-3 group'
                   }
                   key={item.id}>
+                  {/* Left: Reorder arrows + Favicon + Title & URL */}
                   <div className="flex items-center gap-x-3 min-w-0 flex-1">
-                    {item.favIcon ? (
-                      <img alt="" src={item.favIcon} className="size-5 rounded-xs shrink-0 object-contain" />
-                    ) : (
-                      <EarthIcon className="size-5 shrink-0 text-muted" />
-                    )}
+                    {/* Compact Reorder Arrows */}
+                    <div className="flex flex-col items-center justify-center shrink-0 -my-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        aria-label="Move up"
+                        isDisabled={idx === 0}
+                        onPress={() => handleMove(idx, 'up')}
+                        className="h-4 w-5 min-w-0 p-0 text-muted hover:text-foreground disabled:opacity-20"
+                        isIconOnly>
+                        <AltArrowUpIcon className="size-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        aria-label="Move down"
+                        isDisabled={idx === items.length - 1}
+                        onPress={() => handleMove(idx, 'down')}
+                        className="h-4 w-5 min-w-0 p-0 text-muted hover:text-foreground disabled:opacity-20"
+                        isIconOnly>
+                        <AltArrowDownIcon className="size-3.5" />
+                      </Button>
+                    </div>
 
-                    <div className="flex flex-col min-w-0 flex-1">
+                    {/* Favicon Container */}
+                    <div
+                      className={
+                        'size-8 rounded-xl bg-surface-secondary/70 flex items-center ' +
+                        'justify-center shrink-0 border border-border/50'
+                      }>
+                      {item.favIcon ? (
+                        <img alt="" src={item.favIcon} className="size-4.5 rounded-xs object-contain" />
+                      ) : (
+                        <EarthIcon className="size-4.5 text-muted" />
+                      )}
+                    </div>
+
+                    {/* Title + URL + Status Badge */}
+                    <div className="flex flex-col min-w-0 flex-1 gap-y-0.5">
                       <div className="flex items-center gap-x-2">
-                        <span className="text-sm font-semibold truncate">{item.title}</span>
+                        <span className="text-sm font-semibold truncate text-foreground">{item.title}</span>
                         {item.preload && (
-                          <Chip size="sm" variant="soft" color="warning" className="gap-x-1 text-[10px] h-5 px-1.5">
-                            <BoltIcon className="size-3 text-warning" />
-                            Preload
+                          <Chip
+                            size="sm"
+                            variant="soft"
+                            color="warning"
+                            className="gap-x-1 text-[10px] h-4.5 px-1.5 font-medium">
+                            <BoltIcon className="size-2.5 text-warning" />
+                            Preloaded
                           </Chip>
                         )}
                       </div>
-                      <span className="text-xs text-muted font-JetBrainsMono truncate">{item.url}</span>
+                      <span className="text-xs text-muted font-JetBrainsMono truncate select-all">{item.url}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-x-3 shrink-0">
-                    <div className="flex items-center gap-x-1.5">
-                      <Tooltip delay={300}>
-                        <Switch
-                          isSelected={item.preload}
-                          aria-label={`Preload ${item.title}`}
-                          onChange={val => handleTogglePreload(item, val)}>
-                          <Switch.Content>
-                            <Switch.Control>
-                              <Switch.Thumb />
-                            </Switch.Control>
-                          </Switch.Content>
-                        </Switch>
+                  {/* Right: Preload Switch + Launch + Edit + Delete Actions */}
+                  <div className="flex items-center gap-x-2 shrink-0">
+                    <div className="flex items-center gap-x-1.5 border-r border-border/60 pr-3 mr-1">
+                      <Tooltip delay={200}>
+                        <div className="flex items-center gap-x-1.5 cursor-pointer">
+                          <Switch
+                            size="sm"
+                            isSelected={item.preload}
+                            aria-label={`Preload ${item.title}`}
+                            onChange={val => handleTogglePreload(item, val)}>
+                            <Switch.Content>
+                              <Switch.Control>
+                                <Switch.Thumb />
+                              </Switch.Control>
+                            </Switch.Content>
+                          </Switch>
+                          <span className="text-xs text-muted font-medium hidden md:inline">Preload</span>
+                        </div>
                         <Tooltip.Content>
                           {item.preload
-                            ? 'Preloaded in background on startup'
-                            : 'Click to enable background preloading'}
+                            ? 'Webview preloaded in background on startup'
+                            : 'Click to preload in background for instant opening'}
                         </Tooltip.Content>
                       </Tooltip>
                     </div>
 
-                    <ButtonGroup size="sm">
-                      <Tooltip delay={300}>
-                        <Button
-                          size="sm"
-                          variant="tertiary"
-                          aria-label="Move Up"
-                          isDisabled={idx === 0}
-                          onPress={() => handleMove(idx, 'up')}
-                          isIconOnly>
-                          <AltArrowUpIcon className="size-4" />
-                        </Button>
-                        <Tooltip.Content>Move Up</Tooltip.Content>
-                      </Tooltip>
-
-                      <Tooltip delay={300}>
-                        <Button
-                          size="sm"
-                          variant="tertiary"
-                          aria-label="Move Down"
-                          isDisabled={idx === items.length - 1}
-                          onPress={() => handleMove(idx, 'down')}
-                          isIconOnly>
-                          <AltArrowDownIcon className="size-4" />
-                        </Button>
-                        <Tooltip.Content>Move Down</Tooltip.Content>
-                      </Tooltip>
-
-                      <Tooltip delay={300}>
+                    <div className="flex items-center gap-x-1">
+                      <Tooltip delay={200}>
                         <Button
                           size="sm"
                           variant="tertiary"
                           aria-label="Open in Quick Web"
                           onPress={() => handleLaunchItem(item.id)}
                           isIconOnly>
-                          <PlayIcon className="size-4" />
+                          <PlayIcon className="size-3.5 text-accent-foreground" />
                         </Button>
                         <Tooltip.Content>Launch in Quick Window</Tooltip.Content>
                       </Tooltip>
 
-                      <Tooltip delay={300}>
+                      <Tooltip delay={200}>
                         <Button
                           size="sm"
                           aria-label="Edit"
                           variant="tertiary"
                           onPress={() => handleOpenEdit(item)}
                           isIconOnly>
-                          <PenIcon className="size-4" />
+                          <PenIcon className="size-3.5" />
                         </Button>
                         <Tooltip.Content>Edit Website</Tooltip.Content>
                       </Tooltip>
 
-                      <Tooltip delay={300}>
+                      <Tooltip delay={200}>
                         <Button
                           size="sm"
                           aria-label="Delete"
                           variant="danger-soft"
                           onPress={() => handleDeleteItem(item.id)}
                           isIconOnly>
-                          <TrashBin2Icon className="size-4" />
+                          <TrashBin2Icon className="size-3.5" />
                         </Button>
                         <Tooltip.Content>Delete</Tooltip.Content>
                       </Tooltip>
-                    </ButtonGroup>
+                    </div>
                   </div>
                 </div>
               ))}

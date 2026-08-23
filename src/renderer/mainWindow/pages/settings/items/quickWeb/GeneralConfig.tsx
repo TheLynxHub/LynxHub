@@ -1,10 +1,10 @@
-import {Button, Card, Input, Radio, RadioGroup, Switch} from '@heroui/react';
-import {formatHotkey} from '@lynx/utils';
+import {Button, Card, Chip, Kbd, Radio, RadioGroup, Surface, Switch, Tooltip} from '@heroui/react';
+import LynxSwitch from '@lynx/components/LynxSwitch';
 import type {LynxHotkey} from '@lynx_common/types/ipc';
 import type {QuickWebStorage} from '@lynx_common/types/storage';
 import quickWebIpc from '@lynx_shared/ipc/quickWeb';
 import {PlayIcon} from '@solar-icons/react/bold';
-import {KeyboardIcon, RefreshIcon, ShieldCheckIcon} from '@solar-icons/react/bold-duotone';
+import {EarthIcon, KeyboardIcon, RefreshIcon, ShieldCheckIcon} from '@solar-icons/react/bold-duotone';
 import {KeyboardEvent, useCallback, useMemo, useRef, useState} from 'react';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
@@ -19,18 +19,32 @@ const isModifierKey = (key: string): boolean => {
   return ['control', 'shift', 'alt', 'meta', 'os'].includes(key.toLowerCase());
 };
 
+const getHotkeyLabels = (hotkey?: LynxHotkey): string[] => {
+  if (!hotkey) return ['Alt', 'W'];
+  const labels: string[] = [];
+  if (hotkey.meta) labels.push('Win');
+  if (hotkey.control) labels.push('Ctrl');
+  if (hotkey.alt) labels.push('Alt');
+  if (hotkey.shift) labels.push('Shift');
+  if (hotkey.key) labels.push(hotkey.key.toUpperCase());
+  return labels.length > 0 ? labels : ['None'];
+};
+
 export default function GeneralConfig({config, onUpdateConfig}: Props) {
   const [isRecording, setIsRecording] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
 
-  const hotkeyString = useMemo(() => {
-    return formatHotkey(config.globalHotkey);
+  const hotkeyLabels = useMemo(() => getHotkeyLabels(config.globalHotkey), [config.globalHotkey]);
+
+  const isDefaultHotkey = useMemo(() => {
+    const hk = config.globalHotkey;
+    return hk && hk.alt && !hk.control && !hk.shift && !hk.meta && hk.key?.toLowerCase() === 'w';
   }, [config.globalHotkey]);
 
   const handleStartRecord = () => {
     setIsRecording(true);
     setTimeout(() => {
-      inputRef.current?.focus();
+      hiddenInputRef.current?.focus();
     }, 50);
   };
 
@@ -42,7 +56,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
 
       if (lowerKey === 'escape') {
         setIsRecording(false);
-        inputRef.current?.blur();
+        hiddenInputRef.current?.blur();
         return;
       }
 
@@ -61,7 +75,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
 
       onUpdateConfig({globalHotkey: newHotkey});
       setIsRecording(false);
-      inputRef.current?.blur();
+      hiddenInputRef.current?.blur();
     },
     [onUpdateConfig],
   );
@@ -79,14 +93,14 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
   };
 
   const title = 'Quick Web Floating Window';
-  const description = 'Configure the floating preview window, global OS shortcut, session isolation, and lifecycle';
+  const description = 'Instant floating browser window accessible from anywhere via global shortcut';
 
   return (
     <SettingsFilterItem searchTexts={[title, description, 'hotkey', 'shortcut', 'float', 'session', 'unload', 'blur']}>
       <div className="flex flex-col gap-y-4">
         {/* Main Activation & Hotkey Card */}
         <Card>
-          <Card.Header className="flex flex-row items-center justify-between">
+          <Card.Header className="flex flex-row items-center justify-between gap-4">
             <div className="flex flex-col gap-y-0.5">
               <Card.Title>
                 <SettingsSearchHighlight text={title} />
@@ -96,169 +110,226 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
               </Card.Description>
             </div>
 
-            <div className="flex items-center gap-x-2">
-              <Button size="sm" variant="secondary" onPress={() => quickWebIpc.send.toggleWindow()}>
-                <PlayIcon className="size-4" />
-                Toggle Floating Window
-              </Button>
-            </div>
+            <Button size="sm" variant="secondary" onPress={() => quickWebIpc.send.toggleWindow()}>
+              <PlayIcon className="size-3.5 text-accent-foreground" />
+              Toggle Window
+            </Button>
           </Card.Header>
 
-          <Card.Content className="flex flex-col gap-y-4">
-            {/* Global Hotkey Configuration */}
-            <div
+          <Card.Content className="flex flex-col gap-y-3">
+            {/* Global Hotkey Configuration Surface */}
+            <Surface
               className={
-                'flex flex-col sm:flex-row items-start sm:items-center justify-between ' +
-                'p-3 rounded-2xl border border-border bg-surface-secondary/30 gap-3'
-              }>
+                'p-3.5 rounded-2xl border border-border/70 flex flex-col ' +
+                'sm:flex-row sm:items-center justify-between gap-3'
+              }
+              variant="secondary">
               <div className="flex items-center gap-x-3">
-                <KeyboardIcon className="size-6 text-accent-foreground shrink-0" />
+                <div
+                  className={
+                    'size-9 rounded-xl bg-accent/10 border border-accent/20 ' +
+                    'flex items-center justify-center shrink-0'
+                  }>
+                  <KeyboardIcon className="size-5 text-accent-foreground" />
+                </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-semibold">Global OS Shortcut</span>
                   <span className="text-xs text-muted">
-                    Open or toggle the floating window from anywhere, even when LynxHub is in the background.
+                    Open or toggle the floating window from anywhere across your desktop.
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-x-2 shrink-0">
-                <div className="relative">
-                  <Input
-                    ref={inputRef}
-                    variant="secondary"
-                    onKeyDown={handleKeyDown}
-                    onClick={handleStartRecord}
-                    onBlur={() => setIsRecording(false)}
-                    className="w-48 text-center cursor-pointer font-JetBrainsMono text-xs"
-                    value={isRecording ? 'Press key combination...' : hotkeyString || 'Not Set'}
-                    readOnly
-                  />
-                </div>
+              <div className="flex items-center gap-x-2 shrink-0 self-end sm:self-auto">
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  className="sr-only"
+                  ref={hiddenInputRef}
+                  onKeyDown={handleKeyDown}
+                  onBlur={() => setIsRecording(false)}
+                />
 
-                <Button size="sm" variant="ghost" onPress={handleResetHotkey}>
-                  <RefreshIcon className="size-3.5" />
-                  Reset
-                </Button>
+                <Tooltip delay={300}>
+                  <button
+                    className={[
+                      'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs transition-all cursor-pointer',
+                      isRecording
+                        ? 'border-accent bg-accent/15 text-accent ring-2 ring-accent/30 animate-pulse'
+                        : 'border-border bg-surface hover:border-accent/40 hover:bg-surface-secondary/60',
+                    ].join(' ')}
+                    type="button"
+                    onClick={handleStartRecord}>
+                    {isRecording ? (
+                      <span className="font-medium">Press key combination... (Esc to cancel)</span>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-1">
+                          {hotkeyLabels.map(key => (
+                            <Kbd
+                              key={key}
+                              className="text-[11px] font-JetBrainsMono font-semibold px-1.5 py-0.5 shrink-0">
+                              {key}
+                            </Kbd>
+                          ))}
+                        </div>
+                        <span className="text-[10px] text-muted ml-1">(Click to change)</span>
+                      </>
+                    )}
+                  </button>
+                  <Tooltip.Content>Click to record a new keyboard shortcut</Tooltip.Content>
+                </Tooltip>
 
-                <Switch
-                  aria-label="Toggle Global Hotkey"
-                  isSelected={config.globalHotkeyEnabled}
-                  onChange={val => onUpdateConfig({globalHotkeyEnabled: val})}>
-                  <Switch.Content>
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                  </Switch.Content>
-                </Switch>
+                {!isDefaultHotkey && (
+                  <Tooltip delay={300}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onPress={handleResetHotkey}
+                      aria-label="Reset to Alt+W"
+                      isIconOnly>
+                      <RefreshIcon className="size-4" />
+                    </Button>
+                    <Tooltip.Content>Reset shortcut to Alt + W</Tooltip.Content>
+                  </Tooltip>
+                )}
+
+                <Tooltip delay={300}>
+                  <Switch
+                    size="sm"
+                    aria-label="Toggle Global Hotkey"
+                    isSelected={config.globalHotkeyEnabled}
+                    onChange={val => onUpdateConfig({globalHotkeyEnabled: val})}>
+                    <Switch.Content>
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch.Content>
+                  </Switch>
+                  <Tooltip.Content>
+                    {config.globalHotkeyEnabled ? 'Global shortcut is active' : 'Global shortcut is disabled'}
+                  </Tooltip.Content>
+                </Tooltip>
               </div>
+            </Surface>
+          </Card.Content>
+        </Card>
+
+        {/* Window Behavior & Session Settings */}
+        <Card>
+          <Card.Header>
+            <div className="flex flex-col gap-y-0.5">
+              <Card.Title>
+                <SettingsSearchHighlight text="Window Behavior & Session Isolation" />
+              </Card.Title>
+              <Card.Description>
+                <SettingsSearchHighlight
+                  text={'Configure browser profile sharing, background persistence, ' + 'and window focus rules'}
+                />
+              </Card.Description>
             </div>
+          </Card.Header>
 
+          <Card.Content className="flex flex-col gap-y-4">
             {/* Session Type Selector */}
-            <div className={'p-3 rounded-2xl border border-border bg-surface-secondary/30 flex flex-col gap-y-2'}>
-              <div className="flex items-center gap-x-2">
-                <ShieldCheckIcon className="size-5 text-accent-foreground" />
-                <span className="text-sm font-semibold">Browser Session & Cookie Sharing</span>
+            <div className="flex flex-col gap-y-2">
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-foreground">Browser Session & Storage Profile</span>
+                <span className="text-xs text-muted">
+                  Choose whether Quick Web shares logins, cookies, and cache with LynxHub's browser or runs isolated.
+                </span>
               </div>
-              <span className="text-xs text-muted">
-                Choose whether the floating window shares login sessions and cookies with LynxHub's main browser or runs
-                in an isolated profile.
-              </span>
 
               <RadioGroup
                 variant="secondary"
                 value={config.sessionType || 'default'}
                 onChange={val => onUpdateConfig({sessionType: val as 'default' | 'isolated'})}>
-                <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                  <Radio value="default">
-                    <Radio.Content>
-                      <Radio.Control>
-                        <Radio.Indicator />
-                      </Radio.Control>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-medium">Shared Session (Recommended)</span>
-                        <span className="text-[11px] text-muted">Shares cookies & active logins with LynxHub</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                  {/* Shared Session Card */}
+                  <Surface
+                    className={`p-3 rounded-2xl border transition-colors cursor-pointer flex items-start gap-3 ${
+                      config.sessionType !== 'isolated'
+                        ? 'border-accent/50 bg-accent/5 shadow-xs'
+                        : 'border-border hover:border-border-secondary'
+                    }`}
+                    onClick={() => onUpdateConfig({sessionType: 'default'})}
+                    variant={config.sessionType === 'isolated' ? 'default' : 'secondary'}>
+                    <Radio value="default" className="mt-0.5 pointer-events-none">
+                      <Radio.Content>
+                        <Radio.Control>
+                          <Radio.Indicator />
+                        </Radio.Control>
+                      </Radio.Content>
+                    </Radio>
+                    <div className="flex flex-col gap-y-1">
+                      <div className="flex items-center gap-x-2">
+                        <EarthIcon className="size-4 text-accent-foreground" />
+                        <span className="text-xs font-semibold">Shared Session</span>
+                        <Chip size="sm" variant="soft" color="accent" className="text-[10px] h-4 px-1.5 font-medium">
+                          Recommended
+                        </Chip>
                       </div>
-                    </Radio.Content>
-                  </Radio>
+                      <span className="text-[11px] text-muted leading-tight">
+                        Shares cookies, logins, and storage with LynxHub's main browser.
+                      </span>
+                    </div>
+                  </Surface>
 
-                  <Radio value="isolated">
-                    <Radio.Content>
-                      <Radio.Control>
-                        <Radio.Indicator />
-                      </Radio.Control>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-medium">Dedicated Isolated Session</span>
-                        <span className="text-[11px] text-muted">Separate cookies & cache for Quick Web</span>
+                  {/* Isolated Session Card */}
+                  <Surface
+                    className={`p-3 rounded-2xl border transition-colors cursor-pointer flex items-start gap-3 ${
+                      config.sessionType === 'isolated'
+                        ? 'border-accent/50 bg-accent/5 shadow-xs'
+                        : 'border-border hover:border-border-secondary'
+                    }`}
+                    onClick={() => onUpdateConfig({sessionType: 'isolated'})}
+                    variant={config.sessionType === 'isolated' ? 'secondary' : 'default'}>
+                    <Radio value="isolated" className="mt-0.5 pointer-events-none">
+                      <Radio.Content>
+                        <Radio.Control>
+                          <Radio.Indicator />
+                        </Radio.Control>
+                      </Radio.Content>
+                    </Radio>
+                    <div className="flex flex-col gap-y-1">
+                      <div className="flex items-center gap-x-2">
+                        <ShieldCheckIcon className="size-4 text-accent-foreground" />
+                        <span className="text-xs font-semibold">Isolated Session</span>
                       </div>
-                    </Radio.Content>
-                  </Radio>
+                      <span className="text-[11px] text-muted leading-tight">
+                        Runs in a dedicated sandbox with separate cookies, cache, and logins.
+                      </span>
+                    </div>
+                  </Surface>
                 </div>
               </RadioGroup>
             </div>
 
-            {/* Lifecycle & Window Behavior Toggles */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div
-                className={
-                  'p-3 rounded-2xl border border-border bg-surface-secondary/20 flex items-center justify-between'
-                }>
-                <div className="flex flex-col gap-y-0.5 pr-2">
-                  <span className="text-xs font-semibold">Keep in Background</span>
-                  <span className="text-[11px] text-muted">
-                    Keep webviews in memory when closed for zero-latency reopen.
-                  </span>
-                </div>
-                <Switch
-                  aria-label="Keep in Background"
-                  isSelected={config.keepAliveOnClose}
-                  onChange={val => onUpdateConfig({keepAliveOnClose: val})}>
-                  <Switch.Content>
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                  </Switch.Content>
-                </Switch>
-              </div>
+            {/* Window Behavior Toggles */}
+            <div className="flex flex-col gap-y-2.5 pt-1">
+              <LynxSwitch
+                variant="secondary"
+                enabled={config.keepAliveOnClose}
+                title="Keep in Background (Zero-Latency Reopen)"
+                onEnabledChange={val => onUpdateConfig({keepAliveOnClose: val})}
+                description="Keep webviews loaded in memory when closed so the floating window opens instantaneously."
+              />
 
-              <div
-                className={
-                  'p-3 rounded-2xl border border-border bg-surface-secondary/20 flex items-center justify-between'
-                }>
-                <div className="flex flex-col gap-y-0.5 pr-2">
-                  <span className="text-xs font-semibold">Hide on Focus Lost</span>
-                  <span className="text-[11px] text-muted">Automatically dismiss window when clicking outside.</span>
-                </div>
-                <Switch
-                  isSelected={config.hideOnBlur}
-                  aria-label="Hide on Focus Lost"
-                  onChange={val => onUpdateConfig({hideOnBlur: val})}>
-                  <Switch.Content>
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                  </Switch.Content>
-                </Switch>
-              </div>
+              <LynxSwitch
+                variant="secondary"
+                enabled={config.hideOnBlur}
+                title="Hide on Focus Lost (Auto-Dismiss)"
+                onEnabledChange={val => onUpdateConfig({hideOnBlur: val})}
+                description="Automatically dismiss the floating window when clicking anywhere outside of it."
+              />
 
-              <div
-                className={
-                  'p-3 rounded-2xl border border-border bg-surface-secondary/30 flex items-center justify-between'
-                }>
-                <div className="flex flex-col gap-y-0.5 pr-2">
-                  <span className="text-xs font-semibold">Always on Top</span>
-                  <span className="text-[11px] text-muted">Keep floating window pinned above other desktop apps.</span>
-                </div>
-                <Switch
-                  aria-label="Always on Top"
-                  isSelected={config.alwaysOnTop}
-                  onChange={val => onUpdateConfig({alwaysOnTop: val})}>
-                  <Switch.Content>
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                  </Switch.Content>
-                </Switch>
-              </div>
+              <LynxSwitch
+                variant="secondary"
+                enabled={config.alwaysOnTop}
+                title="Always on Top (Pin Window)"
+                onEnabledChange={val => onUpdateConfig({alwaysOnTop: val})}
+                description="Keep the floating preview window pinned above all other desktop applications."
+              />
             </div>
           </Card.Content>
         </Card>

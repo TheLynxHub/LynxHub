@@ -1,4 +1,4 @@
-import {Button, Checkbox, Input, Modal, ScrollShadow, Spinner} from '@heroui/react';
+import {Button, Checkbox, Chip, Modal, ScrollShadow, SearchField, Spinner} from '@heroui/react';
 import type {FavIcons} from '@lynx_common/types/ipc';
 import {EarthIcon, History2Icon, ImportIcon} from '@solar-icons/react/bold-duotone';
 import {useEffect, useMemo, useState} from 'react';
@@ -120,16 +120,30 @@ export default function ImportHistoryModal({isOpen, onClose, onImport}: Props) {
             </Modal.Header>
 
             <Modal.Body className="flex flex-col gap-y-3 py-2">
-              <Input
+              <SearchField
                 value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search history and favorites..."
-              />
+                variant="secondary"
+                onChange={setSearch}
+                aria-label="Search history and favorites"
+                fullWidth>
+                <SearchField.Group>
+                  <SearchField.SearchIcon />
+                  <SearchField.Input placeholder="Search history and favorites by URL..." />
+                  <SearchField.ClearButton />
+                </SearchField.Group>
+              </SearchField>
 
               <div className="flex items-center justify-between px-1">
-                <span className="text-xs text-muted">
-                  {selectedUrls.size} of {filteredEntries.length} selected
-                </span>
+                <div className="flex items-center gap-x-2">
+                  <span className="text-xs text-muted">
+                    {selectedUrls.size} of {filteredEntries.length} selected
+                  </span>
+                  {selectedUrls.size > 0 && (
+                    <Chip size="sm" variant="soft" color="accent" className="h-4.5 text-[10px] px-1.5 font-medium">
+                      {selectedUrls.size} ready to import
+                    </Chip>
+                  )}
+                </div>
                 {filteredEntries.length > 0 && (
                   <Button size="sm" variant="ghost" onPress={selectAll} className="h-6 text-xs px-2">
                     {selectedUrls.size === filteredEntries.length ? 'Deselect All' : 'Select All'}
@@ -138,40 +152,55 @@ export default function ImportHistoryModal({isOpen, onClose, onImport}: Props) {
               </div>
 
               {isLoading ? (
-                <div className="flex items-center justify-center p-8">
+                <div className="flex items-center justify-center p-12">
                   <Spinner size="md" />
                 </div>
               ) : (
                 <ScrollShadow
                   className={
-                    'max-h-80 min-h-48 border border-surface-tertiary rounded-lg ' + 'p-1 flex flex-col gap-y-1'
+                    'max-h-80 min-h-48 border border-border/70 rounded-xl p-1.5 ' +
+                    'flex flex-col gap-y-1 bg-surface-secondary/20'
                   }>
                   {filteredEntries.length === 0 ? (
-                    <div className="p-8 text-center text-xs text-muted">No browser history or favorites found.</div>
+                    <div className="p-8 text-center text-xs text-muted flex flex-col items-center gap-y-2">
+                      <History2Icon className="size-8 text-muted/50" />
+                      <span>No browser history or favorites found.</span>
+                    </div>
                   ) : (
                     filteredEntries.map(entry => {
                       const isChecked = selectedUrls.has(entry.url);
                       return (
                         <div
-                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition ${
-                            isChecked ? 'bg-surface-secondary' : 'hover:bg-surface-secondary/50'
-                          }`}
+                          className={[
+                            'flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-colors',
+                            isChecked
+                              ? 'bg-accent/10 border border-accent/30'
+                              : 'hover:bg-surface-secondary/60 border border-transparent',
+                          ].join(' ')}
                           key={entry.url}
                           onClick={() => toggleSelect(entry.url)}>
-                          <div className="flex items-center gap-x-2.5 min-w-0 flex-1">
+                          <div className="flex items-center gap-x-3 min-w-0 flex-1">
                             <Checkbox isSelected={isChecked} onChange={() => toggleSelect(entry.url)}>
                               <Checkbox.Control>
                                 <Checkbox.Indicator />
                               </Checkbox.Control>
                             </Checkbox>
 
-                            {entry.favIcon ? (
-                              <img alt="" src={entry.favIcon} className="size-4 rounded-xs shrink-0 object-contain" />
-                            ) : (
-                              <EarthIcon className="size-4 shrink-0 text-muted" />
-                            )}
+                            <div
+                              className={
+                                'size-6 rounded-md bg-surface-secondary flex items-center ' +
+                                'justify-center shrink-0 border border-border/40'
+                              }>
+                              {entry.favIcon ? (
+                                <img alt="" src={entry.favIcon} className="size-3.5 rounded-xs object-contain" />
+                              ) : (
+                                <EarthIcon className="size-3.5 text-muted" />
+                              )}
+                            </div>
 
-                            <span className="text-xs font-mono truncate flex-1">{entry.url}</span>
+                            <span className="text-xs font-JetBrainsMono text-foreground truncate flex-1">
+                              {entry.url}
+                            </span>
                           </div>
                         </div>
                       );
@@ -185,7 +214,7 @@ export default function ImportHistoryModal({isOpen, onClose, onImport}: Props) {
               <Button size="sm" variant="ghost" onPress={onClose}>
                 Cancel
               </Button>
-              <Button size="sm" onPress={handleImport} isDisabled={selectedUrls.size === 0}>
+              <Button size="sm" variant="primary" onPress={handleImport} isDisabled={selectedUrls.size === 0}>
                 <ImportIcon className="size-4" />
                 Import Selected ({selectedUrls.size})
               </Button>
