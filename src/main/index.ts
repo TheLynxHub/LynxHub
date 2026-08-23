@@ -1,3 +1,22 @@
+// Sanitize process.env to remove any null bytes (\0) injected by third-party Windows apps
+// (e.g. Steam overlay injecting 'steam_master_ipc_name_override=Console\0') which causes
+// Node's validateArgumentNullCheck to throw ERR_INVALID_ARG_VALUE when spawning child processes.
+for (const key of Object.keys(process.env)) {
+  if (key.includes('\0')) {
+    const val = process.env[key];
+    delete process.env[key];
+    const cleanedKey = key.replace(/\0/g, '');
+    if (val !== undefined) {
+      process.env[cleanedKey] = val.replace(/\0/g, '');
+    }
+  } else {
+    const val = process.env[key];
+    if (typeof val === 'string' && val.includes('\0')) {
+      process.env[key] = val.replace(/\0/g, '');
+    }
+  }
+}
+
 import path from 'node:path';
 
 import {electronApp, optimizer} from '@electron-toolkit/utils';
