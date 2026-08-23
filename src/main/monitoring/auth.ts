@@ -205,7 +205,9 @@ function checkForAppUpdate(stage: SubscribeStages, updateToken?: string | null, 
   const now = Date.now();
   if (force || now - lastUpdateCheckTime >= UPDATE_CHECK_COOLDOWN) {
     lastUpdateCheckTime = now;
-    autoUpdater.checkForUpdates();
+    autoUpdater.checkForUpdates().catch(e => {
+      console.warn('autoUpdater.checkForUpdates failed:', e?.message || e);
+    });
   }
 }
 

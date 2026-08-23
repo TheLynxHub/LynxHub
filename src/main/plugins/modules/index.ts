@@ -77,6 +77,7 @@ export default class ModuleManager {
           return ipcMain.on(channel, listener);
         },
         handle(channel: string, listener: (event: any, ...args: any[]) => any) {
+          ipcMain.removeHandler(channel);
           return ipcMain.handle(channel, listener);
         },
         send(channel: string, ...args: any[]) {

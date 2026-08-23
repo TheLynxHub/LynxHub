@@ -152,6 +152,7 @@ const once = (channel: string, callback: (...args: any[]) => void) => {
  * @returns A function to remove the handler.
  */
 const handle = <T>(channel: string, callback: (...args: any[]) => Promise<T> | T) => {
+  ipcMain.removeHandler(channel);
   ipcMain.handle(channel, async (_, ...args: any[]) => {
     const eventStart = Date.now();
     const beforeEvent = {
