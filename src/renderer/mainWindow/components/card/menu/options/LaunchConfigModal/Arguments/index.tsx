@@ -8,6 +8,7 @@ import {Dispatch, SetStateAction, useEffect, useMemo, useState} from 'react';
 import {getCardMethod, useAllCardMethods} from '../../../../../../plugins/modules';
 import {tabContentVariants} from '../../ExtensionsModal/Constants';
 import AddArgumentModal from './Add';
+import ImportArgumentModal from './Import';
 import ArgumentsList from './Manage';
 import PresetSelector from './ManagePresets';
 import ArgumentsPreview from './Preview';
@@ -26,6 +27,7 @@ export default function ArgumentsManager({chosenArguments, setChosenArguments, i
   const [previewData, setPreviewData] = useState<ParsedPreview>('');
 
   const addArgumentsModal = useOverlayState();
+  const importArgumentsModal = useOverlayState();
   const allMethods = useAllCardMethods();
 
   // Load initial arguments
@@ -69,6 +71,7 @@ export default function ArgumentsManager({chosenArguments, setChosenArguments, i
         chosenArguments={activePreset}
         addArgumentsModal={addArgumentsModal}
         setChosenArguments={setChosenArguments}
+        importArgumentsModal={importArgumentsModal}
       />
       <ArgumentsPreview preview={previewData} />
       <AddArgumentModal
@@ -76,6 +79,13 @@ export default function ArgumentsManager({chosenArguments, setChosenArguments, i
         chosenArguments={chosenArguments}
         addArgumentsModal={addArgumentsModal}
         setChosenArguments={setChosenArguments}
+        importArgumentsModal={importArgumentsModal}
+      />
+      <ImportArgumentModal
+        id={id}
+        chosenArguments={chosenArguments}
+        setChosenArguments={setChosenArguments}
+        importArgumentsModal={importArgumentsModal}
       />
     </motion.div>
   );

@@ -1,7 +1,8 @@
 import {Button, Chip, Dropdown, Label, Modal, ScrollShadow, SearchField, Tabs, useOverlayState} from '@heroui/react';
 import {ChosenArgumentsData, CustomArg} from '@lynx_common/types';
 import {ChosenArgument} from '@lynx_common/types/plugins/modules';
-import {FilterIcon, MonitorIcon, WindowFrameIcon} from '@solar-icons/react/bold-duotone';
+import {BroomIcon, FilterIcon, MonitorIcon, WindowFrameIcon} from '@solar-icons/react/bold-duotone';
+import {ImportIcon} from '@solar-icons/react/line-duotone';
 import {isEmpty, some} from 'lodash-es';
 import {Plus} from 'lucide-react';
 import {Dispatch, Key, SetStateAction, useCallback, useEffect, useMemo, useState} from 'react';
@@ -15,6 +16,7 @@ import CustomArguments from './CustomArguments';
 
 type Props = {
   addArgumentsModal: ReturnType<typeof useOverlayState>;
+  importArgumentsModal?: ReturnType<typeof useOverlayState>;
   chosenArguments: ChosenArgumentsData;
   setChosenArguments: Dispatch<SetStateAction<ChosenArgumentsData>>;
   id: string;
@@ -33,7 +35,13 @@ const isEmptyData = (data: any): boolean => {
 /**
  * Modal to select and add new arguments to the configuration.
  */
-export default function AddArgumentModal({addArgumentsModal, chosenArguments, setChosenArguments, id}: Props) {
+export default function AddArgumentModal({
+  addArgumentsModal,
+  importArgumentsModal,
+  chosenArguments,
+  setChosenArguments,
+  id,
+}: Props) {
   const [filterArguments, setFilterArguments] = useState<Set<string>>(new Set(['all']));
   const [selectedArguments, setSelectedArguments] = useState<Set<string>>(new Set([]));
   const [searchValue, setSearchValue] = useState<string>('');
@@ -82,6 +90,11 @@ export default function AddArgumentModal({addArgumentsModal, chosenArguments, se
     clearSelected();
     addArgumentsModal.close();
   }, [clearSelected, addArgumentsModal]);
+
+  const openImport = useCallback(() => {
+    onClose();
+    importArgumentsModal?.open();
+  }, [onClose, importArgumentsModal]);
 
   const onAdd = useCallback(() => {
     if (selectedArguments.size === 0) return;
@@ -168,10 +181,19 @@ export default function AddArgumentModal({addArgumentsModal, chosenArguments, se
       <Modal.CloseTrigger />
       <Modal.Header className="flex flex-col gap-y-2">
         <div className="flex w-full flex-row space-x-2 items-center">
-          <span className="font-bold">Add Argument</span>
-          {!isEmpty(selectedArguments) && (
-            <Button size="sm" variant="danger-soft" onPress={clearSelected}>
-              Clear All
+          <div className="flex flex-row items-center space-x-2">
+            <span className="font-bold">Add Argument</span>
+            {!isEmpty(selectedArguments) && (
+              <Button size="sm" className="text-xs" variant="danger-soft" onPress={clearSelected}>
+                <BroomIcon />
+                Clear All
+              </Button>
+            )}
+          </div>
+          {importArgumentsModal && (
+            <Button size="sm" variant="tertiary" className="text-xs" onPress={openImport}>
+              <ImportIcon />
+              Import Text
             </Button>
           )}
         </div>

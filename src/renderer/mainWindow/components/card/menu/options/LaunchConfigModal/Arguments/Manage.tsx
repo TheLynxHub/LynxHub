@@ -2,6 +2,7 @@ import {Button, Chip, useOverlayState} from '@heroui/react';
 import {ArgumentsPresets, ChosenArgumentsData} from '@lynx_common/types';
 import {ChosenArgument} from '@lynx_common/types/plugins/modules';
 import {InboxIcon} from '@solar-icons/react/bold-duotone';
+import {ImportIcon} from '@solar-icons/react/line-duotone';
 import {AnimatePresence, Reorder} from 'framer-motion';
 import {isEmpty} from 'lodash-es';
 import {Plus} from 'lucide-react';
@@ -14,6 +15,7 @@ import ManageArgumentsItem from './ManageItem';
 
 type Props = {
   addArgumentsModal: ReturnType<typeof useOverlayState>;
+  importArgumentsModal: ReturnType<typeof useOverlayState>;
   chosenArguments: ArgumentsPresets;
   setChosenArguments: Dispatch<SetStateAction<ChosenArgumentsData>>;
   id: string;
@@ -22,8 +24,15 @@ type Props = {
 /**
  * Show selected arguments and allow reordering.
  */
-export default function ManageArguments({addArgumentsModal, chosenArguments, setChosenArguments, id}: Props) {
+export default function ManageArguments({
+  addArgumentsModal,
+  importArgumentsModal,
+  chosenArguments,
+  setChosenArguments,
+  id,
+}: Props) {
   const openAddArguments = useCallback(() => addArgumentsModal.open(), [addArgumentsModal]);
+  const openImportArguments = useCallback(() => importArgumentsModal.open(), [importArgumentsModal]);
 
   const onReorder = useCallback(
     (items: string[]) => {
@@ -55,18 +64,39 @@ export default function ManageArguments({addArgumentsModal, chosenArguments, set
         </div>
       }
       customButton={
-        <LynxTooltip delay={500} content={'Add New Arguments'}>
-          <Button size="sm" variant="ghost" onPress={openAddArguments} isIconOnly>
-            <Plus className="size-4" />
-          </Button>
-        </LynxTooltip>
+        <div className="flex items-center gap-x-1">
+          <LynxTooltip delay={500} content={'Import Arguments from Text'}>
+            <Button size="sm" variant="ghost" onPress={openImportArguments} isIconOnly>
+              <ImportIcon className="size-4" />
+            </Button>
+          </LynxTooltip>
+          <LynxTooltip delay={500} content={'Add New Arguments'}>
+            <Button size="sm" variant="ghost" onPress={openAddArguments} isIconOnly>
+              <Plus className="size-4" />
+            </Button>
+          </LynxTooltip>
+        </div>
       }
       description="Configurate environments and command lines">
       {isEmpty(chosenArguments.arguments) ? (
         <EmptyStateCard
+          description={
+            <div className="flex flex-col items-center gap-2">
+              <span>No argument selected to display!</span>
+              <div className="flex items-center gap-2 mt-1">
+                <Button size="sm" variant="ghost" onPress={openImportArguments}>
+                  <ImportIcon className="size-4" />
+                  Import from Text
+                </Button>
+                <Button size="sm" onPress={openAddArguments}>
+                  <Plus className="size-4" />
+                  Add Arguments
+                </Button>
+              </div>
+            </div>
+          }
           bodyClassName="py-8"
           icon={<InboxIcon size={40} />}
-          description="No argument selected to display!"
         />
       ) : (
         <AnimatePresence>
