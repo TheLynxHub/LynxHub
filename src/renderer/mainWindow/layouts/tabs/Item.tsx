@@ -166,46 +166,48 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
     (showDivider ? 'opacity-100' : 'opacity-0');
 
   return (
-    <Tooltip delay={350} closeDelay={0} isDisabled={isTooltipDisabled}>
+    <Tooltip delay={350} isDisabled={isTooltipDisabled}>
+      <Tooltip.Trigger className="w-full h-full flex items-center outline-none">
+        <Button
+          variant="ghost"
+          onPress={onPress}
+          ref={btnRef as any}
+          className={buttonClasses}
+          aria-selected={isActiveTab}
+          onHoverChange={setIsHovered}
+          aria-label={`Tab: ${tab.title}`}
+          onContextMenu={handleContextMenu}
+          render={({ref: buttonRef, ...props}) => <div ref={buttonRef as any} {...(props as any)} />}>
+          <div className="flex gap-x-1.5 flex-row items-center min-w-0 flex-1 overflow-hidden">
+            <TabIcon tab={tab} currentView={runningCard?.currentView} />
+
+            {runningCard && <AudioIndicator tabId={tab.id} id={runningCard.id} />}
+
+            {!isCompact && <TabTitle title={tab.title} setIsTruncated={setIsTruncated} />}
+          </div>
+
+          {!tab.isPinned && (
+            <div className={closeWrapperClasses}>
+              <CloseButton
+                ref={closeBtnRef}
+                aria-label="Close tab"
+                onPress={() => handleRemove(false)}
+                className="scale-85 bg-transparent hover:bg-surface-tertiary"
+              />
+            </div>
+          )}
+
+          <ProgressBar progress={tab.progress} />
+
+          {/* Seamless Inactive Tab Divider */}
+          <div className={dividerClasses} />
+        </Button>
+      </Tooltip.Trigger>
+
       <Tooltip.Content placement="bottom" className="max-w-xs text-xs font-normal" showArrow>
         <Tooltip.Arrow />
         <p className="truncate font-medium">{tab.title}</p>
       </Tooltip.Content>
-
-      <Button
-        variant="ghost"
-        onPress={onPress}
-        ref={btnRef as any}
-        className={buttonClasses}
-        aria-selected={isActiveTab}
-        onHoverChange={setIsHovered}
-        aria-label={`Tab: ${tab.title}`}
-        onContextMenu={handleContextMenu}
-        render={({ref: buttonRef, ...props}) => <div ref={buttonRef as any} {...(props as any)} />}>
-        <div className="flex gap-x-1.5 flex-row items-center min-w-0 flex-1 overflow-hidden">
-          <TabIcon tab={tab} currentView={runningCard?.currentView} />
-
-          {runningCard && <AudioIndicator tabId={tab.id} id={runningCard.id} />}
-
-          {!isCompact && <TabTitle title={tab.title} setIsTruncated={setIsTruncated} />}
-        </div>
-
-        {!tab.isPinned && (
-          <div className={closeWrapperClasses}>
-            <CloseButton
-              ref={closeBtnRef}
-              aria-label="Close tab"
-              onPress={() => handleRemove(false)}
-              className="scale-85 bg-transparent hover:bg-surface-tertiary"
-            />
-          </div>
-        )}
-
-        <ProgressBar progress={tab.progress} />
-
-        {/* Seamless Inactive Tab Divider */}
-        <div className={dividerClasses} />
-      </Button>
     </Tooltip>
   );
 });
