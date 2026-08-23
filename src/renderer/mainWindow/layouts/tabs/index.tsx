@@ -5,7 +5,7 @@ import {AppDispatch} from '@lynx/redux/store';
 import {TabInfo} from '@lynx_common/types';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {AnimatePresence, Reorder} from 'framer-motion';
+import {AnimatePresence, Reorder, useDragControls} from 'framer-motion';
 import {isEqual} from 'lodash-es';
 import {memo, useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -13,6 +13,49 @@ import {useDispatch} from 'react-redux';
 import TabItem from './Item';
 import NewTab from './New';
 import {useRemoveTab} from './utils';
+
+type ReorderableTabItemProps = {
+  tab: TabInfo;
+  isOrdering: boolean;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  handleReorderEnd: () => void;
+};
+
+const ReorderableTabItem = memo(({tab, isOrdering, containerRef, handleReorderEnd}: ReorderableTabItemProps) => {
+  const dragControls = useDragControls();
+
+  return (
+    <Reorder.Item
+      transition={{
+        layout: {duration: 0.2, type: 'spring', bounce: 0, visualDuration: 0.2},
+      }}
+      animate={{
+        scale: 1,
+        translateY: 0,
+        opacity: 1,
+        transition: {duration: 0.2, ease: 'backOut'},
+      }}
+      className={
+        'h-full flex items-center notDraggable ' +
+        (tab.isPinned || tab.showIconOnly ? 'shrink-0 min-w-fit w-9' : 'w-60 basis-60 min-w-9 max-w-60 shrink flex-1')
+      }
+      as="div"
+      key={tab.id}
+      value={tab.id}
+      dragElastic={0}
+      layout="position"
+      dragMomentum={false}
+      data-tab-id={tab.id}
+      dragListener={false}
+      dragControls={dragControls}
+      onDragEnd={handleReorderEnd}
+      dragConstraints={containerRef}
+      initial={{scale: 0.95, translateY: 5, opacity: 0.5}}
+      exit={{scale: 0.95, translateY: 5, transition: {duration: 0.1, ease: 'backIn'}}}>
+      <TabItem tab={tab} isOrdering={isOrdering} dragControls={dragControls} />
+    </Reorder.Item>
+  );
+});
 
 /**
  * Container component for the tabs list.
@@ -217,35 +260,13 @@ const TabsList = memo(() => {
         values={localTabs.map(tab => tab.id)}>
         <AnimatePresence mode="popLayout">
           {localTabs.map(tab => (
-            <Reorder.Item
-              transition={{
-                layout: {duration: 0.2, type: 'spring', bounce: 0, visualDuration: 0.2},
-              }}
-              animate={{
-                scale: 1,
-                translateY: 0,
-                opacity: 1,
-                transition: {duration: 0.2, ease: 'backOut'},
-              }}
-              className={
-                'h-full flex items-center notDraggable ' +
-                (tab.isPinned || tab.showIconOnly
-                  ? 'shrink-0 min-w-fit w-9'
-                  : 'w-60 basis-60 min-w-9 max-w-60 shrink flex-1')
-              }
-              as="div"
+            <ReorderableTabItem
+              tab={tab}
               key={tab.id}
-              value={tab.id}
-              dragElastic={0}
-              layout="position"
-              dragMomentum={false}
-              data-tab-id={tab.id}
-              onDragEnd={handleReorderEnd}
-              dragConstraints={containerRef}
-              initial={{scale: 0.95, translateY: 5, opacity: 0.5}}
-              exit={{scale: 0.95, translateY: 5, transition: {duration: 0.1, ease: 'backIn'}}}>
-              <TabItem tab={tab} isOrdering={isOrdering} />
-            </Reorder.Item>
+              isOrdering={isOrdering}
+              containerRef={containerRef}
+              handleReorderEnd={handleReorderEnd}
+            />
           ))}
         </AnimatePresence>
       </Reorder.Group>

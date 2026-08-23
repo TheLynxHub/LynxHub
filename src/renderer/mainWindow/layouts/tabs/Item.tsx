@@ -1,4 +1,4 @@
-import {Button, CloseButton, Tooltip} from '@heroui/react';
+import {CloseButton, Tooltip} from '@heroui/react';
 import useHotkeyPress from '@lynx/hooks/hotkeys';
 import {useCardsState} from '@lynx/redux/reducers/cards';
 import {useHotkeysState} from '@lynx/redux/reducers/hotkeys';
@@ -8,6 +8,7 @@ import {AppDispatch} from '@lynx/redux/store';
 import {Hotkey_Names} from '@lynx_common/consts/hotkeys';
 import {TabInfo} from '@lynx_common/types';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
+import {DragControls} from 'framer-motion';
 import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -20,13 +21,14 @@ import {useIsActiveTab, useRemoveTab} from './utils';
 type Props = {
   tab: TabInfo;
   isOrdering: boolean;
+  dragControls?: DragControls;
 };
 
 /**
  * Component representing a single tab in the tab bar.
  * Handles selection, closing, and drag interactions.
  */
-const TabItem = memo(({tab, isOrdering}: Props) => {
+const TabItem = memo(({tab, isOrdering, dragControls}: Props) => {
   const isCtrlPressed = useHotkeysState('isCtrlPressed');
   const isActiveTab = useIsActiveTab(tab.id);
   const runningCards = useCardsState('runningCard');
@@ -134,13 +136,36 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
     };
   }, [handleAuxClick]);
 
-  const onPress = useCallback(() => {
-    if (!isOrdering) {
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.button !== 0) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('[data-tab-close]') || target?.closest('[data-tab-audio]') || target?.closest('button')) {
+        return;
+      }
+      dragControls?.start(e);
+    },
+    [dragControls],
+  );
+
+  const handleTabClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (isOrdering) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('[data-tab-close]') || target?.closest('[data-tab-audio]') || target?.closest('button')) {
+        return;
+      }
       dispatch(tabsActions.setActiveTab(tab.id));
-    }
-  }, [dispatch, tab.id, isOrdering]);
+    },
+    [dispatch, tab.id, isOrdering],
+  );
+
+  const stopPropagation = useCallback((e: React.SyntheticEvent | Event) => {
+    e.stopPropagation();
+  }, []);
 
   const isTooltipDisabled = isOrdering || (!isTruncated && !isCompact);
+  const isCloseVisible = isActiveTab || isHovered;
 
   const buttonClasses =
     'text-sm flex flex-row relative w-full h-9 overflow-hidden rounded-none rounded-t-xl! ' +
@@ -151,14 +176,14 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
       : 'text-foreground/80 hover:text-foreground hover:bg-surface-secondary/70');
 
   const closeWrapperClasses =
-    'absolute right-0 top-0 bottom-0 z-10 flex items-center pr-1 pl-4 transition-opacity duration-150 ' +
+    'absolute right-0 top-0 bottom-0 z-10 flex items-center pr-1 pl-4 pointer-events-none ' +
+    'transition-opacity duration-150 ' +
     (isActiveTab
-      ? 'opacity-100 pointer-events-auto bg-gradient-to-l from-white dark:from-[#303033] ' +
+      ? 'opacity-100 bg-gradient-to-l from-white dark:from-[#303033] ' +
         'via-white/90 dark:via-[#303033]/90 to-transparent'
       : isHovered
-        ? 'opacity-100 pointer-events-auto bg-gradient-to-l from-surface-secondary ' +
-          'via-surface-secondary/90 to-transparent'
-        : 'opacity-0 pointer-events-none');
+        ? 'opacity-100 bg-gradient-to-l from-surface-secondary via-surface-secondary/90 to-transparent'
+        : 'opacity-0');
 
   const dividerClasses =
     'absolute right-0 top-2.5 bottom-2.5 w-px bg-border-secondary transition-opacity ' +
@@ -168,16 +193,26 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
   return (
     <Tooltip delay={350} isDisabled={isTooltipDisabled}>
       <Tooltip.Trigger className="w-full h-full flex items-center outline-none">
-        <Button
-          variant="ghost"
-          onPress={onPress}
-          ref={btnRef as any}
+        <div
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              const target = e.target as HTMLElement | null;
+              if (!target?.closest('[data-tab-close]') && !target?.closest('[data-tab-audio]')) {
+                dispatch(tabsActions.setActiveTab(tab.id));
+              }
+            }
+          }}
+          role="tab"
+          ref={btnRef}
+          tabIndex={0}
+          onClick={handleTabClick}
           className={buttonClasses}
           aria-selected={isActiveTab}
-          onHoverChange={setIsHovered}
           aria-label={`Tab: ${tab.title}`}
+          onPointerDown={handlePointerDown}
           onContextMenu={handleContextMenu}
-          render={({ref: buttonRef, ...props}) => <div ref={buttonRef as any} {...(props as any)} />}>
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}>
           <div className="flex gap-x-1.5 flex-row items-center min-w-0 flex-1 overflow-hidden">
             <TabIcon tab={tab} currentView={runningCard?.currentView} />
 
@@ -187,12 +222,31 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
           </div>
 
           {!tab.isPinned && (
-            <div className={closeWrapperClasses}>
+            <div
+              onClick={stopPropagation}
+              onKeyUp={stopPropagation}
+              onMouseUp={stopPropagation}
+              onKeyDown={stopPropagation}
+              onMouseDown={stopPropagation}
+              onPointerUp={stopPropagation}
+              className={closeWrapperClasses}
+              onPointerDown={stopPropagation}
+              data-tab-close>
               <CloseButton
+                className={
+                  'scale-85 bg-transparent hover:bg-surface-tertiary ' +
+                  (isCloseVisible ? 'pointer-events-auto' : 'pointer-events-none')
+                }
                 ref={closeBtnRef}
                 aria-label="Close tab"
+                onClick={stopPropagation}
+                onKeyUp={stopPropagation}
+                onMouseUp={stopPropagation}
+                onKeyDown={stopPropagation}
+                onMouseDown={stopPropagation}
+                onPointerUp={stopPropagation}
+                onPointerDown={stopPropagation}
                 onPress={() => handleRemove(false)}
-                className="scale-85 bg-transparent hover:bg-surface-tertiary"
               />
             </div>
           )}
@@ -201,7 +255,7 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
 
           {/* Seamless Inactive Tab Divider */}
           <div className={dividerClasses} />
-        </Button>
+        </div>
       </Tooltip.Trigger>
 
       <Tooltip.Content placement="bottom" className="max-w-xs text-xs font-normal" showArrow>

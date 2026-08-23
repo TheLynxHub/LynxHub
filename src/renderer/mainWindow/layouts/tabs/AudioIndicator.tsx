@@ -46,6 +46,10 @@ const AudioIndicator = memo(({tabId, id}: Props) => {
     [isMuted],
   );
 
+  const stopPropagation = useCallback((e: React.SyntheticEvent | Event) => {
+    e.stopPropagation();
+  }, []);
+
   const ariaLabel = isMuted ? 'Unmute tab audio' : 'Mute tab audio';
   const ariaDescription = isPlaying ? 'Audio is currently playing' : 'Audio indicator';
 
@@ -60,10 +64,18 @@ const AudioIndicator = memo(({tabId, id}: Props) => {
       variant="ghost"
       aria-label={ariaLabel}
       aria-pressed={isMuted}
+      onClick={stopPropagation}
+      onKeyUp={stopPropagation}
       onPress={handleMuteToggle}
+      onMouseUp={stopPropagation}
+      onKeyDown={stopPropagation}
+      onMouseDown={stopPropagation}
+      onPointerUp={stopPropagation}
       className="scale-85 shrink-0"
+      onPointerDown={stopPropagation}
       aria-description={ariaDescription}
-      isIconOnly>
+      isIconOnly
+      data-tab-audio>
       {icon}
     </Button>
   );
