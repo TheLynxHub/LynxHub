@@ -35,7 +35,7 @@ const TabTitle = memo(({title, setIsTruncated}: Props) => {
   }, [title, setIsTruncated]);
 
   return (
-    <span ref={spanRef} className="overflow-hidden whitespace-nowrap text-xs font-normal select-none text-clip">
+    <span ref={spanRef} className="overflow-hidden whitespace-nowrap text-sm font-normal select-none text-clip">
       {title}
     </span>
   );
