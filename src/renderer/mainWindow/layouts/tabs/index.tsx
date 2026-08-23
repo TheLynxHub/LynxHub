@@ -225,7 +225,7 @@ const TabsList = memo(() => {
                 scale: 1,
                 translateY: 0,
                 opacity: 1,
-                transition: {duration: 0.25, ease: 'backOut'},
+                transition: {duration: 0.2, ease: 'backOut'},
               }}
               className={
                 'h-full flex items-center notDraggable ' +
@@ -238,8 +238,8 @@ const TabsList = memo(() => {
               value={tab.id}
               layout="position"
               data-tab-id={tab.id}
-              initial={{scale: 0.9, translateY: 10, opacity: 0}}
-              exit={{scale: 0.9, translateY: 10, transition: {duration: 0.07, ease: 'backIn'}}}>
+              initial={{scale: 0.95, translateY: 5, opacity: 0.5}}
+              exit={{scale: 0.95, translateY: 5, transition: {duration: 0.1, ease: 'backIn'}}}>
               <TabItem tab={tab} isOrdering={isOrdering} />
             </Reorder.Item>
           ))}
