@@ -37,15 +37,18 @@ export const useStorageData = () => {
   const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
     storageIpc.get('app').then(app => {
-      if (app.startupLastActivePage) {
+      const startupBehavior = app.sessionRestore?.startupBehavior || (app.startupLastActivePage ? 'last_page' : 'home');
+      if (startupBehavior === 'last_page') {
         const lastPage = app.lastPage;
-        dispatch(
-          tabsActions.setActivePage({
-            pageID: lastPage,
-            title: PageTitleByPageId[lastPage],
-            isTerminal: false,
-          }),
-        );
+        if (lastPage) {
+          dispatch(
+            tabsActions.setActivePage({
+              pageID: lastPage,
+              title: PageTitleByPageId[lastPage] || 'Page',
+              isTerminal: false,
+            }),
+          );
+        }
       }
     });
   }, [dispatch]);

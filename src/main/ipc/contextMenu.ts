@@ -95,6 +95,7 @@ export default async function listenContextMenu() {
   contextMenuIpc.on.tabActionForceClose(tabId => contextMenuIpc.send.onTabActionForceClose(tabId));
   contextMenuIpc.on.tabActionCloseOthers(tabId => contextMenuIpc.send.onTabActionCloseOthers(tabId));
   contextMenuIpc.on.tabActionCloseRight(tabId => contextMenuIpc.send.onTabActionCloseRight(tabId));
+  contextMenuIpc.on.tabActionReopenClosed(() => contextMenuIpc.send.onTabActionReopenClosed());
   contextMenuIpc.on.removeMultipleTabs(tabIds => contextMenuIpc.send.onRemoveMultipleTabs(tabIds));
 }
 
@@ -499,6 +500,12 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
           enabled: payload.canCloseRight,
           click: () => contextMenuIpc.send.onTabActionCloseRight(payload.tabId),
         },
+        {type: 'separator'},
+        {
+          label: 'Reopen Closed Tab',
+          enabled: Boolean(payload.canReopenClosedTab),
+          click: () => contextMenuIpc.send.onTabActionReopenClosed(),
+        },
       ];
 
       const menu = Menu.buildFromTemplate(template);
@@ -606,6 +613,8 @@ export const contextMenuIpc = {
     onTabActionCloseOthers: (tabId: string) => sendToMain(contextMenuChannels.onTabActionCloseOthers, tabId),
     /** Sends tab close right action to main window renderer */
     onTabActionCloseRight: (tabId: string) => sendToMain(contextMenuChannels.onTabActionCloseRight, tabId),
+    /** Sends tab reopen closed action to main window renderer */
+    onTabActionReopenClosed: () => sendToMain(contextMenuChannels.onTabActionReopenClosed),
     /** Sends terminate multiple tabs event to context menu */
     onTerminateMultipleTabs: (payload: TerminateMultipleTabsPayload) =>
       sendToContextMenu(contextMenuChannels.onTerminateMultipleTabs, payload),
@@ -676,6 +685,8 @@ export const contextMenuIpc = {
     /** Listens for tab close right action from context menu */
     tabActionCloseRight: (callback: (tabId: string) => void) =>
       lynxIpc.on(contextMenuChannels.tabActionCloseRight, callback),
+    /** Listens for tab reopen closed action from context menu */
+    tabActionReopenClosed: (callback: () => void) => lynxIpc.on(contextMenuChannels.tabActionReopenClosed, callback),
 
     /** Listens for open terminate AI request */
     openTerminateAI: (callback: (id: string) => void) => lynxIpc.on(contextMenuChannels.openTerminateAI, callback),

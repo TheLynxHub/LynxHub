@@ -1,5 +1,5 @@
 import {BookmarkBarVisibility, BookmarkNewTabBehavior} from './bookmarks';
-import {CustomArg, StorageChosenArgumentsData} from './index';
+import {CustomArg, SessionRestoreConfig, StorageChosenArgumentsData} from './index';
 import {
   AgentTypes,
   CustomRunBehaviorStore,
@@ -91,6 +91,7 @@ export type AppConfigStorage = {
   startMaximized: boolean;
   startupLastActivePage: boolean;
   lastPage: string;
+  sessionRestore: SessionRestoreConfig;
   hotkeys: LynxHotkey[];
   initialized: boolean;
   inited: boolean;

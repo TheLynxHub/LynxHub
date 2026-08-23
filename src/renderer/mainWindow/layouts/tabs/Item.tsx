@@ -2,6 +2,7 @@ import {CloseButton, Tooltip} from '@heroui/react';
 import useHotkeyPress from '@lynx/hooks/hotkeys';
 import {useCardsState} from '@lynx/redux/reducers/cards';
 import {useHotkeysState} from '@lynx/redux/reducers/hotkeys';
+import {useSessionState} from '@lynx/redux/reducers/session';
 import {useSettingsState} from '@lynx/redux/reducers/settings';
 import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
@@ -99,6 +100,9 @@ const TabItem = memo(({tab, isOrdering, dragControls}: Props) => {
     [handleRemove],
   );
 
+  const recentlyClosedTabs = useSessionState('recentlyClosedTabs');
+  const canReopenClosedTab = recentlyClosedTabs.length > 0;
+
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
@@ -114,11 +118,22 @@ const TabItem = memo(({tab, isOrdering, dragControls}: Props) => {
           canCloseRight,
           isOnlyTab: tabs.length <= 1,
           hasRunningCard: Boolean(runningCard),
+          canReopenClosedTab,
         },
         {x: e.clientX, y: e.clientY},
       );
     },
-    [tab.id, tab.title, tab.isPinned, tab.showIconOnly, canCloseOthers, canCloseRight, tabs.length, runningCard],
+    [
+      tab.id,
+      tab.title,
+      tab.isPinned,
+      tab.showIconOnly,
+      canCloseOthers,
+      canCloseRight,
+      tabs.length,
+      runningCard,
+      canReopenClosedTab,
+    ],
   );
 
   useHotkeyPress([{name: Hotkey_Names.closeTab, method: isActiveTab ? () => handleRemove(true) : null}]);

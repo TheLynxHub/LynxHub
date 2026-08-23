@@ -186,3 +186,12 @@ export const quickWebSettings = sqliteTable('quick_web_settings', {
   data: text('data', {mode: 'json'}).notNull(),
   updatedAt: text('updated_at').notNull(),
 });
+
+/**
+ * Session storage table for live snapshots, clean exit tracking, and crash recovery.
+ */
+export const sessionStorage = sqliteTable('session_storage', {
+  id: text('id').primaryKey(), // 'current' | 'last_closed' | 'crashed'
+  data: text('data', {mode: 'json'}).notNull(),
+  updatedAt: text('updated_at').notNull(),
+});

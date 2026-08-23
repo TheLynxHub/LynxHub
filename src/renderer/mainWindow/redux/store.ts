@@ -12,6 +12,7 @@ import cards from './reducers/cards';
 import hotkeys from './reducers/hotkeys';
 import modals from './reducers/modals';
 import plugins from './reducers/plugins';
+import session, {defaultSessionRestoreConfig} from './reducers/session';
 import settings from './reducers/settings';
 import tabs from './reducers/tabs';
 import terminal from './reducers/terminal';
@@ -33,6 +34,7 @@ const staticReducers = {
   volume,
   trigger,
   bookmarks,
+  session,
 };
 
 const emptyHotkeyInput = {
@@ -150,6 +152,17 @@ const buildPreloadedState = (): PreloadState | undefined => {
       all: [],
       visibility: storage.browser.bookmarksBarVisibility ?? 'browser_open',
       newTabBehavior: storage.browser.bookmarkNewTabBehavior ?? 'browser',
+    },
+    session: {
+      recentlyClosedTabs: [],
+      crashedSession: null,
+      showCrashBanner: false,
+      config: {
+        ...defaultSessionRestoreConfig,
+        ...(storage.app.sessionRestore || {}),
+        startupBehavior:
+          storage.app.sessionRestore?.startupBehavior || (storage.app.startupLastActivePage ? 'last_page' : 'home'),
+      },
     },
   };
 };

@@ -81,9 +81,19 @@ export class BaseSqliteStorage {
       startMinimized: false,
       startMaximized: false,
       startupLastActivePage: false,
+      lastPage: '/homePage',
+      sessionRestore: {
+        startupBehavior: 'home',
+        restoreOnCrash: 'ask',
+        restoreBrowserTabs: true,
+        restoreTerminalTabs: true,
+        restoreAiCardTabs: true,
+        restoreStaticPages: true,
+        restorePinnedTabsOnly: false,
+        maxClosedTabsHistory: 25,
+      },
       dynamicAppTitle: true,
       openLinkExternal: false,
-      lastPage: '/homePage',
       hotkeys: Get_Default_Hotkeys(),
       initialized: false,
       inited: false,
@@ -497,6 +507,12 @@ export class BaseSqliteStorage {
       );
 
       CREATE TABLE IF NOT EXISTS quick_web_settings (
+        id TEXT PRIMARY KEY,
+        data TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS session_storage (
         id TEXT PRIMARY KEY,
         data TEXT NOT NULL,
         updated_at TEXT NOT NULL

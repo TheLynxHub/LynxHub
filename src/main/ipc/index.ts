@@ -11,6 +11,7 @@ import listenModules, {listenModuleApi} from './plugins/modules';
 import listenPlugins from './plugins/plugins';
 import listenPty from './pty';
 import listenQuickWeb from './quickWeb';
+import listenSession from './session';
 import listenStatics from './statics';
 import listenStorage, {listenStorageUtils} from './storage';
 import listenUserImages from './userImages';
@@ -41,6 +42,7 @@ async function listenManagers() {
 export async function listenToIpcChannels() {
   listenStorage();
   listenStorageUtils();
+  listenSession();
   listenActions();
 
   await listenApplication();

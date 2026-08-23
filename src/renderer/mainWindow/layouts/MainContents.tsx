@@ -1,3 +1,4 @@
+import CrashRestoreBanner from '@lynx/components/session/CrashRestoreBanner';
 import {useAppState} from '@lynx/redux/reducers/app';
 import {useTabsState} from '@lynx/redux/reducers/tabs';
 import {PageID} from '@lynx_common/consts';
@@ -24,6 +25,7 @@ const MainContents = memo(() => {
 
   return (
     <div className="absolute inset-0 top-10! flex flex-col transition duration-300">
+      <CrashRestoreBanner />
       {tabs.map(tab => {
         const isActive = tab.id === activeTab;
 

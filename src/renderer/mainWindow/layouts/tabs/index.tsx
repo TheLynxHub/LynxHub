@@ -1,7 +1,9 @@
 import {useCardsState} from '@lynx/redux/reducers/cards';
+import {sessionActions} from '@lynx/redux/reducers/session';
 import {useSettingsState} from '@lynx/redux/reducers/settings';
 import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
-import {AppDispatch} from '@lynx/redux/store';
+import {AppDispatch, getStore} from '@lynx/redux/store';
+import {restoreSingleClosedTab} from '@lynx/utils/sessionRestoreHelper';
 import {TabInfo} from '@lynx_common/types';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
@@ -208,6 +210,16 @@ const TabsList = memo(() => {
       tabIds.forEach(id => removeTab({tabId: id}));
     });
 
+    const offReopenClosed = contextMenuIpc.on.tabActionReopenClosed(() => {
+      const store = getStore();
+      const recentlyClosed = store.getState().session.recentlyClosedTabs;
+      if (recentlyClosed && recentlyClosed.length > 0) {
+        const toRestore = recentlyClosed[0];
+        dispatch(sessionActions.popClosedTab());
+        restoreSingleClosedTab(toRestore, dispatch);
+      }
+    });
+
     return () => {
       offRemoveTab();
       offClose();
@@ -217,6 +229,7 @@ const TabsList = memo(() => {
       offCloseOthers();
       offCloseRight();
       offRemoveMultiple();
+      offReopenClosed();
     };
   }, [removeTab, tabsFromRedux, runningCards, closeTabConfirm, dispatch]);
 

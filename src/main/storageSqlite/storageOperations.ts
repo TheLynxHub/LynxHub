@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto';
 
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {storageUtilsChannels} from '@lynx_common/consts/ipcChannels/storage';
-import {ChosenArgumentsData, ConfirmMenuTypes} from '@lynx_common/types';
+import {ChosenArgumentsData, ConfirmMenuTypes, SessionCrashStatus, SessionSnapshot} from '@lynx_common/types';
 import {BookmarkFolder, BookmarkNode, CreateBookmarkInput, UpdateBookmarkInput} from '@lynx_common/types/bookmarks';
 import {
   BrowserHistoryData,
@@ -1750,6 +1750,72 @@ export class SqliteStorageManager {
         stmt.run(item.order, item.parentId, now, item.id);
       }
     })();
+  }
+
+  /**
+   * Saves a session snapshot by ID ('current', 'last_closed', 'crashed').
+   */
+  public saveSessionSnapshot(id: string, snapshot: SessionSnapshot): void {
+    const now = new Date().toISOString();
+    this.sqlite
+      .prepare(
+        `INSERT INTO session_storage (id, data, updated_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          data = excluded.data,
+          updated_at = excluded.updated_at`,
+      )
+      .run(id, JSON.stringify(snapshot), now);
+  }
+
+  /**
+   * Retrieves a saved session snapshot by ID.
+   */
+  public getSessionSnapshot(id: string): SessionSnapshot | null {
+    const row = this.sqlite.prepare('SELECT data FROM session_storage WHERE id = ?').get(id) as
+      {data: string} | undefined;
+    if (!row?.data) return null;
+    try {
+      return JSON.parse(row.data) as SessionSnapshot;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Checks if the previous app session was terminated unexpectedly (crashed).
+   */
+  public getCrashStatus(): SessionCrashStatus {
+    const crashedSnapshot = this.getSessionSnapshot('crashed');
+    const hasCrashedSession = Boolean(
+      crashedSnapshot && Array.isArray(crashedSnapshot.tabs) && crashedSnapshot.tabs.length > 0,
+    );
+    return {
+      hasCrashedSession,
+      snapshot: hasCrashedSession ? crashedSnapshot : null,
+    };
+  }
+
+  /**
+   * Clears the crashed session snapshot once dismissed or restored.
+   */
+  public clearCrashedSession(): void {
+    this.sqlite.prepare('DELETE FROM session_storage WHERE id = ?').run('crashed');
+  }
+
+  /**
+   * Marks whether the session is cleanly running or has exited cleanly.
+   */
+  public markCleanExit(clean: boolean): void {
+    this.setMetaStatement.run('session_clean_exit', clean ? 'true' : 'false');
+  }
+
+  /**
+   * Checks if the last session exited cleanly.
+   */
+  public isCleanExit(): boolean {
+    const res = this.getMetaStatement.get('session_clean_exit') as {value: string} | undefined;
+    return res ? res.value === 'true' : true;
   }
 
   public close(): void {

@@ -7,6 +7,7 @@ import {
 import {LynxHotkey, LynxInput, OnUpdatingExtensions, TooltipStatus} from '@lynx_common/types/ipc';
 import StorageTypes, {InstalledCards} from '@lynx_common/types/storage';
 
+import type {SessionState} from '../redux/reducers/session';
 import type {RunningCard, UpdatingCards} from './index';
 
 type DuplicatedCard = {ogID: string; id: string; title: string};
@@ -132,4 +133,5 @@ export type PreloadState = {
   terminal: TerminalState;
   volume: VolumeState;
   bookmarks: BookmarksState;
+  session: SessionState;
 };

@@ -167,6 +167,17 @@ async function initializeLynxHub(): Promise<void> {
   storageManager.decryptBrowserData();
   initSession();
 
+  // Check if previous session crashed (unclean exit)
+  if (!storageManager.isCleanExit()) {
+    const currentSnapshot = storageManager.getSessionSnapshot('current');
+    if (currentSnapshot && Array.isArray(currentSnapshot.tabs) && currentSnapshot.tabs.length > 0) {
+      storageManager.saveSessionSnapshot('crashed', currentSnapshot);
+      console.log('[Session] Detected unclean exit from previous run. Prepared crashed session snapshot.');
+    }
+  }
+  // Mark current session as running (unclean until proper quit)
+  storageManager.markCleanExit(false);
+
   // Fetch Sentry DSN in the background to cache it for the next run
   fetchAndCacheSentryDsn(storageManager).catch(err => {
     console.error('Failed to fetch and cache Sentry DSN:', err instanceof Error ? err.message : err);
@@ -211,6 +222,13 @@ let isAppQuitting = false;
 app.on('before-quit', e => {
   if (!isAppQuitting) {
     e.preventDefault();
+    const {storageManager} = classHolder;
+    const currentSnapshot = storageManager.getSessionSnapshot('current');
+    if (currentSnapshot && Array.isArray(currentSnapshot.tabs) && currentSnapshot.tabs.length > 0) {
+      storageManager.saveSessionSnapshot('last_closed', currentSnapshot);
+    }
+    storageManager.markCleanExit(true);
+
     // Stop image cache manager
     getImageCacheManager().stop();
     sendCollectedActions().finally(() => {

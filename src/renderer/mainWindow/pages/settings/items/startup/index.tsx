@@ -4,9 +4,9 @@ import {RocketIcon} from '@solar-icons/react/bold-duotone';
 
 import DisableLoadingAnim from './DisableLoadingAnim';
 import LastSize from './LastSize';
+import SessionRestore from './SessionRestore';
 import StartMaximized from './StartMaximized';
 import StartMinimized from './StartMinimized';
-import StartPage from './StartPage';
 import System from './System';
 
 export const SettingsStartupId = 'settings_startup_elem';
@@ -16,12 +16,12 @@ export const SettingsStartupId = 'settings_startup_elem';
  */
 export default function SettingsStartup() {
   return (
-    <SettingsSection title="Startup" id={SettingsStartupId} icon={<RocketIcon className="size-5" />}>
+    <SettingsSection id={SettingsStartupId} title="Startup & Session" icon={<RocketIcon className="size-5" />}>
       {isWin && <System />}
       <LastSize />
       <StartMaximized />
       <StartMinimized />
-      <StartPage />
+      <SessionRestore />
       <DisableLoadingAnim />
     </SettingsSection>
   );

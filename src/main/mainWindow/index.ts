@@ -151,6 +151,20 @@ export default class MainWindowManager {
       return {action: 'deny'};
     });
 
+    // Handle renderer crashes
+    webContents.on('render-process-gone', (_event, details) => {
+      const {reason, exitCode} = details;
+      console.warn(`[MainWindow] Render process gone: reason=${reason}, exitCode=${exitCode}`);
+      if (reason !== 'clean-exit' && reason !== 'killed') {
+        const {storageManager} = classHolder;
+        const currentSnapshot = storageManager.getSessionSnapshot('current');
+        if (currentSnapshot && currentSnapshot.tabs && currentSnapshot.tabs.length > 0) {
+          storageManager.saveSessionSnapshot('crashed', currentSnapshot);
+          storageManager.markCleanExit(false);
+        }
+      }
+    });
+
     mainWindow.on('close', () => {
       classHolder.quickWindowManager?.destroyAllWindows();
       this.mainWindow = undefined;

@@ -1,6 +1,6 @@
 import {Checkbox} from '@heroui/react';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {BroomIcon, PinIcon} from '@solar-icons/react/bold-duotone';
+import {BroomIcon, HistoryIcon, PinIcon} from '@solar-icons/react/bold-duotone';
 import {DoubleAltArrowRightIcon} from '@solar-icons/react/linear';
 import {X} from 'lucide-react';
 import {memo, useCallback} from 'react';
@@ -11,7 +11,7 @@ import {ActionButton, createActionHandler} from './right_click/Utils';
 
 /**
  * Layout for Tab Item Context Menu.
- * Supports context actions for tabs: Pin/Unpin, Show Icon Only, Close, Force Close, Close Others, and Close to Right.
+ * Supports context actions for tabs: Pin/Unpin, Show Icon Only, Close, Force Close, Close Others, Close to Right, and Reopen Closed Tab.
  */
 const TabContextMenu = memo(function TabContextMenu() {
   const payload = useContextState('tabContextMenu');
@@ -21,6 +21,7 @@ const TabContextMenu = memo(function TabContextMenu() {
   const isIconOnly = Boolean(payload?.showIconOnly);
   const canCloseOthers = Boolean(payload?.canCloseOthers);
   const canCloseRight = Boolean(payload?.canCloseRight);
+  const canReopenClosedTab = Boolean(payload?.canReopenClosedTab);
 
   const handleTogglePin = createActionHandler(() => {
     if (tabId) {
@@ -59,6 +60,10 @@ const TabContextMenu = memo(function TabContextMenu() {
     }
   });
 
+  const handleReopenClosed = createActionHandler(() => {
+    contextMenuIpc.send.tabActionReopenClosed();
+  });
+
   return (
     <div className="overflow-hidden px-1.5 flex flex-col gap-y-1 py-2 min-w-[220px]">
       <ActionButton
@@ -79,6 +84,15 @@ const TabContextMenu = memo(function TabContextMenu() {
           <span className="pointer-events-none text-nowrap">Show Icon Only</span>
         </Checkbox.Content>
       </Checkbox>
+
+      <Separator />
+
+      <ActionButton
+        title="Reopen Closed Tab"
+        onPress={handleReopenClosed}
+        isDisabled={!canReopenClosedTab}
+        icon={<HistoryIcon className="size-4 text-default-500" />}
+      />
 
       <Separator />
 

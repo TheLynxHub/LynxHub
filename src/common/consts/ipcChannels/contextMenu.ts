@@ -69,6 +69,8 @@ export const contextMenuChannels = {
   onTabActionCloseOthers: 'context:on-tab-action-close-others',
   tabActionCloseRight: 'context:tab-action-close-right',
   onTabActionCloseRight: 'context:on-tab-action-close-right',
+  tabActionReopenClosed: 'context:tab-action-reopen-closed',
+  onTabActionReopenClosed: 'context:on-tab-action-reopen-closed',
   openTerminateMultipleTabs: 'context:open-terminate-multiple-tabs',
   onTerminateMultipleTabs: 'context:on-terminate-multiple-tabs',
   removeMultipleTabs: 'context:remove-multiple-tabs',

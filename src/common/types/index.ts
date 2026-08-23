@@ -189,6 +189,7 @@ export type TabContextMenuPayload = {
   canCloseRight: boolean;
   isOnlyTab: boolean;
   hasRunningCard?: boolean;
+  canReopenClosedTab?: boolean;
 };
 
 export type TerminateMultipleTabsPayload = {
@@ -317,3 +318,4 @@ export type ConfirmMenuTypes =
   'closeConfirm' | 'terminateAIConfirm' | 'closeTabConfirm' | 'exitSignalConfirm' | 'forceReloadConfirm';
 
 export * from './cli';
+export * from './session';

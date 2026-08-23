@@ -1,4 +1,5 @@
 import {cardsActions, useCardsState} from '@lynx/redux/reducers/cards';
+import {sessionActions} from '@lynx/redux/reducers/session';
 import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
 import {volumeActions} from '@lynx/redux/reducers/volume';
 import {AppDispatch} from '@lynx/redux/store';
@@ -10,7 +11,7 @@ import {useDispatch} from 'react-redux';
 
 /**
  * Hook to handle tab removal logic.
- * Stops associated processes (pty), clears progress bars, and updates Redux state.
+ * Stops associated processes (pty), clears progress bars, records closed tabs history, and updates Redux state.
  * @returns A function to remove a tab by tabId or process id.
  */
 export function useRemoveTab() {
@@ -34,6 +35,28 @@ export function useRemoveTab() {
         const removedTab = tabs.find(tab => tab.id === tId);
         if (removedTab?.progress && tId === activeTab) {
           applicationIpc.send.setProgressBar(-1);
+        }
+
+        if (removedTab) {
+          dispatch(
+            sessionActions.pushClosedTab({
+              tab: removedTab,
+              runningCard: running
+                ? {
+                    tabId: running.tabId,
+                    id: running.id,
+                    type: running.type,
+                    isEmptyRunning: running.isEmptyRunning,
+                    currentView: running.currentView,
+                    customAddress: running.customAddress,
+                    webUIAddress: running.webUIAddress,
+                    currentAddress: running.currentAddress,
+                    browserTitle: running.browserTitle,
+                    startTime: running.startTime,
+                  }
+                : undefined,
+            }),
+          );
         }
 
         dispatch(tabsActions.removeTab(tId));

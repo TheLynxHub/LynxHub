@@ -83,6 +83,9 @@ const contextMenuIpc = {
     // Close tabs to right action
     tabActionCloseRight: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionCloseRight, tabId),
 
+    // Reopen closed tab action
+    tabActionReopenClosed: () => lynxIpc.send(contextMenuChannels.tabActionReopenClosed),
+
     // Opens quick web switcher dropdown menu
     openQuickWebSwitcher: (payload: QuickWebSwitcherPayload, customPosition?: ContextMenuPosition) =>
       lynxIpc.send(contextMenuChannels.openQuickWebSwitcher, payload, customPosition),
@@ -229,6 +232,10 @@ const contextMenuIpc = {
     // Listens for close tabs to right action
     tabActionCloseRight: (callback: (tabId: string) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onTabActionCloseRight, callback),
+
+    // Listens for reopen closed tab action
+    tabActionReopenClosed: (callback: () => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onTabActionReopenClosed, callback),
 
     // Listens for terminate multiple tabs events
     terminateMultipleTabs: (callback: (payload: TerminateMultipleTabsPayload) => void): (() => void) =>
