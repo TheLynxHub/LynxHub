@@ -1,19 +1,18 @@
-import {Button, ButtonGroup, Input, Spinner, Tooltip} from '@heroui/react';
+import {Button, ButtonGroup, Input, Spinner} from '@heroui/react';
 import type {QuickWebNavState} from '@lynx_common/types/ipc';
 import type {QuickWebStorage} from '@lynx_common/types/storage';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import quickWebIpc from '@lynx_shared/ipc/quickWeb';
 import {
   AltArrowDownIcon,
-  AltArrowLeftIcon,
-  AltArrowRightIcon,
   Code2Icon,
   EarthIcon,
   PinIcon,
   RefreshIcon,
-  SquareShareLineIcon,
+  SquareTopDownIcon,
 } from '@solar-icons/react/bold-duotone';
-import {CloseCircleIcon} from '@solar-icons/react/linear';
+import {ArrowLeftIcon, ArrowRightIcon} from '@solar-icons/react/line-duotone';
+import {X} from 'lucide-react';
 import {Minus} from 'lucide-react';
 import {KeyboardEvent, useEffect, useState} from 'react';
 
@@ -138,45 +137,34 @@ export default function QuickWebApp() {
         style={{WebkitAppRegion: 'drag'} as any}>
         {/* Left: Navigation Buttons */}
         <div style={{WebkitAppRegion: 'no-drag'} as any} className="flex items-center gap-x-1 shrink-0">
-          <ButtonGroup size="sm" variant="ghost">
-            <Tooltip delay={300}>
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-label="Back"
-                isDisabled={!navState.canGo.back}
-                onPress={() => quickWebIpc.send.goBack()}
-                isIconOnly>
-                <AltArrowLeftIcon className="size-4" />
-              </Button>
-              <Tooltip.Content>Go Back</Tooltip.Content>
-            </Tooltip>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Back"
+            isDisabled={!navState.canGo.back}
+            onPress={() => quickWebIpc.send.goBack()}
+            isIconOnly>
+            <ArrowLeftIcon className="size-4" />
+          </Button>
 
-            <Tooltip delay={300}>
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-label="Forward"
-                isDisabled={!navState.canGo.forward}
-                onPress={() => quickWebIpc.send.goForward()}
-                isIconOnly>
-                <AltArrowRightIcon className="size-4" />
-              </Button>
-              <Tooltip.Content>Go Forward</Tooltip.Content>
-            </Tooltip>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Forward"
+            isDisabled={!navState.canGo.forward}
+            onPress={() => quickWebIpc.send.goForward()}
+            isIconOnly>
+            <ArrowRightIcon className="size-4" />
+          </Button>
 
-            <Tooltip delay={300}>
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-label={navState.isLoading ? 'Stop' : 'Reload'}
-                onPress={() => (navState.isLoading ? quickWebIpc.send.stop() : quickWebIpc.send.reload())}
-                isIconOnly>
-                {navState.isLoading ? <Spinner size="sm" color="current" /> : <RefreshIcon className="size-4" />}
-              </Button>
-              <Tooltip.Content>{navState.isLoading ? 'Stop Loading' : 'Reload Page'}</Tooltip.Content>
-            </Tooltip>
-          </ButtonGroup>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label={navState.isLoading ? 'Stop' : 'Reload'}
+            onPress={() => (navState.isLoading ? quickWebIpc.send.stop() : quickWebIpc.send.reload())}
+            isIconOnly>
+            {navState.isLoading ? <Spinner size="sm" color="current" /> : <RefreshIcon className="size-4" />}
+          </Button>
         </div>
 
         {/* Center: Quick Switcher & URL Bar */}
@@ -184,92 +172,78 @@ export default function QuickWebApp() {
           style={{WebkitAppRegion: 'no-drag'} as any}
           className="flex-1 max-w-xl flex items-center gap-x-1.5 min-w-0">
           {/* Quick Switcher Button (triggers always-on-top contextMenu overlay) */}
-          <Tooltip delay={300}>
-            <Button
-              size="sm"
-              variant="secondary"
-              onPress={handleOpenSwitcher}
-              aria-label="Quick Websites Switcher"
-              className="gap-x-1 max-w-36 sm:max-w-48 truncate shrink-0">
-              {activeItem?.favIcon || navState.favIcon ? (
-                <img
-                  onError={e => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                  alt=""
-                  src={activeItem?.favIcon || navState.favIcon}
-                  className="size-3.5 rounded-xs shrink-0 object-contain"
-                />
-              ) : (
-                <EarthIcon className="size-3.5 shrink-0 text-accent-foreground" />
-              )}
-              <span className="truncate text-xs font-medium">{activeItem?.title || navState.title || 'Sites'}</span>
-              <AltArrowDownIcon className="size-3 shrink-0 text-muted" />
-            </Button>
-            <Tooltip.Content>Switch Quick Website</Tooltip.Content>
-          </Tooltip>
+          <Button
+            size="sm"
+            variant="secondary"
+            onPress={handleOpenSwitcher}
+            aria-label="Quick Websites Switcher"
+            className="gap-x-1 max-w-36 sm:max-w-48 truncate shrink-0">
+            {activeItem?.favIcon || navState.favIcon ? (
+              <img
+                onError={e => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+                alt=""
+                src={activeItem?.favIcon || navState.favIcon}
+                className="size-3.5 rounded-xs shrink-0 object-contain"
+              />
+            ) : (
+              <EarthIcon className="size-3.5 shrink-0 text-accent-foreground" />
+            )}
+            <span className="truncate text-xs font-medium">{activeItem?.title || navState.title || 'Sites'}</span>
+            <AltArrowDownIcon className="size-3 shrink-0 text-muted" />
+          </Button>
 
           {/* URL Input Bar */}
           <div className="flex-1 min-w-0">
             <Input
               value={inputUrl}
+              className="w-full"
+              variant="secondary"
               onKeyDown={handleKeyDown}
               onChange={e => setInputUrl(e.target.value)}
               placeholder="Search or enter web address..."
-              className="w-full text-xs font-JetBrainsMono"
             />
           </div>
         </div>
 
         {/* Right: Window & Tool Actions */}
         <div style={{WebkitAppRegion: 'no-drag'} as any} className="flex items-center gap-x-1 shrink-0">
-          <Tooltip delay={300}>
-            <Button
-              size="sm"
-              variant="ghost"
-              aria-label="Open in LynxHub tab"
-              onPress={() => quickWebIpc.send.openInMainTab()}
-              isIconOnly>
-              <EarthIcon className="size-4 text-accent-foreground" />
-            </Button>
-            <Tooltip.Content>Open in LynxHub Tab</Tooltip.Content>
-          </Tooltip>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Open in LynxHub tab"
+            onPress={() => quickWebIpc.send.openInMainTab()}
+            isIconOnly>
+            <EarthIcon className="size-4 text-accent-foreground" />
+          </Button>
 
-          <Tooltip delay={300}>
-            <Button
-              size="sm"
-              variant="ghost"
-              aria-label="Open in external browser"
-              onPress={() => quickWebIpc.send.openExternal()}
-              isIconOnly>
-              <SquareShareLineIcon className="size-4" />
-            </Button>
-            <Tooltip.Content>Open in External Browser</Tooltip.Content>
-          </Tooltip>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Open in external browser"
+            onPress={() => quickWebIpc.send.openExternal()}
+            isIconOnly>
+            <SquareTopDownIcon className="size-4" />
+          </Button>
 
-          <Tooltip delay={300}>
-            <Button
-              size="sm"
-              variant="ghost"
-              aria-label="Toggle DevTools"
-              onPress={() => quickWebIpc.send.toggleDevTools()}
-              isIconOnly>
-              <Code2Icon className="size-4" />
-            </Button>
-            <Tooltip.Content>Toggle DevTools</Tooltip.Content>
-          </Tooltip>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Toggle DevTools"
+            onPress={() => quickWebIpc.send.toggleDevTools()}
+            isIconOnly>
+            <Code2Icon className="size-4" />
+          </Button>
 
-          <Tooltip delay={300}>
-            <Button
-              size="sm"
-              variant={navState.isPinned ? 'secondary' : 'ghost'}
-              aria-label={navState.isPinned ? 'Unpin window' : 'Always on top'}
-              onPress={() => quickWebIpc.send.setAlwaysOnTop(!navState.isPinned)}
-              isIconOnly>
-              <PinIcon className={`size-4 ${navState.isPinned ? 'text-warning' : ''}`} />
-            </Button>
-            <Tooltip.Content>{navState.isPinned ? 'Pinned (Always on top)' : 'Pin window on top'}</Tooltip.Content>
-          </Tooltip>
+          <Button
+            size="sm"
+            variant={navState.isPinned ? 'secondary' : 'ghost'}
+            aria-label={navState.isPinned ? 'Unpin window' : 'Always on top'}
+            onPress={() => quickWebIpc.send.setAlwaysOnTop(!navState.isPinned)}
+            isIconOnly>
+            <PinIcon className={`size-4 ${navState.isPinned ? 'text-warning' : ''}`} />
+          </Button>
 
           <div className="h-4 w-px bg-surface-tertiary mx-0.5" />
 
@@ -279,16 +253,17 @@ export default function QuickWebApp() {
             aria-label="Minimize"
             onPress={() => quickWebIpc.send.minimizeWindow()}
             isIconOnly>
-            <Minus className="size-3.5" />
+            <Minus className="size-4" />
           </Button>
 
           <Button
             size="sm"
+            variant="ghost"
             aria-label="Close"
-            variant="danger-soft"
+            className="hover:bg-danger-soft-hover"
             onPress={() => quickWebIpc.send.closeWindow()}
             isIconOnly>
-            <CloseCircleIcon className="size-4" />
+            <X className="size-4 text-danger" />
           </Button>
         </div>
       </header>
