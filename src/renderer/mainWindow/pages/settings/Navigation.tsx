@@ -4,6 +4,7 @@ import {settingsActions, useSettingsState} from '@lynx/redux/reducers/settings';
 import {Terminal_Icon} from '@lynx_assets/icons';
 import {SettingPage_Icon} from '@lynx_assets/icons/pages';
 import {
+  BoltIcon,
   CardIcon,
   DatabaseIcon,
   EarthIcon,
@@ -76,6 +77,11 @@ const groupSections: GroupProps[] = [
         title: 'Browser',
         icon: <EarthIcon className="size-4 shrink-0" />,
         elementId: settingsSectionId.SettingsBrowserId,
+      },
+      {
+        title: 'Quick Web',
+        icon: <BoltIcon className="size-4 shrink-0 text-accent-foreground" />,
+        elementId: settingsSectionId.SettingsQuickWebId,
       },
       {
         title: 'Hotkeys',

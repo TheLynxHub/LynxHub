@@ -91,8 +91,6 @@ export default class MainWindowManager {
 
   /** Creates and configures the main application window. */
   private createMainWindow(): void {
-    const {contextMenuManager, linkPreviewManager, bookmarkTooltipManager} = classHolder;
-
     this.mainWindow = new BrowserWindow(MainWindowManager.MAIN_WINDOW_CONFIG);
     this.mainWindow.setBackgroundColor(getWindowColor());
 
@@ -105,9 +103,11 @@ export default class MainWindowManager {
     this.onCreateWindowListeners.forEach(listener => listener());
 
     // Initialize child windows that depend on the main window
+    const {contextMenuManager, linkPreviewManager, bookmarkTooltipManager, quickWindowManager} = classHolder;
     contextMenuManager?.createWindow(this.mainWindow);
     linkPreviewManager?.createWindow(this.mainWindow);
     bookmarkTooltipManager?.createWindow(this.mainWindow);
+    quickWindowManager?.initOnStartup(this.mainWindow);
   }
 
   /** Sets up event listeners for the main window. */
@@ -152,11 +152,20 @@ export default class MainWindowManager {
     });
 
     mainWindow.on('close', () => {
+      classHolder.quickWindowManager?.destroyAllWindows();
       this.mainWindow = undefined;
     });
 
     mainWindow.on('minimize', this.handleMinimize);
     mainWindow.on('focus', this.handleFocus);
+
+    // Context menu parent synchronization
+    mainWindow.on('focus', () => {
+      const win = this.getMainWindow();
+      if (win) {
+        classHolder.contextMenuManager?.setCurrentParentWindow(win);
+      }
+    });
 
     // IPC state updates for UI synchronization
     mainWindow.on('focus', () => applicationIpc.send.changeWinState({name: 'focus', value: true}));

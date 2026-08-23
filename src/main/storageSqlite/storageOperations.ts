@@ -26,6 +26,7 @@ import AppStorageData, {
   NotificationStorage,
   PerformanceStorage,
   PluginStorage,
+  QuickWebStorage,
   TerminalStorage,
 } from '@lynx_common/types/storage';
 import {compareUrls, formatWebAddress, isValidURL, terminalLineEnding} from '@lynx_common/utils';
@@ -348,6 +349,10 @@ export class SqliteStorageManager {
           .get();
         return (res ? res.data : this.baseStorage.DEFAULT_DATA.performance) as AppStorageData[K];
       }
+      case 'quickWeb': {
+        const res = this.db.select().from(schema.quickWebSettings).where(eq(schema.quickWebSettings.id, 'main')).get();
+        return (res ? res.data : this.baseStorage.DEFAULT_DATA.quickWeb) as AppStorageData[K];
+      }
       case 'storage': {
         const res = this.getMetaStatement.get('version') as {value: string} | undefined;
         return {version: res ? Number(res.value) : this.baseStorage.DEFAULT_DATA.storage.version} as AppStorageData[K];
@@ -484,6 +489,16 @@ export class SqliteStorageManager {
           .onConflictDoUpdate({
             target: schema.performanceSettings.id,
             set: {data: data as PerformanceStorage, updatedAt: now},
+          })
+          .run();
+        break;
+      case 'quickWeb':
+        this.db
+          .insert(schema.quickWebSettings)
+          .values({id: 'main', data: data as QuickWebStorage, updatedAt: now})
+          .onConflictDoUpdate({
+            target: schema.quickWebSettings.id,
+            set: {data: data as QuickWebStorage, updatedAt: now},
           })
           .run();
         break;
@@ -652,6 +667,7 @@ export class SqliteStorageManager {
       notification: this.getData('notification'),
       plugin: this.getData('plugin'),
       performance: this.getData('performance'),
+      quickWeb: this.getData('quickWeb'),
     };
   }
 

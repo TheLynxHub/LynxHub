@@ -177,3 +177,12 @@ export const staticsStorage = sqliteTable('statics_storage', {
   lastCheckedAt: text('last_checked_at'),
   updatedAt: text('updated_at').notNull(),
 });
+
+/**
+ * Quick Web floating window configuration and items table.
+ */
+export const quickWebSettings = sqliteTable('quick_web_settings', {
+  id: text('id').primaryKey(),
+  data: text('data', {mode: 'json'}).notNull(),
+  updatedAt: text('updated_at').notNull(),
+});

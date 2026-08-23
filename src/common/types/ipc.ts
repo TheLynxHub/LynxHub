@@ -1,6 +1,7 @@
 import type {PullResult, SimpleGitProgressEvent} from 'simple-git';
 
 import type {OsPlatforms, UpdateDownloadProgress} from './index';
+import type {QuickWebItem} from './storage';
 
 /**
  * Payload for window state change events.
@@ -128,4 +129,19 @@ export type MainHT<T> = Promise<T> | T;
 export type NavHistory = {
   canGoBack: boolean;
   canGoForward: boolean;
+};
+
+export type QuickWebNavState = {
+  url: string;
+  title: string;
+  favIcon?: string;
+  isLoading: boolean;
+  canGo: CanGoType;
+  activeItemId?: string;
+  isPinned: boolean;
+};
+
+export type QuickWebSwitcherPayload = {
+  items: QuickWebItem[];
+  activeItemId?: string;
 };

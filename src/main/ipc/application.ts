@@ -96,7 +96,14 @@ export default async function listenApplication() {
  * @param isDark - Whether dark mode is enabled.
  */
 const notifyAllWindowsDarkMode = (isDark: boolean) => {
-  const {contextMenuManager, linkPreviewManager, bookmarkTooltipManager, shareScreenManager, toastWindow} = classHolder;
+  const {
+    contextMenuManager,
+    linkPreviewManager,
+    bookmarkTooltipManager,
+    shareScreenManager,
+    quickWindowManager,
+    toastWindow,
+  } = classHolder;
 
   sendToMain(appChannels.onDarkMode, isDark);
 
@@ -111,6 +118,9 @@ const notifyAllWindowsDarkMode = (isDark: boolean) => {
 
   const shareScreen = getWebContentsIfAvailable(shareScreenManager?.selectorWindow);
   if (shareScreen) shareScreen.send(appChannels.onDarkMode, isDark);
+
+  const quickWeb = getWebContentsIfAvailable(quickWindowManager?.getWindow());
+  if (quickWeb) quickWeb.send(appChannels.onDarkMode, isDark);
 
   const toast = getWebContentsIfAvailable(toastWindow);
   if (toast) toast.send(appChannels.onDarkMode, isDark);

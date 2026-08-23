@@ -166,6 +166,25 @@ export class BaseSqliteStorage {
       enableParallelDownloading: false,
       enableSkiaGraphite: false,
     },
+    quickWeb: {
+      enabled: true,
+      items: [],
+      activeItemId: undefined,
+      globalHotkey: {
+        name: 'quickWeb',
+        key: 'w',
+        alt: true,
+        control: false,
+        shift: false,
+        meta: false,
+      },
+      globalHotkeyEnabled: true,
+      keepAliveOnClose: true,
+      hideOnBlur: false,
+      alwaysOnTop: false,
+      sessionType: 'default',
+      windowBounds: undefined,
+    },
   };
 
   constructor() {
@@ -474,6 +493,12 @@ export class BaseSqliteStorage {
         active_version TEXT,
         broken_versions TEXT,
         last_checked_at TEXT,
+        updated_at TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS quick_web_settings (
+        id TEXT PRIMARY KEY,
+        data TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
     `);

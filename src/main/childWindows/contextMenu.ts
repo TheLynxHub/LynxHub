@@ -14,6 +14,7 @@ import {BrowserWindow, BrowserWindowConstructorOptions, clipboard, Menu, screen,
 export default class ContextMenuManager {
   private contextMenuWindow?: BrowserWindow;
   private mainWindow?: BrowserWindow;
+  private currentParentWindow?: BrowserWindow;
   private customContextPosition: {x: number; y: number} | undefined;
   private currentCursorPosition: {x: number; y: number} | undefined;
   private webContents: WebContents[] = [];
@@ -41,6 +42,11 @@ export default class ContextMenuManager {
 
     this.contextMenuWindow = new BrowserWindow({...ContextMenuManager.CONTEXT_WINDOW_CONFIG, parent: mainWindow});
     this.mainWindow = mainWindow;
+    this.currentParentWindow = mainWindow;
+
+    mainWindow.on('focus', () => {
+      this.setCurrentParentWindow(this.mainWindow);
+    });
 
     this.setupWindowListeners();
     this.loadWindowContent();
@@ -86,6 +92,18 @@ export default class ContextMenuManager {
       classHolder.waitForClass('browserDownloadManager').then(browserDownloadManager => {
         browserDownloadManager.onContextClose();
       });
+    }
+  }
+
+  public setCurrentParentWindow(parentWindow?: BrowserWindow): void {
+    const targetParent = parentWindow && !parentWindow.isDestroyed() ? parentWindow : this.mainWindow;
+    this.currentParentWindow = targetParent;
+    if (this.contextMenuWindow && !this.contextMenuWindow.isDestroyed()) {
+      try {
+        this.contextMenuWindow.setParentWindow(targetParent ?? null);
+      } catch (e) {
+        console.error('Failed to set parent window for context menu:', e);
+      }
     }
   }
 
@@ -267,13 +285,16 @@ export default class ContextMenuManager {
           },
         });
 
+        const targetWindow = BrowserWindow.fromWebContents(contents) || this.mainWindow;
         const menu = Menu.buildFromTemplate(template);
-        menu.popup({window: this.mainWindow});
+        menu.popup({window: targetWindow});
         return;
       }
 
       if (!this.contextMenuWindow || this.contextMenuWindow.isDestroyed()) return;
 
+      const targetWindow = BrowserWindow.fromWebContents(contents) || this.mainWindow;
+      this.setCurrentParentWindow(targetWindow);
       this.setCustomContextPosition(undefined);
       contextMenuIpc.send.rightClick(
         params,
@@ -281,7 +302,7 @@ export default class ContextMenuManager {
         contents.id,
       );
 
-      this.showContextMenu();
+      this.showContextMenu(targetWindow);
     });
   }
 
@@ -306,8 +327,14 @@ export default class ContextMenuManager {
     lynxIpc.send(webContents, channel, ...args);
   }
 
-  public showContextMenu() {
+  public showContextMenu(parentWindow?: BrowserWindow) {
     if (!this.contextMenuWindow || this.contextMenuWindow.isDestroyed()) return;
+
+    if (parentWindow !== undefined) {
+      this.setCurrentParentWindow(parentWindow);
+    } else if (!this.currentParentWindow || this.currentParentWindow.isDestroyed()) {
+      this.setCurrentParentWindow(this.mainWindow);
+    }
 
     // Capture the exact cursor position at the time of the click
     // so that if the user moves the mouse before the renderer replies,
@@ -340,7 +367,7 @@ export default class ContextMenuManager {
     this.contextMenuWindow.setOpacity(1);
   }
 
-  public hideContextMenu(focusMainWindow: boolean = true) {
+  public hideContextMenu(focusParent: boolean = true) {
     const window = this.contextMenuWindow;
     if (!window || window.isDestroyed() || !window.isVisible()) return;
 
@@ -349,8 +376,9 @@ export default class ContextMenuManager {
     window.hide();
     window.setOpacity(1);
 
-    if (focusMainWindow && this.mainWindow && !this.mainWindow.isDestroyed()) {
-      this.mainWindow.focus();
+    const targetToFocus = this.currentParentWindow || this.mainWindow;
+    if (focusParent && targetToFocus && !targetToFocus.isDestroyed()) {
+      targetToFocus.focus();
     }
   }
 
@@ -395,8 +423,9 @@ export default class ContextMenuManager {
     const {width: menuWidth, height: menuHeight} = window.getBounds();
     let clickPoint: {x: number; y: number};
 
-    if (this.customContextPosition && this.mainWindow && !this.mainWindow.isDestroyed()) {
-      const parentBounds = this.mainWindow.getBounds();
+    const targetParent = this.currentParentWindow || this.mainWindow;
+    if (this.customContextPosition && targetParent && !targetParent.isDestroyed()) {
+      const parentBounds = targetParent.getBounds();
       clickPoint = {
         x: Math.floor(this.customContextPosition.x) + parentBounds.x + 1,
         y: Math.floor(this.customContextPosition.y) + parentBounds.y + 1,

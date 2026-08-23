@@ -6,7 +6,7 @@ import {
   BookmarkFolder,
   BookmarkFolderMenuPayload,
 } from '@lynx_common/types/bookmarks';
-import {ContextMenuVolumeData, NavHistory} from '@lynx_common/types/ipc';
+import {ContextMenuVolumeData, NavHistory, QuickWebSwitcherPayload} from '@lynx_common/types/ipc';
 import {isLinux, terminalLineEnding} from '@lynx_common/utils';
 import {ptyWrite} from '@lynx_main/ipc/methods/pty';
 import {changeWindowState} from '@lynx_main/ipc/methods/windowUtils';
@@ -108,8 +108,13 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
     classHolder.waitForClass('appManager'),
   ]);
 
-  const setPosition = (customPosition?: {x: number; y: number}) =>
+  const setPosition = (customPosition?: {x: number; y: number}, parentWindow?: BrowserWindow) => {
+    const targetParent = parentWindow || appManager.getMainWindow();
+    if (targetParent) {
+      contextMenuManager.setCurrentParentWindow(targetParent);
+    }
     contextMenuManager.setCustomContextPosition(customPosition);
+  };
 
   // Force Reload page
   contextMenuIpc.on.forceReload(id => {
@@ -529,6 +534,14 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
     contextMenuIpc.send.onTerminateMultipleTabs(payload);
     contextMenuManager.showContextMenu();
   });
+
+  // Open Quick Web Switcher Menu
+  contextMenuIpc.on.openQuickWebSwitcher((payload, customPosition) => {
+    const quickWebWindow = classHolder.quickWindowManager?.getWindow();
+    setPosition(customPosition, quickWebWindow);
+    contextMenuIpc.send.onQuickWebSwitcher(payload);
+    contextMenuManager.showContextMenu(quickWebWindow);
+  });
 }
 
 /**
@@ -596,6 +609,9 @@ export const contextMenuIpc = {
     /** Sends terminate multiple tabs event to context menu */
     onTerminateMultipleTabs: (payload: TerminateMultipleTabsPayload) =>
       sendToContextMenu(contextMenuChannels.onTerminateMultipleTabs, payload),
+    /** Sends quick web switcher event to context menu */
+    onQuickWebSwitcher: (payload: QuickWebSwitcherPayload) =>
+      sendToContextMenu(contextMenuChannels.onQuickWebSwitcher, payload),
   },
   on: {
     /** Listens for force reload request */
@@ -693,6 +709,10 @@ export const contextMenuIpc = {
     /** Listens for remove multiple tabs request */
     removeMultipleTabs: (callback: (tabIds: string[]) => void) =>
       lynxIpc.on(contextMenuChannels.removeMultipleTabs, callback),
+    /** Listens for open quick web switcher request */
+    openQuickWebSwitcher: (
+      callback: (payload: QuickWebSwitcherPayload, customPosition?: {x: number; y: number}) => void,
+    ) => lynxIpc.on(contextMenuChannels.openQuickWebSwitcher, callback),
   },
   handle: {},
 };

@@ -5,7 +5,7 @@ import {
   BookmarkFolderMenuPayload,
 } from '@lynx_common/types/bookmarks';
 import {DownloadItemInfo} from '@lynx_common/types/downloadManager';
-import {ContextMenuVolumeData, NavHistory} from '@lynx_common/types/ipc';
+import {ContextMenuVolumeData, NavHistory, QuickWebSwitcherPayload} from '@lynx_common/types/ipc';
 import {ContextMenuParams} from 'electron';
 import {ReactNode} from 'react';
 
@@ -50,6 +50,7 @@ export type ContextState = {
   bookmarkEditMenu?: BookmarkEditMenuPayload;
   tabContextMenu?: TabContextMenuPayload;
   terminateMultipleTabs?: TerminateMultipleTabsPayload;
+  quickWebSwitcher?: QuickWebSwitcherPayload;
 };
 
 export type NavBtnProps = {icon?: ReactNode; onPress?: () => void; className?: string; isDisabled?: boolean};

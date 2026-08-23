@@ -75,5 +75,6 @@ const sendToMain = createSender('appManager');
 const sendToLinkPreview = createSender('linkPreviewManager');
 const sendToContextMenu = createSender('contextMenuManager');
 const sendToBookmarkTooltip = createSender('bookmarkTooltipManager');
+const sendToQuickWeb = createSender('quickWindowManager');
 
-export {sendToBookmarkTooltip, sendToContextMenu, sendToLinkPreview, sendToMain};
+export {sendToBookmarkTooltip, sendToContextMenu, sendToLinkPreview, sendToMain, sendToQuickWeb};

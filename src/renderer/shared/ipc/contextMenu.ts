@@ -5,7 +5,7 @@ import type {
   BookmarkEditMenuPayload,
   BookmarkFolderMenuPayload,
 } from '@lynx_common/types/bookmarks';
-import type {ContextMenuVolumeData, NavHistory} from '@lynx_common/types/ipc';
+import type {ContextMenuVolumeData, NavHistory, QuickWebSwitcherPayload} from '@lynx_common/types/ipc';
 import type {ContextMenuParams} from 'electron';
 
 import lynxIpc from './lynxIpc';
@@ -82,6 +82,10 @@ const contextMenuIpc = {
 
     // Close tabs to right action
     tabActionCloseRight: (tabId: string) => lynxIpc.send(contextMenuChannels.tabActionCloseRight, tabId),
+
+    // Opens quick web switcher dropdown menu
+    openQuickWebSwitcher: (payload: QuickWebSwitcherPayload, customPosition?: ContextMenuPosition) =>
+      lynxIpc.send(contextMenuChannels.openQuickWebSwitcher, payload, customPosition),
 
     // Opens terminate multiple tabs dialog
     openTerminateMultipleTabs: (payload: TerminateMultipleTabsPayload, customPosition?: ContextMenuPosition) =>
@@ -233,6 +237,10 @@ const contextMenuIpc = {
     // Listens for remove multiple tabs events
     removeMultipleTabs: (callback: (tabIds: string[]) => void): (() => void) =>
       lynxIpc.on(contextMenuChannels.onRemoveMultipleTabs, callback),
+
+    // Listens for quick web switcher dropdown events
+    quickWebSwitcher: (callback: (payload: QuickWebSwitcherPayload) => void): (() => void) =>
+      lynxIpc.on(contextMenuChannels.onQuickWebSwitcher, callback),
   },
 };
 

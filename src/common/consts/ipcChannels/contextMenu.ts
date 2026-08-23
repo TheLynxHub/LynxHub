@@ -73,4 +73,6 @@ export const contextMenuChannels = {
   onTerminateMultipleTabs: 'context:on-terminate-multiple-tabs',
   removeMultipleTabs: 'context:remove-multiple-tabs',
   onRemoveMultipleTabs: 'context:on-remove-multiple-tabs',
+  openQuickWebSwitcher: 'context:open-quick-web-switcher',
+  onQuickWebSwitcher: 'context:on-quick-web-switcher',
 } as const;

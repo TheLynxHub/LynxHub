@@ -15,6 +15,7 @@ import TerminateProcess from './layouts/confirm_warn/TerminateProcess';
 import TerminateTab from './layouts/confirm_warn/TerminateTab';
 import DownloadMenu from './layouts/downloads';
 import FindInPage from './layouts/FindInPage';
+import QuickWebSwitcher from './layouts/QuickWebSwitcher';
 import RightClick from './layouts/right_click';
 import TabContextMenu from './layouts/TabContextMenu';
 import VolumeMenu from './layouts/Volume';
@@ -74,6 +75,7 @@ export default function ContextMenu() {
       {activeLayout === MenuTypes.BookmarkFolderMenu && <BookmarkFolderMenu />}
       {activeLayout === MenuTypes.BookmarkEditMenu && <BookmarkEditMenu />}
       {activeLayout === MenuTypes.TabContextMenu && <TabContextMenu />}
+      {activeLayout === MenuTypes.QuickWebSwitcher && <QuickWebSwitcher />}
     </div>
   );
 }

@@ -199,6 +199,34 @@ export type PerformanceStorage = {
 };
 
 /**
+ * An item in the Quick Web quick access / preview list.
+ */
+export type QuickWebItem = {
+  id: string;
+  title: string;
+  url: string;
+  favIcon?: string;
+  preload: boolean;
+  order: number;
+};
+
+/**
+ * Storage section for Quick Web floating browser configuration.
+ */
+export type QuickWebStorage = {
+  enabled: boolean;
+  items: QuickWebItem[];
+  activeItemId?: string;
+  globalHotkey: LynxHotkey;
+  globalHotkeyEnabled: boolean;
+  keepAliveOnClose: boolean;
+  hideOnBlur: boolean;
+  alwaysOnTop: boolean;
+  sessionType: 'default' | 'isolated';
+  windowBounds?: Rectangle;
+};
+
+/**
  * Main storage data structure for the application.
  * Used by LowDB for persistence.
  */
@@ -214,6 +242,7 @@ type AppStorageData = {
   notification: NotificationStorage;
   plugin: PluginStorage;
   performance: PerformanceStorage;
+  quickWeb: QuickWebStorage;
 };
 
 export default AppStorageData;

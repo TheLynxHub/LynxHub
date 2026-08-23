@@ -17,6 +17,7 @@ import BookmarkTooltipManager from '../childWindows/bookmarkTooltip';
 import BrowserDownloadManager from '../childWindows/browserDownloadManager';
 import ContextMenuManager from '../childWindows/contextMenu';
 import LinkPreviewManager from '../childWindows/linkPreview';
+import QuickWindowManager from '../childWindows/quickWeb';
 import ShareScreenManager from '../childWindows/shareScreen';
 import BrowserManager from './browser';
 import StaticsManager from './statics';
@@ -47,6 +48,7 @@ class ClassHolder {
   private _bookmarkTooltipManager?: BookmarkTooltipManager;
   private _browserDownloadManager?: BrowserDownloadManager;
   private _shareScreenManager?: ShareScreenManager;
+  private _quickWindowManager?: QuickWindowManager;
   private _browserManager?: BrowserManager;
 
   private _toastWindow?: BrowserWindow;
@@ -135,6 +137,7 @@ class ClassHolder {
     this.contextMenuManager = new ContextMenuManager();
     this.linkPreviewManager = new LinkPreviewManager();
     this.bookmarkTooltipManager = new BookmarkTooltipManager();
+    this.quickWindowManager = new QuickWindowManager();
   }
 
   /**
@@ -200,6 +203,9 @@ class ClassHolder {
   }
   private set bookmarkTooltipManager(value: ClassHolder['_bookmarkTooltipManager']) {
     this._bookmarkTooltipManager = value;
+  }
+  private set quickWindowManager(value: ClassHolder['_quickWindowManager']) {
+    this._quickWindowManager = value;
   }
   private set moduleManager(value: ClassHolder['_moduleManager']) {
     this._moduleManager = value;
@@ -268,6 +274,9 @@ class ClassHolder {
   }
   get bookmarkTooltipManager() {
     return this._bookmarkTooltipManager;
+  }
+  get quickWindowManager() {
+    return this._quickWindowManager;
   }
   get isOnline(): boolean {
     return this._isOnline;

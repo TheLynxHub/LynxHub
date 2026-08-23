@@ -11,6 +11,7 @@ import SettingsData, {SettingsDataId} from './items/data';
 import SettingsGeneral, {SettingsGeneralId} from './items/general';
 import SettingsHotkeys, {SettingsHotkeysId} from './items/hotkeys';
 import SettingsPerformance, {SettingsPerformanceId} from './items/performance';
+import SettingsQuickWeb, {SettingsQuickWebId} from './items/quickWeb';
 import SettingsStartup, {SettingsStartupId} from './items/startup';
 import SettingsTerminal, {SettingsTerminalId} from './items/terminal';
 
@@ -20,6 +21,7 @@ export const settingsSectionId = {
   SettingsGeneralId,
   SettingsTerminalId,
   SettingsBrowserId,
+  SettingsQuickWebId,
   SettingsStartupId,
   SettingsClearId,
   SettingsDataId,
@@ -51,6 +53,7 @@ const builtInSections: SettingsSectionDefinition[] = [
   {title: 'Card', elementId: settingsSectionId.SettingsCardId, Component: SettingsCard},
   {title: 'Terminal', elementId: settingsSectionId.SettingsTerminalId, Component: SettingsTerminal},
   {title: 'Browser', elementId: settingsSectionId.SettingsBrowserId, Component: SettingsBrowser},
+  {title: 'Quick Web', elementId: settingsSectionId.SettingsQuickWebId, Component: SettingsQuickWeb},
   {title: 'Hotkeys', elementId: settingsSectionId.SettingsHotkeysId, Component: SettingsHotkeys},
   {title: 'Data', elementId: settingsSectionId.SettingsDataId, Component: SettingsData},
   {title: 'Clear', elementId: settingsSectionId.SettingsClearId, Component: SettingsClear},

@@ -53,6 +53,7 @@ const initialState: ContextState = {
     message: '',
   },
   downloads: [],
+  quickWebSwitcher: undefined,
 };
 
 const appSlice = createSlice({

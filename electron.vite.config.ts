@@ -103,6 +103,7 @@ export default defineConfig(({mode}) => {
             shareScreen: resolve(__dirname, 'src/renderer/shareScreen.html'),
             linkPreview: resolve(__dirname, 'src/renderer/linkPreview.html'),
             bookmarkTooltip: resolve(__dirname, 'src/renderer/bookmarkTooltip.html'),
+            quickWeb: resolve(__dirname, 'src/renderer/quickWeb.html'),
           },
         },
         target: 'esnext',

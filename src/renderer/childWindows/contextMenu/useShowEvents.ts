@@ -266,6 +266,17 @@ export default function useShowEvents() {
       );
     });
 
+    // Quick Web Switcher
+    const offQuickWebSwitcher = contextMenuIpc.on.quickWebSwitcher(payload => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'quickWebSwitcher',
+          value: payload,
+          layout: MenuTypes.QuickWebSwitcher,
+        }),
+      );
+    });
+
     return () => {
       offZoom();
       offFind();
@@ -288,6 +299,7 @@ export default function useShowEvents() {
       offBookmarkEdit();
       offTabContextMenu();
       offTerminateMultipleTabs();
+      offQuickWebSwitcher();
     };
   }, [dispatch]);
 }
