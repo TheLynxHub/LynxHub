@@ -1,4 +1,5 @@
 import {
+  cn,
   Toast,
   ToastContent,
   ToastContentValue,
@@ -19,7 +20,7 @@ const bottomToast: ToastFunction = createToastFunction(bottomQueue);
 const ToastProviders = memo(() => {
   return (
     <>
-      <Toast.Provider placement="top" queue={topQueue}>
+      <Toast.Provider width={480} placement="top" queue={topQueue}>
         {({toast: toastItem}) => {
           const content = toastItem.content as ToastContentValue;
           return (
@@ -27,19 +28,24 @@ const ToastProviders = memo(() => {
               placement="top"
               toast={toastItem}
               variant={content.variant}
-              className="border border-border notDraggable">
+              className="border border-border notDraggable py-3.5 px-4.5">
               <ToastIndicator variant={content.variant} />
-              <ToastContent className="min-w-0 pr-4">
+              <ToastContent className="min-w-0 flex-1 pr-2">
                 {content.title ? <ToastTitle>{content.title}</ToastTitle> : null}
                 {content.description ? <ToastDescription>{content.description}</ToastDescription> : null}
               </ToastContent>
-              {content.actionProps ? <Toast.ActionButton {...content.actionProps} /> : null}
+              {content.actionProps ? (
+                <Toast.ActionButton
+                  {...content.actionProps}
+                  className={cn('self-center shrink-0 ml-auto', content.actionProps.className)}
+                />
+              ) : null}
               <Toast.CloseButton className={'notDraggable'} />
             </Toast>
           );
         }}
       </Toast.Provider>
-      <Toast.Provider queue={bottomQueue} placement="bottom end">
+      <Toast.Provider width={480} queue={bottomQueue} placement="bottom end">
         {({toast: toastItem}) => {
           const content = toastItem.content as ToastContentValue;
           return (
@@ -47,13 +53,18 @@ const ToastProviders = memo(() => {
               toast={toastItem}
               placement="bottom end"
               variant={content.variant}
-              className="border border-border py-4 px-5">
+              className="border border-border py-3.5 px-4.5">
               <ToastIndicator variant={content.variant} />
-              <ToastContent className="min-w-0 pr-4">
+              <ToastContent className="min-w-0 flex-1 pr-2">
                 {content.title ? <ToastTitle>{content.title}</ToastTitle> : null}
                 {content.description ? <ToastDescription>{content.description}</ToastDescription> : null}
               </ToastContent>
-              {content.actionProps ? <Toast.ActionButton {...content.actionProps} /> : null}
+              {content.actionProps ? (
+                <Toast.ActionButton
+                  {...content.actionProps}
+                  className={cn('self-center shrink-0 ml-auto', content.actionProps.className)}
+                />
+              ) : null}
               <Toast.CloseButton />
             </Toast>
           );

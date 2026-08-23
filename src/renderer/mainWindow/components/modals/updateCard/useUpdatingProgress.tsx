@@ -44,34 +44,34 @@ export function useUpdatingProgress(
         } = progress as PullResult;
 
         const toastID = bottomToast.success(
-          <span className="whitespace-pre-line">{card.title} Updated Successfully.</span>,
+          <span className="whitespace-pre-line font-medium">{card.title} Updated Successfully.</span>,
           {
             timeout: 0,
             description: (
-              <div className="flex items-center gap-x-3 mt-1.5 text-xs text-muted">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1 text-xs text-muted">
                 <div className="flex items-center gap-x-1">
-                  <Plus className="size-3.5 text-success" />
-                  <span className="font-semibold text-success">{insertions}</span>
+                  <Plus className="size-3.5 text-success shrink-0" />
+                  <span className="font-semibold text-success">{insertions.toLocaleString()}</span>
                   <span className="text-muted-foreground/80">insertions</span>
                 </div>
-                <span className="text-muted-foreground/30 font-light">|</span>
+                <span className="text-muted-foreground/30 font-light select-none">|</span>
                 <div className="flex items-center gap-x-1">
-                  <Minus className="size-3.5 text-danger" />
-                  <span className="font-semibold text-danger">{deletions}</span>
+                  <Minus className="size-3.5 text-danger shrink-0" />
+                  <span className="font-semibold text-danger">{deletions.toLocaleString()}</span>
                   <span className="text-muted-foreground/80">deletions</span>
                 </div>
-                <span className="text-muted-foreground/30 font-light">|</span>
+                <span className="text-muted-foreground/30 font-light select-none">|</span>
                 <div className="flex items-center gap-x-1">
-                  <LucideReplace className="size-3.5 text-accent" />
-                  <span className="font-semibold text-accent">{changes}</span>
-                  <span className="text-muted-foreground/80">changes</span>
+                  <LucideReplace className="size-3.5 text-accent shrink-0" />
+                  <span className="font-semibold text-accent">{changes.toLocaleString()}</span>
+                  <span className="text-muted-foreground/80">{changes === 1 ? 'change' : 'changes'}</span>
                 </div>
               </div>
             ),
             actionProps: {
               variant: 'secondary',
               size: 'sm',
-              className: 'self-center',
+              className: 'self-center shrink-0',
               children: (
                 <div className="flex items-center gap-x-1">
                   <DocumentsIcon size={14} />
