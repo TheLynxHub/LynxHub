@@ -215,49 +215,69 @@ export default function useModeAnimation(props?: ReactThemeSwitchAnimationProps)
       document.head.appendChild(styleElement);
     }
 
-    await (document as any).startViewTransition(() => {
-      flushSync(() => {
-        setIsDarkMode(isDarkMode => !isDarkMode);
+    let stateUpdated = false;
+
+    try {
+      const transition = (document as any).startViewTransition(() => {
+        stateUpdated = true;
+        flushSync(() => {
+          setIsDarkMode(isDarkMode => !isDarkMode);
+        });
       });
-    }).ready;
 
-    if (animationType === ThemeAnimationType.CIRCLE) {
-      document.documentElement.animate(
-        {
-          clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${maxRadius}px at ${x}px ${y}px)`],
-        },
-        {
-          duration,
-          easing,
-          pseudoElement,
-        },
-      );
-    }
+      // Catch and suppress rejection on finished/update promises if aborted
+      transition?.finished?.catch(() => {});
+      transition?.updateCallbackDone?.catch(() => {});
 
-    if (animationType === ThemeAnimationType.QR_SCAN) {
-      const scanLineWidth = isHighResolution ? 8 : 4;
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `polygon(0% 0%, ${scanLineWidth}px 0%, ${scanLineWidth}px 100%, 0% 100%)`,
-            `polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)`,
-          ],
-        },
-        {
-          duration,
-          easing,
-          pseudoElement,
-        },
-      );
-    }
+      if (transition?.ready) {
+        await transition.ready;
+      }
 
-    if (animationType === ThemeAnimationType.BLUR_CIRCLE) {
-      setTimeout(() => {
-        const styleElement = document.getElementById(styleId);
-        if (styleElement) {
-          styleElement.remove();
-        }
-      }, duration);
+      if (animationType === ThemeAnimationType.CIRCLE) {
+        document.documentElement.animate(
+          {
+            clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${maxRadius}px at ${x}px ${y}px)`],
+          },
+          {
+            duration,
+            easing,
+            pseudoElement,
+          },
+        );
+      }
+
+      if (animationType === ThemeAnimationType.QR_SCAN) {
+        const scanLineWidth = isHighResolution ? 8 : 4;
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `polygon(0% 0%, ${scanLineWidth}px 0%, ${scanLineWidth}px 100%, 0% 100%)`,
+              `polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)`,
+            ],
+          },
+          {
+            duration,
+            easing,
+            pseudoElement,
+          },
+        );
+      }
+    } catch (e: any) {
+      if (!stateUpdated) {
+        setIsDarkMode(isDarkMode => !isDarkMode);
+      }
+      if (e?.name !== 'InvalidStateError' && e?.name !== 'AbortError') {
+        console.warn('Theme view transition error:', e);
+      }
+    } finally {
+      if (animationType === ThemeAnimationType.BLUR_CIRCLE) {
+        setTimeout(() => {
+          const styleElement = document.getElementById(styleId);
+          if (styleElement) {
+            styleElement.remove();
+          }
+        }, duration);
+      }
     }
   };
 
