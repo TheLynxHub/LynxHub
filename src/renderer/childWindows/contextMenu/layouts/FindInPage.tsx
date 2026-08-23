@@ -1,7 +1,7 @@
 import {Button, Chip, Label, SearchField, Switch} from '@heroui/react';
 import {Circle_Icon} from '@lynx_assets/icons';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {AltArrowDownIcon, AltArrowUpIcon} from '@solar-icons/react/bold';
+import {AltArrowDownIcon, AltArrowUpIcon} from '@solar-icons/react/line-duotone';
 import {isEmpty} from 'lodash-es';
 import {X} from 'lucide-react';
 import {type KeyboardEvent, memo, useCallback, useEffect, useRef, useState} from 'react';
