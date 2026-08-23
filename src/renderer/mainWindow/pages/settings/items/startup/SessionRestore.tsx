@@ -62,7 +62,7 @@ const SessionRestore = memo(() => {
     'rounded-xl hover:bg-surface-tertiary transition-colors';
 
   return (
-    <div className="flex flex-col gap-y-6 w-full">
+    <div className="flex flex-col gap-y-4 w-full">
       {/* Startup Behavior Selection */}
       <SettingsFilterItem
         searchTexts={[
@@ -182,7 +182,7 @@ const SessionRestore = memo(() => {
             </Description>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div className="grid grid-cols-2 gap-3 pt-1">
             <Checkbox
               isSelected={config.restoreBrowserTabs}
               onChange={(isSelected: boolean) => handleToggle('restoreBrowserTabs', isSelected)}>
