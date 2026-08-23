@@ -236,8 +236,12 @@ const TabsList = memo(() => {
               as="div"
               key={tab.id}
               value={tab.id}
+              dragElastic={0}
               layout="position"
+              dragMomentum={false}
               data-tab-id={tab.id}
+              onDragEnd={handleReorderEnd}
+              dragConstraints={containerRef}
               initial={{scale: 0.95, translateY: 5, opacity: 0.5}}
               exit={{scale: 0.95, translateY: 5, transition: {duration: 0.1, ease: 'backIn'}}}>
               <TabItem tab={tab} isOrdering={isOrdering} />
