@@ -91,7 +91,16 @@ export default class ExtensionManager {
       if (this.appManager) extensionUtils.setAppManager(this.appManager);
       if (this.moduleManager) extensionUtils.setModuleManager(this.moduleManager);
 
-      await initial.initialExtension(this.extensionApi.getApi(), extensionUtils, mainIpcApi);
+      const initFn =
+        initial.initialExtension ??
+        (initial as any).default?.initialExtension ??
+        (typeof (initial as any).default === 'function' ? (initial as any).default : undefined);
+
+      if (typeof initFn !== 'function') {
+        throw new Error('Extension dev entry point does not export an initialExtension function');
+      }
+
+      await initFn(this.extensionApi.getApi(), extensionUtils, mainIpcApi);
     } catch (e: any) {
       console.log('No dev extension found or failed to load, skipping...', e);
       if (e?.code !== 'MODULE_NOT_FOUND' && e?.code !== 'ERR_MODULE_NOT_FOUND') {
@@ -117,7 +126,16 @@ export default class ExtensionManager {
       if (this.appManager) extensionUtils.setAppManager(this.appManager);
       if (this.moduleManager) extensionUtils.setModuleManager(this.moduleManager);
 
-      await initial.initialExtension(this.extensionApi.getApi(), extensionUtils, mainIpcApi);
+      const initFn =
+        initial.initialExtension ??
+        (initial as any).default?.initialExtension ??
+        (typeof (initial as any).default === 'function' ? (initial as any).default : undefined);
+
+      if (typeof initFn !== 'function') {
+        throw new Error('Extension main entry point does not export an initialExtension function');
+      }
+
+      await initFn(this.extensionApi.getApi(), extensionUtils, mainIpcApi);
     } catch (e: any) {
       console.error(`Failed to load extension from ${extensionPath}:`, e);
       captureException(e);

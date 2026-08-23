@@ -180,7 +180,18 @@ export default class ModuleManager {
 
       // @ts-ignore
       const initialModule: MainModuleImportType = await import(/* @vite-ignore */ '../../../../module/src/main.ts');
-      const allMethods = await initialModule.default(utils);
+      const initFn =
+        typeof initialModule.default === 'function'
+          ? initialModule.default
+          : typeof initialModule === 'function'
+            ? (initialModule as any)
+            : undefined;
+
+      if (typeof initFn !== 'function') {
+        throw new Error('Module dev entry point does not export a default initialization function');
+      }
+
+      const allMethods = await initFn(utils);
       // Filter out disabled cards and register mapping
       const enabledMethods = allMethods.filter(m => {
         const isEnabled = !disabledCards.has(m.id);
@@ -219,7 +230,18 @@ export default class ModuleManager {
           const moduleUrl = `file://${fullModulePath}`;
 
           const importedModule = (await import(moduleUrl)) as MainModuleImportType;
-          const allMethods = await importedModule.default(utils);
+          const initFn =
+            typeof importedModule.default === 'function'
+              ? importedModule.default
+              : typeof importedModule === 'function'
+                ? (importedModule as any)
+                : undefined;
+
+          if (typeof initFn !== 'function') {
+            throw new Error('Module main entry point does not export a default initialization function');
+          }
+
+          const allMethods = await initFn(utils);
 
           // Filter out disabled cards and register mapping
           const enabledMethods = allMethods.filter(m => {
