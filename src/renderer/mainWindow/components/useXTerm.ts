@@ -99,10 +99,14 @@ export const useXTerm = ({
 
   const canResize = useCallback(() => {
     if (!fitAddon.current) return false;
-    const dims = fitAddon.current.proposeDimensions();
-    if (!dims || dims.cols <= 0 || dims.rows <= 0) return false;
-    if (minResizeCols === 0 && minResizeRows === 0) return true;
-    return dims.cols > minResizeCols && dims.rows > minResizeRows;
+    try {
+      const dims = fitAddon.current.proposeDimensions();
+      if (!dims || dims.cols <= 0 || dims.rows <= 0) return false;
+      if (minResizeCols === 0 && minResizeRows === 0) return true;
+      return dims.cols > minResizeCols && dims.rows > minResizeRows;
+    } catch {
+      return false;
+    }
   }, [minResizeCols, minResizeRows]);
 
   // Initialize terminal
@@ -177,7 +181,17 @@ export const useXTerm = ({
         if (renderMode === 'webgl') {
           try {
             const webglAddon = new WebglAddon();
-            webglAddon.onContextLoss(() => webglAddon.dispose());
+            webglAddon.onContextLoss(() => {
+              console.warn('WebGL context lost, falling back to CanvasAddon');
+              webglAddon.dispose();
+              try {
+                if (!destroyed && termRef) {
+                  termRef.loadAddon(new CanvasAddon());
+                }
+              } catch (canvasErr) {
+                console.warn('Failed to load CanvasAddon as WebGL context loss fallback:', canvasErr);
+              }
+            });
             termRef.loadAddon(webglAddon);
           } catch (e) {
             console.warn('Failed to load WebGL addon, falling back to canvas:', e);
@@ -308,7 +322,11 @@ export const useXTerm = ({
       }
       onResizeDisposable?.dispose();
       onDataDisposable?.dispose();
-      terminal.current?.dispose();
+      try {
+        terminal.current?.dispose();
+      } catch (e) {
+        console.warn('Error disposing terminal:', e);
+      }
       terminal.current = null;
       apiRef.current = null;
     };
@@ -334,9 +352,13 @@ export const useXTerm = ({
   useEffect(() => {
     if (terminal.current) {
       terminal.current.options.fontSize = fontSize;
-      fitAddon.current?.fit();
+      try {
+        if (canResize()) fitAddon.current?.fit();
+      } catch (e) {
+        console.warn('Failed to fit terminal on fontSize change:', e);
+      }
     }
-  }, [fontSize]);
+  }, [fontSize, canResize]);
 
   // Update scrollback
   useEffect(() => {
