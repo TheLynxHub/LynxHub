@@ -10,6 +10,7 @@ import {
   RendererModuleImportType,
 } from '@lynx_common/types/plugins/modules';
 import {extractGitUrl, isDev} from '@lynx_common/utils';
+import applicationIpc from '@lynx_shared/ipc/application';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
 import storageIpc from '@lynx_shared/ipc/storage';
 import {captureException} from '@sentry/electron/renderer';
@@ -469,6 +470,12 @@ async function commitModuleState(
  */
 const loadModules = async () => {
   try {
+    const cliArgs = await applicationIpc.invoke.getCliArgs();
+    if (cliArgs?.unloadPlugins) {
+      commitModuleState([], [], [], [], [], []);
+      return;
+    }
+
     let importedModules: ({path: string; module: RendererModuleImportType} | null)[];
 
     const pluginStorage = await storageIpc.get('plugin');

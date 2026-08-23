@@ -315,3 +315,5 @@ export type HeroToastPlacement = 'top' | 'bottom';
 
 export type ConfirmMenuTypes =
   'closeConfirm' | 'terminateAIConfirm' | 'closeTabConfirm' | 'exitSignalConfirm' | 'forceReloadConfirm';
+
+export * from './cli';

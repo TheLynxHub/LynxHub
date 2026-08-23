@@ -42,4 +42,6 @@ export const appChannels = {
 
   disableLoadingAnimations: 'app:disableLoadingAnimations',
   onOnline: 'app:onOnline',
+
+  getCliArgs: 'app:getCliArgs',
 } as const;

@@ -135,6 +135,10 @@ export default class ModuleManager {
       // Get disabled cards from storage
       const disabledCards = new Set(classHolder.storageManager.getData('plugin').disabledCards || []);
 
+      if (classHolder.cliArgs.unloadPlugins) {
+        return;
+      }
+
       if (isDev()) {
         await this.loadDevModule(disabledCards);
       } else {

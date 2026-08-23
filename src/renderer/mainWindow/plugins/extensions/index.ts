@@ -1,5 +1,6 @@
 import {__federation_method_getRemote, __federation_method_setRemote} from '__federation__';
 import {isDev} from '@lynx_common/utils';
+import applicationIpc from '@lynx_shared/ipc/application';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
 import {captureException} from '@sentry/electron/renderer';
 import {compact} from 'lodash-es';
@@ -50,6 +51,11 @@ const getRemote: GetRemoteModule = __federation_method_getRemote;
  * extension's `InitialExtensions` entry point against the renderer API.
  */
 export async function loadExtensions() {
+  const cliArgs = await applicationIpc.invoke.getCliArgs();
+  if (cliArgs?.unloadPlugins) {
+    return;
+  }
+
   let importedExtensions: (ExtensionImport_Renderer | null)[];
   let extensionIds: string[];
 

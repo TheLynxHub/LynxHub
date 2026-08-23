@@ -254,6 +254,11 @@ export class PluginManager {
 
       await this.setInstalledPlugins(folders);
 
+      if (classHolder.cliArgs.unloadPlugins) {
+        console.log('PluginManager: --unload-plugins active. Skipping plugin loading and execution.');
+        return;
+      }
+
       const validFolders = await this.validatePluginFolders(folders);
 
       this.addresses = validFolders.map(({folder, type}) => ({

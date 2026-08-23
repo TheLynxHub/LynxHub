@@ -131,6 +131,10 @@ export default class ExtensionManager {
    * @param extensionFolders - List of folder paths to load extensions from.
    */
   public async importPlugins(extensionFolders: string[]): Promise<void> {
+    if (classHolder.cliArgs.unloadPlugins) {
+      return;
+    }
+
     if (isDev()) {
       await this.importDevExtension();
     } else {

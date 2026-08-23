@@ -1,5 +1,5 @@
 import {appChannels} from '@lynx_common/consts/ipcChannels/application';
-import {HeroToastPlacement} from '@lynx_common/types';
+import {AppCliOptions, HeroToastPlacement} from '@lynx_common/types';
 import {
   AppUpdateEventTypes,
   AppUpdateStatus,
@@ -87,6 +87,8 @@ export default async function listenApplication() {
   applicationIpc.handle.getCurrentDataPath(() => getAppDataPath());
   applicationIpc.handle.selectAnotherDataPath(() => selectNewAppDataFolder());
   applicationIpc.handle.isValidDataPath(dir => isAppDir(dir));
+
+  applicationIpc.handle.getCliArgs(() => classHolder.cliArgs);
 }
 
 /**
@@ -185,5 +187,7 @@ export const applicationIpc = {
     /** Checks if a path is a valid app data directory */
     isValidDataPath: (callback: (dir: string) => MainHT<boolean>) =>
       lynxIpc.handle(appChannels.isValidDataPath, callback),
+    /** Gets application command-line arguments */
+    getCliArgs: (callback: () => MainHT<AppCliOptions>) => lynxIpc.handle(appChannels.getCliArgs, callback),
   },
 };

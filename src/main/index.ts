@@ -10,6 +10,7 @@ import darwinIcon from '../../resources/icon-darwin.png?asset';
 import {configureAppBeforeReady, handleAppReadyToShow, registerCustomProtocols} from './appLifecycle';
 import LoadingWindow from './childWindows/loading';
 import ShowToastWindow from './childWindows/toast';
+import {parseCliArgs} from './cli';
 import {listenToIpcChannels} from './ipc';
 import {listenBrowser, resetBrowserIPC} from './ipc/browser';
 import listenDialogsWindow from './ipc/dialogsWindow';
@@ -80,6 +81,12 @@ if (!gotTheLock) {
   } else {
     app.setAsDefaultProtocolClient('lynxhub');
   }
+}
+
+// Parse application command-line arguments
+const cliArgs = parseCliArgs();
+if (cliArgs.unloadPlugins) {
+  console.log('[CLI] App started with --unload-plugins flag (installed plugins will not be loaded)');
 }
 
 // Initialize command-line switches and protocol scheme before app getting ready

@@ -1,6 +1,6 @@
 import type {ToastProps} from '@heroui/react';
 import {appChannels} from '@lynx_common/consts/ipcChannels/application';
-import type {HeroToastPlacement} from '@lynx_common/types';
+import type {AppCliOptions, HeroToastPlacement} from '@lynx_common/types';
 import type {
   AppUpdateEventTypes,
   AppUpdateStatus,
@@ -68,7 +68,11 @@ const applicationIpc = {
     checkPwsh7Installed: () => lynxIpc.invoke<string | undefined>(appChannels.checkPwsh7Installed),
 
     disableLoadingAnimations: () => lynxIpc.invoke<boolean>(appChannels.disableLoadingAnimations),
+
+    // Gets application command-line arguments
+    getCliArgs: () => lynxIpc.invoke<AppCliOptions>(appChannels.getCliArgs),
   },
+
   on: {
     // Listens for window state change events
     windowStateChange: (result: (result: WinStateChange) => void): (() => void) =>

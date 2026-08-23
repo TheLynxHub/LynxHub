@@ -1,6 +1,8 @@
 import {clearInterval} from 'node:timers';
 
+import {AppCliOptions} from '@lynx_common/types';
 import {toMs} from '@lynx_common/utils';
+import {getCliArgs} from '@lynx_main/cli';
 import {applicationIpc} from '@lynx_main/ipc/application';
 import ElectronAppManager from '@lynx_main/mainWindow';
 import {PluginManager} from '@lynx_main/plugins';
@@ -30,6 +32,7 @@ const ONLINE_CHECK_INTERVAL = toMs(30, 'seconds');
  */
 class ClassHolder {
   private readonly _storageManager: StorageManager;
+  private readonly _cliArgs: AppCliOptions;
 
   private _moduleManager?: ModuleManager;
   private _extensionManager?: ExtensionManager;
@@ -53,6 +56,7 @@ class ClassHolder {
   private isOnlineInterval: NodeJS.Timeout | undefined = undefined;
 
   constructor() {
+    this._cliArgs = getCliArgs();
     this._storageManager = new StorageManager();
     this._appStartTime = Date.now();
     this.checkOnline();
@@ -228,6 +232,9 @@ class ClassHolder {
   // ----------------> Getters
   get appStartTime(): number {
     return this._appStartTime;
+  }
+  get cliArgs(): AppCliOptions {
+    return this._cliArgs;
   }
   get storageManager(): StorageManager {
     return this._storageManager;
