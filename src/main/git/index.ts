@@ -280,7 +280,7 @@ export default class GitManager {
       this.onFailedProgress(error.message);
     } else {
       console.error(`Unknown Error: ${error}`);
-      this.onFailedProgress(error.toString());
+      this.onFailedProgress(error?.message || error?.toString() || 'Unknown error');
     }
   }
 
@@ -308,6 +308,13 @@ export default class GitManager {
     const targetDirectory = path.resolve(directory);
 
     return new Promise((resolve, reject) => {
+      if (!classHolder.isOnline) {
+        const error = new Error('Network is not accessible!');
+        this.handleError(error);
+        reject(error);
+        return;
+      }
+
       this.git
         .clone(url, targetDirectory)
         .then(() => {
@@ -324,7 +331,12 @@ export default class GitManager {
    */
   public async shallowClone(options: ShallowCloneOptions): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!classHolder.isOnline) reject('User is offline!');
+      if (!classHolder.isOnline) {
+        const error = new Error('Network is not accessible!');
+        this.handleError(error);
+        reject(error);
+        return;
+      }
 
       const {url, directory, branch, singleBranch, depth} = options;
 
@@ -381,6 +393,12 @@ export default class GitManager {
   }
 
   private async fetchAndCheckoutBranch(branchName: string, checkout: () => Promise<void>): Promise<void> {
+    if (!classHolder.isOnline) {
+      const error = new Error('Network is not accessible!');
+      this.handleError(error);
+      throw error;
+    }
+
     try {
       await this.git.fetch(['origin', `${branchName}:${branchName}`]);
       await checkout();
@@ -399,6 +417,12 @@ export default class GitManager {
    * @param directory - The repository directory.
    */
   public async convertToFullClone(directory: string): Promise<void> {
+    if (!classHolder.isOnline) {
+      const error = new Error('Network is not accessible!');
+      this.handleError(error);
+      throw error;
+    }
+
     const targetDirectory = path.resolve(directory);
     try {
       await this.git.cwd(targetDirectory);
