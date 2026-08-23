@@ -1,18 +1,17 @@
 import {Button, ButtonGroup, Card, Chip, ScrollShadow, Switch, Tooltip} from '@heroui/react';
 import type {QuickWebItem, QuickWebStorage} from '@lynx_common/types/storage';
 import quickWebIpc from '@lynx_shared/ipc/quickWeb';
+import {PlayIcon} from '@solar-icons/react/bold';
 import {
   AddCircleIcon,
-  AltArrowDownIcon,
-  AltArrowUpIcon,
   BoltIcon,
   BookmarkIcon,
   EarthIcon,
   History2Icon,
   PenIcon,
-  PlayIcon,
   TrashBin2Icon,
 } from '@solar-icons/react/bold-duotone';
+import {AltArrowDownIcon, AltArrowUpIcon} from '@solar-icons/react/line-duotone';
 import {useState} from 'react';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
@@ -162,8 +161,8 @@ export default function UrlList({config}: Props) {
               {items.map((item, idx) => (
                 <div
                   className={
-                    'flex items-center justify-between p-3 rounded-lg border ' +
-                    'border-surface-tertiary bg-surface-secondary/40 hover:bg-surface-secondary transition gap-x-3'
+                    'flex items-center justify-between p-3 rounded-2xl border ' +
+                    'border-border bg-surface-secondary/30 hover:bg-surface-secondary/50 transition gap-x-3'
                   }
                   key={item.id}>
                   <div className="flex items-center gap-x-3 min-w-0 flex-1">
@@ -208,11 +207,11 @@ export default function UrlList({config}: Props) {
                       </Tooltip>
                     </div>
 
-                    <ButtonGroup size="sm" variant="ghost">
+                    <ButtonGroup size="sm">
                       <Tooltip delay={300}>
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="tertiary"
                           aria-label="Move Up"
                           isDisabled={idx === 0}
                           onPress={() => handleMove(idx, 'up')}
@@ -225,7 +224,7 @@ export default function UrlList({config}: Props) {
                       <Tooltip delay={300}>
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="tertiary"
                           aria-label="Move Down"
                           isDisabled={idx === items.length - 1}
                           onPress={() => handleMove(idx, 'down')}
@@ -238,11 +237,11 @@ export default function UrlList({config}: Props) {
                       <Tooltip delay={300}>
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="tertiary"
                           aria-label="Open in Quick Web"
                           onPress={() => handleLaunchItem(item.id)}
                           isIconOnly>
-                          <PlayIcon className="size-4 text-success" />
+                          <PlayIcon className="size-4" />
                         </Button>
                         <Tooltip.Content>Launch in Quick Window</Tooltip.Content>
                       </Tooltip>
@@ -250,8 +249,8 @@ export default function UrlList({config}: Props) {
                       <Tooltip delay={300}>
                         <Button
                           size="sm"
-                          variant="ghost"
                           aria-label="Edit"
+                          variant="tertiary"
                           onPress={() => handleOpenEdit(item)}
                           isIconOnly>
                           <PenIcon className="size-4" />

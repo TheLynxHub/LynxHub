@@ -3,7 +3,8 @@ import {formatHotkey} from '@lynx/utils';
 import type {LynxHotkey} from '@lynx_common/types/ipc';
 import type {QuickWebStorage} from '@lynx_common/types/storage';
 import quickWebIpc from '@lynx_shared/ipc/quickWeb';
-import {KeyboardIcon, PlayIcon, RefreshIcon, ShieldCheckIcon} from '@solar-icons/react/bold-duotone';
+import {PlayIcon} from '@solar-icons/react/bold';
+import {KeyboardIcon, RefreshIcon, ShieldCheckIcon} from '@solar-icons/react/bold-duotone';
 import {KeyboardEvent, useCallback, useMemo, useRef, useState} from 'react';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
@@ -97,7 +98,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
 
             <div className="flex items-center gap-x-2">
               <Button size="sm" variant="secondary" onPress={() => quickWebIpc.send.toggleWindow()}>
-                <PlayIcon className="size-4 text-success" />
+                <PlayIcon className="size-4" />
                 Toggle Floating Window
               </Button>
             </div>
@@ -108,7 +109,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
             <div
               className={
                 'flex flex-col sm:flex-row items-start sm:items-center justify-between ' +
-                'p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/30 gap-3'
+                'p-3 rounded-2xl border border-border bg-surface-secondary/30 gap-3'
               }>
               <div className="flex items-center gap-x-3">
                 <KeyboardIcon className="size-6 text-accent-foreground shrink-0" />
@@ -124,6 +125,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                 <div className="relative">
                   <Input
                     ref={inputRef}
+                    variant="secondary"
                     onKeyDown={handleKeyDown}
                     onClick={handleStartRecord}
                     onBlur={() => setIsRecording(false)}
@@ -152,10 +154,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
             </div>
 
             {/* Session Type Selector */}
-            <div
-              className={
-                'p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/30 ' + 'flex flex-col gap-y-2'
-              }>
+            <div className={'p-3 rounded-2xl border border-border bg-surface-secondary/30 flex flex-col gap-y-2'}>
               <div className="flex items-center gap-x-2">
                 <ShieldCheckIcon className="size-5 text-accent-foreground" />
                 <span className="text-sm font-semibold">Browser Session & Cookie Sharing</span>
@@ -201,8 +200,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div
                 className={
-                  'p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/20 ' +
-                  'flex items-center justify-between'
+                  'p-3 rounded-2xl border border-border bg-surface-secondary/20 flex items-center justify-between'
                 }>
                 <div className="flex flex-col gap-y-0.5 pr-2">
                   <span className="text-xs font-semibold">Keep in Background</span>
@@ -224,8 +222,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
 
               <div
                 className={
-                  'p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/20 ' +
-                  'flex items-center justify-between'
+                  'p-3 rounded-2xl border border-border bg-surface-secondary/20 flex items-center justify-between'
                 }>
                 <div className="flex flex-col gap-y-0.5 pr-2">
                   <span className="text-xs font-semibold">Hide on Focus Lost</span>
@@ -245,8 +242,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
 
               <div
                 className={
-                  'p-3 rounded-lg border border-surface-tertiary bg-surface-secondary/20 ' +
-                  'flex items-center justify-between'
+                  'p-3 rounded-2xl border border-border bg-surface-secondary/30 flex items-center justify-between'
                 }>
                 <div className="flex flex-col gap-y-0.5 pr-2">
                   <span className="text-xs font-semibold">Always on Top</span>
