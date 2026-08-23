@@ -52,18 +52,29 @@ const TerminalSearchText = memo(({searchAddon, tabId}: Props) => {
   useEffect(() => {
     return () => {
       setSearchText('');
-      searchAddon.clearDecorations();
-      searchAddon.dispose();
+      try {
+        searchAddon.clearDecorations();
+      } catch {
+        // Ignore if addon is not loaded or already detached
+      }
     };
   }, [isOpen, searchAddon]);
 
   const findNext = useCallback(() => {
-    const isFound = searchAddon.findNext(searchText, searchOptions);
-    setFoundAny(isFound);
+    try {
+      const isFound = searchAddon.findNext(searchText, searchOptions);
+      setFoundAny(isFound);
+    } catch {
+      setFoundAny(false);
+    }
   }, [searchAddon, searchText, searchOptions]);
   const findPrev = useCallback(() => {
-    const isFound = searchAddon.findPrevious(searchText, searchOptions);
-    setFoundAny(isFound);
+    try {
+      const isFound = searchAddon.findPrevious(searchText, searchOptions);
+      setFoundAny(isFound);
+    } catch {
+      setFoundAny(false);
+    }
   }, [searchAddon, searchText, searchOptions]);
 
   const handleFindNext = useCallback(() => {
@@ -107,7 +118,11 @@ const TerminalSearchText = memo(({searchAddon, tabId}: Props) => {
 
   const onInputValueChange = useCallback(
     (value: string) => {
-      searchAddon.findNext(value, searchOptions);
+      try {
+        searchAddon.findNext(value, searchOptions);
+      } catch {
+        // Ignore if addon is not loaded
+      }
       setSearchText(value);
     },
     [searchAddon, searchOptions],
@@ -116,8 +131,12 @@ const TerminalSearchText = memo(({searchAddon, tabId}: Props) => {
   const clear = () => {
     AddBreadcrumb_Renderer('Terminal: Clear search text');
     setSearchText('');
-    searchAddon.findNext('');
-    searchAddon.clearDecorations();
+    try {
+      searchAddon.findNext('');
+      searchAddon.clearDecorations();
+    } catch {
+      // Ignore if addon is not loaded
+    }
     setFoundAny(false);
   };
 

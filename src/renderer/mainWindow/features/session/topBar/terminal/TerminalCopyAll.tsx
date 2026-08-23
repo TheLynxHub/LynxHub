@@ -21,19 +21,31 @@ type Props = {
  */
 const TerminalCopyAll = memo(({serializeAddon}: Props) => {
   const handleCopy = useCallback(async () => {
-    const contentToCopy = serializeAddon.serialize();
+    let contentToCopy: string;
+    try {
+      contentToCopy = serializeAddon.serialize();
+    } catch {
+      topToast.warning('Terminal is not ready or content cannot be copied.');
+      return;
+    }
     if (!contentToCopy) return;
 
     try {
       AddBreadcrumb_Renderer('Terminal: Copy all to clipboard');
       await navigator.clipboard.writeText(contentToCopy);
-    } catch (e) {
+    } catch {
       topToast.danger('Failed to copy terminal text to clipboard!');
     }
   }, [serializeAddon]);
 
   const saveFile = useCallback(() => {
-    const contentToSave = serializeAddon.serialize();
+    let contentToSave: string;
+    try {
+      contentToSave = serializeAddon.serialize();
+    } catch {
+      topToast.warning('Terminal is not ready or content cannot be saved.');
+      return;
+    }
     if (!contentToSave) {
       topToast.warning('Failed get terminal text to save!');
       return;
@@ -43,7 +55,7 @@ const TerminalCopyAll = memo(({serializeAddon}: Props) => {
     filesIpc
       .saveToFile(contentToSave, 'terminal-export.txt')
       .then(result => {
-        if (result) topToast.success(`Successfully saved terminal data.`);
+        if (result) topToast.success('Successfully saved terminal data.');
       })
       .catch(() => topToast.danger('Failed to save terminal text to file!'));
   }, [serializeAddon]);
