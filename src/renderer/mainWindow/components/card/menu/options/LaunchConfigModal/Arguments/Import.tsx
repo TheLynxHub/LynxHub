@@ -1,9 +1,10 @@
-import {Button, Chip, Modal, ScrollShadow, TextArea, useOverlayState} from '@heroui/react';
+import {Button, Chip, Modal, TextArea, useOverlayState} from '@heroui/react';
 import {topToast} from '@lynx/layouts/ToastProviders';
 import {ChosenArgumentsData} from '@lynx_common/types';
 import {ChosenArgument} from '@lynx_common/types/plugins/modules';
 import storageIpc from '@lynx_shared/ipc/storage';
 import {
+  ClipboardIcon,
   ClipboardListIcon,
   ImportIcon,
   MonitorIcon,
@@ -11,11 +12,12 @@ import {
   WindowFrameIcon,
 } from '@solar-icons/react/bold-duotone';
 import {isEmpty} from 'lodash-es';
-import {ClipboardPaste, Plus} from 'lucide-react';
+import {Plus} from 'lucide-react';
 import {Dispatch, memo, SetStateAction, useCallback, useMemo, useState} from 'react';
 
 import {getCardMethod, useAllCardMethods, useGetArgumentsByID} from '../../../../../../plugins/modules';
 import {parseArgumentsText} from '../../../../../../utils/parseArgumentsText';
+import EmptyStateCard from '../../../../../EmptyStateCard';
 import TabModal from '../../../../../TabModal';
 
 type Props = {
@@ -199,18 +201,18 @@ function ImportArgumentsModal({importArgumentsModal, setChosenArguments, id}: Pr
         </p>
       </Modal.Header>
 
-      <Modal.Body className="space-y-4">
-        <div className="space-y-2">
+      <Modal.Body className="space-y-4 flex flex-col gap-y-2">
+        <div className="flex flex-col gap-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-foreground/80">Raw Configuration Text</span>
             <div className="flex items-center gap-x-1">
-              <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onPress={handlePasteClipboard}>
-                <ClipboardPaste className="size-3.5" />
+              <Button size="sm" variant="ghost" onPress={handlePasteClipboard}>
+                <ClipboardIcon />
                 Paste
               </Button>
               {!isEmpty(rawText) && (
-                <Button size="sm" variant="ghost" onPress={handleClear} className="h-7 text-xs text-danger gap-1">
-                  <TrashBin2Icon className="size-3.5" />
+                <Button size="sm" variant="ghost" onPress={handleClear} className="text-danger">
+                  <TrashBin2Icon />
                   Clear
                 </Button>
               )}
@@ -231,6 +233,7 @@ function ImportArgumentsModal({importArgumentsModal, setChosenArguments, id}: Pr
             }
             rows={5}
             value={rawText}
+            spellCheck="false"
             variant="secondary"
             className="font-JetBrainsMono text-xs"
             fullWidth
@@ -238,7 +241,7 @@ function ImportArgumentsModal({importArgumentsModal, setChosenArguments, id}: Pr
         </div>
 
         {/* Parsed summary & items preview */}
-        <div className="space-y-2">
+        <div className="flex flex-col gap-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-foreground/80">Parsed Arguments ({activeItems.length})</span>
             <div className="flex items-center gap-1">
@@ -256,20 +259,17 @@ function ImportArgumentsModal({importArgumentsModal, setChosenArguments, id}: Pr
           </div>
 
           {parsedItems.length === 0 ? (
-            <div
-              className={
-                'flex flex-col items-center justify-center p-6 border border-dashed ' +
-                'border-border/60 rounded-xl text-center space-y-1'
-              }>
-              <ClipboardListIcon className="size-8 text-muted/50" />
-              <span className="text-xs text-muted">
-                {isEmpty(rawText)
+            <EmptyStateCard
+              description={
+                isEmpty(rawText)
                   ? 'Paste configuration text above to see parsed arguments.'
-                  : 'No arguments could be recognized from the provided text.'}
-              </span>
-            </div>
+                  : 'No arguments could be recognized from the provided text.'
+              }
+              variant="secondary"
+              icon={<ClipboardListIcon className="size-8 text-muted/50" />}
+            />
           ) : (
-            <ScrollShadow className="max-h-48 rounded-xl border border-border/40 p-2 space-y-1.5">
+            <div className="rounded-2xl border border-border p-2 space-y-1.5 h-full">
               {parsedItems.map(item => {
                 const isExcluded = excludedNames.has(item.name);
                 return (
@@ -310,7 +310,7 @@ function ImportArgumentsModal({importArgumentsModal, setChosenArguments, id}: Pr
                   </div>
                 );
               })}
-            </ScrollShadow>
+            </div>
           )}
         </div>
       </Modal.Body>
