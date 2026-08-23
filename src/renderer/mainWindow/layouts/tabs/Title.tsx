@@ -6,21 +6,36 @@ type Props = {
 };
 
 /**
- * Displays the tab title and detects truncation.
- * Updates the parent's state `setIsTruncated` if the text overflows.
+ * Displays the tab title and detects truncation in real-time.
+ * Uses ResizeObserver to update `isTruncated` continuously as tab width shrinks or expands.
  */
 const TabTitle = memo(({title, setIsTruncated}: Props) => {
   const spanRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
-    if (spanRef.current) {
-      const isTruncated = spanRef.current.offsetWidth < spanRef.current.scrollWidth;
-      setIsTruncated(isTruncated);
-    }
+    const el = spanRef.current;
+    if (!el) return undefined;
+
+    const checkTruncation = () => {
+      const truncated = el.clientWidth < el.scrollWidth;
+      setIsTruncated(truncated);
+    };
+
+    checkTruncation();
+
+    const observer = new ResizeObserver(() => {
+      checkTruncation();
+    });
+
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [title, setIsTruncated]);
 
   return (
-    <span ref={spanRef} className="truncate">
+    <span ref={spanRef} className="overflow-hidden whitespace-nowrap text-xs font-normal select-none text-clip">
       {title}
     </span>
   );

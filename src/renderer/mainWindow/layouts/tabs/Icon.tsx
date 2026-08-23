@@ -115,7 +115,7 @@ const TabIcon = memo(({tab, currentView}: Props) => {
   }, [tab.isTerminal, tab.isLoading, currentView]);
 
   return (
-    <div className="relative shrink-0 size-4 mb-0.5 mr-1">
+    <div className="relative shrink-0 size-4 flex items-center justify-center">
       <AnimatePresence mode="popLayout">
         {iconState === 'terminal' && (
           <motion.div key="terminal" className="absolute inset-0 flex items-center justify-center" {...iconTransition}>

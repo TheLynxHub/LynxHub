@@ -31,6 +31,7 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
   const isActiveTab = useIsActiveTab(tab.id);
   const runningCards = useCardsState('runningCard');
   const tabs = useTabsState('tabs');
+  const activeTab = useTabsState('activeTab');
   const btnRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch<AppDispatch>();
   const [isTruncated, setIsTruncated] = useState<boolean>(false);
@@ -45,6 +46,13 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
 
   const isCompact = Boolean(tab.isPinned || tab.showIconOnly);
   const tabIndex = useMemo(() => tabs.findIndex(t => t.id === tab.id), [tabs, tab.id]);
+  const isNextActive = useMemo(() => {
+    const next = tabs[tabIndex + 1];
+    return next ? next.id === activeTab : false;
+  }, [tabs, tabIndex, activeTab]);
+  const isLastTab = tabIndex === tabs.length - 1;
+  const showDivider = !isActiveTab && !isHovered && !isNextActive && !isLastTab;
+
   const canCloseOthers = useMemo(() => tabs.filter(t => !t.isPinned && t.id !== tab.id).length > 0, [tabs, tab.id]);
   const canCloseRight = useMemo(
     () => tabIndex !== -1 && tabs.slice(tabIndex + 1).some(t => !t.isPinned),
@@ -132,29 +140,49 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
     }
   }, [dispatch, tab.id, isOrdering]);
 
+  const isTooltipDisabled = isOrdering || (!isTruncated && !isCompact);
+
+  const buttonClasses =
+    'text-sm flex flex-row relative w-full h-9 overflow-hidden rounded-none rounded-t-xl! ' +
+    'cursor-default select-none transition-colors duration-150 px-2 ' +
+    (tab.isPinned ? 'justify-center ' : 'justify-start ') +
+    (isActiveTab
+      ? 'bg-white dark:bg-[#303033] shadow-xs text-foreground'
+      : 'text-foreground/80 hover:text-foreground hover:bg-surface-secondary/70');
+
+  const closeWrapperClasses =
+    'absolute right-0 top-0 bottom-0 z-10 flex items-center pr-1 pl-4 transition-opacity duration-150 ' +
+    (isActiveTab
+      ? 'opacity-100 pointer-events-auto bg-gradient-to-l from-white dark:from-[#303033] ' +
+        'via-white/90 dark:via-[#303033]/90 to-transparent'
+      : isHovered
+        ? 'opacity-100 pointer-events-auto bg-gradient-to-l from-surface-secondary ' +
+          'via-surface-secondary/90 to-transparent'
+        : 'opacity-0 pointer-events-none');
+
+  const dividerClasses =
+    'absolute right-0 top-2.5 bottom-2.5 w-px bg-border-secondary transition-opacity ' +
+    'duration-150 pointer-events-none ' +
+    (showDivider ? 'opacity-100' : 'opacity-0');
+
   return (
-    <Tooltip delay={300} isDisabled={!isTruncated && !isCompact}>
-      <Tooltip.Content placement="bottom" showArrow>
+    <Tooltip delay={350} closeDelay={0} isDisabled={isTooltipDisabled}>
+      <Tooltip.Content placement="bottom" className="max-w-xs text-xs font-normal" showArrow>
         <Tooltip.Arrow />
-        <p>{tab.title}</p>
+        <p className="truncate font-medium">{tab.title}</p>
       </Tooltip.Content>
 
       <Button
-        className={
-          'text-sm flex flex-row relative ' +
-          (tab.isPinned ? 'px-2.5 ' : isCompact ? 'pl-2 pr-1 ' : 'pl-2 pr-1 ') +
-          `cursor-default gap-x-0.5 h-9 overflow-hidden rounded-none rounded-t-xl! ` +
-          `${isActiveTab ? 'bg-white dark:bg-[#303033]' : 'hover:bg-surface-secondary'} transition duration-200`
-        }
         variant="ghost"
         onPress={onPress}
         ref={btnRef as any}
+        className={buttonClasses}
         aria-selected={isActiveTab}
         onHoverChange={setIsHovered}
         aria-label={`Tab: ${tab.title}`}
         onContextMenu={handleContextMenu}
         render={({ref: buttonRef, ...props}) => <div ref={buttonRef as any} {...(props as any)} />}>
-        <div className="flex gap-x-0.5 flex-row items-center min-w-0 flex-1">
+        <div className="flex gap-x-1.5 flex-row items-center min-w-0 flex-1 overflow-hidden">
           <TabIcon tab={tab} currentView={runningCard?.currentView} />
 
           {runningCard && <AudioIndicator tabId={tab.id} id={runningCard.id} />}
@@ -163,18 +191,20 @@ const TabItem = memo(({tab, isOrdering}: Props) => {
         </div>
 
         {!tab.isPinned && (
-          <CloseButton
-            className={
-              `scale-85 bg-transparent hover:bg-surface-tertiary ` +
-              `${isActiveTab || isHovered ? 'opacity-100' : 'opacity-0'}`
-            }
-            ref={closeBtnRef}
-            aria-label="Close tab"
-            onPress={() => handleRemove(false)}
-          />
+          <div className={closeWrapperClasses}>
+            <CloseButton
+              ref={closeBtnRef}
+              aria-label="Close tab"
+              onPress={() => handleRemove(false)}
+              className="scale-85 bg-transparent hover:bg-surface-tertiary"
+            />
+          </div>
         )}
 
         <ProgressBar progress={tab.progress} />
+
+        {/* Seamless Inactive Tab Divider */}
+        <div className={dividerClasses} />
       </Button>
     </Tooltip>
   );

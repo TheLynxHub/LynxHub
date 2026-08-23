@@ -1,4 +1,3 @@
-import {Separator} from '@heroui/react';
 import {useCardsState} from '@lynx/redux/reducers/cards';
 import {useSettingsState} from '@lynx/redux/reducers/settings';
 import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
@@ -11,14 +10,13 @@ import {isEqual} from 'lodash-es';
 import {memo, useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
-import {useAppState} from '../../redux/reducers/app';
 import TabItem from './Item';
 import NewTab from './New';
 import {useRemoveTab} from './utils';
 
 /**
  * Container component for the tabs list.
- * Handles drag-and-drop reordering, context menu interactions, and rendering of individual tabs.
+ * Handles dynamic tab shrinking, drag-and-drop reordering, context menu interactions, and rendering of individual tabs.
  */
 const TabsList = memo(() => {
   const dispatch = useDispatch<AppDispatch>();
@@ -28,7 +26,6 @@ const TabsList = memo(() => {
   const runningCards = useCardsState('runningCard');
   const closeTabConfirm = useSettingsState('closeTabConfirm');
   const removeTab = useRemoveTab();
-  const onFocus = useAppState('onFocus');
 
   const [localTabs, setLocalTabs] = useState<TabInfo[]>(tabsFromRedux);
 
@@ -52,6 +49,34 @@ const TabsList = memo(() => {
   useEffect(() => {
     setLocalTabs(tabsFromRedux);
   }, [tabsFromRedux]);
+
+  // Scroll active tab into view when active tab changes
+  useEffect(() => {
+    if (activeTab && containerRef.current) {
+      const activeElement = containerRef.current.querySelector(`[data-tab-id="${activeTab}"]`);
+      if (activeElement) {
+        activeElement.scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'nearest'});
+      }
+    }
+  }, [activeTab]);
+
+  // Handle horizontal mouse wheel scrolling over the tabs container
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return undefined;
+
+    const handleWheel = (event: WheelEvent) => {
+      if (event.deltaY !== 0 && !event.shiftKey) {
+        event.preventDefault();
+        container.scrollLeft += event.deltaY;
+      }
+    };
+
+    container.addEventListener('wheel', handleWheel, {passive: false});
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   // Prevent default middle-click scrolling behavior on the tab container
   useEffect(() => {
@@ -175,44 +200,47 @@ const TabsList = memo(() => {
     }
   }, [tabsFromRedux, localTabs, dispatch]);
 
+  const containerClasses =
+    'h-full items-center pt-1 flex flex-row pl-1 gap-x-1 relative max-w-[calc(100%-140px)] min-w-0 overflow-hidden';
+
+  const groupClasses = 'items-center h-full flex flex-row overflow-y-hidden overflow-x-auto scrollbar-hide min-w-0';
+
   return (
-    <div
-      className={
-        'h-full items-center pt-1 notDraggable justify-between overflow-hidden flex flex-row pl-1 gap-x-1 relative'
-      }>
+    <div className={containerClasses}>
       <Reorder.Group
         axis="x"
         as="div"
         ref={containerRef}
         onReorder={onReorder}
+        className={groupClasses}
         onMouseUp={handleReorderEnd}
-        values={localTabs.map(tab => tab.id)}
-        className="items-center h-full w-full flex flex-row overflow-y-hidden overflow-x-scroll scrollbar-hide">
+        values={localTabs.map(tab => tab.id)}>
         <AnimatePresence mode="popLayout">
-          {localTabs.map((tab, index) => (
+          {localTabs.map(tab => (
             <Reorder.Item
               transition={{
                 layout: {duration: 0.2, type: 'spring', bounce: 0, visualDuration: 0.2},
               }}
-              className={
-                'h-full flex items-center ' + (tab.isPinned || tab.showIconOnly ? 'min-w-fit' : 'max-w-60 min-w-24')
-              }
               animate={{
                 scale: 1,
                 translateY: 0,
                 opacity: 1,
                 transition: {duration: 0.25, ease: 'backOut'},
               }}
+              className={
+                'h-full flex items-center notDraggable ' +
+                (tab.isPinned || tab.showIconOnly
+                  ? 'shrink-0 min-w-fit w-9'
+                  : 'w-60 basis-60 min-w-9 max-w-60 shrink flex-1')
+              }
               as="div"
               key={tab.id}
               value={tab.id}
               layout="position"
+              data-tab-id={tab.id}
               initial={{scale: 0.9, translateY: 10, opacity: 0}}
               exit={{scale: 0.9, translateY: 10, transition: {duration: 0.07, ease: 'backIn'}}}>
               <TabItem tab={tab} isOrdering={isOrdering} />
-              {index < localTabs.length - 1 && (
-                <Separator orientation="vertical" className={`mx-1 my-3`} variant={onFocus ? 'tertiary' : 'default'} />
-              )}
             </Reorder.Item>
           ))}
         </AnimatePresence>
