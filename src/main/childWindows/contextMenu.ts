@@ -56,12 +56,22 @@ export default class ContextMenuManager {
         webPreferences: {
           preload: path.join(__dirname, '../preload/index.cjs'),
           sandbox: false,
+          backgroundThrottling: false,
         },
       });
+      this.contextMenuView.webContents.setBackgroundThrottling(false);
       this.contextMenuView.setBackgroundColor('#00000000');
 
       this.setupViewListeners();
       this.loadWindowContent();
+
+      try {
+        mainWindow.contentView.removeChildView(this.contextMenuView);
+      } catch {
+        // Ignored
+      }
+      mainWindow.contentView.addChildView(this.contextMenuView);
+      this.contextMenuView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
       return;
     }
 
@@ -183,7 +193,22 @@ export default class ContextMenuManager {
 
       const targetWindow = BrowserWindow.fromWebContents(contents) || this.mainWindow;
       this.setCurrentParentWindow(targetWindow);
-      this.setCustomContextPosition(undefined);
+
+      let offsetX = 0;
+      let offsetY = 0;
+      const browserBounds = classHolder.browserManager?.getBrowserBoundsByWebContents(contents);
+      if (browserBounds) {
+        offsetX = browserBounds.x;
+        offsetY = browserBounds.y;
+      } else {
+        const quickWebBounds = classHolder.quickWindowManager?.getViewBoundsByWebContents(contents);
+        if (quickWebBounds) {
+          offsetX = quickWebBounds.x;
+          offsetY = quickWebBounds.y;
+        }
+      }
+
+      this.setCustomContextPosition({x: offsetX + params.x, y: offsetY + params.y});
       contextMenuIpc.send.rightClick(
         params,
         {canGoBack: contents.navigationHistory.canGoBack(), canGoForward: contents.navigationHistory.canGoForward()},
@@ -242,10 +267,26 @@ export default class ContextMenuManager {
 
       const parentBounds = targetParent.getContentBounds();
       const cursorScreenPoint = screen.getCursorScreenPoint();
-      this.currentCursorPosition = {
-        x: cursorScreenPoint.x - parentBounds.x,
-        y: cursorScreenPoint.y - parentBounds.y,
-      };
+      const relCursorX = cursorScreenPoint.x - parentBounds.x;
+      const relCursorY = cursorScreenPoint.y - parentBounds.y;
+      const [parentW, parentH] = targetParent.getContentSize();
+
+      if (this.customContextPosition) {
+        this.currentCursorPosition = this.customContextPosition;
+      } else if (
+        relCursorX >= 0 &&
+        relCursorX <= parentW &&
+        relCursorY >= 0 &&
+        relCursorY <= parentH &&
+        (cursorScreenPoint.x !== 0 || cursorScreenPoint.y !== 0)
+      ) {
+        this.currentCursorPosition = {x: relCursorX, y: relCursorY};
+      } else {
+        this.currentCursorPosition = {
+          x: Math.floor(parentW / 2 - 150),
+          y: Math.max(40, Math.floor(parentH / 3)),
+        };
+      }
 
       try {
         targetParent.contentView.removeChildView(this.contextMenuView);
@@ -290,7 +331,10 @@ export default class ContextMenuManager {
       const [parentW, parentH] = targetParent.getContentSize();
       const clickPoint = this.customContextPosition
         ? {x: Math.floor(this.customContextPosition.x), y: Math.floor(this.customContextPosition.y)}
-        : this.currentCursorPosition || {x: 0, y: 0};
+        : this.currentCursorPosition || {
+            x: Math.floor((parentW - contentW) / 2),
+            y: Math.floor((parentH - contentH) / 2),
+          };
 
       let newX = clickPoint.x;
       let newY = clickPoint.y;
@@ -328,18 +372,12 @@ export default class ContextMenuManager {
     if (isLinux) {
       if (!this.isViewVisible && (!this.contextMenuView || this.contextMenuView.webContents.isDestroyed())) return;
       this.isViewVisible = false;
+      this.setCustomContextPosition(undefined);
       dialogBlurred();
 
       const targetToFocus = this.currentParentWindow || this.mainWindow;
       if (this.contextMenuView && !this.contextMenuView.webContents.isDestroyed()) {
         this.contextMenuView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
-        if (targetToFocus && !targetToFocus.isDestroyed()) {
-          try {
-            targetToFocus.contentView.removeChildView(this.contextMenuView);
-          } catch {
-            // Ignored
-          }
-        }
       }
       if (focusParent && targetToFocus && !targetToFocus.isDestroyed()) {
         targetToFocus.focus();
@@ -368,18 +406,50 @@ export default class ContextMenuManager {
 
   /**
    * Resizes the context menu based on content dimensions from the renderer.
-   * Ensures the window stays within safe bounds (20x20 to 4096x4096).
+   * Ensures the window/view stays within safe bounds (20x20 to 4096x4096).
    */
   public resizeContextMenu(data: ElementResizeData) {
-    const window = this.contextMenuWindow;
-    if (!window || window.isDestroyed()) return;
-
     if (!data || typeof data !== 'object') return;
 
     const {width, height, dpr} = data;
     const isValid = (val: any) => typeof val === 'number' && Number.isFinite(val) && val > 0;
-
     if (!isValid(width) || !isValid(height)) return;
+
+    if (isLinux) {
+      if (!this.contextMenuView || this.contextMenuView.webContents.isDestroyed() || !this.isViewVisible) return;
+      const targetParent = this.currentParentWindow || this.mainWindow;
+      if (!targetParent || targetParent.isDestroyed()) return;
+
+      const contentW = Math.max(20, Math.min(Math.ceil(width), 4096));
+      const contentH = Math.max(20, Math.min(Math.ceil(height), 4096));
+
+      const [parentW, parentH] = targetParent.getContentSize();
+      const currentBounds = this.contextMenuView.getBounds();
+      let newX = currentBounds.x;
+      let newY = currentBounds.y;
+
+      if (newX + contentW > parentW) {
+        newX = Math.max(0, parentW - contentW);
+      }
+      if (newY + contentH > parentH) {
+        newY = Math.max(0, parentH - contentH);
+      }
+
+      try {
+        this.contextMenuView.setBounds({
+          x: Math.floor(newX),
+          y: Math.floor(newY),
+          width: contentW,
+          height: contentH,
+        });
+      } catch (error) {
+        console.error('Failed to resize Linux context menu view:', error);
+      }
+      return;
+    }
+
+    const window = this.contextMenuWindow;
+    if (!window || window.isDestroyed()) return;
 
     const scale = isWin ? 1 : isValid(dpr) ? dpr : 1;
     const contentW = Math.max(20, Math.min(Math.ceil(width * scale), 4096));

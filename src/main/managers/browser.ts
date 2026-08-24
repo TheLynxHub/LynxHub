@@ -407,6 +407,14 @@ export default class BrowserManager {
     this.withWebContents(id, wc => wc.focus());
   }
 
+  public getBrowserBoundsByWebContents(webContents: WebContents): {x: number; y: number} | undefined {
+    const browser = this.browsers.find(b => b.view.webContents === webContents);
+    if (browser && !browser.view.webContents.isDestroyed()) {
+      return browser.view.getBounds();
+    }
+    return undefined;
+  }
+
   public async clearCache() {
     return this.getSession().clearData({
       dataTypes: ['backgroundFetch', 'cache', 'serviceWorkers'],

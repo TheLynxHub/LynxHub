@@ -2,8 +2,6 @@ import {createHash} from 'node:crypto';
 import {createWriteStream, existsSync, mkdirSync, readdirSync, renameSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 
-import {robustWipe} from '@lynx_main/utils/fileSystem';
-
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {SubscribeStages} from '@lynx_common/types';
 import {
@@ -17,6 +15,7 @@ import {getUpdateType} from '@lynx_common/utils/plugins';
 import {pluginsIpc} from '@lynx_main/ipc/plugins/plugins';
 import classHolder from '@lynx_main/managers/classHolder';
 import {getAppDirectory} from '@lynx_main/managers/dataFolder';
+import {robustWipe} from '@lynx_main/utils/fileSystem';
 import {decompress} from '@lynxhub/7zip';
 import {captureException} from '@sentry/electron/main';
 import axios from 'axios';

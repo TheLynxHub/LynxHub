@@ -9,6 +9,8 @@ const shareScreenIpc = {
 
   cancel: () => lynxIpc.send(screenShareChannels.cancel),
   startShare: (config: ScreenShareStart) => lynxIpc.send(screenShareChannels.startShare, config),
+
+  onRequestSources: (callback: () => void) => lynxIpc.on(screenShareChannels.requestSources, callback),
 };
 
 export default shareScreenIpc;

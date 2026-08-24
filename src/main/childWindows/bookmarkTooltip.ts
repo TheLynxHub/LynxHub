@@ -67,12 +67,22 @@ export default class BookmarkTooltipManager {
         webPreferences: {
           preload: path.join(__dirname, '../preload/index.cjs'),
           sandbox: false,
+          backgroundThrottling: false,
         },
       });
+      this.tooltipView.webContents.setBackgroundThrottling(false);
       this.tooltipView.setBackgroundColor('#00000000');
 
       this.setupViewListeners();
       this.loadWindowContent();
+
+      try {
+        mainWindow.contentView.removeChildView(this.tooltipView);
+      } catch {
+        // Ignored
+      }
+      mainWindow.contentView.addChildView(this.tooltipView);
+      this.tooltipView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
       return;
     }
 
@@ -212,11 +222,6 @@ export default class BookmarkTooltipManager {
           this.mainWindow &&
           !this.mainWindow.isDestroyed()
         ) {
-          try {
-            this.mainWindow.contentView.removeChildView(this.tooltipView);
-          } catch {
-            // Ignored
-          }
           this.tooltipView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
           this.isViewVisible = false;
         }

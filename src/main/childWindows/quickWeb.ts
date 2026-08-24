@@ -748,6 +748,15 @@ export default class QuickWindowManager {
     return this.quickWebWindow && !this.quickWebWindow.isDestroyed() ? this.quickWebWindow : undefined;
   }
 
+  public getViewBoundsByWebContents(webContents: WebContents): {x: number; y: number} | undefined {
+    for (const entry of this.viewsPool.values()) {
+      if (entry.view && !entry.view.webContents.isDestroyed() && entry.view.webContents === webContents) {
+        return entry.view.getBounds();
+      }
+    }
+    return undefined;
+  }
+
   public destroyWindow() {
     this.destroyAllViews();
 

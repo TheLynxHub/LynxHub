@@ -24,14 +24,17 @@ const WindowButtonsClose = memo(({buttonProps, commonStyles}: Props) => {
 
   const close = useCallback(() => applicationIpc.send.changeWinState('close'), []);
 
-  const onClick = useCallback(() => {
-    storageIpc.update('app', {lastPage: activePage});
-    if (isCtrlPressed || !showCloseConfirm) {
-      close();
-    } else {
-      contextMenuIpc.send.openCloseApp();
-    }
-  }, [activePage, isCtrlPressed, showCloseConfirm, close]);
+  const onClick = useCallback(
+    (e: React.MouseEvent) => {
+      storageIpc.update('app', {lastPage: activePage});
+      if (isCtrlPressed || !showCloseConfirm) {
+        close();
+      } else {
+        contextMenuIpc.send.openCloseApp({x: e.clientX, y: e.clientY});
+      }
+    },
+    [activePage, isCtrlPressed, showCloseConfirm, close],
+  );
 
   return (
     <motion.button

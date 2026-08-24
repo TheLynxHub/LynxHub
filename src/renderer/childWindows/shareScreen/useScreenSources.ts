@@ -1,6 +1,6 @@
 import {ScreenShareSources} from '@lynx_common/types/shareScreen';
 import shareScreenIpc from '@lynx_shared/ipc/shareScreen';
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
 export type UseScreenSourcesReturn = {
   isLoading: boolean;
@@ -18,33 +18,28 @@ export function useScreenSources(): UseScreenSourcesReturn {
   const [windows, setWindows] = useState<ScreenShareSources[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    let isMounted = true;
+  const fetchSources = useCallback(() => {
     setIsLoading(true);
 
     Promise.all([shareScreenIpc.getScreenSources(), shareScreenIpc.getWindowSources()])
       .then(([fetchedScreens, fetchedWindows]) => {
-        if (isMounted) {
-          setScreens(fetchedScreens);
-          setWindows(fetchedWindows);
-        }
+        setScreens(fetchedScreens);
+        setWindows(fetchedWindows);
       })
       .catch(error => {
         console.error('Failed to fetch screen sources:', error);
-        // If there's an error, we might want to close the window or show an error state.
-        // For now, following original logic, we just cancel.
-        shareScreenIpc.cancel();
       })
       .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       });
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    fetchSources();
+    return shareScreenIpc.onRequestSources(() => {
+      fetchSources();
+    });
+  }, [fetchSources]);
 
   return {isLoading, screens, windows};
 }

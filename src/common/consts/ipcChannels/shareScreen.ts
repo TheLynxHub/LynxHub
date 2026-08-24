@@ -7,4 +7,5 @@ export const screenShareChannels = {
   getWindowSources: 'screenShare-getWindowSources',
   startShare: 'screenShare-startShare',
   cancel: 'screenShare-cancel',
+  requestSources: 'screenShare-requestSources',
 } as const;

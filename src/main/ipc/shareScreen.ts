@@ -3,11 +3,16 @@ import {MainHT} from '@lynx_common/types/ipc';
 import {ScreenShareSources, ScreenShareStart} from '@lynx_common/types/shareScreen';
 
 import lynxIpc from './ipcWrapper';
+import {sendToShareScreen} from './sender';
 
 /**
  * IPC interface for screen sharing operations.
  */
 export const shareScreenIpc = {
+  send: {
+    /** Requests renderer to refresh sources */
+    requestSources: () => sendToShareScreen(screenShareChannels.requestSources),
+  },
   once: {
     /** Listens for start share request once */
     startShare: (callback: (data: ScreenShareStart) => void) => lynxIpc.once(screenShareChannels.startShare, callback),

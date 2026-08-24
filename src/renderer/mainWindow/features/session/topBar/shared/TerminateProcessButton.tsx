@@ -7,7 +7,7 @@ import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import ptyIpc from '@lynx_shared/ipc/pty';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {ExitIcon} from '@solar-icons/react/bold-duotone';
-import {memo, useCallback} from 'react';
+import {memo, useCallback, useRef} from 'react';
 
 import LynxTooltip from '../../../../components/LynxTooltip';
 import {useTerminalState} from '../../../../redux/reducers/terminal';
@@ -28,6 +28,8 @@ const TerminateProcessButton = memo(({id}: Props) => {
   const showTerminateConfirm = useSettingsState('terminateAIConfirm');
   const exitSignalConfirm = useSettingsState('exitSignalConfirm');
   const sendYWithExit = useTerminalState('sendYWithExit');
+  const exitBtnRef = useRef<HTMLButtonElement>(null);
+  const stopBtnRef = useRef<HTMLButtonElement>(null);
 
   const handleStop = useCallback(() => {
     if (!id) return;
@@ -37,7 +39,9 @@ const TerminateProcessButton = memo(({id}: Props) => {
       contextMenuIpc.send.stopAI(id);
     } else {
       AddBreadcrumb_Renderer('Running Card: Open terminate process dialog');
-      contextMenuIpc.send.openTerminateProcess(id);
+      const rect = stopBtnRef.current?.getBoundingClientRect();
+      const customPosition = rect ? {x: Math.floor(rect.x), y: Math.floor(rect.bottom + 4)} : undefined;
+      contextMenuIpc.send.openTerminateProcess(id, customPosition);
     }
   }, [id, isCtrlPressed, showTerminateConfirm]);
 
@@ -48,7 +52,9 @@ const TerminateProcessButton = memo(({id}: Props) => {
       if (sendYWithExit) ptyIpc.write(id, 'y' + terminalLineEnding);
     } else {
       AddBreadcrumb_Renderer('Running Card: Open send exit signal dialog');
-      contextMenuIpc.send.openSendExitSignal(id);
+      const rect = exitBtnRef.current?.getBoundingClientRect();
+      const customPosition = rect ? {x: Math.floor(rect.x), y: Math.floor(rect.bottom + 4)} : undefined;
+      contextMenuIpc.send.openSendExitSignal(id, customPosition);
     }
   }, [id, sendYWithExit, exitSignalConfirm, isCtrlPressed]);
 
@@ -57,6 +63,7 @@ const TerminateProcessButton = memo(({id}: Props) => {
       <LynxTooltip delay={500} content="Send exit signal to the process">
         <Button
           size="sm"
+          ref={exitBtnRef}
           onPress={handleExit}
           className="text-warning-soft-foreground bg-warning-soft hover:bg-warning-soft-hover"
           isIconOnly>
@@ -64,7 +71,13 @@ const TerminateProcessButton = memo(({id}: Props) => {
         </Button>
       </LynxTooltip>
       <LynxTooltip delay={500} content="Terminate Process">
-        <Button size="sm" onPress={handleStop} variant="danger-soft" aria-label="Terminate Process" isIconOnly>
+        <Button
+          size="sm"
+          ref={stopBtnRef}
+          onPress={handleStop}
+          variant="danger-soft"
+          aria-label="Terminate Process"
+          isIconOnly>
           <Stop_Icon className="size-4" />
         </Button>
       </LynxTooltip>

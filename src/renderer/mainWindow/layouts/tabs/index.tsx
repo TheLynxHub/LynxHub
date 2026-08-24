@@ -147,7 +147,10 @@ const TabsList = memo(() => {
     const offClose = contextMenuIpc.on.tabActionClose(tabId => {
       const running = runningCards.find(card => card.tabId === tabId);
       if (running && running.type !== 'browser' && closeTabConfirm) {
-        contextMenuIpc.send.openTerminateTab(tabId);
+        const tabEl = containerRef.current?.querySelector(`[data-tab-id="${tabId}"]`);
+        const rect = tabEl?.getBoundingClientRect();
+        const customPosition = rect ? {x: Math.floor(rect.x), y: Math.floor(rect.bottom + 4)} : undefined;
+        contextMenuIpc.send.openTerminateTab(tabId, customPosition);
       } else {
         removeTab({tabId});
       }

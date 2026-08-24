@@ -3,6 +3,7 @@ import path from 'node:path';
 import {is} from '@electron-toolkit/utils';
 import {ScreenShareSources} from '@lynx_common/types/shareScreen';
 import {isLinux, isMac, isWin} from '@lynx_common/utils';
+import lynxIpc from '@lynx_main/ipc/ipcWrapper';
 import {shareScreenIpc} from '@lynx_main/ipc/shareScreen';
 import classHolder from '@lynx_main/managers/classHolder';
 import {
@@ -13,12 +14,10 @@ import {
   session,
   Streams,
   WebContents,
-  WebContentsView,
 } from 'electron';
 
 export default class ShareScreenManager {
   private _selectorWindow?: BrowserWindow;
-  private _selectorView?: WebContentsView;
   private mainWindow?: BrowserWindow;
   private availableSources: DesktopCapturerSource[] = [];
   private handlersRegistered = false;
@@ -30,11 +29,19 @@ export default class ShareScreenManager {
     session.fromPartition('persist:lynxhub_browser').setDisplayMediaRequestHandler(this.requestHandler);
     session.defaultSession.setDisplayMediaRequestHandler(this.requestHandler);
 
+    this.registerSourceHandlers();
+
     const mainWindow = appManager?.getMainWindow();
     if (mainWindow && !mainWindow.isDestroyed()) {
       this.mainWindow = mainWindow;
       mainWindow.on('close', () => this.cleanup());
     }
+  }
+
+  public sendMessage(channel: string, ...args: any[]): void {
+    const webContents = this.getWebContent();
+    if (!webContents || webContents.isDestroyed()) return;
+    lynxIpc.send(webContents, channel, ...args);
   }
 
   private cleanup() {
@@ -43,51 +50,36 @@ export default class ShareScreenManager {
     if (this._selectorWindow && !this._selectorWindow.isDestroyed()) {
       this._selectorWindow.close();
     }
-    if (this._selectorView && !this._selectorView.webContents.isDestroyed()) {
-      try {
-        (this._selectorView.webContents as any).close?.();
-      } catch {
-        // Ignored
-      }
-      this._selectorView = undefined;
-    }
   }
 
   private requestHandler(_: DisplayMediaRequestHandlerHandlerRequest, callback: (streams: Streams) => void) {
+    if (isLinux) {
+      desktopCapturer
+        .getSources({types: ['screen', 'window']})
+        .then(sources => {
+          if (sources.length > 0) {
+            callback({video: sources[0]});
+          } else {
+            callback({});
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching screen sources on Linux:', err);
+          callback({});
+        });
+      return;
+    }
+
     this.showSelector();
     this.startShare(callback);
-    this.registerSourceHandlers();
   }
 
   private onDone() {
     this.availableSources = [];
-    this.handlersRegistered = false;
-
-    if (isLinux) {
-      if (
-        this._selectorView &&
-        !this._selectorView.webContents.isDestroyed() &&
-        this.mainWindow &&
-        !this.mainWindow.isDestroyed()
-      ) {
-        try {
-          this.mainWindow.contentView.removeChildView(this._selectorView);
-        } catch {
-          // Ignored
-        }
-        this._selectorView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
-      }
-      this._selectorView = undefined;
-      shareScreenIpc.removeHandler.getScreenSources();
-      shareScreenIpc.removeHandler.getWindowSources();
-      return;
-    }
 
     this._selectorWindow?.close();
     this._selectorWindow?.on('closed', () => {
       this._selectorWindow = undefined;
-      shareScreenIpc.removeHandler.getScreenSources();
-      shareScreenIpc.removeHandler.getWindowSources();
     });
   }
 
@@ -172,43 +164,6 @@ export default class ShareScreenManager {
   }
 
   private showSelector() {
-    if (isLinux) {
-      if (this._selectorView && !this._selectorView.webContents.isDestroyed()) {
-        try {
-          (this._selectorView.webContents as any).close?.();
-        } catch {
-          // Ignored
-        }
-      }
-
-      this._selectorView = new WebContentsView({
-        webPreferences: {
-          preload: path.join(__dirname, '../preload/index.cjs'),
-          sandbox: false,
-        },
-      });
-      this._selectorView.setBackgroundColor('#18181b');
-
-      this.loadSelectorContent();
-
-      if (!this.mainWindow || this.mainWindow.isDestroyed()) return;
-      const [winW, winH] = this.mainWindow.getContentSize();
-      const width = Math.min(620, winW);
-      const height = Math.min(480, winH);
-      const x = Math.floor((winW - width) / 2);
-      const y = Math.floor((winH - height) / 2);
-
-      try {
-        this.mainWindow.contentView.removeChildView(this._selectorView);
-      } catch {
-        // Ignored
-      }
-      this.mainWindow.contentView.addChildView(this._selectorView);
-      this._selectorView.setBounds({x, y, width, height});
-      this._selectorView.webContents.focus();
-      return;
-    }
-
     this._selectorWindow = new BrowserWindow({
       frame: false,
       show: false,
@@ -235,6 +190,7 @@ export default class ShareScreenManager {
 
     this._selectorWindow.on('ready-to-show', () => {
       this._selectorWindow?.show();
+      shareScreenIpc.send.requestSources();
     });
 
     this.loadSelectorContent();
@@ -258,27 +214,12 @@ export default class ShareScreenManager {
   }
 
   private loadSelectorContent() {
-    const url =
-      is.dev && process.env['ELECTRON_RENDERER_URL']
-        ? `${process.env['ELECTRON_RENDERER_URL']}/shareScreen.html`
-        : path.join(__dirname, `../renderer/shareScreen.html`);
-
-    if (isLinux) {
-      if (!this._selectorView || this._selectorView.webContents.isDestroyed()) return;
-      if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        this._selectorView.webContents.loadURL(url);
-      } else {
-        this._selectorView.webContents.loadFile(url);
-      }
-      return;
-    }
-
     if (!this._selectorWindow) return;
 
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-      this._selectorWindow.loadURL(url);
+      this._selectorWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/shareScreen.html`);
     } else {
-      this._selectorWindow.loadFile(url);
+      this._selectorWindow.loadFile(path.join(__dirname, `../renderer/shareScreen.html`));
     }
   }
 
@@ -286,16 +227,7 @@ export default class ShareScreenManager {
     return this._selectorWindow;
   }
 
-  get selectorView(): WebContentsView | undefined {
-    return this._selectorView;
-  }
-
   public getWebContent(): WebContents | undefined {
-    if (isLinux) {
-      return this._selectorView && !this._selectorView.webContents.isDestroyed()
-        ? this._selectorView.webContents
-        : undefined;
-    }
     return this._selectorWindow && !this._selectorWindow.webContents.isDestroyed()
       ? this._selectorWindow.webContents
       : undefined;

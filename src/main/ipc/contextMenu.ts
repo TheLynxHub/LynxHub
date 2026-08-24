@@ -151,15 +151,15 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
   });
 
   // Open Terminate AI
-  contextMenuIpc.on.openTerminateAI(id => {
-    setPosition(undefined);
+  contextMenuIpc.on.openTerminateAI((id, customPosition) => {
+    setPosition(customPosition);
     contextMenuIpc.send.onTerminateAI(id);
     contextMenuManager.showContextMenu();
   });
 
   // Open send exit signal process
-  contextMenuIpc.on.openSendExitSignal(id => {
-    setPosition(undefined);
+  contextMenuIpc.on.openSendExitSignal((id, customPosition) => {
+    setPosition(customPosition);
     contextMenuIpc.send.onSendExitProcess(id);
     contextMenuManager.showContextMenu();
   });
@@ -172,8 +172,8 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
   });
 
   // Open Close App
-  contextMenuIpc.on.openCloseApp(() => {
-    setPosition(undefined);
+  contextMenuIpc.on.openCloseApp(customPosition => {
+    setPosition(customPosition);
     contextMenuIpc.send.onCloseApp();
     contextMenuManager.showContextMenu();
   });
@@ -367,15 +367,17 @@ export const contextMenuIpc = {
     tabActionReopenClosed: (callback: () => void) => lynxIpc.on(contextMenuChannels.tabActionReopenClosed, callback),
 
     /** Listens for open terminate AI request */
-    openTerminateAI: (callback: (id: string) => void) => lynxIpc.on(contextMenuChannels.openTerminateAI, callback),
+    openTerminateAI: (callback: (id: string, customPosition?: {x: number; y: number}) => void) =>
+      lynxIpc.on(contextMenuChannels.openTerminateAI, callback),
     /** Listens for open send exit signal request */
-    openSendExitSignal: (callback: (id: string) => void) =>
+    openSendExitSignal: (callback: (id: string, customPosition?: {x: number; y: number}) => void) =>
       lynxIpc.on(contextMenuChannels.openSendExitSignal, callback),
     /** Listens for open terminate tab request */
     openTerminateTab: (callback: (id: string, customPosition?: {x: number; y: number}) => void) =>
       lynxIpc.on(contextMenuChannels.openTerminateTab, callback),
     /** Listens for open close app request */
-    openCloseApp: (callback: () => void) => lynxIpc.on(contextMenuChannels.openCloseApp, callback),
+    openCloseApp: (callback: (customPosition?: {x: number; y: number}) => void) =>
+      lynxIpc.on(contextMenuChannels.openCloseApp, callback),
     /** Listens for open bookmark context menu request */
     openBookmarkContextMenu: (
       callback: (payload: BookmarkContextMenuPayload, customPosition?: {x: number; y: number}) => void,

@@ -57,12 +57,22 @@ export default class LinkPreviewManager {
         webPreferences: {
           preload: path.join(__dirname, '../preload/index.cjs'),
           sandbox: false,
+          backgroundThrottling: false,
         },
       });
+      this.linkPreviewView.webContents.setBackgroundThrottling(false);
       this.linkPreviewView.setBackgroundColor('#00000000');
 
       this.loadWindowContent();
       this.setupViewListeners();
+
+      try {
+        mainWindow.contentView.removeChildView(this.linkPreviewView);
+      } catch {
+        // Ignored
+      }
+      mainWindow.contentView.addChildView(this.linkPreviewView);
+      this.linkPreviewView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
       return;
     }
 
@@ -251,11 +261,6 @@ export default class LinkPreviewManager {
           this.mainWindow &&
           !this.mainWindow.isDestroyed()
         ) {
-          try {
-            this.mainWindow.contentView.removeChildView(this.linkPreviewView);
-          } catch {
-            // Ignored
-          }
           this.linkPreviewView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
           this.isViewVisible = false;
         }

@@ -25,17 +25,20 @@ const contextMenuIpc = {
     showReady: (data: ElementResizeData) => lynxIpc.send(contextMenuChannels.showReady, data),
 
     // Opens terminate AI dialog
-    openTerminateProcess: (id: string) => lynxIpc.send(contextMenuChannels.openTerminateAI, id),
+    openTerminateProcess: (id: string, customPosition?: ContextMenuPosition) =>
+      lynxIpc.send(contextMenuChannels.openTerminateAI, id, customPosition),
 
     // Opens send exit signal dialog
-    openSendExitSignal: (id: string) => lynxIpc.send(contextMenuChannels.openSendExitSignal, id),
+    openSendExitSignal: (id: string, customPosition?: ContextMenuPosition) =>
+      lynxIpc.send(contextMenuChannels.openSendExitSignal, id, customPosition),
 
     // Opens terminate tab dialog
     openTerminateTab: (id: string, customPosition?: ContextMenuPosition) =>
       lynxIpc.send(contextMenuChannels.openTerminateTab, id, customPosition),
 
     // Opens close app dialog
-    openCloseApp: () => lynxIpc.send(contextMenuChannels.openCloseApp),
+    openCloseApp: (customPosition?: ContextMenuPosition) =>
+      lynxIpc.send(contextMenuChannels.openCloseApp, customPosition),
 
     // Relaunches AI process
     relaunchAI: (id: string) => lynxIpc.send(contextMenuChannels.relaunchAI, id),

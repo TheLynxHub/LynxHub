@@ -76,8 +76,11 @@ const TabItem = memo(({tab, isOrdering, dragControls}: Props) => {
             removeTab({tabId});
           } else {
             const bounds = closeBtnRef.current?.getBoundingClientRect();
-            if (bounds && isHotkey) {
-              contextMenuIpc.send.openTerminateTab(tabId, {x: bounds.x, y: bounds.y});
+            if (bounds) {
+              contextMenuIpc.send.openTerminateTab(tabId, {
+                x: Math.floor(bounds.x),
+                y: Math.floor(bounds.bottom + 4),
+              });
             } else {
               contextMenuIpc.send.openTerminateTab(tabId);
             }
