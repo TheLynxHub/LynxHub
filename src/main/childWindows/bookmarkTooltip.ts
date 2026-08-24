@@ -42,7 +42,6 @@ export default class BookmarkTooltipManager {
       webPreferences: {
         preload: path.join(__dirname, '../preload/index.cjs'),
         sandbox: false,
-        backgroundThrottling: false,
       },
     });
     this.tooltipView.webContents.setBackgroundThrottling(false);

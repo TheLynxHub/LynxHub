@@ -31,7 +31,6 @@ export default class LinkPreviewManager {
       webPreferences: {
         preload: path.join(__dirname, '../preload/index.cjs'),
         sandbox: false,
-        backgroundThrottling: false,
       },
     });
     this.linkPreviewView.webContents.setBackgroundThrottling(false);

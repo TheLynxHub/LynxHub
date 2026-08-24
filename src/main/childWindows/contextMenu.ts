@@ -37,7 +37,6 @@ export default class ContextMenuManager {
       webPreferences: {
         preload: path.join(__dirname, '../preload/index.cjs'),
         sandbox: false,
-        backgroundThrottling: false,
       },
     });
     this.contextMenuView.webContents.setBackgroundThrottling(false);

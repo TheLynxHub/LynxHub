@@ -198,7 +198,6 @@ export default class ShareScreenManager {
       webPreferences: {
         preload: path.join(__dirname, '../preload/index.cjs'),
         sandbox: false,
-        backgroundThrottling: false,
       },
     });
     this._selectorView.webContents.setBackgroundThrottling(false);
