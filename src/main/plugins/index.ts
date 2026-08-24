@@ -1,29 +1,8 @@
 import {createHash} from 'node:crypto';
-import {chmodSync, createWriteStream, existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync} from 'node:fs';
+import {createWriteStream, existsSync, mkdirSync, readdirSync, renameSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 
-/**
- * Helper to recursively make files and directories writable on Windows.
- */
-function makeWritableRecursive(targetPath: string): void {
-  try {
-    if (!existsSync(targetPath)) return;
-    const stat = statSync(targetPath);
-    try {
-      chmodSync(targetPath, 0o666);
-    } catch {
-      // Ignore permission errors on individual items
-    }
-    if (stat.isDirectory()) {
-      const entries = readdirSync(targetPath, {withFileTypes: true});
-      for (const entry of entries) {
-        makeWritableRecursive(join(targetPath, entry.name));
-      }
-    }
-  } catch {
-    // Ignore error during recursive traversal
-  }
-}
+import {robustWipe} from '@lynx_main/utils/fileSystem';
 
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {SubscribeStages} from '@lynx_common/types';
@@ -122,7 +101,7 @@ export class PluginManager {
         const toRemove = versionFolders.slice(0, versionFolders.length - 2);
         for (const tag of toRemove) {
           console.log(`PluginManager: Pruning old version ${tag} for plugin ${pluginId}`);
-          this.robustWipePluginDir(join(pluginDir, tag));
+          robustWipe(join(pluginDir, tag));
         }
       }
     } catch (err) {
@@ -143,18 +122,21 @@ export class PluginManager {
       let hasLegacy = false;
 
       for (const entry of entries) {
+        if (entry.name.includes('_old_')) {
+          robustWipe(join(pluginDir, entry.name));
+          continue;
+        }
         if (entry.name === '.tmp') continue;
         if (entry.isDirectory() && /^v\d+/i.test(entry.name)) continue;
 
         hasLegacy = true;
-        break;
       }
 
       if (hasLegacy) {
         console.log(
           `PluginManager: Found legacy non-7z files in plugin folder ${pluginId}. Wiping for clean 7z installation...`,
         );
-        this.robustWipePluginDir(pluginDir);
+        robustWipe(pluginDir);
 
         const repoUrl = urlMap[pluginId];
         const targetVersion = await getTargetVersionByAppStage(pluginId);
@@ -240,7 +222,7 @@ export class PluginManager {
         .filter(file => file.isDirectory() && file.name.includes('_old_'))
         .map(folder => folder.name);
       for (const oldFolder of oldFolders) {
-        this.robustWipePluginDir(join(this.pluginPath, oldFolder));
+        robustWipe(join(this.pluginPath, oldFolder));
       }
 
       const pluginsUrlPath = join('plugins', 'plugins_url.json');
@@ -365,35 +347,6 @@ export class PluginManager {
   }
 
   /**
-   * Safely deletes a plugin directory.
-   */
-  private robustWipePluginDir(dir: string): void {
-    if (!existsSync(dir)) return;
-    makeWritableRecursive(dir);
-    try {
-      rmSync(dir, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
-    } catch (error) {
-      console.warn(`PluginManager: Initial deletion of directory ${dir} failed (possibly locked files):`, error);
-      const tempDirName = `${dir}_old_${Date.now()}`;
-      try {
-        renameSync(dir, tempDirName);
-        console.log(`PluginManager: Successfully renamed locked directory ${dir} to ${tempDirName}`);
-        makeWritableRecursive(tempDirName);
-        try {
-          rmSync(tempDirName, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
-        } catch {
-          console.warn(
-            `PluginManager: Could not delete renamed directory ${tempDirName} immediately, left for OS cleanup.`,
-          );
-        }
-      } catch (renameError) {
-        console.error(`PluginManager: Failed to rename directory ${dir} as fallback:`, renameError);
-        throw error;
-      }
-    }
-  }
-
-  /**
    * Downloads .7z release package for a plugin version and extracts it into v<version> folder.
    */
   private async downloadAndExtractRelease(pluginId: string, repoUrl: string, version: string): Promise<boolean> {
@@ -409,7 +362,7 @@ export class PluginManager {
     const finalDir = join(pluginDir, `v${cleanVer}`);
 
     try {
-      this.robustWipePluginDir(tmpDir);
+      robustWipe(tmpDir);
       mkdirSync(tmpExtractDir, {recursive: true});
 
       console.log(`PluginManager: Downloading ${downloadUrl}...`);
@@ -431,10 +384,10 @@ export class PluginManager {
       await decompress(tmpArchive, tmpExtractDir);
 
       if (existsSync(finalDir)) {
-        this.robustWipePluginDir(finalDir);
+        robustWipe(finalDir);
       }
       renameSync(tmpExtractDir, finalDir);
-      this.robustWipePluginDir(tmpDir);
+      robustWipe(tmpDir);
 
       // Save active version in storage
       const pluginStorage = classHolder.storageManager?.getData('plugin') || {migrated: true, disabledCards: []};
@@ -446,7 +399,7 @@ export class PluginManager {
       return true;
     } catch (error) {
       console.error(`PluginManager: Error downloading/extracting plugin ${pluginId} version ${cleanVer}:`, error);
-      this.robustWipePluginDir(tmpDir);
+      robustWipe(tmpDir);
       return false;
     }
   }
@@ -488,7 +441,7 @@ export class PluginManager {
   public async uninstall(id: string): Promise<boolean> {
     const pluginDir = join(this.pluginPath, id);
     try {
-      this.robustWipePluginDir(pluginDir);
+      robustWipe(pluginDir);
       this.syncList_remove(id);
       this.installed = this.installed.filter(plugin => plugin.id !== id);
 

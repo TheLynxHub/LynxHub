@@ -1,14 +1,4 @@
-import {
-  chmodSync,
-  createWriteStream,
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  renameSync,
-  rmSync,
-  statSync,
-} from 'node:fs';
+import {createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, renameSync} from 'node:fs';
 import {join} from 'node:path';
 
 import {LYNXHUB_WEBSITE, STATICS_URL} from '@lynx_common/consts';
@@ -21,6 +11,7 @@ import {
 } from '@lynx_common/types';
 import {PluginMetadata, PluginVersioning} from '@lynx_common/types/plugins';
 import {isDev, toMs} from '@lynx_common/utils';
+import {robustWipe} from '@lynx_main/utils/fileSystem';
 import {decompress} from '@lynxhub/7zip';
 import axios from 'axios';
 
@@ -38,29 +29,6 @@ type PluginAvailableItem = {metadata: PluginMetadata; versioning: PluginVersioni
 function parseVersionNumber(tag: string): number {
   const num = parseInt(tag.replace(/^v/i, ''), 10);
   return isNaN(num) ? -1 : num;
-}
-
-/**
- * Helper to recursively make files and directories writable on Windows.
- */
-function makeWritableRecursive(targetPath: string): void {
-  try {
-    if (!existsSync(targetPath)) return;
-    const stat = statSync(targetPath);
-    try {
-      chmodSync(targetPath, 0o666);
-    } catch {
-      // Ignore permission errors on individual items
-    }
-    if (stat.isDirectory()) {
-      const entries = readdirSync(targetPath, {withFileTypes: true});
-      for (const entry of entries) {
-        makeWritableRecursive(join(targetPath, entry.name));
-      }
-    }
-  } catch {
-    // Ignore error during recursive traversal
-  }
 }
 
 /**
@@ -155,7 +123,7 @@ export default class StaticsManager {
         const toRemove = versionFolders.slice(0, versionFolders.length - 2);
         for (const tag of toRemove) {
           console.log(`StaticsManager: Pruning old statics version ${tag}`);
-          this.robustWipe(join(this.dir, tag));
+          robustWipe(join(this.dir, tag));
         }
       }
     } catch (err) {
@@ -178,7 +146,7 @@ export default class StaticsManager {
 
         const legacyPath = join(this.dir, entry.name);
         console.log(`StaticsManager: Cleaning up legacy statics item: ${entry.name}`);
-        this.robustWipe(legacyPath);
+        robustWipe(legacyPath);
       }
     } catch (err) {
       console.error('StaticsManager: Error cleaning up legacy files:', err);
@@ -330,7 +298,7 @@ export default class StaticsManager {
 
     try {
       // Prepare clean temp dir
-      this.robustWipe(tmpDir);
+      robustWipe(tmpDir);
       mkdirSync(tmpExtractDir, {recursive: true});
 
       console.log(`StaticsManager: Downloading ${downloadUrl}...`);
@@ -353,10 +321,10 @@ export default class StaticsManager {
 
       // Move extracted folder to final location
       if (existsSync(finalDir)) {
-        this.robustWipe(finalDir);
+        robustWipe(finalDir);
       }
       renameSync(tmpExtractDir, finalDir);
-      this.robustWipe(tmpDir);
+      robustWipe(tmpDir);
 
       // Update active version
       this.activeVersionCache = tag;
@@ -374,7 +342,7 @@ export default class StaticsManager {
       console.log(`StaticsManager: Successfully updated statics to ${tag}`);
     } catch (error) {
       console.error(`StaticsManager: Error downloading/extracting release ${tag}:`, error);
-      this.robustWipe(tmpDir);
+      robustWipe(tmpDir);
       throw error;
     }
   }
@@ -506,31 +474,6 @@ export default class StaticsManager {
     if (this.pullIntervalId) {
       clearInterval(this.pullIntervalId);
       this.pullIntervalId = null;
-    }
-  }
-
-  /**
-   * Safely wipes a directory recursively.
-   */
-  private robustWipe(targetPath: string): void {
-    if (!existsSync(targetPath)) return;
-    makeWritableRecursive(targetPath);
-    try {
-      rmSync(targetPath, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
-    } catch (error) {
-      console.warn(`StaticsManager: Initial deletion of ${targetPath} failed:`, error);
-      const tempDirName = `${targetPath}_old_${Date.now()}`;
-      try {
-        renameSync(targetPath, tempDirName);
-        makeWritableRecursive(tempDirName);
-        try {
-          rmSync(tempDirName, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
-        } catch {
-          console.warn(`StaticsManager: Could not delete ${tempDirName} immediately.`);
-        }
-      } catch (renameError) {
-        console.error(`StaticsManager: Failed to rename directory ${targetPath} as fallback:`, renameError);
-      }
     }
   }
 

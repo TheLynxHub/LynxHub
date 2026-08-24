@@ -10,6 +10,7 @@ import {FolderNames} from '@lynx_common/types';
 import {isWin} from '@lynx_common/utils';
 import {changeWindowState} from '@lynx_main/ipc/methods/windowUtils';
 import {getExePath, getRelativePath, isPortable} from '@lynx_main/utils';
+import {robustWipe} from '@lynx_main/utils/fileSystem';
 import {app, BrowserWindow, dialog} from 'electron';
 import fs from 'graceful-fs';
 
@@ -156,20 +157,21 @@ export async function isAppDir(dir: string): Promise<boolean> {
  */
 export async function cleanupLeftoverOldFolders(): Promise<void> {
   const appDataPath = getAppDataPath();
+  const staticsPath = getAppDirectory('Statics');
   const pluginsPath = getAppDirectory('Plugins');
 
-  const oldFolderPattern = /_old_\d+$/;
+  const oldFolderPattern = /_old_\d+/;
 
-  // 1. Clean up old statics folders in appDataPath
+  // 1. Clean up old folders in appDataPath root
   try {
     if (fs.existsSync(appDataPath)) {
       const entries = await fs.promises.readdir(appDataPath, {withFileTypes: true});
       for (const entry of entries) {
-        if (entry.isDirectory() && oldFolderPattern.test(entry.name)) {
+        if (oldFolderPattern.test(entry.name)) {
           const fullPath = join(appDataPath, entry.name);
           try {
-            await fs.promises.rm(fullPath, {recursive: true, force: true});
-            console.log(`cleanupLeftoverOldFolders: Cleaned up leftover statics folder: ${entry.name}`);
+            robustWipe(fullPath);
+            console.log(`cleanupLeftoverOldFolders: Cleaned up leftover folder: ${entry.name}`);
           } catch (err) {
             console.warn(`cleanupLeftoverOldFolders: Failed to delete ${fullPath}:`, err);
           }
@@ -177,21 +179,58 @@ export async function cleanupLeftoverOldFolders(): Promise<void> {
       }
     }
   } catch (err) {
-    console.error('cleanupLeftoverOldFolders: Error cleaning up old statics folders:', err);
+    console.error('cleanupLeftoverOldFolders: Error cleaning up old root folders:', err);
   }
 
-  // 2. Clean up old plugin folders in pluginsPath
+  // 2. Clean up old statics items in staticsPath
+  try {
+    if (fs.existsSync(staticsPath)) {
+      const entries = await fs.promises.readdir(staticsPath, {withFileTypes: true});
+      for (const entry of entries) {
+        if (oldFolderPattern.test(entry.name)) {
+          const fullPath = join(staticsPath, entry.name);
+          try {
+            robustWipe(fullPath);
+            console.log(`cleanupLeftoverOldFolders: Cleaned up leftover statics item: ${entry.name}`);
+          } catch (err) {
+            console.warn(`cleanupLeftoverOldFolders: Failed to delete ${fullPath}:`, err);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('cleanupLeftoverOldFolders: Error cleaning up old statics items:', err);
+  }
+
+  // 3. Clean up old plugin folders and temporary subfolders in pluginsPath
   try {
     if (fs.existsSync(pluginsPath)) {
       const entries = await fs.promises.readdir(pluginsPath, {withFileTypes: true});
       for (const entry of entries) {
-        if (entry.isDirectory() && oldFolderPattern.test(entry.name)) {
-          const fullPath = join(pluginsPath, entry.name);
+        const fullPath = join(pluginsPath, entry.name);
+        if (oldFolderPattern.test(entry.name)) {
           try {
-            await fs.promises.rm(fullPath, {recursive: true, force: true});
+            robustWipe(fullPath);
             console.log(`cleanupLeftoverOldFolders: Cleaned up leftover plugin folder: ${entry.name}`);
           } catch (err) {
             console.warn(`cleanupLeftoverOldFolders: Failed to delete ${fullPath}:`, err);
+          }
+        } else if (entry.isDirectory()) {
+          try {
+            const subEntries = await fs.promises.readdir(fullPath, {withFileTypes: true});
+            for (const subEntry of subEntries) {
+              if (oldFolderPattern.test(subEntry.name) || subEntry.name === '.tmp') {
+                const subFullPath = join(fullPath, subEntry.name);
+                try {
+                  robustWipe(subFullPath);
+                  console.log(`cleanupLeftoverOldFolders: Cleaned up plugin sub-item: ${entry.name}/${subEntry.name}`);
+                } catch (err) {
+                  console.warn(`cleanupLeftoverOldFolders: Failed to delete ${subFullPath}:`, err);
+                }
+              }
+            }
+          } catch {
+            // Ignore if subfolder read fails
           }
         }
       }

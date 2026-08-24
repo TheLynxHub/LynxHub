@@ -7,6 +7,7 @@ import {ChangeWindowState, DarkModeTypes, TaskbarStatus} from '@lynx_common/type
 import {isMac, isWin} from '@lynx_common/utils';
 import classHolder from '@lynx_main/managers/classHolder';
 import {noticeAllWindowsDarkMode} from '@lynx_main/utils';
+import {robustWipe} from '@lynx_main/utils/fileSystem';
 import {decompress} from '@lynxhub/7zip';
 import {app, clipboard, dialog, nativeImage, net, shell} from 'electron';
 import fs, {promises} from 'graceful-fs';
@@ -117,7 +118,7 @@ export async function removeDirRecursive(dir: string): Promise<void> {
   try {
     const resolvedPath = resolve(dir);
     console.log(`Removing directory: ${resolvedPath}`);
-    return await promises.rm(resolvedPath, {recursive: true, force: true});
+    robustWipe(resolvedPath);
   } catch (e) {
     console.error(`Error removing directory ${dir}:`, e);
     throw e;

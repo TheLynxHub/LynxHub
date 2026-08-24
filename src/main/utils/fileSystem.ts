@@ -1,4 +1,15 @@
-import {accessSync, constants as fsConstants, existsSync, mkdirSync} from 'node:fs';
+import {
+  accessSync,
+  chmodSync,
+  constants as fsConstants,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  renameSync,
+  rmSync,
+} from 'node:fs';
+import {join} from 'node:path';
 
 import {FileSystemError} from '@lynx_common/types/fileSystem';
 import {isWin} from '@lynx_common/utils';
@@ -136,3 +147,65 @@ export function validatePath(path: string): {success: boolean; error?: string} {
     return {success: false, error: fsError.userMessage};
   }
 }
+
+/**
+ * Recursively ensures all directories have read/write/execute permissions (0o777)
+ * and all files have read/write permissions (0o666) so they can be deleted or modified
+ * across POSIX (Linux/macOS) and Windows.
+ */
+export function makeWritableRecursive(targetPath: string): void {
+  try {
+    if (!existsSync(targetPath)) return;
+    const stat = lstatSync(targetPath);
+    if (stat.isSymbolicLink()) {
+      return;
+    }
+    if (stat.isDirectory()) {
+      try {
+        chmodSync(targetPath, 0o777);
+      } catch {
+        // Ignore permission errors on individual items
+      }
+      const entries = readdirSync(targetPath, {withFileTypes: true});
+      for (const entry of entries) {
+        makeWritableRecursive(join(targetPath, entry.name));
+      }
+    } else {
+      try {
+        chmodSync(targetPath, 0o666);
+      } catch {
+        // Ignore permission errors on individual items
+      }
+    }
+  } catch {
+    // Ignore error during recursive traversal
+  }
+}
+
+/**
+ * Safely and robustly wipes a directory or file recursively.
+ * Ensures proper directory/file permissions before deletion to prevent EACCES/ENOTEMPTY on POSIX/Linux.
+ * Falls back to renaming and deferred deletion if files are locked.
+ */
+export function robustWipe(targetPath: string): void {
+  if (!existsSync(targetPath)) return;
+  makeWritableRecursive(targetPath);
+  try {
+    rmSync(targetPath, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
+  } catch (error) {
+    console.warn(`robustWipe: Initial deletion of ${targetPath} failed (possibly locked files):`, error);
+    const tempDirName = `${targetPath}_old_${Date.now()}`;
+    try {
+      renameSync(targetPath, tempDirName);
+      makeWritableRecursive(tempDirName);
+      try {
+        rmSync(tempDirName, {recursive: true, force: true, maxRetries: 3, retryDelay: 100});
+      } catch {
+        console.warn(`robustWipe: Could not delete ${tempDirName} immediately, left for OS/startup cleanup.`);
+      }
+    } catch (renameError) {
+      console.error(`robustWipe: Failed to rename directory ${targetPath} as fallback:`, renameError);
+    }
+  }
+}
+
