@@ -107,17 +107,17 @@ const notifyAllWindowsDarkMode = (isDark: boolean) => {
 
   sendToMain(appChannels.onDarkMode, isDark);
 
-  const contextMenu = getWebContentsIfAvailable(contextMenuManager?.getWindow());
-  if (contextMenu) contextMenu.send(appChannels.onDarkMode, isDark);
+  const contextMenu = contextMenuManager?.getWebContent();
+  if (contextMenu && !contextMenu.isDestroyed()) contextMenu.send(appChannels.onDarkMode, isDark);
 
-  const linkPreview = getWebContentsIfAvailable(linkPreviewManager?.getWindow());
-  if (linkPreview) linkPreview.send(appChannels.onDarkMode, isDark);
+  const linkPreview = linkPreviewManager?.getWebContent();
+  if (linkPreview && !linkPreview.isDestroyed()) linkPreview.send(appChannels.onDarkMode, isDark);
 
-  const bookmarkTooltip = getWebContentsIfAvailable(bookmarkTooltipManager?.getWindow());
-  if (bookmarkTooltip) bookmarkTooltip.send(appChannels.onDarkMode, isDark);
+  const bookmarkTooltip = bookmarkTooltipManager?.getWebContent();
+  if (bookmarkTooltip && !bookmarkTooltip.isDestroyed()) bookmarkTooltip.send(appChannels.onDarkMode, isDark);
 
-  const shareScreen = getWebContentsIfAvailable(shareScreenManager?.selectorWindow);
-  if (shareScreen) shareScreen.send(appChannels.onDarkMode, isDark);
+  const shareScreen = shareScreenManager?.getWebContent();
+  if (shareScreen && !shareScreen.isDestroyed()) shareScreen.send(appChannels.onDarkMode, isDark);
 
   const quickWeb = getWebContentsIfAvailable(quickWindowManager?.getWindow());
   if (quickWeb) quickWeb.send(appChannels.onDarkMode, isDark);

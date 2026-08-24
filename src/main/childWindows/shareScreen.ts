@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import {is} from '@electron-toolkit/utils';
 import {ScreenShareSources} from '@lynx_common/types/shareScreen';
-import {isLinux, isMac, isWin} from '@lynx_common/utils';
+import {isLinux, isWin} from '@lynx_common/utils';
 import lynxIpc from '@lynx_main/ipc/ipcWrapper';
 import {shareScreenIpc} from '@lynx_main/ipc/shareScreen';
 import classHolder from '@lynx_main/managers/classHolder';
@@ -14,13 +14,15 @@ import {
   session,
   Streams,
   WebContents,
+  WebContentsView,
 } from 'electron';
 
 export default class ShareScreenManager {
-  private _selectorWindow?: BrowserWindow;
+  private _selectorView?: WebContentsView;
   private mainWindow?: BrowserWindow;
   private availableSources: DesktopCapturerSource[] = [];
   private handlersRegistered = false;
+  private activeCancel?: () => void;
 
   public start() {
     const {appManager} = classHolder;
@@ -34,6 +36,9 @@ export default class ShareScreenManager {
     const mainWindow = appManager?.getMainWindow();
     if (mainWindow && !mainWindow.isDestroyed()) {
       this.mainWindow = mainWindow;
+      if (!isLinux) {
+        this.initSelectorView();
+      }
       mainWindow.on('close', () => this.cleanup());
     }
   }
@@ -47,8 +52,14 @@ export default class ShareScreenManager {
   private cleanup() {
     this.mainWindow = undefined;
     this.availableSources = [];
-    if (this._selectorWindow && !this._selectorWindow.isDestroyed()) {
-      this._selectorWindow.close();
+    this.activeCancel = undefined;
+    if (this._selectorView && !this._selectorView.webContents.isDestroyed()) {
+      try {
+        (this._selectorView.webContents as any).close?.();
+      } catch {
+        // Ignored
+      }
+      this._selectorView = undefined;
     }
   }
 
@@ -76,11 +87,21 @@ export default class ShareScreenManager {
 
   private onDone() {
     this.availableSources = [];
+    this.activeCancel = undefined;
 
-    this._selectorWindow?.close();
-    this._selectorWindow?.on('closed', () => {
-      this._selectorWindow = undefined;
-    });
+    if (
+      this._selectorView &&
+      !this._selectorView.webContents.isDestroyed() &&
+      this.mainWindow &&
+      !this.mainWindow.isDestroyed()
+    ) {
+      try {
+        this.mainWindow.contentView.removeChildView(this._selectorView);
+      } catch {
+        // Ignored
+      }
+      this._selectorView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
+    }
   }
 
   /**
@@ -94,7 +115,23 @@ export default class ShareScreenManager {
     const cleanupListeners = () => {
       if (offStartShare) offStartShare = undefined;
       if (offCancel) offCancel = undefined;
+      this.activeCancel = undefined;
     };
+
+    const cancelShare = () => {
+      if (offStartShare) offStartShare();
+      cleanupListeners();
+
+      try {
+        callback({});
+      } catch (e) {
+        console.error('Error in cancel callback:', e);
+      }
+
+      this.onDone();
+    };
+
+    this.activeCancel = cancelShare;
 
     offStartShare = shareScreenIpc.once.startShare(data => {
       if (offCancel) offCancel();
@@ -119,18 +156,7 @@ export default class ShareScreenManager {
       this.onDone();
     });
 
-    offCancel = shareScreenIpc.once.cancel(() => {
-      if (offStartShare) offStartShare();
-      cleanupListeners();
-
-      try {
-        callback({});
-      } catch (e) {
-        console.error('Error in cancel callback:', e);
-      }
-
-      this.onDone();
-    });
+    offCancel = shareScreenIpc.once.cancel(cancelShare);
   }
 
   private registerSourceHandlers() {
@@ -163,73 +189,86 @@ export default class ShareScreenManager {
     }));
   }
 
-  private showSelector() {
-    this._selectorWindow = new BrowserWindow({
-      frame: false,
-      show: false,
-      width: 620,
-      height: 480,
-      resizable: isWin,
-      minWidth: isWin ? 620 : undefined,
-      maxWidth: isWin ? 620 : undefined,
-      minHeight: isWin ? 480 : undefined,
-      maxHeight: isWin ? 480 : undefined,
-      maximizable: false,
-      minimizable: false,
-      titleBarStyle: isMac ? 'customButtonsOnHover' : 'default',
-      skipTaskbar: true,
-      parent: this.mainWindow,
-      modal: true,
+  private initSelectorView() {
+    if (this._selectorView && !this._selectorView.webContents.isDestroyed()) {
+      return;
+    }
+
+    this._selectorView = new WebContentsView({
       webPreferences: {
         preload: path.join(__dirname, '../preload/index.cjs'),
         sandbox: false,
+        backgroundThrottling: false,
       },
     });
+    this._selectorView.webContents.setBackgroundThrottling(false);
+    this._selectorView.setBackgroundColor('#18181b');
 
-    this.positionSelectorWindow();
-
-    this._selectorWindow.on('ready-to-show', () => {
-      this._selectorWindow?.show();
-      shareScreenIpc.send.requestSources();
+    this._selectorView.webContents.on('before-input-event', (_, input) => {
+      if (input.key.toLowerCase() === 'escape') {
+        this.activeCancel?.();
+      }
     });
 
     this.loadSelectorContent();
-  }
 
-  private positionSelectorWindow() {
-    if (!this.mainWindow || !this._selectorWindow) return;
-
-    const mainBounds = this.mainWindow.getBounds();
-    const width = 620;
-    const height = 480;
-    const x = mainBounds.x + (mainBounds.width - width) / 2;
-    const y = mainBounds.y + 10;
-
-    this._selectorWindow.setBounds({
-      x: Math.floor(x),
-      y: Math.floor(y),
-      width,
-      height,
-    });
-  }
-
-  private loadSelectorContent() {
-    if (!this._selectorWindow) return;
-
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-      this._selectorWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/shareScreen.html`);
-    } else {
-      this._selectorWindow.loadFile(path.join(__dirname, `../renderer/shareScreen.html`));
+    if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+      try {
+        this.mainWindow.contentView.removeChildView(this._selectorView);
+      } catch {
+        // Ignored
+      }
+      this.mainWindow.contentView.addChildView(this._selectorView);
+      this._selectorView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
     }
   }
 
-  get selectorWindow(): BrowserWindow | undefined {
-    return this._selectorWindow;
+  private showSelector() {
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) return;
+
+    if (!this._selectorView || this._selectorView.webContents.isDestroyed()) {
+      this.initSelectorView();
+    }
+
+    const [winW, winH] = this.mainWindow.getContentSize();
+    const width = Math.min(620, winW);
+    const height = Math.min(480, winH);
+    const x = Math.floor((winW - width) / 2);
+    const y = Math.floor((winH - height) / 2);
+
+    try {
+      this.mainWindow.contentView.removeChildView(this._selectorView!);
+    } catch {
+      // Ignored
+    }
+    this.mainWindow.contentView.addChildView(this._selectorView!);
+    this._selectorView!.setBounds({x, y, width, height});
+    this._selectorView!.webContents.focus();
+    shareScreenIpc.send.requestSources();
+  }
+
+  private loadSelectorContent() {
+    if (!this._selectorView || this._selectorView.webContents.isDestroyed()) return;
+
+    const url =
+      is.dev && process.env['ELECTRON_RENDERER_URL']
+        ? `${process.env['ELECTRON_RENDERER_URL']}/shareScreen.html`
+        : path.join(__dirname, `../renderer/shareScreen.html`);
+
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+      this._selectorView.webContents.loadURL(url);
+    } else {
+      this._selectorView.webContents.loadFile(url);
+    }
+  }
+
+  get selectorView(): WebContentsView | undefined {
+    return this._selectorView;
   }
 
   public getWebContent(): WebContents | undefined {
-    return this._selectorWindow && !this._selectorWindow.webContents.isDestroyed()
-      ? this._selectorWindow.webContents
+    return this._selectorView && !this._selectorView.webContents.isDestroyed()
+      ? this._selectorView.webContents
       : undefined;
   }
 }
