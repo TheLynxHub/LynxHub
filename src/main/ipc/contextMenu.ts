@@ -3,19 +3,14 @@ import {ElementResizeData, TabContextMenuPayload, TerminateMultipleTabsPayload} 
 import {
   BookmarkContextMenuPayload,
   BookmarkEditMenuPayload,
-  BookmarkFolder,
   BookmarkFolderMenuPayload,
 } from '@lynx_common/types/bookmarks';
 import {ContextMenuVolumeData, NavHistory, QuickWebSwitcherPayload} from '@lynx_common/types/ipc';
-import {isLinux, terminalLineEnding} from '@lynx_common/utils';
-import {ptyWrite} from '@lynx_main/ipc/methods/pty';
-import {changeWindowState} from '@lynx_main/ipc/methods/windowUtils';
 import BrowserManager from '@lynx_main/managers/browser';
 import classHolder from '@lynx_main/managers/classHolder';
-import {BrowserWindow, clipboard, ContextMenuParams, dialog, Menu} from 'electron';
+import {BrowserWindow, ContextMenuParams} from 'electron';
 
 import {applicationIpc} from './application';
-import {bookmarksIpc} from './bookmarks';
 import {browserIpc} from './browser';
 import {downloadManagerIpc} from './downloadManager';
 import lynxIpc from './ipcWrapper';
@@ -124,7 +119,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Find in Page
   browserIpc.on.openFindInPage(async (id, customPosition) => {
-    if (isLinux) return;
     setPosition(customPosition);
 
     const webContents = browserManager.getWebContentsById(id);
@@ -144,7 +138,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Zoom control
   browserIpc.on.openZoom((id, customPosition) => {
-    if (isLinux) return;
     setPosition(customPosition);
     contextMenuIpc.send.onZoom(id, browserManager.getCurrentZoom(id));
     contextMenuManager.showContextMenu();
@@ -152,7 +145,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Volume control
   browserIpc.on.openVolume((data, customPosition) => {
-    if (isLinux) return;
     setPosition(customPosition);
     contextMenuIpc.send.onVolume(data);
     contextMenuManager.showContextMenu();
@@ -160,23 +152,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Terminate AI
   contextMenuIpc.on.openTerminateAI(id => {
-    if (isLinux) {
-      const mainWindow = appManager.getMainWindow();
-      const choice = dialog.showMessageBoxSync(mainWindow as BrowserWindow, {
-        type: 'question',
-        buttons: ['Cancel', 'Relaunch', 'Terminate'],
-        defaultId: 2,
-        cancelId: 0,
-        message: 'Confirm Terminate Process',
-        detail: 'Are you sure you want to terminate or relaunch the process?',
-      });
-      if (choice === 1) {
-        contextMenuIpc.send.onRelaunchAI(id);
-      } else if (choice === 2) {
-        contextMenuIpc.send.onStopAI(id);
-      }
-      return;
-    }
     setPosition(undefined);
     contextMenuIpc.send.onTerminateAI(id);
     contextMenuManager.showContextMenu();
@@ -184,24 +159,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open send exit signal process
   contextMenuIpc.on.openSendExitSignal(id => {
-    if (isLinux) {
-      const mainWindow = appManager.getMainWindow();
-      const choice = dialog.showMessageBoxSync(mainWindow as BrowserWindow, {
-        type: 'question',
-        buttons: ['Cancel', 'Exit (Ctrl+C)', 'Exit with Y (Ctrl+C + Y)'],
-        defaultId: 2,
-        cancelId: 0,
-        message: 'Confirm Sending Exit Signal',
-        detail: 'Select how you want to exit the running process.',
-      });
-      if (choice === 1) {
-        ptyWrite(id, '\x03');
-      } else if (choice === 2) {
-        ptyWrite(id, '\x03');
-        ptyWrite(id, 'y' + terminalLineEnding);
-      }
-      return;
-    }
     setPosition(undefined);
     contextMenuIpc.send.onSendExitProcess(id);
     contextMenuManager.showContextMenu();
@@ -209,21 +166,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Terminate Tab
   contextMenuIpc.on.openTerminateTab((id, customPosition) => {
-    if (isLinux) {
-      const mainWindow = appManager.getMainWindow();
-      const choice = dialog.showMessageBoxSync(mainWindow as BrowserWindow, {
-        type: 'question',
-        buttons: ['Cancel', 'Terminate'],
-        defaultId: 1,
-        cancelId: 0,
-        message: 'Confirm Terminate Process',
-        detail: 'Are you sure you want to terminate this tab?',
-      });
-      if (choice === 1) {
-        contextMenuIpc.send.onRemoveTab(id);
-      }
-      return;
-    }
     setPosition(customPosition);
     contextMenuIpc.send.onTerminateTab(id);
     contextMenuManager.showContextMenu();
@@ -231,23 +173,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Close App
   contextMenuIpc.on.openCloseApp(() => {
-    if (isLinux) {
-      const mainWindow = appManager.getMainWindow();
-      const choice = dialog.showMessageBoxSync(mainWindow as BrowserWindow, {
-        type: 'question',
-        buttons: ['Cancel', 'Restart', 'Exit'],
-        defaultId: 2,
-        cancelId: 0,
-        message: 'Confirm Exit',
-        detail: 'Are you sure you want to exit or restart?',
-      });
-      if (choice === 1) {
-        changeWindowState('restart');
-      } else if (choice === 2) {
-        changeWindowState('close');
-      }
-      return;
-    }
     setPosition(undefined);
     contextMenuIpc.send.onCloseApp();
     contextMenuManager.showContextMenu();
@@ -255,7 +180,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Downloads Menu
   downloadManagerIpc.on.openDownloadsMenu(() => {
-    if (isLinux) return;
     setPosition(undefined);
     contextMenuIpc.send.onDownloads();
     contextMenuManager.showContextMenu();
@@ -263,129 +187,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Bookmark Context Menu
   contextMenuIpc.on.openBookmarkContextMenu((payload, customPosition) => {
-    if (isLinux) {
-      const mainWindow = appManager.getMainWindow();
-      const storageManager = classHolder.storageManager;
-      const template: Electron.MenuItemConstructorOptions[] = [];
-
-      if (payload.targetType === 'bookmark' && payload.url) {
-        template.push({
-          label: 'Open',
-          click: () => applicationIpc.send.onNewTab(payload.url!, false),
-        });
-        template.push({
-          label: 'Open in New Tab',
-          click: () => applicationIpc.send.onNewTab(payload.url!, true),
-        });
-        template.push({type: 'separator'});
-        template.push({
-          label: 'Copy Link Address',
-          click: () => clipboard.writeText(payload.url!),
-        });
-        template.push({
-          label: 'Show Icon Only',
-          type: 'checkbox',
-          checked: Boolean(payload.showIconOnly),
-          click: () => {
-            if (payload.bookmarkId) {
-              storageManager.updateBookmark(payload.bookmarkId, {
-                showIconOnly: !payload.showIconOnly,
-              });
-              bookmarksIpc.send.onChanged();
-            }
-          },
-        });
-        template.push({
-          label: 'Edit...',
-          click: () => {
-            if (payload.bookmarkId) {
-              const all = storageManager.getAllBookmarks();
-              const item = all.find(b => b.id === payload.bookmarkId);
-              if (item) {
-                setPosition(undefined);
-                contextMenuIpc.send.onBookmarkEditMenu({mode: 'edit', item});
-                contextMenuManager.showContextMenu();
-              }
-            }
-          },
-        });
-        template.push({
-          label: 'Delete',
-          click: () => {
-            if (payload.bookmarkId) storageManager.removeBookmark(payload.bookmarkId);
-            bookmarksIpc.send.onChanged();
-          },
-        });
-        template.push({type: 'separator'});
-      } else if (payload.targetType === 'folder') {
-        template.push({
-          label: 'Open All in New Tabs',
-          click: () => {
-            if (payload.folderId) {
-              const all = storageManager.getAllBookmarks();
-              const children = all.filter(b => b.parentId === payload.folderId && b.type === 'bookmark' && b.url);
-              children.forEach(c => applicationIpc.send.onNewTab(c.url!, true));
-            }
-          },
-        });
-        template.push({
-          label: 'Rename...',
-          click: () => {
-            if (payload.folderId) {
-              const all = storageManager.getAllBookmarks();
-              const item = all.find(b => b.id === payload.folderId);
-              if (item) {
-                setPosition(undefined);
-                contextMenuIpc.send.onBookmarkEditMenu({mode: 'edit', item});
-                contextMenuManager.showContextMenu();
-              }
-            }
-          },
-        });
-        template.push({
-          label: 'Delete',
-          click: () => {
-            if (payload.folderId) storageManager.removeBookmark(payload.folderId);
-            bookmarksIpc.send.onChanged();
-          },
-        });
-        template.push({type: 'separator'});
-      }
-
-      template.push({
-        label: 'Add Bookmark...',
-        click: () => {
-          setPosition(undefined);
-          contextMenuIpc.send.onBookmarkEditMenu({mode: 'add', parentId: payload.folderId || 'bookmarks_bar'});
-          contextMenuManager.showContextMenu();
-        },
-      });
-      template.push({
-        label: 'Add Folder...',
-        click: () => {
-          setPosition(undefined);
-          contextMenuIpc.send.onBookmarkEditMenu({
-            mode: 'add',
-            parentId: payload.folderId || 'bookmarks_bar',
-            item: {
-              id: '',
-              type: 'folder',
-              title: 'New Folder',
-              parentId: payload.folderId || 'bookmarks_bar',
-              order: 0,
-              createdAt: 0,
-              updatedAt: 0,
-            },
-          });
-          contextMenuManager.showContextMenu();
-        },
-      });
-
-      const menu = Menu.buildFromTemplate(template);
-      menu.popup({window: mainWindow as BrowserWindow});
-      return;
-    }
-
     setPosition(customPosition);
     contextMenuIpc.send.onBookmarkContextMenu(payload);
     contextMenuManager.showContextMenu();
@@ -400,67 +201,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Bookmark Folder Menu
   contextMenuIpc.on.openBookmarkFolderMenu((payload, customPosition) => {
-    if (isLinux) {
-      const mainWindow = appManager.getMainWindow();
-      const storageManager = classHolder.storageManager;
-      const tree = storageManager.getBookmarksTree();
-
-      const findFolder = (node: BookmarkFolder, id: string): BookmarkFolder | null => {
-        if (node.id === id) return node;
-        for (const child of node.children) {
-          if (child.type === 'folder') {
-            const found = findFolder(child as BookmarkFolder, id);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-
-      const folder = findFolder(tree, payload.folderId);
-      if (!folder) return;
-
-      const buildMenuTemplate = (f: BookmarkFolder): Electron.MenuItemConstructorOptions[] => {
-        const items: Electron.MenuItemConstructorOptions[] = [];
-        const hasBookmarks = f.children.some(c => c.type === 'bookmark');
-        if (hasBookmarks) {
-          items.push({
-            label: 'Open All in Tabs',
-            click: () => {
-              f.children.forEach(c => {
-                if (c.type === 'bookmark' && c.url) applicationIpc.send.onNewTab(c.url, true);
-              });
-            },
-          });
-          items.push({type: 'separator'});
-        }
-
-        if (f.children.length === 0) {
-          items.push({label: '(Empty folder)', enabled: false});
-        } else {
-          for (const child of f.children) {
-            if (child.type === 'folder') {
-              items.push({
-                label: child.title,
-                submenu: buildMenuTemplate(child as BookmarkFolder),
-              });
-            } else {
-              items.push({
-                label: child.title || child.url || 'Bookmark',
-                click: () => {
-                  if (child.url) applicationIpc.send.onNewTab(child.url, false);
-                },
-              });
-            }
-          }
-        }
-        return items;
-      };
-
-      const menu = Menu.buildFromTemplate(buildMenuTemplate(folder));
-      menu.popup({window: mainWindow as BrowserWindow});
-      return;
-    }
-
     setPosition(customPosition);
     contextMenuIpc.send.onBookmarkFolderMenu(payload);
     contextMenuManager.showContextMenu();
@@ -468,51 +208,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Tab Context Menu
   contextMenuIpc.on.openTabContextMenu((payload, customPosition) => {
-    if (isLinux) {
-      const mainWindow = appManager.getMainWindow();
-      const template: Electron.MenuItemConstructorOptions[] = [
-        {
-          label: payload.isPinned ? 'Unpin Tab' : 'Pin Tab',
-          click: () => contextMenuIpc.send.onTabActionPin(payload.tabId),
-        },
-        {
-          label: 'Show Icon Only',
-          type: 'checkbox',
-          checked: Boolean(payload.showIconOnly),
-          click: () => contextMenuIpc.send.onTabActionIconOnly(payload.tabId),
-        },
-        {type: 'separator'},
-        {
-          label: 'Close',
-          click: () => contextMenuIpc.send.onRemoveTab(payload.tabId),
-        },
-        {
-          label: 'Close (Bypass Confirmation)',
-          click: () => contextMenuIpc.send.onTabActionForceClose(payload.tabId),
-        },
-        {
-          label: 'Close Other Tabs',
-          enabled: payload.canCloseOthers,
-          click: () => contextMenuIpc.send.onTabActionCloseOthers(payload.tabId),
-        },
-        {
-          label: 'Close Tabs to the Right',
-          enabled: payload.canCloseRight,
-          click: () => contextMenuIpc.send.onTabActionCloseRight(payload.tabId),
-        },
-        {type: 'separator'},
-        {
-          label: 'Reopen Closed Tab',
-          enabled: Boolean(payload.canReopenClosedTab),
-          click: () => contextMenuIpc.send.onTabActionReopenClosed(),
-        },
-      ];
-
-      const menu = Menu.buildFromTemplate(template);
-      menu.popup({window: mainWindow as BrowserWindow});
-      return;
-    }
-
     setPosition(customPosition);
     contextMenuIpc.send.onTabContextMenu(payload);
     contextMenuManager.showContextMenu();
@@ -520,23 +215,6 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
 
   // Open Terminate Multiple Tabs Confirmation
   contextMenuIpc.on.openTerminateMultipleTabs((payload, customPosition) => {
-    if (isLinux) {
-      const mainWindow = appManager.getMainWindow();
-      const choice = dialog.showMessageBoxSync(mainWindow as BrowserWindow, {
-        type: 'question',
-        buttons: ['Cancel', 'Terminate All'],
-        defaultId: 1,
-        cancelId: 0,
-        message: `Confirm Terminate ${payload.count} Tabs`,
-        detail:
-          `Are you sure you want to close ${payload.count} tabs ` + `(${payload.runningCount} with running processes)?`,
-      });
-      if (choice === 1) {
-        contextMenuIpc.send.onRemoveMultipleTabs(payload.tabIds);
-      }
-      return;
-    }
-
     setPosition(customPosition);
     contextMenuIpc.send.onTerminateMultipleTabs(payload);
     contextMenuManager.showContextMenu();

@@ -1,7 +1,6 @@
 import {windowDialogsChannels} from '@lynx_common/consts/ipcChannels/dialogsWindow';
-import {isLinux} from '@lynx_common/utils';
 import classHolder from '@lynx_main/managers/classHolder';
-import {BrowserWindow, dialog, IpcMainEvent} from 'electron';
+import {IpcMainEvent} from 'electron';
 
 import lynxIpc from './ipcWrapper';
 import {sendToContextMenu} from './sender';
@@ -39,10 +38,6 @@ export default async function listenDialogsWindow() {
 
   // Prompt dialog
   dialogsWindowIpc.on.onPrompt((event, message, defaultValue) => {
-    if (isLinux) {
-      event.returnValue = defaultValue || null;
-      return;
-    }
     setCenterPosition();
 
     dialogsWindowIpc.send.promptShow(message, defaultValue);
@@ -55,17 +50,6 @@ export default async function listenDialogsWindow() {
 
   // Confirm dialog
   dialogsWindowIpc.on.onConfirm((event, message) => {
-    if (isLinux) {
-      const choice = dialog.showMessageBoxSync(appManager.getMainWindow() as BrowserWindow, {
-        type: 'question',
-        buttons: ['Cancel', 'OK'],
-        defaultId: 1,
-        cancelId: 0,
-        message: message || '',
-      });
-      event.returnValue = choice === 1;
-      return;
-    }
     setCenterPosition();
 
     dialogsWindowIpc.send.confirmShow(message);
@@ -78,16 +62,6 @@ export default async function listenDialogsWindow() {
 
   // Alert dialog
   dialogsWindowIpc.on.onAlert((event, message) => {
-    if (isLinux) {
-      dialog.showMessageBoxSync(appManager.getMainWindow() as BrowserWindow, {
-        type: 'info',
-        buttons: ['OK'],
-        defaultId: 0,
-        message: message || '',
-      });
-      event.returnValue = null;
-      return;
-    }
     setCenterPosition();
 
     dialogsWindowIpc.send.alertShow(message);

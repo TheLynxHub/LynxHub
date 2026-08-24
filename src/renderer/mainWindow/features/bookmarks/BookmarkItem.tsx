@@ -1,6 +1,6 @@
 import {Avatar} from '@heroui/react';
 import {BookmarkItem as BookmarkItemType} from '@lynx_common/types/bookmarks';
-import {getCacheUrl, isLinux} from '@lynx_common/utils';
+import {getCacheUrl} from '@lynx_common/utils';
 import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {EarthIcon} from '@solar-icons/react/bold-duotone';
@@ -36,7 +36,7 @@ const BookmarkItem = memo(({item, inDropdown, isOrdering}: Props) => {
   }, [item.favIcon, item.url]);
 
   const handleMouseEnter = useCallback(() => {
-    if (isLinux || !btnRef.current || !item.url) return;
+    if (!btnRef.current || !item.url) return;
     const rect = btnRef.current.getBoundingClientRect();
     bookmarkTooltipIpc.show({
       title: item.title,
@@ -49,7 +49,6 @@ const BookmarkItem = memo(({item, inDropdown, isOrdering}: Props) => {
   }, [item.title, item.url]);
 
   const handleMouseLeave = useCallback(() => {
-    if (isLinux) return;
     bookmarkTooltipIpc.hide();
   }, []);
 
@@ -80,7 +79,7 @@ const BookmarkItem = memo(({item, inDropdown, isOrdering}: Props) => {
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!isLinux) bookmarkTooltipIpc.hide();
+      bookmarkTooltipIpc.hide();
 
       contextMenuIpc.send.openBookmarkContextMenu(
         {
@@ -123,8 +122,7 @@ const BookmarkItem = memo(({item, inDropdown, isOrdering}: Props) => {
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onContextMenu={handleContextMenu}
-      title={isLinux && item.url ? `${item.title}\n${item.url}` : undefined}>
+      onContextMenu={handleContextMenu}>
       <div className="shrink-0 size-4 flex items-center justify-center">
         {domainFavicon && !imgError ? (
           <Avatar className="size-3.5 rounded-none bg-transparent">

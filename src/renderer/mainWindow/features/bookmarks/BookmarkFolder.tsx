@@ -1,5 +1,4 @@
 import {BookmarkFolder as BookmarkFolderType} from '@lynx_common/types/bookmarks';
-import {isLinux} from '@lynx_common/utils';
 import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {FolderIcon} from '@solar-icons/react/bold-duotone';
@@ -15,7 +14,7 @@ const BookmarkFolder = memo(({folder, isOrdering}: Props) => {
 
   const handleClick = useCallback(() => {
     if (isOrdering || !btnRef.current) return;
-    if (!isLinux) bookmarkTooltipIpc.hide();
+    bookmarkTooltipIpc.hide();
     const rect = btnRef.current.getBoundingClientRect();
     contextMenuIpc.send.openBookmarkFolderMenu(
       {
@@ -30,7 +29,7 @@ const BookmarkFolder = memo(({folder, isOrdering}: Props) => {
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!isLinux) bookmarkTooltipIpc.hide();
+      bookmarkTooltipIpc.hide();
 
       contextMenuIpc.send.openBookmarkContextMenu(
         {

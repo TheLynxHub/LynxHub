@@ -4,10 +4,13 @@ import {is} from '@electron-toolkit/utils';
 import {isLinux, isWin} from '@lynx_common/utils';
 import {browserIpc} from '@lynx_main/ipc/browser';
 import lynxIpc from '@lynx_main/ipc/ipcWrapper';
-import {BrowserWindow, BrowserWindowConstructorOptions, WebContents} from 'electron';
+import {BrowserWindow, BrowserWindowConstructorOptions, WebContents, WebContentsView} from 'electron';
 
 export default class LinkPreviewManager {
   private linkPreviewWindow?: BrowserWindow;
+  private linkPreviewView?: WebContentsView;
+  private isViewVisible = false;
+  private currentWidth = 400;
   private mainWindow?: BrowserWindow;
   private hideTimeout?: NodeJS.Timeout;
   private channelsRegistered = false;
@@ -38,14 +41,35 @@ export default class LinkPreviewManager {
   };
 
   public createWindow(mainWindow: BrowserWindow) {
-    if (isLinux) return;
+    this.removeMainWindowListeners();
+    this.mainWindow = mainWindow;
+
+    if (isLinux) {
+      if (this.linkPreviewView && !this.linkPreviewView.webContents.isDestroyed()) {
+        try {
+          (this.linkPreviewView.webContents as any).close?.();
+        } catch {
+          // Ignored
+        }
+      }
+
+      this.linkPreviewView = new WebContentsView({
+        webPreferences: {
+          preload: path.join(__dirname, '../preload/index.cjs'),
+          sandbox: false,
+        },
+      });
+      this.linkPreviewView.setBackgroundColor('#00000000');
+
+      this.loadWindowContent();
+      this.setupViewListeners();
+      return;
+    }
+
     if (this.linkPreviewWindow && !this.linkPreviewWindow.isDestroyed()) {
       this.linkPreviewWindow.close();
     }
 
-    this.removeMainWindowListeners();
-
-    this.mainWindow = mainWindow;
     this.linkPreviewWindow = new BrowserWindow({
       ...LinkPreviewManager.WINDOW_CONFIG,
       parent: mainWindow,
@@ -58,13 +82,41 @@ export default class LinkPreviewManager {
     this.setupWindowListeners();
   }
 
+  private setupViewListeners() {
+    if (!this.mainWindow) return;
+
+    this.mainWindow.on('hide', this.boundHide);
+    this.mainWindow.on('minimize', this.boundHide);
+    this.mainWindow.on('blur', this.boundHide);
+
+    this.mainWindow.on('close', () => {
+      this.removeMainWindowListeners();
+      this.mainWindow = undefined;
+    });
+  }
+
   private loadWindowContent() {
+    const url =
+      is.dev && process.env['ELECTRON_RENDERER_URL']
+        ? `${process.env['ELECTRON_RENDERER_URL']}/linkPreview.html`
+        : path.join(__dirname, '../renderer/linkPreview.html');
+
+    if (isLinux) {
+      if (!this.linkPreviewView || this.linkPreviewView.webContents.isDestroyed()) return;
+      if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+        this.linkPreviewView.webContents.loadURL(url);
+      } else {
+        this.linkPreviewView.webContents.loadFile(url);
+      }
+      return;
+    }
+
     if (!this.linkPreviewWindow) return;
 
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-      this.linkPreviewWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/linkPreview.html`);
+      this.linkPreviewWindow.loadURL(url);
     } else {
-      this.linkPreviewWindow.loadFile(path.join(__dirname, '../renderer/linkPreview.html'));
+      this.linkPreviewWindow.loadFile(url);
     }
   }
 
@@ -110,7 +162,6 @@ export default class LinkPreviewManager {
   }
 
   public updateUrl(url: string) {
-    if (isLinux) return;
     if (url) {
       this.show(url);
     } else {
@@ -125,7 +176,19 @@ export default class LinkPreviewManager {
     return this.linkPreviewWindow;
   }
 
+  public getView(): WebContentsView | undefined {
+    if (this.linkPreviewView?.webContents.isDestroyed()) {
+      this.linkPreviewView = undefined;
+    }
+    return this.linkPreviewView;
+  }
+
   public getWebContent(): WebContents | undefined {
+    if (isLinux) {
+      return this.linkPreviewView && !this.linkPreviewView.webContents.isDestroyed()
+        ? this.linkPreviewView.webContents
+        : undefined;
+    }
     const window = this.getWindow();
     return window && !window.webContents.isDestroyed() ? window.webContents : undefined;
   }
@@ -140,7 +203,6 @@ export default class LinkPreviewManager {
   }
 
   private show(url: string) {
-    if (!this.linkPreviewWindow || this.linkPreviewWindow.isDestroyed()) return;
     if (!this.mainWindow || this.mainWindow.isDestroyed()) return;
 
     // Clear any pending hide timeout
@@ -152,6 +214,26 @@ export default class LinkPreviewManager {
     // Send URL to the preview window
     browserIpc.send.onLinkHover(url);
 
+    if (isLinux) {
+      if (!this.linkPreviewView || this.linkPreviewView.webContents.isDestroyed()) return;
+
+      const [, winH] = this.mainWindow.getContentSize();
+      const x = 4;
+      const y = winH - 24;
+
+      try {
+        this.mainWindow.contentView.removeChildView(this.linkPreviewView);
+      } catch {
+        // Ignored
+      }
+      this.mainWindow.contentView.addChildView(this.linkPreviewView);
+      this.linkPreviewView.setBounds({x, y, width: this.currentWidth, height: 24});
+      this.isViewVisible = true;
+      return;
+    }
+
+    if (!this.linkPreviewWindow || this.linkPreviewWindow.isDestroyed()) return;
+
     // Update position and show
     this.updatePosition();
 
@@ -161,6 +243,26 @@ export default class LinkPreviewManager {
   }
 
   private hide() {
+    if (isLinux) {
+      this.hideTimeout = setTimeout(() => {
+        if (
+          this.linkPreviewView &&
+          !this.linkPreviewView.webContents.isDestroyed() &&
+          this.mainWindow &&
+          !this.mainWindow.isDestroyed()
+        ) {
+          try {
+            this.mainWindow.contentView.removeChildView(this.linkPreviewView);
+          } catch {
+            // Ignored
+          }
+          this.linkPreviewView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
+          this.isViewVisible = false;
+        }
+      }, 50);
+      return;
+    }
+
     if (!this.linkPreviewWindow || this.linkPreviewWindow.isDestroyed()) return;
 
     // Small delay to prevent flickering when moving between links
@@ -193,9 +295,27 @@ export default class LinkPreviewManager {
    * Clamps width between 100px and 800px.
    */
   public resizeWindow(width: number) {
+    const clampedWidth = Math.min(Math.max(width, 100), 800);
+    this.currentWidth = clampedWidth;
+
+    if (isLinux) {
+      if (
+        this.isViewVisible &&
+        this.linkPreviewView &&
+        !this.linkPreviewView.webContents.isDestroyed() &&
+        this.mainWindow &&
+        !this.mainWindow.isDestroyed()
+      ) {
+        const [, winH] = this.mainWindow.getContentSize();
+        const x = 4;
+        const y = winH - 24;
+        this.linkPreviewView.setBounds({x, y, width: clampedWidth, height: 24});
+      }
+      return;
+    }
+
     if (!this.linkPreviewWindow || this.linkPreviewWindow.isDestroyed()) return;
 
-    const clampedWidth = Math.min(Math.max(width, 100), 800);
     this.linkPreviewWindow.setSize(clampedWidth, 24);
     this.updatePosition();
   }

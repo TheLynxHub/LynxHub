@@ -5,7 +5,6 @@ import {
   BookmarkItem as BookmarkItemType,
   BookmarkNode,
 } from '@lynx_common/types/bookmarks';
-import {isLinux} from '@lynx_common/utils';
 import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {AnimatePresence, Reorder, Transition, Variants} from 'framer-motion';
@@ -69,7 +68,7 @@ const BookmarksBar = memo(({runningCard, className}: Props) => {
 
   const handleBarContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    if (!isLinux) bookmarkTooltipIpc.hide();
+    bookmarkTooltipIpc.hide();
 
     contextMenuIpc.send.openBookmarkContextMenu(
       {

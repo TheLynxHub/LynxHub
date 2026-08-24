@@ -2,12 +2,12 @@ import path from 'node:path';
 
 import {ElementResizeData} from '@lynx_common/types';
 import {AudioState, CanGoType} from '@lynx_common/types/ipc';
-import {formatWebAddress, isLinux} from '@lynx_common/utils';
+import {formatWebAddress} from '@lynx_common/utils';
 import {applicationIpc} from '@lynx_main/ipc/application';
 import {browserIpc} from '@lynx_main/ipc/browser';
 import {contextMenuIpc} from '@lynx_main/ipc/contextMenu';
 import {getUserAgent} from '@lynx_main/utils';
-import {BrowserWindow, dialog, FindInPageOptions, session, shell, WebContents, WebContentsView} from 'electron';
+import {BrowserWindow, FindInPageOptions, session, shell, WebContents, WebContentsView} from 'electron';
 import {isNil} from 'lodash-es';
 
 import icon from '../../../resources/icon.png?asset';
@@ -317,23 +317,6 @@ export default class BrowserManager {
       if (!forceReloadConfirm || this.bypassingUnload.has(id)) {
         this.bypassingUnload.delete(id);
         event.preventDefault();
-        return;
-      }
-
-      if (isLinux) {
-        const mainWindow = this.getMainWindow();
-        const options: Electron.MessageBoxSyncOptions = {
-          type: 'warning',
-          buttons: ['Cancel', 'Force Reload'],
-          defaultId: 1,
-          cancelId: 0,
-          message: 'Confirm Force Reload',
-          detail: 'Changes that you made may not be saved. Are you sure you want to force reload this page?',
-        };
-        const choice = mainWindow ? dialog.showMessageBoxSync(mainWindow, options) : dialog.showMessageBoxSync(options);
-        if (choice === 1) {
-          event.preventDefault();
-        }
         return;
       }
 

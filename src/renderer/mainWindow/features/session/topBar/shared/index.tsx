@@ -1,5 +1,4 @@
 import {RunningCard} from '@lynx/types';
-import {isLinux} from '@lynx_common/utils';
 import {memo, useMemo} from 'react';
 
 import BrowserDownloadManager from '../browser/BrowserDownloadManager';
@@ -26,7 +25,7 @@ const SharedTopBar = memo(({runningCard}: Props) => {
     <div className="flex flex-row gap-x-1">
       {showSwitch && <ViewSwitch currentView={currentView} />}
       {showTerminate && <TerminateProcessButton id={id} />}
-      {!isLinux && <BrowserDownloadManager />}
+      <BrowserDownloadManager />
     </div>
   );
 });
