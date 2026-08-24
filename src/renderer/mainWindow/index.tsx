@@ -3,6 +3,7 @@ import '@xterm/xterm/css/xterm.css';
 import '@lynx_shared/sentry/init';
 
 import {isDev} from '@lynx_common/utils';
+import applicationIpc from '@lynx_shared/ipc/application';
 import {onBreadcrumbStateChange} from '@lynx_shared/sentry/Breadcrumbs';
 import {reactErrorHandler} from '@sentry/react';
 import log from 'electron-log/renderer';
@@ -42,6 +43,29 @@ onBreadcrumbStateChange(addBreadcrumbs);
 
 if (!isDev()) {
   Object.assign(console, log.functions);
+}
+
+// Attach debugging helpers to window for easy memory & process inspection in DevTools
+if (typeof window !== 'undefined') {
+  (window as any).getProcessMetrics = async () => {
+    const report = await applicationIpc.invoke.getProcessMetrics();
+    console.log(
+      `%c[Metrics] LynxHub Processes: ${report.processCount} | Total RAM: ${report.totalWorkingSetMB} MB`,
+      'font-weight: bold; color: #4ade80; font-size: 12px;',
+    );
+    console.table(
+      report.processes.map(p => ({
+        PID: p.pid,
+        Type: p.type,
+        Label: p.label,
+        'RAM (MB)': p.memoryMB,
+        'Peak (MB)': p.peakMemoryMB,
+        'CPU (%)': p.cpuPercent ?? 0,
+      })),
+    );
+    return report;
+  };
+  (window as any).logProcessMetrics = () => applicationIpc.send.logProcessMetrics();
 }
 
 const rootOptions: RootOptions | undefined = collectErrors

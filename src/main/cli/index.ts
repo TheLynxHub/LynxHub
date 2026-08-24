@@ -49,9 +49,11 @@ export function hasCliFlag(flagName: string, argv: string[] = process.argv): boo
 export function parseCliArgs(argv: string[] = process.argv): AppCliOptions {
   const rawArgs = [...argv];
   const unloadPlugins = hasCliFlag('unload-plugins', rawArgs);
+  const logMetrics = hasCliFlag('log-metrics', rawArgs);
 
   cachedCliOptions = {
     unloadPlugins,
+    logMetrics,
     rawArgs,
   };
 

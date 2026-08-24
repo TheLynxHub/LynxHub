@@ -42,6 +42,7 @@
     "dev": "run-script-os",
     "dev:win32": "electron-vite dev",
     "dev:default": "electron-vite dev --noSandbox",
+    "dev:win:metrics": "electron-vite dev -- --log-metrics",
     "dev:test": "electron-vite dev --remote-debugging-port=9222",
     "prof": "electron-vite dev -w --noSandbox -- --js-flags=\"--prof\"",
     "dev:srouce": "electron-vite dev -w --noSandbox --sourcemap",

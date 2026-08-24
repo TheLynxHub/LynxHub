@@ -9,6 +9,12 @@ export interface AppCliOptions {
   unloadPlugins: boolean;
 
   /**
+   * If true, periodically logs Electron process memory/CPU metrics to console.
+   * Specified via `--log-metrics`.
+   */
+  logMetrics: boolean;
+
+  /**
    * Unparsed raw command-line arguments.
    */
   rawArgs: string[];

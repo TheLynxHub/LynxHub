@@ -7,6 +7,7 @@ import type {
   ChangeWindowState,
   DarkModeTypes,
   LynxInput,
+  ProcessMetricsReport,
   SystemInfo,
   TaskbarStatus,
   WinStateChange,
@@ -41,6 +42,9 @@ const applicationIpc = {
 
     // Installs downloaded app update
     updateInstall: () => lynxIpc.send(appChannels.updateInstall),
+
+    // Requests main process to log process metrics table
+    logProcessMetrics: () => lynxIpc.send(appChannels.logProcessMetrics),
   },
   invoke: {
     // Gets system dark mode preference (light/dark)
@@ -71,6 +75,9 @@ const applicationIpc = {
 
     // Gets application command-line arguments
     getCliArgs: () => lynxIpc.invoke<AppCliOptions>(appChannels.getCliArgs),
+
+    // Gets detailed process metrics report across all Electron processes
+    getProcessMetrics: () => lynxIpc.invoke<ProcessMetricsReport>(appChannels.getProcessMetrics),
   },
 
   on: {

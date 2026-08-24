@@ -44,4 +44,6 @@ export const appChannels = {
   onOnline: 'app:onOnline',
 
   getCliArgs: 'app:getCliArgs',
+  getProcessMetrics: 'app:getProcessMetrics',
+  logProcessMetrics: 'app:logProcessMetrics',
 } as const;

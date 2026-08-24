@@ -7,6 +7,7 @@ import {
   DarkModeTypes,
   LynxInput,
   MainHT,
+  ProcessMetricsReport,
   ShowToastTypes,
   SystemInfo,
   TaskbarStatus,
@@ -22,6 +23,7 @@ import {
   isPowerShell7Installed,
   noticeAllWindowsDarkMode,
 } from '@lynx_main/utils';
+import {getProcessMetrics, logProcessMetrics} from '@lynx_main/utils/processMetrics';
 import {nativeTheme, shell} from 'electron';
 
 import lynxIpc from './ipcWrapper';
@@ -89,6 +91,9 @@ export default async function listenApplication() {
   applicationIpc.handle.isValidDataPath(dir => isAppDir(dir));
 
   applicationIpc.handle.getCliArgs(() => classHolder.cliArgs);
+
+  applicationIpc.handle.getProcessMetrics(() => getProcessMetrics());
+  applicationIpc.on.logProcessMetrics(() => logProcessMetrics());
 }
 
 /**
@@ -172,6 +177,8 @@ export const applicationIpc = {
     updateInstall: (callback: () => void) => lynxIpc.on(appChannels.updateInstall, callback),
     /** Listens for update cancel request */
     updateCancel: (callback: () => void) => lynxIpc.on(appChannels.updateCancel, callback),
+    /** Listens for logging process metrics */
+    logProcessMetrics: (callback: () => void) => lynxIpc.on(appChannels.logProcessMetrics, callback),
   },
   handle: {
     /** Gets system dark mode setting */
@@ -199,5 +206,8 @@ export const applicationIpc = {
       lynxIpc.handle(appChannels.isValidDataPath, callback),
     /** Gets application command-line arguments */
     getCliArgs: (callback: () => MainHT<AppCliOptions>) => lynxIpc.handle(appChannels.getCliArgs, callback),
+    /** Gets detailed process metrics report */
+    getProcessMetrics: (callback: () => MainHT<ProcessMetricsReport>) =>
+      lynxIpc.handle(appChannels.getProcessMetrics, callback),
   },
 };

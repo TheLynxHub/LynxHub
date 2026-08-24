@@ -145,3 +145,20 @@ export type QuickWebSwitcherPayload = {
   items: QuickWebItem[];
   activeItemId?: string;
 };
+
+export type LynxProcessMetric = {
+  pid: number;
+  type: string;
+  name?: string;
+  label: string;
+  memoryMB: number;
+  peakMemoryMB?: number;
+  cpuPercent?: number;
+  sandboxed?: boolean;
+};
+
+export type ProcessMetricsReport = {
+  totalWorkingSetMB: number;
+  processCount: number;
+  processes: LynxProcessMetric[];
+};

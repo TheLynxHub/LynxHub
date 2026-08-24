@@ -43,6 +43,7 @@ import {fetchAndCacheSentryDsn} from './monitoring/sentry';
 import {PluginMigrate} from './setup/migration';
 import {getPrivilegeText} from './utils';
 import {initSession, sendCollectedActions} from './utils/actionLogger';
+import {logProcessMetrics} from './utils/processMetrics';
 
 /**
  * Initializes logging for production environments.
@@ -213,6 +214,13 @@ async function initializeLynxHub(): Promise<void> {
   appManager.startApp();
 
   checkForUpdate();
+
+  if (cliArgs.logMetrics) {
+    console.log('[CLI] App started with --log-metrics flag');
+    setTimeout(() => logProcessMetrics(), 3000);
+    const metricsInterval = setInterval(() => logProcessMetrics(), 15000);
+    app.on('before-quit', () => clearInterval(metricsInterval));
+  }
 }
 
 // ====================================== App Events ======================================
