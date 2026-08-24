@@ -23,7 +23,7 @@ const QuickWebSwitcher = memo(function QuickWebSwitcher() {
 
   return (
     <div className="w-80 p-1 flex flex-col gap-y-1 select-none font-sans text-foreground">
-      <div className="px-2 py-1.5 flex items-center justify-between border-b border-surface-tertiary">
+      <div className="px-2 py-1.5 flex items-center justify-between border-b border-border">
         <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Quick Websites</span>
         <Chip size="sm" variant="secondary" className="text-[10px] h-5 px-1.5">
           {items.length} saved

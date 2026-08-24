@@ -202,7 +202,7 @@ export default class ShareScreenManager {
       },
     });
     this._selectorView.webContents.setBackgroundThrottling(false);
-    this._selectorView.setBackgroundColor('#18181b');
+    this._selectorView.setBackgroundColor('#00000000');
 
     this._selectorView.webContents.on('before-input-event', (_, input) => {
       if (input.key.toLowerCase() === 'escape') {

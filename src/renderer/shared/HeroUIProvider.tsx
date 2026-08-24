@@ -7,13 +7,14 @@ import {useDocumentDarkMode} from './hooks';
  */
 interface SharedHeroUIProviderProps {
   children: ReactNode;
+  className?: string;
 }
 
 /**
  * Wraps child windows with HeroUI providers and synchronizes dark/light classes.
  */
-export default function HeroUIProvider({children}: SharedHeroUIProviderProps) {
+export default function HeroUIProvider({children, className = ''}: SharedHeroUIProviderProps) {
   const isDark = useDocumentDarkMode();
 
-  return <div className={`bg-background text-foreground ${isDark ? 'dark' : 'light'}`}>{children}</div>;
+  return <div className={`text-foreground ${isDark ? 'dark' : 'light'} ${className}`}>{children}</div>;
 }

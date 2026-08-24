@@ -37,8 +37,9 @@ export default function ToastContent() {
   return (
     <div
       className={
-        `${getTypeStyles(toastMessage.type)} size-full overflow-hidden scrollbar-hide ` +
-        ` draggable flex flex-col border-l-8 bg-white transition-all duration-300 ease-out dark:bg-LynxRaisinBlack`
+        `${getTypeStyles(toastMessage.type)} size-full overflow-hidden scrollbar-hide draggable ` +
+        'flex flex-col border border-border border-l-8 bg-surface text-foreground rounded-2xl ' +
+        'transition-all duration-300 ease-out'
       }>
       <ToastHeader type={toastMessage.type} title={toastMessage.title} />
 

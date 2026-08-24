@@ -37,9 +37,8 @@ export default function LinkPreview() {
   return (
     <div
       className={
-        'inline-block px-2 py-0.5 text-xs truncate rounded-lg bg-white/95 dark:bg-[#1a1a1a]/95' +
-        ' border border-l-0 border-b-0 border-gray-200 dark:border-gray-700 text-gray-700' +
-        ' dark:text-gray-300 backdrop-blur-sm whitespace-nowrap'
+        'inline-flex items-center px-2.5 py-0.5 text-xs truncate rounded-xl bg-surface/95 ' +
+        'border border-border text-foreground backdrop-blur-md whitespace-nowrap shadow-xl'
       }
       ref={containerRef}
       style={{maxWidth: '800px'}}>

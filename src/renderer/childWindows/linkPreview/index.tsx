@@ -1,5 +1,6 @@
 import '@lynx_shared/styles.css';
 
+import HeroUIProvider from '@lynx_shared/HeroUIProvider';
 import {createRoot} from 'react-dom/client';
 
 import LinkPreview from './App';
@@ -13,4 +14,8 @@ if (!rootElement) {
 /**
  * Entry point for the Link Preview window.
  */
-createRoot(rootElement).render(<LinkPreview />);
+createRoot(rootElement).render(
+  <HeroUIProvider>
+    <LinkPreview />
+  </HeroUIProvider>,
+);

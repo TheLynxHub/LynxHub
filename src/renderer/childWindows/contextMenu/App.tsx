@@ -56,7 +56,12 @@ export default function ContextMenu() {
   }, [containerRef]);
 
   return (
-    <div ref={containerRef} className={`flex size-fit flex-col overflow-hidden bg-surface`}>
+    <div
+      className={
+        'flex size-fit flex-col overflow-hidden rounded-2xl border border-border ' +
+        'bg-surface text-foreground shadow-2xl'
+      }
+      ref={containerRef}>
       {activeLayout === MenuTypes.BrowserScale && <BrowserScale />}
       {activeLayout === MenuTypes.FindInPage && <FindInPage />}
       {activeLayout === MenuTypes.RightClick && <RightClick />}

@@ -133,8 +133,8 @@ export default class LinkPreviewManager {
     if (!this.linkPreviewView || this.linkPreviewView.webContents.isDestroyed()) return;
 
     const [, winH] = this.mainWindow.getContentSize();
-    const x = 4;
-    const y = winH - 24;
+    const x = 6;
+    const y = winH - 28;
 
     try {
       this.mainWindow.contentView.removeChildView(this.linkPreviewView);
@@ -142,7 +142,7 @@ export default class LinkPreviewManager {
       // Ignored
     }
     this.mainWindow.contentView.addChildView(this.linkPreviewView);
-    this.linkPreviewView.setBounds({x, y, width: this.currentWidth, height: 24});
+    this.linkPreviewView.setBounds({x, y, width: this.currentWidth, height: 26});
     this.isViewVisible = true;
   }
 
@@ -176,9 +176,9 @@ export default class LinkPreviewManager {
       !this.mainWindow.isDestroyed()
     ) {
       const [, winH] = this.mainWindow.getContentSize();
-      const x = 4;
-      const y = winH - 24;
-      this.linkPreviewView.setBounds({x, y, width: clampedWidth, height: 24});
+      const x = 6;
+      const y = winH - 28;
+      this.linkPreviewView.setBounds({x, y, width: clampedWidth, height: 26});
     }
   }
 }

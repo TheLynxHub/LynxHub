@@ -1,5 +1,6 @@
 import '@lynx_shared/styles.css';
 
+import HeroUIProvider from '@lynx_shared/HeroUIProvider';
 import {createRoot} from 'react-dom/client';
 
 import BookmarkTooltip from './App';
@@ -13,4 +14,8 @@ if (!rootElement) {
 /**
  * Entry point for the Bookmark Tooltip window.
  */
-createRoot(rootElement).render(<BookmarkTooltip />);
+createRoot(rootElement).render(
+  <HeroUIProvider>
+    <BookmarkTooltip />
+  </HeroUIProvider>,
+);
