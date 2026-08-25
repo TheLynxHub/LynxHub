@@ -127,7 +127,7 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
   }, [folderId, dispatch]);
 
   return (
-    <div className="overflow-hidden px-1.5 flex flex-col gap-y-1 py-2 min-w-[210px]">
+    <div className="overflow-hidden px-1.5 flex flex-col gap-y-1 py-2 min-w-52.5">
       {targetType === 'bookmark' && url && (
         <>
           <ActionButton
@@ -140,7 +140,7 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
             title="Copy Link Address"
             icon={<CopyIcon className="size-4 text-muted" />}
           />
-          <Checkbox className="w-full" isSelected={isIconOnly} onChange={handleToggleShowIconOnly}>
+          <Checkbox className="w-full" variant="secondary" isSelected={isIconOnly} onChange={handleToggleShowIconOnly}>
             <Checkbox.Content
               className={
                 'w-full flex items-center gap-x-2 text-sm text-foreground select-none ' +
