@@ -6,6 +6,7 @@ import filesIpc from '@lynx_shared/ipc/files';
 import {DatabaseIcon, MoveToFolderIcon, RepeatIcon} from '@solar-icons/react/bold-duotone';
 import {useCallback, useEffect, useState} from 'react';
 
+import SettingsFilterItem from '../../SettingsFilterItem';
 import SettingsSearchHighlight from '../../SettingsSearchHighlight';
 
 export const SettingsDataId = 'settings_data_elem';
@@ -47,29 +48,46 @@ export default function SettingsData() {
     }
   }, [currentPath]);
 
+  const descriptionText = 'App data, including extensions, modules and binaries, will be saved here.';
+
   return (
     <SettingsSection
-      description={
-        <SettingsSearchHighlight text="App data, including extensions, modules and binaries, will be saved here." />
-      }
       title="Data"
       id={SettingsDataId}
       icon={<DatabaseIcon className="size-5" />}
+      description={<SettingsSearchHighlight text={descriptionText} />}
       itemsCenter>
-      <Button
-        variant="tertiary"
-        isDisabled={!currentPath}
-        onPress={handleOpenFolder}
-        className="bg-surface hover:bg-surface/50"
-        fullWidth>
-        <MoveToFolderIcon />
-        {currentPath || 'Loading path...'}
-      </Button>
+      <SettingsFilterItem
+        searchTexts={[
+          'Data',
+          descriptionText,
+          'data directory',
+          'storage folder',
+          'extensions storage',
+          'modules folder',
+          'binaries folder',
+          'change data path',
+          'restart required',
+          'open folder in file explorer',
+          currentPath,
+        ]}>
+        <div className="flex flex-col gap-y-2 w-full">
+          <Button
+            variant="tertiary"
+            isDisabled={!currentPath}
+            onPress={handleOpenFolder}
+            className="bg-surface hover:bg-surface/50"
+            fullWidth>
+            <MoveToFolderIcon />
+            <SettingsSearchHighlight text={currentPath || 'Loading path...'} />
+          </Button>
 
-      <Button variant="danger-soft" onPress={handleChangeDataPath} fullWidth>
-        <RepeatIcon />
-        <SettingsSearchHighlight text="Change (Restart Required)" />
-      </Button>
+          <Button variant="danger-soft" onPress={handleChangeDataPath} fullWidth>
+            <RepeatIcon />
+            <SettingsSearchHighlight text="Change (Restart Required)" />
+          </Button>
+        </div>
+      </SettingsFilterItem>
     </SettingsSection>
   );
 }

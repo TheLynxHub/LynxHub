@@ -30,7 +30,18 @@ export default function Conpty() {
   const descriptionText = 'Use the ConPTY system on Windows.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'terminal', 'conpty', 'windows', 'pty']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'terminal',
+        'conpty',
+        'windows',
+        'pty',
+        'pseudo console',
+        'winpty',
+        'use conpty',
+      ]}>
       <Select value={useConpty} onChange={onChange}>
         <Label>
           <SettingsSearchHighlight text={labelText} />

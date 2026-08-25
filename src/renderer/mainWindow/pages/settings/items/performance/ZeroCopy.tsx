@@ -34,7 +34,19 @@ export default function ZeroCopy() {
   const descriptionText = 'Optimizes GPU memory transfers. Disable if experiencing rendering artifacts.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'zero copy', 'gpu', 'memory', 'buffer', 'artifact']}>
+    <SettingsFilterItem
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'zero copy',
+        'gpu',
+        'memory',
+        'buffer',
+        'artifact',
+        'zero-copy gpu buffers',
+        'vram',
+        'memory transfer',
+      ]}>
       <LynxSwitch title={titleText} enabled={enabled} description={descriptionText} onEnabledChange={onEnabledChange} />
     </SettingsFilterItem>
   );

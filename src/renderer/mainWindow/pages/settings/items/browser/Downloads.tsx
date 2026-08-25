@@ -139,12 +139,36 @@ export default function Downloads() {
   const behaviorDescription = 'Control how downloads are handled';
 
   const locationSearchTexts = useMemo(
-    () => [locationTitle, locationDescription, 'download', 'location', 'folder', 'directory', 'save'],
+    () => [
+      locationTitle,
+      locationDescription,
+      'download',
+      'location',
+      'folder',
+      'directory',
+      'save',
+      'download location',
+      'change location',
+      'save folder',
+      'downloads path',
+    ],
     [],
   );
 
   const behaviorSearchTexts = useMemo(
-    () => [behaviorTitle, behaviorDescription, 'download', 'behavior', 'ask', 'default', 'prompt', 'automatic'],
+    () => [
+      behaviorTitle,
+      behaviorDescription,
+      'download',
+      'behavior',
+      'ask',
+      'default',
+      'prompt',
+      'automatic',
+      'download behavior',
+      'always ask where to save',
+      'use default location',
+    ],
     [],
   );
 

@@ -32,6 +32,9 @@ export default function OutputColor() {
         'success',
         'info',
         'debug',
+        'ansi colors',
+        'syntax highlighting',
+        'terminal theme colors',
       ]}>
       <LynxSwitch
         description={

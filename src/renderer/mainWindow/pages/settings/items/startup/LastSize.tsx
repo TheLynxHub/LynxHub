@@ -27,6 +27,9 @@ export default function LastSize() {
         'startup',
         'window size',
         'window position',
+        'window geometry',
+        'remember size',
+        'window bounds',
       ]}>
       <LynxSwitch
         enabled={openLastSize}

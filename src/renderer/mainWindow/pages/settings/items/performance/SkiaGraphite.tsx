@@ -43,7 +43,11 @@ export default function SkiaGraphite() {
         'dawn',
         'rendering',
         'backend',
-        'enable-skia-graphite',
+        'enable skia graphite',
+        'vulkan',
+        'metal',
+        'directx',
+        'graphite rendering',
       ]}>
       <LynxSwitch title={titleText} enabled={enabled} description={descriptionText} onEnabledChange={onEnabledChange} />
     </SettingsFilterItem>

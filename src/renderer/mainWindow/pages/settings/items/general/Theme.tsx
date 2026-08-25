@@ -74,7 +74,20 @@ export default function Theme() {
   const descriptionText = 'Select the appearance theme.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'theme', 'dark', 'light', 'system']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'theme',
+        'dark',
+        'light',
+        'system',
+        'appearance',
+        'mode',
+        'dark mode',
+        'light mode',
+        'color scheme',
+      ]}>
       <Select ref={ref} value={selectedTheme} onChange={onThemeChange}>
         <Label>
           <SettingsSearchHighlight text={labelText} />
@@ -83,26 +96,36 @@ export default function Theme() {
           <Select.Value className="flex flex-row items-center gap-x-2" />
           <Select.Indicator />
         </Select.Trigger>
-        <Description>{descriptionText}</Description>
+        <Description>
+          <SettingsSearchHighlight text={descriptionText} />
+        </Description>
         <Select.Popover>
           <ListBox>
             <ListBox.Item id="dark" textValue="dark">
               <ListBox.ItemIndicator />
               <MoonIcon className="size-4" />
-              <Label>Dark</Label>
+              <Label>
+                <SettingsSearchHighlight text="Dark" />
+              </Label>
             </ListBox.Item>
             <ListBox.Item id="light" textValue="light">
               <ListBox.ItemIndicator />
               <Sun2Icon className="size-4" />
-              <Label>Light</Label>
+              <Label>
+                <SettingsSearchHighlight text="Light" />
+              </Label>
             </ListBox.Item>
             <ListBox.Item id="system" textValue="system">
               <ListBox.ItemIndicator />
               <DisplayIcon className="size-4" />
 
               <div className="flex flex-col">
-                <Label>System Default</Label>
-                <Description>Automatically switch theme based on system settings.</Description>
+                <Label>
+                  <SettingsSearchHighlight text="System Default" />
+                </Label>
+                <Description>
+                  <SettingsSearchHighlight text="Automatically switch theme based on system settings." />
+                </Description>
               </div>
             </ListBox.Item>
           </ListBox>

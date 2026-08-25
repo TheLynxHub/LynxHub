@@ -7,8 +7,8 @@ import {useDispatch} from 'react-redux';
 import SettingsFilterItem from '../../SettingsFilterItem';
 
 /**
- * Settings component that toggles whether the terminal cursor should blink.
- * Updates the 'blinkCursor' terminal setting in REDUX state.
+ * Settings component that toggles whether URLs clicked in the terminal open in a new tab.
+ * Updates the 'openLinkNewTab' terminal setting in REDUX state.
  */
 export default function OpenLinks() {
   const openLinkNewTab = useTerminalState('openLinkNewTab');
@@ -26,7 +26,19 @@ export default function OpenLinks() {
     'Whether open links in new tab when clicking on url.\n(Middle click to always open links in new tab)';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'terminal', 'cursor', 'blink']}>
+    <SettingsFilterItem
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'terminal',
+        'open links in new tab',
+        'links',
+        'url',
+        'hyperlinks',
+        'middle click',
+        'browser tab',
+        'clickable links',
+      ]}>
       <LynxSwitch
         title={titleText}
         enabled={openLinkNewTab}

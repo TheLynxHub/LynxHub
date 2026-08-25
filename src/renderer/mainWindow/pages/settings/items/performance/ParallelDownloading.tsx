@@ -43,7 +43,10 @@ export default function ParallelDownloading() {
         'parallel',
         'speed',
         'accelerate',
-        'enable-parallel-downloading',
+        'parallel downloading',
+        'download acceleration',
+        'concurrent downloads',
+        'multi-part download',
       ]}>
       <LynxSwitch title={titleText} enabled={enabled} description={descriptionText} onEnabledChange={onEnabledChange} />
     </SettingsFilterItem>

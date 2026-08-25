@@ -87,6 +87,11 @@ export default function ClearBrowserData() {
     'history',
     'fav icons',
     'clear data',
+    'clear browser data',
+    'clear browsing data',
+    'clear history',
+    'clear cookies',
+    'clear cache',
   ];
 
   return (

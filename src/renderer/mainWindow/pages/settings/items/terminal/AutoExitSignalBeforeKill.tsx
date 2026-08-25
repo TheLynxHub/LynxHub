@@ -36,6 +36,9 @@ export default function AutoExitSignalBeforeKill() {
         'terminate',
         'ctrl+c',
         'auto exit',
+        'sigint',
+        'sigterm',
+        'auto send exit signal before killing',
       ]}>
       <LynxSwitch
         title={titleText}

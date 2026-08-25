@@ -44,7 +44,7 @@ const settingsSlice = createSlice({
     setSearchValue: (state, action: PayloadAction<string>) => {
       const searchValue = action.payload;
       state.searchValue = searchValue;
-      state.searchWords = searchValue ? searchValue.split(/\s+/) : [];
+      state.searchWords = searchValue ? searchValue.split(/\s+/).filter(Boolean) : [];
     },
   },
 });

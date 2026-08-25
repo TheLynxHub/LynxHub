@@ -27,7 +27,17 @@ export default function StartMinimized() {
 
   return (
     <SettingsFilterItem
-      searchTexts={['Start Minimized', 'startup', 'launch minimized', 'minimize', 'system tray', 'taskbar']}>
+      searchTexts={[
+        'Start Minimized',
+        'startup',
+        'launch minimized',
+        'minimize',
+        'system tray',
+        'taskbar',
+        'tray start',
+        'silent start',
+        'background launch',
+      ]}>
       <LynxSwitch
         enabled={isEnabled}
         title="Start Minimized"

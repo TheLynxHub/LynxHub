@@ -25,7 +25,17 @@ export default function BlinkCursor() {
   const descriptionText = 'Whether the cursor blinks.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'terminal', 'cursor', 'blink']}>
+    <SettingsFilterItem
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'terminal',
+        'cursor',
+        'blink',
+        'blinking cursor',
+        'blink cursor',
+        'cursor animation',
+      ]}>
       <LynxSwitch
         title={titleText}
         enabled={blinkCursor}

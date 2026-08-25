@@ -33,7 +33,18 @@ export default function QuickCommands() {
 
   return (
     <SettingsFilterItem
-      searchTexts={['terminal', 'quick', 'commands', 'shortcuts', 'terminal quick commands', 'terminal shortcuts']}>
+      searchTexts={[
+        'terminal',
+        'quick',
+        'commands',
+        'shortcuts',
+        'terminal quick commands',
+        'terminal shortcuts',
+        'macros',
+        'snippets',
+        'custom commands',
+        'quick command',
+      ]}>
       <div className="flex flex-col gap-y-2">
         {normalized.map((item, index) => {
           const slot = index + 1;

@@ -25,7 +25,18 @@ export default function Ligatures() {
   const descriptionText = 'Enable programming ligatures.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'terminal', 'ligatures', 'font', 'programming']}>
+    <SettingsFilterItem
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'terminal',
+        'ligatures',
+        'font',
+        'programming',
+        'font ligatures',
+        'code ligatures',
+        'arrows',
+      ]}>
       <LynxSwitch
         title={titleText}
         enabled={enableLigatures}

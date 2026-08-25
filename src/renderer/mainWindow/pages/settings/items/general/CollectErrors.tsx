@@ -40,46 +40,53 @@ export default function CollectErrors() {
     [addBreadcrumbs, onBreadcrumbChange],
   );
 
+  const improveTitle = 'Help Improve LynxHub';
+  const improveDesc =
+    'Allow anonymous error reporting to help me identify issues and improve your experience in future updates.';
+
+  const interactionsTitle = 'Include Interactions';
+  const interactionsDesc =
+    'Collect minimal UI interactions reports. This data is anonymous ' +
+    'and helps to improve app and better trace what happened before an error.';
+
   return (
     <>
       <SettingsFilterItem
         searchTexts={[
-          'Help Improve LynxHub',
+          improveTitle,
+          improveDesc,
           'anonymous error reporting',
           'error reports',
           'improve your experience',
           'collect errors',
+          'telemetry',
+          'sentry',
+          'crash logs',
         ]}>
         <LynxSwitch
-          description={
-            <span>
-              Allow anonymous error reporting to help me identify issues and improve your experience in future updates
-            </span>
-          }
+          title={improveTitle}
           enabled={collectErrors}
-          title="Help Improve LynxHub"
+          description={improveDesc}
           onEnabledChange={onErrorChange}
         />
       </SettingsFilterItem>
 
       <SettingsFilterItem
         searchTexts={[
-          'Include User Interactions',
+          interactionsTitle,
+          interactionsDesc,
           'collect minimal UI interactions',
           'user interactions',
           'breadcrumbs',
           'error reports',
+          'ui events',
+          'trace errors',
         ]}>
         <LynxSwitch
-          description={
-            <span>
-              Collect minimal UI interactions reports. This data is anonymous and helps to improve app and better trace
-              what happened before an error.
-            </span>
-          }
           enabled={addBreadcrumbs}
+          title={interactionsTitle}
           isDisabled={!collectErrors}
-          title="Include Interactions"
+          description={interactionsDesc}
           onEnabledChange={onBreadcrumbChange}
         />
       </SettingsFilterItem>

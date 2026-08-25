@@ -98,21 +98,17 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
   const description = 'Instant floating browser window accessible from anywhere via global shortcut';
 
   return (
-    <SettingsFilterItem
-      searchTexts={[
-        title,
-        description,
-        'enable',
-        'disable',
-        'hotkey',
-        'shortcut',
-        'float',
-        'session',
-        'unload',
-        'blur',
-      ]}>
-      <div className="flex flex-col gap-y-4">
-        {/* Master Activation Toggle */}
+    <div className="flex flex-col gap-y-4">
+      {/* Master Activation Toggle */}
+      <SettingsFilterItem
+        searchTexts={[
+          'Enable Quick Web',
+          'Activate the floating quick-access browser window',
+          'quick web',
+          'floating window',
+          'master switch',
+          'toggle quick web',
+        ]}>
         <LynxSwitch
           description={
             'Activate the floating quick-access browser window, desktop global shortcut, ' +
@@ -122,8 +118,21 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
           title="Enable Quick Web"
           onEnabledChange={val => onUpdateConfig({enabled: val})}
         />
+      </SettingsFilterItem>
 
-        {/* Main Activation & Hotkey Card */}
+      {/* Main Activation & Hotkey Card */}
+      <SettingsFilterItem
+        searchTexts={[
+          title,
+          description,
+          'Global OS Shortcut',
+          'hotkey',
+          'shortcut',
+          'alt+w',
+          'record shortcut',
+          'toggle window',
+          'quick web floating window',
+        ]}>
         <Card className={!isEnabled ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
           <Card.Header className="flex flex-row items-center justify-between gap-4">
             <div className="flex flex-col gap-y-0.5">
@@ -162,9 +171,13 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                   <KeyboardIcon className="size-5 text-accent-foreground" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold">Global OS Shortcut</span>
+                  <span className="text-sm font-semibold">
+                    <SettingsSearchHighlight text="Global OS Shortcut" />
+                  </span>
                   <span className="text-xs text-muted">
-                    Open or toggle the floating window from anywhere across your desktop.
+                    <SettingsSearchHighlight
+                      text={'Open or toggle the floating window from ' + 'anywhere across your desktop.'}
+                    />
                   </span>
                 </div>
               </div>
@@ -256,8 +269,28 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
             </Surface>
           </Card.Content>
         </Card>
+      </SettingsFilterItem>
 
-        {/* Window Behavior & Session Settings */}
+      {/* Window Behavior & Session Settings */}
+      <SettingsFilterItem
+        searchTexts={[
+          'Window Behavior & Session Isolation',
+          'Browser Session & Storage Profile',
+          'Shared Session',
+          'Isolated Session',
+          'cookies',
+          'sandbox',
+          'logins',
+          'Keep in Background',
+          'Zero-Latency Reopen',
+          'preload',
+          'Hide on Focus Lost',
+          'Auto-Dismiss',
+          'Always on Top',
+          'Pin Window',
+          'stay on top',
+          'overlay',
+        ]}>
         <Card className={!isEnabled ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
           <Card.Header>
             <div className="flex flex-col gap-y-0.5">
@@ -266,7 +299,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
               </Card.Title>
               <Card.Description>
                 <SettingsSearchHighlight
-                  text={'Configure browser profile sharing, background persistence, ' + 'and window focus rules'}
+                  text={'Configure browser profile sharing, background persistence, and window focus rules'}
                 />
               </Card.Description>
             </div>
@@ -276,9 +309,16 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
             {/* Session Type Selector */}
             <div className="flex flex-col gap-y-2">
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-foreground">Browser Session & Storage Profile</span>
+                <span className="text-xs font-semibold text-foreground">
+                  <SettingsSearchHighlight text="Browser Session & Storage Profile" />
+                </span>
                 <span className="text-xs text-muted">
-                  Choose whether Quick Web shares logins, cookies, and cache with LynxHub's browser or runs isolated.
+                  <SettingsSearchHighlight
+                    text={
+                      'Choose whether Quick Web shares logins, cookies, and cache ' +
+                      "with LynxHub's browser or runs isolated."
+                    }
+                  />
                 </span>
               </div>
 
@@ -309,13 +349,17 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                     <div className="flex flex-col gap-y-1">
                       <div className="flex items-center gap-x-2">
                         <EarthIcon className="size-4 text-accent-foreground" />
-                        <span className="text-xs font-semibold">Shared Session</span>
+                        <span className="text-xs font-semibold">
+                          <SettingsSearchHighlight text="Shared Session" />
+                        </span>
                         <Chip size="sm" variant="soft" color="accent" className="text-[10px] h-4 px-1.5 font-medium">
                           Recommended
                         </Chip>
                       </div>
                       <span className="text-[11px] text-muted leading-tight">
-                        Shares cookies, logins, and storage with LynxHub's main browser.
+                        <SettingsSearchHighlight
+                          text={"Shares cookies, logins, and storage with LynxHub's main browser."}
+                        />
                       </span>
                     </div>
                   </Surface>
@@ -341,10 +385,14 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                     <div className="flex flex-col gap-y-1">
                       <div className="flex items-center gap-x-2">
                         <ShieldCheckIcon className="size-4 text-accent-foreground" />
-                        <span className="text-xs font-semibold">Isolated Session</span>
+                        <span className="text-xs font-semibold">
+                          <SettingsSearchHighlight text="Isolated Session" />
+                        </span>
                       </div>
                       <span className="text-[11px] text-muted leading-tight">
-                        Runs in a dedicated sandbox with separate cookies, cache, and logins.
+                        <SettingsSearchHighlight
+                          text={'Runs in a dedicated sandbox with separate cookies, cache, and logins.'}
+                        />
                       </span>
                     </div>
                   </Surface>
@@ -383,7 +431,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
             </div>
           </Card.Content>
         </Card>
-      </div>
-    </SettingsFilterItem>
+      </SettingsFilterItem>
+    </div>
   );
 }

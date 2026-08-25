@@ -25,7 +25,20 @@ export default function FontLoadTimeout() {
     'increase this value to allow slow-loading systems more time.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'terminal', 'font', 'load', 'timeout', 'observer']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'terminal',
+        'font',
+        'load',
+        'timeout',
+        'observer',
+        'font load timeout',
+        'custom font',
+        'jetbrains mono',
+        'slow font loading',
+      ]}>
       <NumberField
         step={100}
         minValue={0}

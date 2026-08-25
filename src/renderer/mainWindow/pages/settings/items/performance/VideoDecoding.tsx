@@ -34,7 +34,23 @@ export default function VideoDecoding() {
   const descriptionText = 'Uses GPU for video decoding. Disable if experiencing video playback issues or crashes.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'video', 'decode', 'gpu', 'hardware', 'playback']}>
+    <SettingsFilterItem
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'video',
+        'decode',
+        'gpu',
+        'hardware',
+        'playback',
+        'hardware video decoding',
+        'accelerated video',
+        'codec',
+        'h264',
+        'hevc',
+        'av1',
+        'vp9',
+      ]}>
       <LynxSwitch title={titleText} enabled={enabled} description={descriptionText} onEnabledChange={onEnabledChange} />
     </SettingsFilterItem>
   );

@@ -6,6 +6,7 @@ import {useCallback, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
 import SettingsFilterItem from '../../SettingsFilterItem';
+import SettingsSearchHighlight from '../../SettingsSearchHighlight';
 
 /**
  * Settings component providing a button to reset all terminal configuration settings back to their defaults.
@@ -25,18 +26,22 @@ export default function Reset() {
     }, fakeDelay);
   }, [dispatch]);
 
+  const buttonText = 'Reset All Terminal Settings';
+
   return (
     <SettingsFilterItem
       searchTexts={[
+        buttonText,
         'Reset all terminal settings',
         'reset terminal',
         'defaults',
+        'restore terminal defaults',
         'terminal settings',
         'reset quick commands',
       ]}>
       <Button className="mt-2" variant="danger" onPress={onApply} isPending={isSaving} fullWidth>
         {isSaving ? <Spinner size="sm" color="current" /> : <RefreshIcon />}
-        Reset All Terminal Settings
+        <SettingsSearchHighlight text={buttonText} />
       </Button>
     </SettingsFilterItem>
   );

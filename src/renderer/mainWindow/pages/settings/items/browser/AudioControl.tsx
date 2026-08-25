@@ -112,7 +112,21 @@ export default function AudioControl() {
     ' but have no audible effect when global mute is enabled.';
 
   const muteSearchTexts = useMemo(
-    () => [muteTitle, muteDescription, 'audio', 'mute', 'silence', 'sound', 'global', 'all', 'tabs'],
+    () => [
+      muteTitle,
+      muteDescription,
+      'audio',
+      'mute',
+      'silence',
+      'sound',
+      'global',
+      'all',
+      'tabs',
+      'global mute',
+      'volume',
+      'speaker',
+      'browser audio',
+    ],
     [],
   );
 
@@ -139,7 +153,7 @@ export default function AudioControl() {
               ) : (
                 <VolumeIcon aria-hidden="true" className="size-5 shrink-0 text-muted" />
               )}
-              {globalMuted ? 'All audio muted' : 'Audio enabled'}
+              <SettingsSearchHighlight text={globalMuted ? 'All audio muted' : 'Audio enabled'} />
             </Switch.Content>
           </Switch>
         </Card.Content>

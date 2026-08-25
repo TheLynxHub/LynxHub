@@ -28,7 +28,17 @@ export default function TitleName() {
 
   return (
     <SettingsFilterItem
-      searchTexts={[titleText, descriptionText, 'title', 'window title', 'taskbar name', 'active ai', 'dynamic name']}>
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'title',
+        'window title',
+        'taskbar name',
+        'active ai',
+        'dynamic name',
+        'dynamic app title',
+        'process name',
+      ]}>
       <LynxSwitch
         title={titleText}
         enabled={dynamicAppTitle}

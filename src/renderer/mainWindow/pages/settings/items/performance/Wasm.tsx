@@ -34,7 +34,17 @@ export default function Wasm() {
   const descriptionText = 'Enables SIMD optimizations for WebAssembly applications. Improves WASM performance.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'webassembly', 'wasm', 'simd', 'performance']}>
+    <SettingsFilterItem
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'webassembly',
+        'wasm',
+        'simd',
+        'performance',
+        'vector instructions',
+        'webassembly simd',
+      ]}>
       <LynxSwitch title={titleText} enabled={enabled} description={descriptionText} onEnabledChange={onEnabledChange} />
     </SettingsFilterItem>
   );

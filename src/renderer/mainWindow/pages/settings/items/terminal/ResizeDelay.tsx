@@ -24,7 +24,18 @@ export default function ResizeDelay() {
     'Low values feel snappier, while high values prevent performance lag during dragging.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'terminal', 'resize delay', 'resize', 'latency']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'terminal',
+        'resize delay',
+        'resize',
+        'latency',
+        'debounce',
+        'viewport resize',
+        'window resize delay',
+      ]}>
       <NumberField
         step={1}
         minValue={1}

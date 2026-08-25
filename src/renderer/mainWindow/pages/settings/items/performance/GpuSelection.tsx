@@ -36,7 +36,21 @@ export default function GpuSelection() {
 
   return (
     <SettingsFilterItem
-      searchTexts={[titleText, descriptionText, 'gpu', 'dedicated', 'discrete', 'integrated', 'graphics', 'laptop']}>
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'gpu',
+        'dedicated',
+        'discrete',
+        'integrated',
+        'graphics',
+        'laptop',
+        'force high-performance gpu',
+        'nvidia',
+        'amd',
+        'intel iris',
+        'discrete graphics',
+      ]}>
       <LynxSwitch title={titleText} enabled={enabled} description={descriptionText} onEnabledChange={onEnabledChange} />
     </SettingsFilterItem>
   );

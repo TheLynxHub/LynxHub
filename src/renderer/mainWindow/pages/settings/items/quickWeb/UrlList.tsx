@@ -271,7 +271,21 @@ export default function UrlList({config, onUpdateConfig}: Props) {
   const description = 'Manage URLs accessible in the Quick Web floating window and configure startup preloading';
 
   return (
-    <SettingsFilterItem searchTexts={[title, description, 'url', 'websites', 'preload', 'quick web list']}>
+    <SettingsFilterItem
+      searchTexts={[
+        title,
+        description,
+        'url',
+        'websites',
+        'preload',
+        'quick web list',
+        'configured websites',
+        'add website',
+        'import bookmarks',
+        'import history',
+        'preload on startup',
+        'reorder websites',
+      ]}>
       <Card>
         <Card.Header className="flex flex-row items-center justify-between gap-4">
           <div className="flex flex-col gap-y-1">

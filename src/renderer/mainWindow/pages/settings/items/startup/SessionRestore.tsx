@@ -73,6 +73,10 @@ const SessionRestore = memo(() => {
           'home page',
           'open tabs',
           'remember tabs',
+          'open home page',
+          'resume last active page',
+          'restore previous session',
+          'on startup',
         ]}>
         <Select value={config.startupBehavior} onChange={handleStartupBehaviorChange}>
           <Label>
@@ -82,15 +86,21 @@ const SessionRestore = memo(() => {
             <Select.Value className="flex flex-row items-center gap-x-2" />
             <Select.Indicator />
           </Select.Trigger>
-          <Description>{startupDesc}</Description>
+          <Description>
+            <SettingsSearchHighlight text={startupDesc} />
+          </Description>
           <Select.Popover>
             <ListBox>
               <ListBox.Item id="home" textValue="Open Home Page">
                 <ListBox.ItemIndicator />
                 <Home2Icon className="size-4 text-accent" />
                 <div className="flex flex-col">
-                  <Label>Open Home Page</Label>
-                  <Description>Start fresh on the Home page every time LynxHub opens.</Description>
+                  <Label>
+                    <SettingsSearchHighlight text="Open Home Page" />
+                  </Label>
+                  <Description>
+                    <SettingsSearchHighlight text="Start fresh on the Home page every time LynxHub opens." />
+                  </Description>
                 </div>
               </ListBox.Item>
 
@@ -98,8 +108,12 @@ const SessionRestore = memo(() => {
                 <ListBox.ItemIndicator />
                 <HistoryIcon className="size-4 text-LynxPurple" />
                 <div className="flex flex-col">
-                  <Label>Resume Last Active Page</Label>
-                  <Description>Reopen the single internal page that was open when closing.</Description>
+                  <Label>
+                    <SettingsSearchHighlight text="Resume Last Active Page" />
+                  </Label>
+                  <Description>
+                    <SettingsSearchHighlight text="Reopen the single internal page that was open when closing." />
+                  </Description>
                 </div>
               </ListBox.Item>
 
@@ -107,8 +121,14 @@ const SessionRestore = memo(() => {
                 <ListBox.ItemIndicator />
                 <RestartIcon className="size-4 text-success" />
                 <div className="flex flex-col">
-                  <Label>Restore Previous Session (Remember All Tabs)</Label>
-                  <Description>Automatically restore all open tabs, sessions, and workspaces on startup.</Description>
+                  <Label>
+                    <SettingsSearchHighlight text="Restore Previous Session (Remember All Tabs)" />
+                  </Label>
+                  <Description>
+                    <SettingsSearchHighlight
+                      text={'Automatically restore all open tabs, sessions, ' + 'and workspaces on startup.'}
+                    />
+                  </Description>
                 </div>
               </ListBox.Item>
             </ListBox>
@@ -118,7 +138,17 @@ const SessionRestore = memo(() => {
 
       {/* Crash Recovery Setting */}
       <SettingsFilterItem
-        searchTexts={[crashLabel, crashDesc, 'crash recovery', 'restore on crash', 'unexpected exit', 'restore tabs']}>
+        searchTexts={[
+          crashLabel,
+          crashDesc,
+          'crash recovery',
+          'restore on crash',
+          'unexpected exit',
+          'restore tabs',
+          'ask to restore',
+          'always restore automatically',
+          'never restore',
+        ]}>
         <Select value={config.restoreOnCrash} onChange={handleCrashModeChange}>
           <Label>
             <SettingsSearchHighlight text={crashLabel} />
@@ -127,15 +157,23 @@ const SessionRestore = memo(() => {
             <Select.Value className="flex flex-row items-center gap-x-2" />
             <Select.Indicator />
           </Select.Trigger>
-          <Description>{crashDesc}</Description>
+          <Description>
+            <SettingsSearchHighlight text={crashDesc} />
+          </Description>
           <Select.Popover>
             <ListBox>
               <ListBox.Item id="ask" textValue="Ask to restore tabs (Recommended)">
                 <ListBox.ItemIndicator />
                 <RefreshIcon className="size-4 text-warning" />
                 <div className="flex flex-col">
-                  <Label>Ask to Restore (Recommended)</Label>
-                  <Description>Display a restore banner when LynxHub starts after an unexpected exit.</Description>
+                  <Label>
+                    <SettingsSearchHighlight text="Ask to Restore (Recommended)" />
+                  </Label>
+                  <Description>
+                    <SettingsSearchHighlight
+                      text={'Display a restore banner when LynxHub starts ' + 'after an unexpected exit.'}
+                    />
+                  </Description>
                 </div>
               </ListBox.Item>
 
@@ -143,8 +181,14 @@ const SessionRestore = memo(() => {
                 <ListBox.ItemIndicator />
                 <RestartIcon className="size-4 text-success" />
                 <div className="flex flex-col">
-                  <Label>Always Restore Automatically</Label>
-                  <Description>Immediately reopen all previously active tabs after a crash without asking.</Description>
+                  <Label>
+                    <SettingsSearchHighlight text="Always Restore Automatically" />
+                  </Label>
+                  <Description>
+                    <SettingsSearchHighlight
+                      text={'Immediately reopen all previously active tabs ' + 'after a crash without asking.'}
+                    />
+                  </Description>
                 </div>
               </ListBox.Item>
 
@@ -152,8 +196,12 @@ const SessionRestore = memo(() => {
                 <ListBox.ItemIndicator />
                 <DangerCircleIcon className="size-4 text-danger" />
                 <div className="flex flex-col">
-                  <Label>Never Restore</Label>
-                  <Description>Discard crashed session data and always start fresh.</Description>
+                  <Label>
+                    <SettingsSearchHighlight text="Never Restore" />
+                  </Label>
+                  <Description>
+                    <SettingsSearchHighlight text="Discard crashed session data and always start fresh." />
+                  </Description>
                 </div>
               </ListBox.Item>
             </ListBox>
@@ -171,6 +219,10 @@ const SessionRestore = memo(() => {
           'workspaces',
           'pinned tabs',
           'static pages',
+          'internal app pages',
+          'standalone browser tabs',
+          'standalone terminal tabs',
+          'only restore pinned tabs',
         ]}>
         <div className="flex flex-col gap-y-3 pt-1">
           <div className="flex flex-col gap-y-0.5">
@@ -178,7 +230,9 @@ const SessionRestore = memo(() => {
               <SettingsSearchHighlight text="Tab Types to Remember & Restore" />
             </Label>
             <Description className="text-xs text-foreground/60">
-              Customize which types of tabs and sessions LynxHub should remember and restore.
+              <SettingsSearchHighlight
+                text={'Customize which types of tabs and sessions LynxHub ' + 'should remember and restore.'}
+              />
             </Description>
           </div>
 
@@ -192,7 +246,9 @@ const SessionRestore = memo(() => {
                 </Checkbox.Control>
                 <div className="flex items-center gap-x-2 min-w-0">
                   <GlobalIcon className="size-4 text-accent shrink-0" />
-                  <span className="truncate">Standalone Browser Tabs</span>
+                  <span className="truncate">
+                    <SettingsSearchHighlight text="Standalone Browser Tabs" />
+                  </span>
                 </div>
               </Checkbox.Content>
             </Checkbox>
@@ -206,7 +262,9 @@ const SessionRestore = memo(() => {
                 </Checkbox.Control>
                 <div className="flex items-center gap-x-2 min-w-0">
                   <Widget2Icon className="size-4 text-LynxPurple shrink-0" />
-                  <span className="truncate">AI Cards & Workspaces</span>
+                  <span className="truncate">
+                    <SettingsSearchHighlight text="AI Cards & Workspaces" />
+                  </span>
                 </div>
               </Checkbox.Content>
             </Checkbox>
@@ -220,7 +278,9 @@ const SessionRestore = memo(() => {
                 </Checkbox.Control>
                 <div className="flex items-center gap-x-2 min-w-0">
                   <Terminal_Icon className="size-4 text-warning shrink-0" />
-                  <span className="truncate">Standalone Terminal Tabs</span>
+                  <span className="truncate">
+                    <SettingsSearchHighlight text="Standalone Terminal Tabs" />
+                  </span>
                 </div>
               </Checkbox.Content>
             </Checkbox>
@@ -234,7 +294,9 @@ const SessionRestore = memo(() => {
                 </Checkbox.Control>
                 <div className="flex items-center gap-x-2 min-w-0">
                   <Home2Icon className="size-4 text-success shrink-0" />
-                  <span className="truncate">Internal App Pages</span>
+                  <span className="truncate">
+                    <SettingsSearchHighlight text="Internal App Pages" />
+                  </span>
                 </div>
               </Checkbox.Content>
             </Checkbox>
@@ -249,7 +311,9 @@ const SessionRestore = memo(() => {
                   </Checkbox.Control>
                   <div className="flex items-center gap-x-2 min-w-0">
                     <PinIcon className="size-4 text-warning shrink-0" />
-                    <span className="truncate">Only Restore Pinned Tabs on Startup</span>
+                    <span className="truncate">
+                      <SettingsSearchHighlight text="Only Restore Pinned Tabs on Startup" />
+                    </span>
                   </div>
                 </Checkbox.Content>
               </Checkbox>

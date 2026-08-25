@@ -48,6 +48,10 @@ export default function BookmarkNewTabSetting() {
       'terminal',
       'browser',
       'behavior',
+      'bookmark new tab behavior',
+      'browser only',
+      'terminal & browser',
+      'dual tab',
     ],
     [],
   );

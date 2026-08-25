@@ -38,7 +38,18 @@ export default function GpuBlacklist() {
 
   return (
     <SettingsFilterItem
-      searchTexts={[titleText, descriptionText, 'gpu', 'blocklist', 'blacklist', 'driver', 'compatibility', 'crash']}>
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'gpu',
+        'blocklist',
+        'blacklist',
+        'driver',
+        'compatibility',
+        'crash',
+        'ignore gpu blocklist',
+        'hardware acceleration',
+      ]}>
       <LynxSwitch
         title={titleText}
         enabled={enabled}

@@ -29,7 +29,21 @@ export default function CursorInactiveStyle() {
   const descriptionText = 'Select the appearance of cursor when inactive.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'cursor', 'inactive', 'terminal']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'cursor',
+        'inactive',
+        'terminal',
+        'cursor inactive style',
+        'unfocused cursor',
+        'outline',
+        'bar',
+        'block',
+        'underline',
+        'none',
+      ]}>
       <Select onChange={onChange} value={cursorInactiveStyle}>
         <Label>
           <SettingsSearchHighlight text={labelText} />

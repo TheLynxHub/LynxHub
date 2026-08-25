@@ -7,8 +7,8 @@ import {useDispatch} from 'react-redux';
 import SettingsFilterItem from '../../SettingsFilterItem';
 
 /**
- * Settings component that toggles whether the terminal cursor should blink.
- * Updates the 'blinkCursor' terminal setting in REDUX state.
+ * Settings component that toggles whether to automatically send 'Y' confirmation after exit button is pressed.
+ * Updates the 'sendYWithExit' terminal setting in REDUX state.
  */
 export default function SendYWithExit() {
   const sendYWithExit = useTerminalState('sendYWithExit');
@@ -26,7 +26,17 @@ export default function SendYWithExit() {
     'Whether auto send the "Y" after exit button pressed.\n(When CTRL held or confirm is disabled)';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'terminal', 'exit', 'y']}>
+    <SettingsFilterItem
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'terminal',
+        'exit',
+        'y',
+        'send y with exit',
+        'auto confirm exit',
+        'yes exit',
+      ]}>
       <LynxSwitch
         title={titleText}
         enabled={sendYWithExit}

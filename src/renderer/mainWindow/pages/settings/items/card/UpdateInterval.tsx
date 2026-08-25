@@ -25,7 +25,17 @@ export default function UpdateInterval() {
 
   return (
     <SettingsFilterItem
-      searchTexts={['Update check frequency:', 'update interval', 'card update', 'check for updates', 'minutes']}>
+      searchTexts={[
+        'Update Check Frequency (Minutes)',
+        'Update check frequency:',
+        'update interval',
+        'card update',
+        'check for updates',
+        'minutes',
+        'frequency',
+        'dashboard cards',
+        'card refresh',
+      ]}>
       <NumberField
         minValue={2}
         value={updateInterval}

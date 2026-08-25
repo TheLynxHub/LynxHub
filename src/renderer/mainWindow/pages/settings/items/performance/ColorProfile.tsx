@@ -40,7 +40,21 @@ export default function ColorProfile() {
   const descriptionText = 'Forces a specific color output profile. Use sRGB for standard displays.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'color', 'profile', 'srgb', 'display']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'color',
+        'profile',
+        'srgb',
+        'display',
+        'display-p3',
+        'display p3',
+        'hdr',
+        'gamma',
+        'color space',
+        'wide color gamut',
+      ]}>
       <Select value={selectedKey} onChange={onChange}>
         <Label>
           <SettingsSearchHighlight text={labelText} />

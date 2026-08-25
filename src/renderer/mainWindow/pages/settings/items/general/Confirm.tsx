@@ -63,7 +63,15 @@ export default function Confirm() {
   return (
     <>
       <SettingsFilterItem
-        searchTexts={['Close App', 'close app', 'confirmation window', 'ctrl', 'bypass confirmation']}>
+        searchTexts={[
+          'Close App',
+          'close app',
+          'quit application',
+          'exit app',
+          'confirmation window',
+          'ctrl',
+          'bypass confirmation',
+        ]}>
         <LynxSwitch
           title="Close App"
           enabled={closeConfirm}
@@ -72,7 +80,15 @@ export default function Confirm() {
         />
       </SettingsFilterItem>
       <SettingsFilterItem
-        searchTexts={['Close Tab', 'close tab', 'terminal tab', 'confirmation window', 'ctrl', 'bypass confirmation']}>
+        searchTexts={[
+          'Close Tab',
+          'close tab',
+          'terminal tab',
+          'close running terminal',
+          'confirmation window',
+          'ctrl',
+          'bypass confirmation',
+        ]}>
         <LynxSwitch
           title="Close Tab"
           enabled={closeTabConfirm}
@@ -85,6 +101,9 @@ export default function Confirm() {
           'Terminate Process',
           'terminate process',
           'stop ai',
+          'kill process',
+          'kill ai',
+          'stop process',
           'confirmation window',
           'ctrl',
           'bypass confirmation',
@@ -93,7 +112,7 @@ export default function Confirm() {
           title="Terminate Process"
           enabled={terminateAIConfirm}
           onEnabledChange={onTerminateAIConfirmChange}
-          description="Show a confirmation window when terminating running process"
+          description="Show a confirmation window when terminating running process."
         />
       </SettingsFilterItem>
 
@@ -102,6 +121,9 @@ export default function Confirm() {
           'Send Exit Signal (Terminal)',
           'terminal',
           'exit confirmation',
+          'exit signal',
+          'sigint',
+          'ctrl+c',
           'confirm',
           'ctrl',
           'bypass confirmation',
@@ -110,12 +132,13 @@ export default function Confirm() {
           enabled={exitSignalConfirm}
           title="Send Exit Signal (Terminal)"
           onEnabledChange={onSendSignalConfirmChange}
-          description={'Show a confirmation window when sending exit signal to process.'}
+          description="Show a confirmation window when sending exit signal to process."
         />
       </SettingsFilterItem>
 
       <SettingsFilterItem
         searchTexts={[
+          'Browser Reload Confirmation',
           'Force Reload',
           'force reload',
           'browser reload',

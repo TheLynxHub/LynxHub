@@ -124,7 +124,19 @@ export default function UserAgent() {
     return agentDescriptions.find(d => d.id === id)?.value || undefined;
   };
 
-  const filterSearchTexts = ['User Agent', 'browser', 'user agent', 'lynxhub', 'electron', 'chrome', 'custom', 'ua'];
+  const filterSearchTexts = [
+    'User Agent',
+    'browser',
+    'user agent',
+    'lynxhub',
+    'electron',
+    'chrome',
+    'custom',
+    'ua',
+    'user agent string',
+    'http header',
+    'custom user agent',
+  ];
 
   return (
     <SettingsFilterItem searchTexts={filterSearchTexts}>
@@ -142,7 +154,9 @@ export default function UserAgent() {
               <ListBox.Item id="lynxhub" textValue="LynxHub (Default)">
                 <ListBox.ItemIndicator />
                 <div className="flex flex-col">
-                  <Label>LynxHub (Default)</Label>
+                  <Label>
+                    <SettingsSearchHighlight text="LynxHub (Default)" />
+                  </Label>
                   <Description>
                     <SettingsSearchHighlight text={getAgentDescription('lynxhub')} />
                   </Description>
@@ -151,7 +165,9 @@ export default function UserAgent() {
               <ListBox.Item id="electron" textValue="Electron">
                 <ListBox.ItemIndicator />
                 <div className="flex flex-col">
-                  <Label>Electron</Label>
+                  <Label>
+                    <SettingsSearchHighlight text="Electron" />
+                  </Label>
                   <Description>
                     <SettingsSearchHighlight text={getAgentDescription('electron')} />
                   </Description>
@@ -160,7 +176,9 @@ export default function UserAgent() {
               <ListBox.Item id="chrome" textValue="Chrome">
                 <ListBox.ItemIndicator />
                 <div className="flex flex-col">
-                  <Label>Chrome</Label>
+                  <Label>
+                    <SettingsSearchHighlight text="Chrome" />
+                  </Label>
                   <Description>
                     <SettingsSearchHighlight text={getAgentDescription('chrome')} />
                   </Description>
@@ -169,7 +187,9 @@ export default function UserAgent() {
               <ListBox.Item id="custom" textValue="Custom">
                 <ListBox.ItemIndicator />
                 <div className="flex flex-col">
-                  <Label>Custom</Label>
+                  <Label>
+                    <SettingsSearchHighlight text="Custom" />
+                  </Label>
                   <Description>
                     <SettingsSearchHighlight text={getAgentDescription('custom')} />
                   </Description>

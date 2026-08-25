@@ -31,6 +31,9 @@ export default function ExternalLinks() {
     'browser',
     'open externally',
     'default browser',
+    'open links externally',
+    'system browser',
+    'external browser',
   ];
 
   return (

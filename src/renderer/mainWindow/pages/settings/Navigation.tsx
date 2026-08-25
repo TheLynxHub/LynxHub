@@ -184,6 +184,8 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
   const groupsToRender = useMemo(() => {
     if (!searchValue) return groupSections;
 
+    const query = searchValue.trim().toLowerCase();
+
     return groupSections
       .map(group => {
         const itemsWithSearchFields = group.items.map(item => ({
@@ -193,20 +195,35 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
           sectionText: sectionTexts.get(item.elementId) ?? '',
         }));
 
+        const directMatchedItems = query
+          ? itemsWithSearchFields
+              .filter(({title, groupTitle, sectionText}) => {
+                const combined = `${title} ${groupTitle} ${sectionText}`.toLowerCase();
+                return combined.includes(query);
+              })
+              .map(r => r.item)
+          : [];
+
         const fuse = new Fuse(itemsWithSearchFields, {
           keys: ['title', 'groupTitle', 'sectionText'],
           threshold: 0.4,
+          ignoreLocation: true,
+          minMatchCharLength: 2,
         });
 
-        const matchedItems = fuse.search(searchValue).map(r => r.item.item);
+        const fuzzyMatchedItems = fuse.search(searchValue).map(r => r.item.item);
+
+        const matchedItemMap = new Map<string, (typeof group.items)[number]>();
+        directMatchedItems.forEach(item => matchedItemMap.set(item.elementId, item));
+        fuzzyMatchedItems.forEach(item => matchedItemMap.set(item.elementId, item));
 
         return {
           ...group,
-          items: matchedItems,
+          items: Array.from(matchedItemMap.values()),
         };
       })
       .filter(group => group.items.length > 0);
-  }, [searchValue, groupSections, sectionTexts]);
+  }, [searchValue, sectionTexts]);
 
   return (
     <Card variant="secondary" className="h-full my-2 w-48 shrink-0">

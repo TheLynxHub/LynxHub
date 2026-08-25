@@ -34,7 +34,19 @@ export default function Taskbar() {
     : 'Select how the app should appear in the taskbar and system tray.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'taskbar', 'dock', 'tray']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'taskbar',
+        'dock',
+        'tray',
+        'system tray',
+        'minimize to tray',
+        'dock options',
+        'taskbar options',
+        'tray icon',
+      ]}>
       <Select value={selectedKey} onChange={onChange}>
         <Label>
           <SettingsSearchHighlight text={labelText} />
@@ -43,33 +55,49 @@ export default function Taskbar() {
           <Select.Value />
           <Select.Indicator />
         </Select.Trigger>
-        <Description>{descriptionText}</Description>
+        <Description>
+          <SettingsSearchHighlight text={descriptionText} />
+        </Description>
         <Select.Popover>
           <ListBox>
             <ListBox.Item id="taskbar-tray" textValue={isMac ? 'Dock & Tray' : 'Taskbar & Tray'}>
               <ListBox.ItemIndicator />
-              <Label>{isMac ? 'Dock & Tray' : 'Taskbar & Tray'}</Label>
+              <Label>
+                <SettingsSearchHighlight text={isMac ? 'Dock & Tray' : 'Taskbar & Tray'} />
+              </Label>
             </ListBox.Item>
             <ListBox.Item id="taskbar" textValue={isMac ? 'Dock Only' : 'Taskbar Only'}>
               <ListBox.ItemIndicator />
-              <Label>{isMac ? 'Dock Only' : 'Taskbar Only'}</Label>
+              <Label>
+                <SettingsSearchHighlight text={isMac ? 'Dock Only' : 'Taskbar Only'} />
+              </Label>
             </ListBox.Item>
             {!isLinux && (
               <ListBox.Item id="tray" textValue={isMac ? 'Tray Only' : 'Tray Only'}>
                 <ListBox.ItemIndicator />
-                <Label>{isMac ? 'Tray Only' : 'Tray Only'}</Label>
+                <Label>
+                  <SettingsSearchHighlight text={isMac ? 'Tray Only' : 'Tray Only'} />
+                </Label>
               </ListBox.Item>
             )}
             <ListBox.Item id="tray-minimized" textValue={isMac ? 'Tray Only' : 'Tray Only'}>
               <ListBox.ItemIndicator />
               <div className="flex flex-col">
                 <Label>
-                  {isMac ? 'Dock when focused, Tray when minimized' : 'Taskbar when focused, Tray when minimized'}
+                  <SettingsSearchHighlight
+                    text={
+                      isMac ? 'Dock when focused, Tray when minimized' : 'Taskbar when focused, Tray when minimized'
+                    }
+                  />
                 </Label>
                 <Description>
-                  {isMac
-                    ? 'Show in the dock when focused, move to tray when minimized.'
-                    : 'Show in the taskbar when focused, move to tray when minimized.'}
+                  <SettingsSearchHighlight
+                    text={
+                      isMac
+                        ? 'Show in the dock when focused, move to tray when minimized.'
+                        : 'Show in the taskbar when focused, move to tray when minimized.'
+                    }
+                  />
                 </Description>
               </div>
             </ListBox.Item>

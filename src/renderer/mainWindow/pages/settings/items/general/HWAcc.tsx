@@ -30,7 +30,17 @@ export default function HWAcc() {
 
   return (
     <SettingsFilterItem
-      searchTexts={[titleText, descriptionText, 'hardware acceleration', 'gpu', 'performance', 'lag', 'freeze']}>
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'hardware acceleration',
+        'gpu',
+        'performance',
+        'lag',
+        'freeze',
+        'hardware',
+        'graphics acceleration',
+      ]}>
       <LynxSwitch
         description={
           <>

@@ -24,7 +24,18 @@ export default function ScrollBack() {
     'Larger values keep more history but consume more memory.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'terminal', 'scrollback', 'buffer', 'history']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'terminal',
+        'scrollback',
+        'buffer',
+        'history',
+        'scroll lines',
+        'scrollback lines',
+        'terminal buffer size',
+      ]}>
       <NumberField
         step={100}
         minValue={100}

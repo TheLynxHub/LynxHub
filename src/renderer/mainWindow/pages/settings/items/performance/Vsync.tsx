@@ -36,7 +36,18 @@ export default function Vsync() {
 
   return (
     <SettingsFilterItem
-      searchTexts={[titleText, descriptionText, 'vsync', 'tearing', 'latency', 'input lag', 'gaming']}>
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'vsync',
+        'tearing',
+        'latency',
+        'input lag',
+        'gaming',
+        'disable gpu vsync',
+        'vertical sync',
+        'frame sync',
+      ]}>
       <LynxSwitch
         title={titleText}
         enabled={enabled}

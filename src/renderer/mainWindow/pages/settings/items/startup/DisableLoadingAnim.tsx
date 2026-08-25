@@ -28,6 +28,9 @@ export default function DisableLoadingAnim() {
         'loading window',
         'visual effects',
         'performance',
+        'splash screen',
+        'fast boot',
+        'skip animations',
       ]}>
       <LynxSwitch
         enabled={disableLoadingAnimations}

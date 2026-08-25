@@ -35,7 +35,19 @@ export default function HighDpi() {
 
   return (
     <SettingsFilterItem
-      searchTexts={[titleText, descriptionText, 'dpi', 'high resolution', '4k', 'scaling', 'display']}>
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'dpi',
+        'high resolution',
+        '4k',
+        'scaling',
+        'display',
+        'high dpi support',
+        'retina',
+        'hidpi',
+        'display scaling',
+      ]}>
       <LynxSwitch title={titleText} enabled={enabled} description={descriptionText} onEnabledChange={onEnabledChange} />
     </SettingsFilterItem>
   );

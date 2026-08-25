@@ -102,40 +102,61 @@ export default function ImageCache() {
         </div>
       ) : cacheStats ? (
         <>
-          <DescriptionGrid
-            items={[
-              {
-                key: 'cached_items',
-                label: <SettingsSearchHighlight text="Cached Items:" />,
-                content: (
-                  <Chip size="sm" color="accent" variant="soft">
-                    {cacheStats.entryCount}
-                  </Chip>
-                ),
-              },
-              {
-                key: 'cached_size',
-                label: <SettingsSearchHighlight text="Cache Size:" />,
-                content: (
-                  <Chip size="sm" variant="soft" color="warning">
-                    {cacheStats.totalSizeFormatted}
-                  </Chip>
-                ),
-              },
-              {
-                key: 'last_cleanup',
-                label: <SettingsSearchHighlight text="Last Cleanup:" />,
-                content: (
-                  <span className="text-xs text-muted">{new Date(cacheStats.lastCleanup).toLocaleDateString()}</span>
-                ),
-              },
-            ]}
-            columns={3}
-          />
+          <SettingsFilterItem
+            searchTexts={[
+              'Cached Items',
+              'Cache Size',
+              'Last Cleanup',
+              'image cache',
+              'cached images',
+              'cache statistics',
+            ]}>
+            <DescriptionGrid
+              items={[
+                {
+                  key: 'cached_items',
+                  label: <SettingsSearchHighlight text="Cached Items:" />,
+                  content: (
+                    <Chip size="sm" color="accent" variant="soft">
+                      {cacheStats.entryCount}
+                    </Chip>
+                  ),
+                },
+                {
+                  key: 'cached_size',
+                  label: <SettingsSearchHighlight text="Cache Size:" />,
+                  content: (
+                    <Chip size="sm" variant="soft" color="warning">
+                      {cacheStats.totalSizeFormatted}
+                    </Chip>
+                  ),
+                },
+                {
+                  key: 'last_cleanup',
+                  label: <SettingsSearchHighlight text="Last Cleanup:" />,
+                  content: (
+                    <span className="text-xs text-muted">{new Date(cacheStats.lastCleanup).toLocaleDateString()}</span>
+                  ),
+                },
+              ]}
+              columns={3}
+            />
+          </SettingsFilterItem>
 
           <div className="flex flex-col gap-4 mt-2 w-full text-left">
             <SettingsFilterItem
-              searchTexts={['Auto Cleanup Interval', 'cleanup', 'image cache', 'interval', 'clear frequency']}>
+              searchTexts={[
+                'Auto Cleanup Interval',
+                'cleanup',
+                'image cache',
+                'interval',
+                'clear frequency',
+                'auto cleanup',
+                'weekly',
+                'monthly',
+                'quarterly',
+                'never',
+              ]}>
               <Select className="w-full" value={intervalDays} onChange={handleIntervalChange}>
                 <Label>
                   <SettingsSearchHighlight text="Auto Cleanup Interval" />
@@ -157,7 +178,9 @@ export default function ImageCache() {
                     <ListBox.Item id="7" textValue="Weekly (7 days)">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>Weekly</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="Weekly" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Clear expired cache every 7 days." />
                         </Description>
@@ -166,7 +189,9 @@ export default function ImageCache() {
                     <ListBox.Item id="30" textValue="Monthly (30 days)">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>Monthly</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="Monthly" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Clear expired cache every 30 days." />
                         </Description>
@@ -175,7 +200,9 @@ export default function ImageCache() {
                     <ListBox.Item id="90" textValue="Quarterly (90 days)">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>Quarterly</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="Quarterly" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Clear expired cache every 90 days." />
                         </Description>
@@ -184,7 +211,9 @@ export default function ImageCache() {
                     <ListBox.Item id="0" textValue="Never">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>Never</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="Never" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Disable automatic periodic clearing." />
                         </Description>
@@ -195,7 +224,19 @@ export default function ImageCache() {
               </Select>
             </SettingsFilterItem>
 
-            <SettingsFilterItem searchTexts={['Max Cache Size Limit', 'image cache size', 'cache limit', 'max size']}>
+            <SettingsFilterItem
+              searchTexts={[
+                'Max Cache Size Limit',
+                'image cache size',
+                'cache limit',
+                'max size',
+                '100 mb',
+                '256 mb',
+                '512 mb',
+                '1 gb',
+                '2 gb',
+                '5 gb',
+              ]}>
               <Select value={maxSize} className="w-full" onChange={handleMaxSizeChange}>
                 <Label>
                   <SettingsSearchHighlight text="Max Cache Size Limit" />
@@ -212,7 +253,9 @@ export default function ImageCache() {
                     <ListBox.Item id="104857600" textValue="100 MB">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>100 MB</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="100 MB" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Small cache size limit." />
                         </Description>
@@ -221,7 +264,9 @@ export default function ImageCache() {
                     <ListBox.Item id="268435456" textValue="256 MB">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>256 MB</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="256 MB" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Medium-low cache size limit." />
                         </Description>
@@ -230,7 +275,9 @@ export default function ImageCache() {
                     <ListBox.Item id="536870912" textValue="512 MB">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>512 MB</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="512 MB" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Standard cache size limit." />
                         </Description>
@@ -239,7 +286,9 @@ export default function ImageCache() {
                     <ListBox.Item id="1073741824" textValue="1 GB">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>1 GB</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="1 GB" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Large cache size limit." />
                         </Description>
@@ -248,7 +297,9 @@ export default function ImageCache() {
                     <ListBox.Item id="2147483648" textValue="2 GB">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>2 GB</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="2 GB" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Very large cache size limit." />
                         </Description>
@@ -257,7 +308,9 @@ export default function ImageCache() {
                     <ListBox.Item id="5368709120" textValue="5 GB">
                       <ListBox.ItemIndicator />
                       <div className="flex flex-col">
-                        <Label>5 GB</Label>
+                        <Label>
+                          <SettingsSearchHighlight text="5 GB" />
+                        </Label>
                         <Description>
                           <SettingsSearchHighlight text="Maximum cache size limit." />
                         </Description>
@@ -269,43 +322,52 @@ export default function ImageCache() {
             </SettingsFilterItem>
           </div>
 
-          <div className="mt-2 w-full">
-            {cacheStats.entryCount === 0 || isClearing ? (
-              <Button variant="danger-soft" isPending={isClearing} fullWidth isDisabled>
-                {isClearing ? <Spinner size="sm" color="current" /> : <BroomIcon />}
-                <SettingsSearchHighlight text="Clear Image Cache" />
-              </Button>
-            ) : (
-              <Popover isOpen={isClearCacheOpen} onOpenChange={setIsClearCacheOpen}>
-                <Popover.Trigger>
-                  <Button variant="danger-soft" isPending={isClearing} fullWidth>
-                    {isClearing ? <Spinner size="sm" color="current" /> : <BroomIcon />}
-                    <SettingsSearchHighlight text="Clear Image Cache" />
-                  </Button>
-                </Popover.Trigger>
-                <Popover.Content>
-                  <Popover.Arrow />
-                  <Popover.Dialog className="w-90">
-                    <Popover.Heading>
+          <SettingsFilterItem
+            searchTexts={[
+              'Clear Image Cache',
+              'clear image cache',
+              'delete cached images',
+              'purge cache',
+              'clean image cache',
+            ]}>
+            <div className="mt-2 w-full">
+              {cacheStats.entryCount === 0 || isClearing ? (
+                <Button variant="danger-soft" isPending={isClearing} fullWidth isDisabled>
+                  {isClearing ? <Spinner size="sm" color="current" /> : <BroomIcon />}
+                  <SettingsSearchHighlight text="Clear Image Cache" />
+                </Button>
+              ) : (
+                <Popover isOpen={isClearCacheOpen} onOpenChange={setIsClearCacheOpen}>
+                  <Popover.Trigger>
+                    <Button variant="danger-soft" isPending={isClearing} fullWidth>
+                      {isClearing ? <Spinner size="sm" color="current" /> : <BroomIcon />}
                       <SettingsSearchHighlight text="Clear Image Cache" />
-                    </Popover.Heading>
-                    <p className="mt-1 text-sm text-muted">
-                      Clear {cacheStats.entryCount} cached images ({cacheStats.totalSizeFormatted})?
-                    </p>
-                    <ButtonGroup className="mt-2" fullWidth>
-                      <Button size="sm" variant="danger-soft" onPress={handleClearImageCache}>
-                        <BroomIcon />
-                        Clear
-                      </Button>
-                      <Button size="sm" variant="secondary" onPress={() => setIsClearCacheOpen(false)}>
-                        Cancel
-                      </Button>
-                    </ButtonGroup>
-                  </Popover.Dialog>
-                </Popover.Content>
-              </Popover>
-            )}
-          </div>
+                    </Button>
+                  </Popover.Trigger>
+                  <Popover.Content>
+                    <Popover.Arrow />
+                    <Popover.Dialog className="w-90">
+                      <Popover.Heading>
+                        <SettingsSearchHighlight text="Clear Image Cache" />
+                      </Popover.Heading>
+                      <p className="mt-1 text-sm text-muted">
+                        Clear {cacheStats.entryCount} cached images ({cacheStats.totalSizeFormatted})?
+                      </p>
+                      <ButtonGroup className="mt-2" fullWidth>
+                        <Button size="sm" variant="danger-soft" onPress={handleClearImageCache}>
+                          <BroomIcon />
+                          Clear
+                        </Button>
+                        <Button size="sm" variant="secondary" onPress={() => setIsClearCacheOpen(false)}>
+                          Cancel
+                        </Button>
+                      </ButtonGroup>
+                    </Popover.Dialog>
+                  </Popover.Content>
+                </Popover>
+              )}
+            </div>
+          </SettingsFilterItem>
         </>
       ) : (
         <span className="text-sm text-muted">

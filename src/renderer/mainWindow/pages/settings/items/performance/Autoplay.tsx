@@ -41,7 +41,19 @@ export default function Autoplay() {
   const descriptionText = 'Controls autoplay behavior for audio and video elements in web pages.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'autoplay', 'media', 'video', 'audio']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'autoplay',
+        'media',
+        'video',
+        'audio',
+        'sound',
+        'media autoplay policy',
+        'gesture',
+        'playback',
+      ]}>
       <Select value={selectedKey} onChange={onChange}>
         <Label>
           <SettingsSearchHighlight text={labelText} />
@@ -78,7 +90,7 @@ export default function Autoplay() {
               <div className="flex flex-col">
                 <Label>Require Gesture</Label>
                 <Description>
-                  <SettingsSearchHighlight text="Wide color gamut for compatible displays." />
+                  <SettingsSearchHighlight text="Require user gesture before playing audio or video." />
                 </Description>
               </div>
             </ListBox.Item>

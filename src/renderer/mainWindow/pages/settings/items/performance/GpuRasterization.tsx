@@ -35,7 +35,18 @@ export default function GpuRasterization() {
 
   return (
     <SettingsFilterItem
-      searchTexts={[titleText, descriptionText, 'gpu', 'rasterization', 'rendering', 'scroll', 'animation']}>
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'gpu',
+        'rasterization',
+        'rendering',
+        'scroll',
+        'animation',
+        'gpu rasterization',
+        'smooth scrolling',
+        'hardware acceleration',
+      ]}>
       <LynxSwitch title={titleText} enabled={enabled} description={descriptionText} onEnabledChange={onEnabledChange} />
     </SettingsFilterItem>
   );

@@ -66,8 +66,24 @@ export function searchInStrings(searchText: string, targetTexts: (string | undef
   const filteredTexts = targetTexts.filter(Boolean) as string[];
   if (filteredTexts.length === 0) return false;
 
+  const normalizedQuery = searchText.trim().toLowerCase();
+  if (!normalizedQuery) return true;
+
+  // Direct fast substring check
+  const hasExactSubstring = filteredTexts.some(text => text.toLowerCase().includes(normalizedQuery));
+  if (hasExactSubstring) return true;
+
+  // Multi-word check
+  const words = normalizedQuery.split(/\s+/).filter(Boolean);
+  if (words.length > 1) {
+    const allWordsMatch = words.every(word => filteredTexts.some(text => text.toLowerCase().includes(word)));
+    if (allWordsMatch) return true;
+  }
+
   const fuse = new Fuse(filteredTexts, {
     threshold: 0.4,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
   });
 
   return fuse.search(searchText).length > 0;

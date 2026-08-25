@@ -30,7 +30,19 @@ export default function CursorStyle() {
   const descriptionText = 'Select the appearance of cursor.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'cursor', 'style', 'terminal']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'cursor',
+        'style',
+        'terminal',
+        'cursor style',
+        'caret',
+        'bar',
+        'block',
+        'underline',
+      ]}>
       <Select value={cursorStyle} onChange={onChange}>
         <Label>
           <SettingsSearchHighlight text={labelText} />

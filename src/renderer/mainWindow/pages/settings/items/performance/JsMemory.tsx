@@ -41,7 +41,21 @@ export default function JsMemory() {
     'Maximum heap size for the JavaScript engine. Higher values may improve performance with large web applications.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'js', 'memory', 'heap', 'ram']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'js',
+        'memory',
+        'heap',
+        'ram',
+        'v8 heap',
+        'max old space size',
+        'javascript memory limit',
+        '2 gb',
+        '4 gb',
+        '8 gb',
+      ]}>
       <Select value={selectedKey} onChange={onChange}>
         <Label>
           <SettingsSearchHighlight text={labelText} />
@@ -58,22 +72,34 @@ export default function JsMemory() {
             <ListBox.Item id="2048" textValue="2 GB">
               <ListBox.ItemIndicator />
               <div className="flex flex-col">
-                <Label>2 GB</Label>
-                <Description>Lower memory usage, suitable for most use cases.</Description>
+                <Label>
+                  <SettingsSearchHighlight text="2 GB" />
+                </Label>
+                <Description>
+                  <SettingsSearchHighlight text="Lower memory usage, suitable for most use cases." />
+                </Description>
               </div>
             </ListBox.Item>
             <ListBox.Item id="4096" textValue="4 GB (Default)">
               <ListBox.ItemIndicator />
               <div className="flex flex-col">
-                <Label>4 GB (Default)</Label>
-                <Description>Lower memory usage, suitable for most use cases.</Description>
+                <Label>
+                  <SettingsSearchHighlight text="4 GB (Default)" />
+                </Label>
+                <Description>
+                  <SettingsSearchHighlight text="Balanced memory allocation for standard usage." />
+                </Description>
               </div>
             </ListBox.Item>
             <ListBox.Item id="8192" textValue="8 GB">
               <ListBox.ItemIndicator />
               <div className="flex flex-col">
-                <Label>8 GB</Label>
-                <Description>Lower memory usage, suitable for most use cases.</Description>
+                <Label>
+                  <SettingsSearchHighlight text="8 GB" />
+                </Label>
+                <Description>
+                  <SettingsSearchHighlight text="High memory limit for heavy workloads and multiple tabs." />
+                </Description>
               </div>
             </ListBox.Item>
           </ListBox>

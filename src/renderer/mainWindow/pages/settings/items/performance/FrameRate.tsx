@@ -36,7 +36,22 @@ export default function FrameRate() {
     'Removes FPS cap. May increase power consumption and heat generation on less powerful devices.';
 
   return (
-    <SettingsFilterItem searchTexts={[titleText, descriptionText, 'fps', 'frame rate', 'limit', 'power', 'heat']}>
+    <SettingsFilterItem
+      searchTexts={[
+        titleText,
+        descriptionText,
+        'fps',
+        'frame rate',
+        'limit',
+        'power',
+        'heat',
+        'fps cap',
+        'unlimited fps',
+        '144hz',
+        '240hz',
+        'refresh rate',
+        'disable frame rate limit',
+      ]}>
       <LynxSwitch
         title={titleText}
         enabled={enabled}

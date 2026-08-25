@@ -99,6 +99,9 @@ export default function HistoryLimits() {
     'address limit',
     'favicon limit',
     'fav icons',
+    'history retention',
+    'recent addresses',
+    'browser limits',
   ];
 
   return (

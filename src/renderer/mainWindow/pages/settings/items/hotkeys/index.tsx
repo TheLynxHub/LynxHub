@@ -223,7 +223,7 @@ export default function SettingsHotkeys() {
       </Surface>
       <Button variant="danger-soft" onPress={resetToDefault} fullWidth>
         <RefreshIcon />
-        Reset to Defaults
+        <SettingsSearchHighlight text="Reset to Defaults" />
       </Button>
     </SettingsSection>
   );

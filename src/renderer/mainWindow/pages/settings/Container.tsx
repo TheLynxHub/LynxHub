@@ -89,19 +89,32 @@ export const SettingsSections = ({sectionTexts}: SettingsSectionsProps) => {
       );
     }
 
+    const query = searchValue.trim().toLowerCase();
     const searchableSections = allSections.map(section => ({
       section,
       title: section.title,
       dynamicText: section.elementId ? sectionTexts.get(section.elementId) : '',
     }));
 
+    const directMatchedIds = new Set<string>();
+    if (query) {
+      searchableSections.forEach(({section, title, dynamicText}) => {
+        const combined = `${title} ${dynamicText || ''}`.toLowerCase();
+        if (combined.includes(query)) {
+          directMatchedIds.add(section.elementId);
+        }
+      });
+    }
+
     const fuse = new Fuse(searchableSections, {
       keys: ['title', 'dynamicText'],
       threshold: 0.4,
+      ignoreLocation: true,
+      minMatchCharLength: 2,
     });
 
     const results = fuse.search(searchValue);
-    const visibleSectionIds = new Set(results.map(r => r.item.section.elementId));
+    const visibleSectionIds = new Set([...directMatchedIds, ...results.map(r => r.item.section.elementId)]);
 
     return allSections.map(section => ({
       ...section,

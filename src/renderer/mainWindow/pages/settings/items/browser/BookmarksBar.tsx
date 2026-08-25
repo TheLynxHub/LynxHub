@@ -46,6 +46,10 @@ export default function BookmarksBarSetting() {
       'always',
       'never',
       'visibility',
+      'bookmarks bar',
+      'when browser is open',
+      'always show',
+      'never show',
     ],
     [],
   );

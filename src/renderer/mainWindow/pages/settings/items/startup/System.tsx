@@ -35,6 +35,9 @@ export default function System() {
         'auto start',
         'boot',
         'startup',
+        'windows startup',
+        'login startup',
+        'open on login',
       ]}>
       <LynxSwitch
         enabled={isEnabled}

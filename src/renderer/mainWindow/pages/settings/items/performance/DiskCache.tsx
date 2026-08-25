@@ -40,7 +40,21 @@ export default function DiskCache() {
   const descriptionText = 'Amount of disk space for caching web content. Larger cache may improve loading times.';
 
   return (
-    <SettingsFilterItem searchTexts={[labelText, descriptionText, 'cache', 'disk', 'storage']}>
+    <SettingsFilterItem
+      searchTexts={[
+        labelText,
+        descriptionText,
+        'cache',
+        'disk',
+        'storage',
+        'disk cache',
+        'disk space',
+        'web cache',
+        'http cache',
+        '256 mb',
+        '512 mb',
+        '1 gb',
+      ]}>
       <Select value={selectedKey} onChange={onChange}>
         <Label>
           <SettingsSearchHighlight text={labelText} />
