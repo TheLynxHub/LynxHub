@@ -56,21 +56,21 @@ export default function ShareScreen() {
   );
 
   return (
-    <main className="size-full overflow-hidden">
+    <main className="h-screen w-screen overflow-hidden select-none">
       <div
         className={
-          'size-full flex flex-col overflow-hidden rounded-2xl border border-border ' +
+          'flex size-full flex-col overflow-hidden rounded-2xl border border-border ' +
           'bg-surface text-foreground shadow-2xl'
         }>
         {/* Header */}
-        <div className="border-b border-border px-4 py-2">
+        <div className="shrink-0 border-b border-border px-4 py-2">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Select window or screen to share</h2>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="px-6 py-1.5">
+        <div className="shrink-0 px-6 py-1.5">
           <Tabs className="w-full" selectedKey={activeTab} onSelectionChange={handleTabChange}>
             <Tabs.ListContainer>
               <Tabs.List aria-label="Options">
@@ -90,7 +90,7 @@ export default function ShareScreen() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-hidden pl-6 pr-1">
+        <div className="min-h-0 flex-1 overflow-hidden pl-6 pr-1">
           {isLoading ? (
             <div className="flex size-full items-center justify-center">
               <div className="flex flex-col items-center gap-2">
@@ -120,7 +120,7 @@ export default function ShareScreen() {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border bg-surface px-4 py-2">
+        <div className="shrink-0 border-t border-border bg-surface px-4 py-2">
           <div className="flex justify-between items-center gap-x-3">
             <Switch isSelected={shareAudio} onChange={setShareAudio}>
               <Switch.Content>
