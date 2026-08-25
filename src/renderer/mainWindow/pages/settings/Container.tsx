@@ -106,15 +106,20 @@ export const SettingsSections = ({sectionTexts}: SettingsSectionsProps) => {
       });
     }
 
-    const fuse = new Fuse(searchableSections, {
-      keys: ['title', 'dynamicText'],
-      threshold: 0.4,
-      ignoreLocation: true,
-      minMatchCharLength: 2,
-    });
+    let visibleSectionIds: Set<string>;
+    if (directMatchedIds.size > 0) {
+      visibleSectionIds = directMatchedIds;
+    } else {
+      const fuse = new Fuse(searchableSections, {
+        keys: ['title', 'dynamicText'],
+        threshold: 0.25,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+      });
 
-    const results = fuse.search(searchValue);
-    const visibleSectionIds = new Set([...directMatchedIds, ...results.map(r => r.item.section.elementId)]);
+      const results = fuse.search(searchValue);
+      visibleSectionIds = new Set(results.map(r => r.item.section.elementId));
+    }
 
     return allSections.map(section => ({
       ...section,

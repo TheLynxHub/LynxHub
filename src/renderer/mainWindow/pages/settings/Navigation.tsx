@@ -186,6 +186,21 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
 
     const query = searchValue.trim().toLowerCase();
 
+    const allItemsWithSearchFields = groupSections.flatMap(group =>
+      group.items.map(item => ({
+        item,
+        title: item.title,
+        groupTitle: group.title,
+        sectionText: sectionTexts.get(item.elementId) ?? '',
+      })),
+    );
+
+    const hasAnyDirectMatch = query
+      ? allItemsWithSearchFields.some(({title, groupTitle, sectionText}) =>
+          `${title} ${groupTitle} ${sectionText}`.toLowerCase().includes(query),
+        )
+      : false;
+
     return groupSections
       .map(group => {
         const itemsWithSearchFields = group.items.map(item => ({
@@ -204,22 +219,25 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
               .map(r => r.item)
           : [];
 
+        if (hasAnyDirectMatch) {
+          return {
+            ...group,
+            items: directMatchedItems,
+          };
+        }
+
         const fuse = new Fuse(itemsWithSearchFields, {
           keys: ['title', 'groupTitle', 'sectionText'],
-          threshold: 0.4,
+          threshold: 0.25,
           ignoreLocation: true,
           minMatchCharLength: 2,
         });
 
         const fuzzyMatchedItems = fuse.search(searchValue).map(r => r.item.item);
 
-        const matchedItemMap = new Map<string, (typeof group.items)[number]>();
-        directMatchedItems.forEach(item => matchedItemMap.set(item.elementId, item));
-        fuzzyMatchedItems.forEach(item => matchedItemMap.set(item.elementId, item));
-
         return {
           ...group,
-          items: Array.from(matchedItemMap.values()),
+          items: fuzzyMatchedItems,
         };
       })
       .filter(group => group.items.length > 0);

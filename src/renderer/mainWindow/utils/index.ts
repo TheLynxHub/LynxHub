@@ -81,7 +81,7 @@ export function searchInStrings(searchText: string, targetTexts: (string | undef
   }
 
   const fuse = new Fuse(filteredTexts, {
-    threshold: 0.4,
+    threshold: 0.25,
     ignoreLocation: true,
     minMatchCharLength: 2,
   });
