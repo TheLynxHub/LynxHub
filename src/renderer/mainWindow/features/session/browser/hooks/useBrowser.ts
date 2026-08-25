@@ -42,6 +42,7 @@ export function useBrowser(runningCard: RunningCard) {
     // Only load URL if finalAddress actually changed (not just from redirect sync)
     if (finalAddress !== previousFinalAddress.current) {
       previousFinalAddress.current = finalAddress;
+      setFailedLoad(undefined);
 
       if (finalAddress) {
         // Load the URL when finalAddress changes from user action
@@ -92,6 +93,9 @@ export function useBrowser(runningCard: RunningCard) {
     const offUrlChange = browserIpc.on.urlChanged((targetID, url) => {
       if (targetID === id) {
         setCurrentUrl(url);
+        if (url !== 'about:blank') {
+          setFailedLoad(prev => (prev && prev.validatedURL !== url ? undefined : prev));
+        }
         // Sync customAddress with actual browser URL for back/forward navigation
         // But don't sync during redirects - only sync when user explicitly navigates
         if (url === 'about:blank' && customAddress) {

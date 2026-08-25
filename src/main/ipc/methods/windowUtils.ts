@@ -9,7 +9,7 @@ import classHolder from '@lynx_main/managers/classHolder';
 import {noticeAllWindowsDarkMode} from '@lynx_main/utils';
 import {robustWipe} from '@lynx_main/utils/fileSystem';
 import {decompress} from '@lynxhub/7zip';
-import {app, clipboard, dialog, nativeImage, net, shell} from 'electron';
+import {app, clipboard, ClipboardItem, dialog, net, shell} from 'electron';
 import fs, {promises} from 'graceful-fs';
 
 import {applicationIpc} from '../application';
@@ -348,14 +348,11 @@ export async function getImageAsDataURL(imageUrl: string): Promise<string | null
 export async function downloadImageToClipboard(url: string): Promise<void> {
   try {
     const response = await net.fetch(url);
-    const buffer = Buffer.from(await response.arrayBuffer());
-    const image = nativeImage.createFromBuffer(buffer);
-    if (!image.isEmpty()) {
-      clipboard.writeImage(image);
-      applicationIpc.send.showToast('Image copied to clipboard', 'success', 'top');
-    } else {
-      applicationIpc.send.showToast('Failed to copy image', 'danger', 'top');
-    }
+    const blob = await response.blob();
+    const mime = blob.type || 'image/png';
+    const item = new ClipboardItem({[mime]: blob});
+    await clipboard.write([item]);
+    applicationIpc.send.showToast('Image copied to clipboard', 'success', 'top');
   } catch (error) {
     console.error('Failed to copy image:', error);
     applicationIpc.send.showToast('Failed to copy image', 'danger', 'top');

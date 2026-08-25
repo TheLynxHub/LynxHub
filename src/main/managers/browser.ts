@@ -141,6 +141,7 @@ export default class BrowserManager {
     webContents.on('did-navigate', (_, url) => {
       sendToRenderer();
       this.trackUrl(url);
+      browserIpc.send.onClearFailed(id);
     });
 
     webContents.on('did-navigate-in-page', (_, url) => {
@@ -152,7 +153,10 @@ export default class BrowserManager {
     webContents.on('did-stop-loading', sendToRenderer);
 
     webContents.on('did-start-navigation', e => {
-      if (e.isMainFrame) browserIpc.send.onUrlChange(id, e.url);
+      if (e.isMainFrame) {
+        browserIpc.send.onUrlChange(id, e.url);
+        browserIpc.send.onClearFailed(id);
+      }
     });
   }
 
@@ -505,6 +509,7 @@ export default class BrowserManager {
       });
       // URL tracking is handled by listenForNavigate's did-navigate event
     });
+    browserIpc.send.onClearFailed(id);
   }
 
   /**

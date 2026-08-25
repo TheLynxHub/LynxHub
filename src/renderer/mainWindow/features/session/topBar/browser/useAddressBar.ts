@@ -1,4 +1,5 @@
 import {formatWebAddress} from '@lynx_common/utils';
+import browserIpc from '@lynx_shared/ipc/browser';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import {storageUtilsIpc} from '@lynx_shared/ipc/storage';
 import {isEmpty} from 'lodash-es';
@@ -285,6 +286,7 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
           } else {
             dispatch(cardsActions.setRunningCardCustomAddress({tabId: activeTab, address: url}));
           }
+          browserIpc.send.loadURL(runningCard.id, url);
           storageUtilsIpc.send.addBrowserRecent(url);
           editableRef.current?.blur();
         } catch (err) {
@@ -292,7 +294,16 @@ export const useAddressBar = ({runningCard, setCustomAddress}: UseAddressBarProp
         }
       }
     },
-    [setCustomAddress, dispatch, activeTab, autocomplete, inputValue, acceptAutocomplete, handleBookmarkToggle],
+    [
+      setCustomAddress,
+      dispatch,
+      activeTab,
+      runningCard.id,
+      autocomplete,
+      inputValue,
+      acceptAutocomplete,
+      handleBookmarkToggle,
+    ],
   );
 
   const handleContainerClick = useCallback(() => {
