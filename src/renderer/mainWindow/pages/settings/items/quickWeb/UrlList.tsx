@@ -33,6 +33,7 @@ type Props = {
 type ItemProps = {
   item: QuickWebItem;
   containerRef: RefObject<HTMLDivElement | null>;
+  isQuickWebEnabled: boolean;
   onTogglePreload: (item: QuickWebItem, preload: boolean) => void;
   onLaunch: (id: string) => void;
   onEdit: (item: QuickWebItem) => void;
@@ -40,7 +41,16 @@ type ItemProps = {
   onDragEnd: () => void;
 };
 
-function UrlListItem({item, containerRef, onTogglePreload, onLaunch, onEdit, onDelete, onDragEnd}: ItemProps) {
+function UrlListItem({
+  item,
+  containerRef,
+  isQuickWebEnabled,
+  onTogglePreload,
+  onLaunch,
+  onEdit,
+  onDelete,
+  onDragEnd,
+}: ItemProps) {
   const dragControls = useDragControls();
 
   return (
@@ -134,11 +144,14 @@ function UrlListItem({item, containerRef, onTogglePreload, onLaunch, onEdit, onD
               size="sm"
               variant="tertiary"
               aria-label="Open in Quick Web"
+              isDisabled={!isQuickWebEnabled}
               onPress={() => onLaunch(item.id)}
               isIconOnly>
               <PlayIcon className="size-3.5 text-accent-foreground" />
             </Button>
-            <Tooltip.Content>Launch in Quick Window</Tooltip.Content>
+            <Tooltip.Content>
+              {isQuickWebEnabled ? 'Launch in Quick Window' : 'Quick Web is currently disabled'}
+            </Tooltip.Content>
           </Tooltip>
 
           <Tooltip delay={200}>
@@ -360,6 +373,7 @@ export default function UrlList({config, onUpdateConfig}: Props) {
                       containerRef={containerRef}
                       onLaunch={handleLaunchItem}
                       onDelete={handleDeleteItem}
+                      isQuickWebEnabled={config.enabled}
                       onTogglePreload={handleTogglePreload}
                     />
                   ))}

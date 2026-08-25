@@ -34,6 +34,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
   const [isRecording, setIsRecording] = useState(false);
   const hiddenInputRef = useRef<HTMLInputElement>(null);
 
+  const isEnabled = config.enabled;
   const hotkeyLabels = useMemo(() => getHotkeyLabels(config.globalHotkey), [config.globalHotkey]);
 
   const isDefaultHotkey = useMemo(() => {
@@ -42,6 +43,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
   }, [config.globalHotkey]);
 
   const handleStartRecord = () => {
+    if (!isEnabled) return;
     setIsRecording(true);
     setTimeout(() => {
       hiddenInputRef.current?.focus();
@@ -96,10 +98,33 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
   const description = 'Instant floating browser window accessible from anywhere via global shortcut';
 
   return (
-    <SettingsFilterItem searchTexts={[title, description, 'hotkey', 'shortcut', 'float', 'session', 'unload', 'blur']}>
+    <SettingsFilterItem
+      searchTexts={[
+        title,
+        description,
+        'enable',
+        'disable',
+        'hotkey',
+        'shortcut',
+        'float',
+        'session',
+        'unload',
+        'blur',
+      ]}>
       <div className="flex flex-col gap-y-4">
+        {/* Master Activation Toggle */}
+        <LynxSwitch
+          description={
+            'Activate the floating quick-access browser window, desktop global shortcut, ' +
+            'and background preloading.'
+          }
+          enabled={isEnabled}
+          title="Enable Quick Web"
+          onEnabledChange={val => onUpdateConfig({enabled: val})}
+        />
+
         {/* Main Activation & Hotkey Card */}
-        <Card>
+        <Card className={!isEnabled ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
           <Card.Header className="flex flex-row items-center justify-between gap-4">
             <div className="flex flex-col gap-y-0.5">
               <Card.Title>
@@ -110,7 +135,11 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
               </Card.Description>
             </div>
 
-            <Button size="sm" variant="secondary" onPress={() => quickWebIpc.send.toggleWindow()}>
+            <Button
+              size="sm"
+              variant="secondary"
+              isDisabled={!isEnabled}
+              onPress={() => quickWebIpc.send.toggleWindow()}>
               <PlayIcon className="size-3.5 text-accent-foreground" />
               Toggle Window
             </Button>
@@ -146,6 +175,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                   tabIndex={-1}
                   className="sr-only"
                   ref={hiddenInputRef}
+                  disabled={!isEnabled}
                   onKeyDown={handleKeyDown}
                   onBlur={() => setIsRecording(false)}
                 />
@@ -153,13 +183,17 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                 <Tooltip delay={300}>
                   <button
                     className={[
-                      'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs transition-all cursor-pointer',
-                      isRecording
-                        ? 'border-accent bg-accent/15 text-accent ring-2 ring-accent/30 animate-pulse'
-                        : 'border-border bg-surface hover:border-accent/40 hover:bg-surface-secondary/60',
+                      'flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs transition-all',
+                      !isEnabled
+                        ? 'border-border bg-surface-secondary/40 text-muted opacity-50 cursor-not-allowed'
+                        : isRecording
+                          ? 'border-accent bg-accent/15 text-accent ring-2 ring-accent/30 animate-pulse cursor-pointer'
+                          : 'border-border bg-surface hover:border-accent/40 ' +
+                            'hover:bg-surface-secondary/60 cursor-pointer',
                     ].join(' ')}
                     type="button"
-                    onClick={handleStartRecord}>
+                    disabled={!isEnabled}
+                    onClick={isEnabled ? handleStartRecord : undefined}>
                     {isRecording ? (
                       <span className="font-medium">Press key combination... (Esc to cancel)</span>
                     ) : (
@@ -173,11 +207,13 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                             </Kbd>
                           ))}
                         </div>
-                        <span className="text-[10px] text-muted ml-1">(Click to change)</span>
+                        {isEnabled && <span className="text-[10px] text-muted ml-1">(Click to change)</span>}
                       </>
                     )}
                   </button>
-                  <Tooltip.Content>Click to record a new keyboard shortcut</Tooltip.Content>
+                  <Tooltip.Content>
+                    {isEnabled ? 'Click to record a new keyboard shortcut' : 'Quick Web is disabled'}
+                  </Tooltip.Content>
                 </Tooltip>
 
                 {!isDefaultHotkey && (
@@ -185,6 +221,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                     <Button
                       size="sm"
                       variant="ghost"
+                      isDisabled={!isEnabled}
                       onPress={handleResetHotkey}
                       aria-label="Reset to Alt+W"
                       isIconOnly>
@@ -197,6 +234,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                 <Tooltip delay={300}>
                   <Switch
                     size="sm"
+                    isDisabled={!isEnabled}
                     aria-label="Toggle Global Hotkey"
                     isSelected={config.globalHotkeyEnabled}
                     onChange={val => onUpdateConfig({globalHotkeyEnabled: val})}>
@@ -207,7 +245,11 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
                     </Switch.Content>
                   </Switch>
                   <Tooltip.Content>
-                    {config.globalHotkeyEnabled ? 'Global shortcut is active' : 'Global shortcut is disabled'}
+                    {!isEnabled
+                      ? 'Quick Web is completely disabled'
+                      : config.globalHotkeyEnabled
+                        ? 'Global shortcut is active'
+                        : 'Global shortcut is disabled'}
                   </Tooltip.Content>
                 </Tooltip>
               </div>
@@ -216,7 +258,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
         </Card>
 
         {/* Window Behavior & Session Settings */}
-        <Card>
+        <Card className={!isEnabled ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
           <Card.Header>
             <div className="flex flex-col gap-y-0.5">
               <Card.Title>
@@ -242,17 +284,20 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
 
               <RadioGroup
                 variant="secondary"
+                isDisabled={!isEnabled}
                 value={config.sessionType || 'default'}
-                onChange={val => onUpdateConfig({sessionType: val as 'default' | 'isolated'})}>
+                onChange={val => isEnabled && onUpdateConfig({sessionType: val as 'default' | 'isolated'})}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
                   {/* Shared Session Card */}
                   <Surface
-                    className={`p-3 rounded-2xl border transition-colors cursor-pointer flex items-start gap-3 ${
-                      config.sessionType !== 'isolated'
-                        ? 'border-accent/50 bg-accent/5 shadow-xs'
-                        : 'border-border hover:border-border-secondary'
+                    className={`p-3 rounded-2xl border transition-colors flex items-start gap-3 ${
+                      !isEnabled
+                        ? 'border-border opacity-60 cursor-not-allowed'
+                        : config.sessionType !== 'isolated'
+                          ? 'border-accent/50 bg-accent/5 shadow-xs cursor-pointer'
+                          : 'border-border hover:border-border-secondary cursor-pointer'
                     }`}
-                    onClick={() => onUpdateConfig({sessionType: 'default'})}
+                    onClick={() => isEnabled && onUpdateConfig({sessionType: 'default'})}
                     variant={config.sessionType === 'isolated' ? 'default' : 'secondary'}>
                     <Radio value="default" className="mt-0.5 pointer-events-none">
                       <Radio.Content>
@@ -277,13 +322,15 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
 
                   {/* Isolated Session Card */}
                   <Surface
-                    className={`p-3 rounded-2xl border transition-colors cursor-pointer flex items-start gap-3 ${
-                      config.sessionType === 'isolated'
-                        ? 'border-accent/50 bg-accent/5 shadow-xs'
-                        : 'border-border hover:border-border-secondary'
+                    className={`p-3 rounded-2xl border transition-colors flex items-start gap-3 ${
+                      !isEnabled
+                        ? 'border-border opacity-60 cursor-not-allowed'
+                        : config.sessionType === 'isolated'
+                          ? 'border-accent/50 bg-accent/5 shadow-xs cursor-pointer'
+                          : 'border-border hover:border-border-secondary cursor-pointer'
                     }`}
-                    onClick={() => onUpdateConfig({sessionType: 'isolated'})}
-                    variant={config.sessionType === 'isolated' ? 'secondary' : 'default'}>
+                    variant={config.sessionType === 'isolated' ? 'secondary' : 'default'}
+                    onClick={() => isEnabled && onUpdateConfig({sessionType: 'isolated'})}>
                     <Radio value="isolated" className="mt-0.5 pointer-events-none">
                       <Radio.Content>
                         <Radio.Control>
@@ -309,6 +356,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
             <div className="flex flex-col gap-y-2.5 pt-1">
               <LynxSwitch
                 variant="secondary"
+                isDisabled={!isEnabled}
                 enabled={config.keepAliveOnClose}
                 title="Keep in Background (Zero-Latency Reopen)"
                 onEnabledChange={val => onUpdateConfig({keepAliveOnClose: val})}
@@ -317,6 +365,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
 
               <LynxSwitch
                 variant="secondary"
+                isDisabled={!isEnabled}
                 enabled={config.hideOnBlur}
                 title="Hide on Focus Lost (Auto-Dismiss)"
                 onEnabledChange={val => onUpdateConfig({hideOnBlur: val})}
@@ -325,6 +374,7 @@ export default function GeneralConfig({config, onUpdateConfig}: Props) {
 
               <LynxSwitch
                 variant="secondary"
+                isDisabled={!isEnabled}
                 enabled={config.alwaysOnTop}
                 title="Always on Top (Pin Window)"
                 onEnabledChange={val => onUpdateConfig({alwaysOnTop: val})}

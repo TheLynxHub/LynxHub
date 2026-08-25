@@ -177,7 +177,7 @@ export class BaseSqliteStorage {
       enableSkiaGraphite: false,
     },
     quickWeb: {
-      enabled: true,
+      enabled: false,
       items: [],
       activeItemId: undefined,
       globalHotkey: {

@@ -17,7 +17,7 @@ import {Minus} from 'lucide-react';
 import {KeyboardEvent, useEffect, useState} from 'react';
 
 const DEFAULT_CONFIG: QuickWebStorage = {
-  enabled: true,
+  enabled: false,
   items: [],
   activeItemId: undefined,
   globalHotkey: {

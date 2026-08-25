@@ -10,7 +10,7 @@ import UrlList from './UrlList';
 export const SettingsQuickWebId = 'settings_quickweb_elem';
 
 const DEFAULT_CONFIG: QuickWebStorage = {
-  enabled: true,
+  enabled: false,
   items: [],
   activeItemId: undefined,
   globalHotkey: {

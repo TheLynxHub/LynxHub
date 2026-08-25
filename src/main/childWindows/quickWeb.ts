@@ -93,11 +93,15 @@ export default class QuickWindowManager {
       this.mainWindow = mainWindow;
     }
 
+    const config = this.getConfig();
+    if (!config.enabled) {
+      return;
+    }
+
     if (this.quickWebWindow && !this.quickWebWindow.isDestroyed()) {
       return;
     }
 
-    const config = this.getConfig();
     const bounds = config.windowBounds;
 
     this.quickWebWindow = new BrowserWindow({
@@ -439,6 +443,8 @@ export default class QuickWindowManager {
    */
   public selectItem(itemId: string) {
     const config = this.getConfig();
+    if (!config.enabled) return;
+
     const item = config.items.find(i => i.id === itemId);
     if (!item) return;
 
@@ -462,6 +468,9 @@ export default class QuickWindowManager {
    */
   public loadUrl(rawUrl: string) {
     if (!rawUrl) return;
+    const config = this.getConfig();
+    if (!config.enabled) return;
+
     const url = formatWebAddress(rawUrl);
 
     if (this.activeViewEntry && !this.activeViewEntry.view.webContents.isDestroyed()) {
@@ -487,6 +496,9 @@ export default class QuickWindowManager {
    * Toggles visibility of the Quick Web floating window.
    */
   public toggleWindow() {
+    const config = this.getConfig();
+    if (!config.enabled) return;
+
     if (this.quickWebWindow && !this.quickWebWindow.isDestroyed() && this.quickWebWindow.isVisible()) {
       if (this.quickWebWindow.isFocused()) {
         this.closeWindow();
@@ -502,14 +514,15 @@ export default class QuickWindowManager {
    * Shows and focuses the Quick Web window.
    */
   public showWindow(itemId?: string, url?: string) {
+    const config = this.getConfig();
+    if (!config.enabled) return;
+
     if (!this.quickWebWindow || this.quickWebWindow.isDestroyed()) {
       const mainWindow = this.mainWindow || classHolder.appManager?.getMainWindow();
       this.createWindow(mainWindow);
     }
 
     if (!this.quickWebWindow) return;
-
-    const config = this.getConfig();
 
     if (itemId) {
       this.selectItem(itemId);
@@ -626,11 +639,19 @@ export default class QuickWindowManager {
       this.registerGlobalHotkey();
     }
 
+    if (updates.enabled !== undefined) {
+      if (!updates.enabled) {
+        this.destroyWindow();
+      } else if (newConfig.keepAliveOnClose && (!this.quickWebWindow || this.quickWebWindow.isDestroyed())) {
+        this.createWindow(this.mainWindow);
+      }
+    }
+
     if (updates.alwaysOnTop !== undefined && this.quickWebWindow && !this.quickWebWindow.isDestroyed()) {
       this.quickWebWindow.setAlwaysOnTop(updates.alwaysOnTop);
     }
 
-    if (updates.keepAliveOnClose !== undefined) {
+    if (updates.keepAliveOnClose !== undefined && newConfig.enabled) {
       if (!updates.keepAliveOnClose && !this.isWindowVisible()) {
         this.destroyWindow();
       } else if (updates.keepAliveOnClose && (!this.quickWebWindow || this.quickWebWindow.isDestroyed())) {
@@ -656,7 +677,7 @@ export default class QuickWindowManager {
     const newItems = [...config.items, newItem];
     this.updateConfig({items: newItems});
 
-    if (newItem.preload) {
+    if (config.enabled && newItem.preload) {
       const entry = this.createView(newItem.url, newItem.id, true);
       this.viewsPool.set(newItem.id, entry);
     }
