@@ -50,6 +50,12 @@ export default class LinkPreviewManager {
 
     const childManager = classHolder.childWindowManager;
     if (!childManager) return;
+
+    const activeType = childManager.getActiveType();
+    if (activeType === 'contextMenu' || activeType === 'shareScreen') {
+      return;
+    }
+
     const childView = childManager.ensureView(mainWindow);
     childManager.setActiveType('linkPreview');
 
