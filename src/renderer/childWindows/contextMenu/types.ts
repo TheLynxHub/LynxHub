@@ -51,6 +51,8 @@ export type ContextState = {
   tabContextMenu?: TabContextMenuPayload;
   terminateMultipleTabs?: TerminateMultipleTabsPayload;
   quickWebSwitcher?: QuickWebSwitcherPayload;
+  bookmarkTooltip?: {title: string; url: string};
+  linkPreviewUrl?: string;
 };
 
 export type NavBtnProps = {icon?: ReactNode; onPress?: () => void; className?: string; isDisabled?: boolean};

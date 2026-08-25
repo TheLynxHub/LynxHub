@@ -1,108 +1,22 @@
-import path from 'node:path';
-
-import {is} from '@electron-toolkit/utils';
 import {ElementResizeData} from '@lynx_common/types';
 import {contextMenuIpc} from '@lynx_main/ipc/contextMenu';
-import {dialogBlurred} from '@lynx_main/ipc/dialogsWindow';
-import lynxIpc from '@lynx_main/ipc/ipcWrapper';
 import classHolder from '@lynx_main/managers/classHolder';
 import {BrowserWindow, screen, WebContents, WebContentsView} from 'electron';
 
 export default class ContextMenuManager {
-  private contextMenuView?: WebContentsView;
-  private isViewVisible = false;
-  private mainWindow?: BrowserWindow;
-  private currentParentWindow?: BrowserWindow;
-  private customContextPosition: {x: number; y: number} | undefined;
   private currentCursorPosition: {x: number; y: number} | undefined;
   private webContents: WebContents[] = [];
 
   public createWindow(mainWindow: BrowserWindow) {
-    this.mainWindow = mainWindow;
-    this.currentParentWindow = mainWindow;
-
-    mainWindow.on('focus', () => {
-      this.setCurrentParentWindow(this.mainWindow);
-    });
-
-    if (this.contextMenuView && !this.contextMenuView.webContents.isDestroyed()) {
-      try {
-        (this.contextMenuView.webContents as any).close?.();
-      } catch {
-        // Ignored
-      }
-    }
-
-    this.contextMenuView = new WebContentsView({
-      webPreferences: {
-        preload: path.join(__dirname, '../preload/index.cjs'),
-        sandbox: false,
-      },
-    });
-    this.contextMenuView.webContents.setBackgroundThrottling(false);
-    this.contextMenuView.setBackgroundColor('#00000000');
-
-    this.setupViewListeners();
-    this.loadWindowContent();
-
-    try {
-      mainWindow.contentView.removeChildView(this.contextMenuView);
-    } catch {
-      // Ignored
-    }
-    mainWindow.contentView.addChildView(this.contextMenuView);
-    this.contextMenuView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
-  }
-
-  private setupViewListeners() {
-    if (!this.contextMenuView) return;
-
-    this.contextMenuView.webContents.on('before-input-event', (_, input) => {
-      if (input.key.toLowerCase() === 'escape') this.hideContextMenu();
-    });
-
-    this.contextMenuView.webContents.on('blur', () => this.hideContextMenu(false));
-
-    if (this.mainWindow) {
-      this.mainWindow.on('close', () => {
-        this.mainWindow = undefined;
-        this.webContents = [];
-      });
-      this.mainWindow.on('blur', () => this.hideContextMenu(false));
-    }
-  }
-
-  private loadWindowContent() {
-    const url =
-      is.dev && process.env['ELECTRON_RENDERER_URL']
-        ? `${process.env['ELECTRON_RENDERER_URL']}/contextMenu.html`
-        : path.join(__dirname, '../renderer/contextMenu.html');
-
-    if (!this.contextMenuView || this.contextMenuView.webContents.isDestroyed()) return;
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-      this.contextMenuView.webContents.loadURL(url);
-    } else {
-      this.contextMenuView.webContents.loadFile(url);
-    }
-  }
-
-  private notifyDownloadManagerClose() {
-    const browserDownloadManager = classHolder.browserDownloadManager;
-    if (browserDownloadManager) {
-      browserDownloadManager.onContextClose();
-    } else {
-      classHolder.waitForClass('browserDownloadManager').then(browserDownloadManager => {
-        browserDownloadManager.onContextClose();
-      });
-    }
+    classHolder.childWindowManager?.setMainWindow(mainWindow);
   }
 
   public setCurrentParentWindow(parentWindow?: BrowserWindow): void {
-    this.currentParentWindow = parentWindow && !parentWindow.isDestroyed() ? parentWindow : this.mainWindow;
+    classHolder.childWindowManager?.setCurrentParentWindow(parentWindow);
   }
 
   public setCustomContextPosition(customPosition?: {x: number; y: number}): void {
-    this.customContextPosition = customPosition;
+    classHolder.childWindowManager?.setCustomPosition(customPosition);
   }
 
   public listenForMenu(contents: WebContents) {
@@ -113,9 +27,8 @@ export default class ContextMenuManager {
     });
 
     contents.on('context-menu', (_e, params) => {
-      if (!this.contextMenuView || this.contextMenuView.webContents.isDestroyed()) return;
-
-      const targetWindow = BrowserWindow.fromWebContents(contents) || this.mainWindow;
+      const targetWindow =
+        BrowserWindow.fromWebContents(contents) || classHolder.childWindowManager?.getCurrentParentWindow();
       this.setCurrentParentWindow(targetWindow);
 
       let offsetX = 0;
@@ -144,47 +57,40 @@ export default class ContextMenuManager {
   }
 
   public getView(): WebContentsView | undefined {
-    if (this.contextMenuView?.webContents.isDestroyed()) {
-      this.contextMenuView = undefined;
-    }
-    return this.contextMenuView;
+    return classHolder.childWindowManager?.getView();
   }
 
   public getWebContent(): WebContents | undefined {
-    return this.contextMenuView && !this.contextMenuView.webContents.isDestroyed()
-      ? this.contextMenuView.webContents
-      : undefined;
+    return classHolder.childWindowManager?.getWebContent();
   }
 
   public sendMessage(channel: string, ...args: any[]): void {
-    const webContents = this.getWebContent();
-    if (!webContents) {
-      console.error('Failed to send message: webContents is not available.');
-      return;
-    }
-    lynxIpc.send(webContents, channel, ...args);
+    classHolder.childWindowManager?.sendMessage(channel, ...args);
   }
 
   public showContextMenu(parentWindow?: BrowserWindow) {
     if (parentWindow !== undefined) {
       this.setCurrentParentWindow(parentWindow);
-    } else if (!this.currentParentWindow || this.currentParentWindow.isDestroyed()) {
-      this.setCurrentParentWindow(this.mainWindow);
     }
 
-    const targetParent = this.currentParentWindow || this.mainWindow;
+    const childManager = classHolder.childWindowManager;
+    if (!childManager) return;
+
+    const targetParent = childManager.getCurrentParentWindow();
     if (!targetParent || targetParent.isDestroyed()) return;
 
-    if (!this.contextMenuView || this.contextMenuView.webContents.isDestroyed()) return;
+    const childView = childManager.ensureView(targetParent);
+    childManager.setActiveType('contextMenu');
 
     const parentBounds = targetParent.getContentBounds();
     const cursorScreenPoint = screen.getCursorScreenPoint();
     const relCursorX = cursorScreenPoint.x - parentBounds.x;
     const relCursorY = cursorScreenPoint.y - parentBounds.y;
     const [parentW, parentH] = targetParent.getContentSize();
+    const customContextPosition = childManager.getCustomPosition();
 
-    if (this.customContextPosition) {
-      this.currentCursorPosition = this.customContextPosition;
+    if (customContextPosition) {
+      this.currentCursorPosition = customContextPosition;
     } else if (
       relCursorX >= 0 &&
       relCursorX <= parentW &&
@@ -200,14 +106,8 @@ export default class ContextMenuManager {
       };
     }
 
-    try {
-      targetParent.contentView.removeChildView(this.contextMenuView);
-    } catch {
-      // Ignored
-    }
-    targetParent.contentView.addChildView(this.contextMenuView);
-    this.contextMenuView.setBounds({x: -5000, y: -5000, width: 2000, height: 2000});
-
+    childManager.setPreparingShow(true);
+    childView.setBounds({x: -5000, y: -5000, width: 2000, height: 2000});
     contextMenuIpc.send.requestShow();
   }
 
@@ -215,8 +115,12 @@ export default class ContextMenuManager {
    * Called by the renderer when it is ready to show, with its final calculated size.
    */
   public applySizeAndShow(data: ElementResizeData) {
-    if (!this.contextMenuView || this.contextMenuView.webContents.isDestroyed()) return;
-    const targetParent = this.currentParentWindow || this.mainWindow;
+    const childManager = classHolder.childWindowManager;
+    if (!childManager) return;
+
+    const childView = childManager.getView();
+    if (!childView || childView.webContents.isDestroyed()) return;
+    const targetParent = childManager.getCurrentParentWindow();
     if (!targetParent || targetParent.isDestroyed()) return;
 
     const {width, height} = data;
@@ -227,8 +131,9 @@ export default class ContextMenuManager {
     const contentH = Math.max(20, Math.min(Math.ceil(height), 4096));
 
     const [parentW, parentH] = targetParent.getContentSize();
-    const clickPoint = this.customContextPosition
-      ? {x: Math.floor(this.customContextPosition.x), y: Math.floor(this.customContextPosition.y)}
+    const customContextPosition = childManager.getCustomPosition();
+    const clickPoint = customContextPosition
+      ? {x: Math.floor(customContextPosition.x), y: Math.floor(customContextPosition.y)}
       : this.currentCursorPosition || {
           x: Math.floor((parentW - contentW) / 2),
           y: Math.floor((parentH - contentH) / 2),
@@ -238,7 +143,7 @@ export default class ContextMenuManager {
     let newY = clickPoint.y;
 
     if (newX + contentW > parentW) {
-      newX = clickPoint.x - (this.customContextPosition ? Math.floor(contentW / 2) : contentW);
+      newX = clickPoint.x - (customContextPosition ? Math.floor(contentW / 2) : contentW);
     }
     if (newY + contentH > parentH) {
       newY = clickPoint.y - contentH;
@@ -247,30 +152,18 @@ export default class ContextMenuManager {
     newX = Math.max(0, Math.min(newX, parentW - contentW));
     newY = Math.max(0, Math.min(newY, parentH - contentH));
 
-    this.contextMenuView.setBounds({
+    childView.setBounds({
       x: Math.floor(newX),
       y: Math.floor(newY),
       width: contentW,
       height: contentH,
     });
-    this.contextMenuView.webContents.focus();
-    this.isViewVisible = true;
+    childView.webContents.focus();
+    childManager.setVisible(true);
   }
 
   public hideContextMenu(focusParent: boolean = true) {
-    if (!this.isViewVisible && (!this.contextMenuView || this.contextMenuView.webContents.isDestroyed())) return;
-    this.isViewVisible = false;
-    this.setCustomContextPosition(undefined);
-    dialogBlurred();
-
-    const targetToFocus = this.currentParentWindow || this.mainWindow;
-    if (this.contextMenuView && !this.contextMenuView.webContents.isDestroyed()) {
-      this.contextMenuView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
-    }
-    if (focusParent && targetToFocus && !targetToFocus.isDestroyed()) {
-      targetToFocus.focus();
-    }
-    this.notifyDownloadManagerClose();
+    classHolder.childWindowManager?.hide(focusParent);
   }
 
   public getContentById(id: number) {
@@ -288,27 +181,43 @@ export default class ContextMenuManager {
     const isValid = (val: any) => typeof val === 'number' && Number.isFinite(val) && val > 0;
     if (!isValid(width) || !isValid(height)) return;
 
-    if (!this.contextMenuView || this.contextMenuView.webContents.isDestroyed() || !this.isViewVisible) return;
-    const targetParent = this.currentParentWindow || this.mainWindow;
+    const childManager = classHolder.childWindowManager;
+    if (!childManager || !childManager.isShowing()) return;
+
+    const childView = childManager.getView();
+    if (!childView || childView.webContents.isDestroyed()) return;
+    const targetParent = childManager.getCurrentParentWindow();
     if (!targetParent || targetParent.isDestroyed()) return;
 
     const contentW = Math.max(20, Math.min(Math.ceil(width), 4096));
     const contentH = Math.max(20, Math.min(Math.ceil(height), 4096));
 
     const [parentW, parentH] = targetParent.getContentSize();
-    const currentBounds = this.contextMenuView.getBounds();
-    let newX = currentBounds.x;
-    let newY = currentBounds.y;
+    const customContextPosition = childManager.getCustomPosition();
+    const currentBounds = childView.getBounds();
+
+    const clickPoint = customContextPosition
+      ? {x: Math.floor(customContextPosition.x), y: Math.floor(customContextPosition.y)}
+      : this.currentCursorPosition || {
+          x: currentBounds.x,
+          y: currentBounds.y,
+        };
+
+    let newX = clickPoint.x;
+    let newY = clickPoint.y;
 
     if (newX + contentW > parentW) {
-      newX = Math.max(0, parentW - contentW);
+      newX = clickPoint.x - (customContextPosition ? Math.floor(contentW / 2) : contentW);
     }
     if (newY + contentH > parentH) {
-      newY = Math.max(0, parentH - contentH);
+      newY = clickPoint.y - contentH;
     }
 
+    newX = Math.max(0, Math.min(newX, parentW - contentW));
+    newY = Math.max(0, Math.min(newY, parentH - contentH));
+
     try {
-      this.contextMenuView.setBounds({
+      childView.setBounds({
         x: Math.floor(newX),
         y: Math.floor(newY),
         width: contentW,

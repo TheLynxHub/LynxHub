@@ -20,16 +20,10 @@ export function getProcessMetrics(): ProcessMetricsReport {
       const title = wc.getTitle() || '';
       let label = 'Renderer Process';
 
-      if (url.includes('bookmarkTooltip.html')) {
-        label = 'BookmarkTooltip (Child View)';
-      } else if (url.includes('contextMenu.html')) {
-        label = 'ContextMenu (Child View)';
-      } else if (url.includes('linkPreview.html')) {
-        label = 'LinkPreview (Child View)';
+      if (url.includes('contextMenu.html')) {
+        label = 'Child Overlay View (Context Menu / Tooltips / Modals)';
       } else if (url.includes('quickWeb.html')) {
         label = 'QuickWeb Window';
-      } else if (url.includes('shareScreen.html')) {
-        label = 'ShareScreen Window';
       } else if (url.includes('loading.html')) {
         label = 'Loading Window';
       } else if (url.includes('toast.html')) {

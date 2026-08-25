@@ -3,7 +3,7 @@ import {useSettingsState} from '@lynx/redux/reducers/settings';
 import {ChangelogItem, type ElementResizeData} from '@lynx_common/types';
 import {InstalledCard} from '@lynx_common/types/storage';
 import {isEmpty, isNil} from 'lodash-es';
-import {Fragment, useEffect, useRef, useState} from 'react';
+import {Fragment, useEffect, useState} from 'react';
 
 /**
  * Hook to get an installed card by its ID.
@@ -113,15 +113,12 @@ export function RenderSubItems(items?: ChangelogItem[], parentKey: string = '') 
 export const isLinuxPortable = window.isPortable === 'linux';
 
 export function useElementResizing(onResize: (data: ElementResizeData) => void) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const element = containerRef.current;
     if (!element) return;
 
     const sendSize = () => {
-      if (!element) return;
-
       const rect = element.getBoundingClientRect();
       const width = Math.max(Math.ceil(element.scrollWidth), Math.ceil(rect.width));
       const height = Math.max(Math.ceil(element.scrollHeight), Math.ceil(rect.height));
@@ -137,12 +134,14 @@ export function useElementResizing(onResize: (data: ElementResizeData) => void) 
     });
 
     resizeObserver.observe(element);
-    sendSize(); // Initial size send
+    sendSize();
 
-    return () => resizeObserver.disconnect();
-  }, []);
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [element, onResize]);
 
-  return containerRef;
+  return setElement;
 }
 
 export function useHasScroll() {

@@ -1,7 +1,10 @@
 import {DownloadItemInfo} from '@lynx_common/types/downloadManager';
+import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
+import browserIpc from '@lynx_shared/ipc/browser';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import windowDialogsIpc from '@lynx_shared/ipc/dialogsWindow';
 import downloadManagerIpc from '@lynx_shared/ipc/downloadManager';
+import shareScreenIpc from '@lynx_shared/ipc/shareScreen';
 import {isEmpty} from 'lodash-es';
 import {useEffect} from 'react';
 import {useDispatch} from 'react-redux';
@@ -277,6 +280,47 @@ export default function useShowEvents() {
       );
     });
 
+    // Bookmark Tooltip
+    const offBookmarkTooltip = bookmarkTooltipIpc.on.tooltipData(data => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'bookmarkTooltip',
+          value: data,
+          layout: MenuTypes.BookmarkTooltip,
+        }),
+      );
+    });
+
+    // Link Preview
+    const offLinkPreview = browserIpc.on.linkHover(url => {
+      if (url) {
+        dispatch(
+          contextActions.showLayout({
+            key: 'linkPreviewUrl',
+            value: url,
+            layout: MenuTypes.LinkPreview,
+          }),
+        );
+      } else {
+        dispatch(contextActions.unloadLayout());
+      }
+    });
+
+    // Share Screen
+    const offShareScreen = shareScreenIpc.onRequestSources(() => {
+      dispatch(
+        contextActions.showLayout({
+          key: 'activeLayout',
+          value: MenuTypes.ShareScreen,
+        }),
+      );
+    });
+
+    // Unload / Hide Window (clears all layout state from memory)
+    const offUnload = contextMenuIpc.on.onUnload(() => {
+      dispatch(contextActions.unloadLayout());
+    });
+
     return () => {
       offZoom();
       offFind();
@@ -300,6 +344,10 @@ export default function useShowEvents() {
       offTabContextMenu();
       offTerminateMultipleTabs();
       offQuickWebSwitcher();
+      offBookmarkTooltip();
+      offLinkPreview();
+      offShareScreen();
+      offUnload();
     };
   }, [dispatch]);
 }

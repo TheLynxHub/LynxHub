@@ -142,6 +142,9 @@ const contextMenuIpc = {
   },
 
   on: {
+    // Listens for unload/hide event to unmount content from memory
+    onUnload: (callback: () => void): (() => void) => lynxIpc.on(contextMenuChannels.onUnload, callback),
+
     // Listens for request to show the context menu
     requestShow: (callback: () => void): (() => void) => lynxIpc.on(contextMenuChannels.requestShow, callback),
 

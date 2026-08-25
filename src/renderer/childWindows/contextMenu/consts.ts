@@ -21,4 +21,7 @@ export enum MenuTypes {
   TabContextMenu,
   TerminateMultipleTabsConfirm,
   QuickWebSwitcher,
+  BookmarkTooltip,
+  LinkPreview,
+  ShareScreen,
 }

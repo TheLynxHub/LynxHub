@@ -54,6 +54,8 @@ const initialState: ContextState = {
   },
   downloads: [],
   quickWebSwitcher: undefined,
+  bookmarkTooltip: undefined,
+  linkPreviewUrl: undefined,
 };
 
 const appSlice = createSlice({
@@ -91,6 +93,17 @@ const appSlice = createSlice({
       }
       newState[key] = value;
 
+      return newState;
+    },
+
+    /**
+     * Unloads the active layout and resets all state to empty to free RAM when view is hidden.
+     */
+    unloadLayout: (state: ContextState) => {
+      const downloads = current(state).downloads;
+      const newState = cloneDeep(initialState);
+      newState.downloads = downloads;
+      newState.activeLayout = undefined;
       return newState;
     },
 

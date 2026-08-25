@@ -15,6 +15,7 @@ import {app, BrowserWindow, net} from 'electron';
 
 import BookmarkTooltipManager from '../childWindows/bookmarkTooltip';
 import BrowserDownloadManager from '../childWindows/browserDownloadManager';
+import ChildWindowManager from '../childWindows/childWindowManager';
 import ContextMenuManager from '../childWindows/contextMenu';
 import LinkPreviewManager from '../childWindows/linkPreview';
 import QuickWindowManager from '../childWindows/quickWeb';
@@ -43,6 +44,7 @@ class ClassHolder {
   private _appManager?: ElectronAppManager;
   private _trayManager?: TrayManager;
   private _cardsValidator?: ValidateCards;
+  private _childWindowManager?: ChildWindowManager;
   private _contextMenuManager?: ContextMenuManager;
   private _linkPreviewManager?: LinkPreviewManager;
   private _bookmarkTooltipManager?: BookmarkTooltipManager;
@@ -134,6 +136,7 @@ class ClassHolder {
     this.extensionManager.setAppManager(this.appManager);
     this.trayManager = new TrayManager();
     this.cardsValidator = new ValidateCards();
+    this.childWindowManager = new ChildWindowManager();
     this.contextMenuManager = new ContextMenuManager();
     this.linkPreviewManager = new LinkPreviewManager();
     this.bookmarkTooltipManager = new BookmarkTooltipManager();
@@ -194,6 +197,9 @@ class ClassHolder {
   }
   private set cardsValidator(value: ClassHolder['_cardsValidator']) {
     this._cardsValidator = value;
+  }
+  private set childWindowManager(value: ClassHolder['_childWindowManager']) {
+    this._childWindowManager = value;
   }
   private set contextMenuManager(value: ClassHolder['_contextMenuManager']) {
     this._contextMenuManager = value;
@@ -265,6 +271,9 @@ class ClassHolder {
   }
   get cardsValidator() {
     return this._cardsValidator;
+  }
+  get childWindowManager() {
+    return this._childWindowManager!;
   }
   get contextMenuManager() {
     return this._contextMenuManager;

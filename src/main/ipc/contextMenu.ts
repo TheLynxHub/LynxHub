@@ -140,14 +140,20 @@ export async function listenForBrowserChannels(browserManager: BrowserManager) {
   browserIpc.on.openZoom((id, customPosition) => {
     setPosition(customPosition);
     contextMenuIpc.send.onZoom(id, browserManager.getCurrentZoom(id));
-    contextMenuManager.showContextMenu();
+    const childManager = classHolder.childWindowManager;
+    if (!childManager?.isShowing() || childManager.getActiveType() !== 'contextMenu') {
+      contextMenuManager.showContextMenu();
+    }
   });
 
   // Open Volume control
   browserIpc.on.openVolume((data, customPosition) => {
     setPosition(customPosition);
     contextMenuIpc.send.onVolume(data);
-    contextMenuManager.showContextMenu();
+    const childManager = classHolder.childWindowManager;
+    if (!childManager?.isShowing() || childManager.getActiveType() !== 'contextMenu') {
+      contextMenuManager.showContextMenu();
+    }
   });
 
   // Open Terminate AI
@@ -245,6 +251,8 @@ export const contextMenuIpc = {
 
     /** Sends request to show context menu to renderer */
     requestShow: () => sendToContextMenu(contextMenuChannels.requestShow),
+    /** Sends unload event to context menu to unmount React DOM */
+    onUnload: () => sendToContextMenu(contextMenuChannels.onUnload),
 
     /** Sends right-click event to context menu */
     rightClick: (params: ContextMenuParams, navHistory: NavHistory, id: number) =>

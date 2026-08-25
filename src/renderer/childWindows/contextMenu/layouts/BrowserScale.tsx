@@ -65,7 +65,7 @@ const BrowserScale = memo(function BrowserScale() {
       {/* Slider */}
       <div className="flex flex-col gap-3">
         <Slider step={5} minValue={10} value={factor} maxValue={300} onChange={onChange} className="w-full max-w-xs">
-          <Label>Volume</Label>
+          <Label>Browser Scale</Label>
           <Slider.Output>
             {values => {
               return `${values.defaultChildren}%`;

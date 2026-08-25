@@ -13,10 +13,10 @@ import {useScreenSources} from './useScreenSources';
 type TabType = 'windows' | 'screens';
 
 /**
- * Main application component for the Share Screen window.
+ * Main application component for the Share Screen modal layout.
  * Allows users to select a window or screen to share.
  */
-export default function ScreenShare() {
+export default function ShareScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('windows');
   const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
   const [shareAudio, setShareAudio] = useState<boolean>(false);
@@ -51,7 +51,7 @@ export default function ScreenShare() {
       className="size-full"
       title="Nothing to share"
       icon={<MonitorIcon className="size-12" />}
-      description="No {activeTab} available to capture."
+      description={`No ${activeTab} available to capture.`}
     />
   );
 

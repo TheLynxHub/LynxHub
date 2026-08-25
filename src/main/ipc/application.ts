@@ -101,28 +101,14 @@ export default async function listenApplication() {
  * @param isDark - Whether dark mode is enabled.
  */
 const notifyAllWindowsDarkMode = (isDark: boolean) => {
-  const {
-    contextMenuManager,
-    linkPreviewManager,
-    bookmarkTooltipManager,
-    shareScreenManager,
-    quickWindowManager,
-    toastWindow,
-  } = classHolder;
+  const {childWindowManager, quickWindowManager, toastWindow} = classHolder;
 
   sendToMain(appChannels.onDarkMode, isDark);
 
-  const contextMenu = contextMenuManager?.getWebContent();
-  if (contextMenu && !contextMenu.isDestroyed()) contextMenu.send(appChannels.onDarkMode, isDark);
-
-  const linkPreview = linkPreviewManager?.getWebContent();
-  if (linkPreview && !linkPreview.isDestroyed()) linkPreview.send(appChannels.onDarkMode, isDark);
-
-  const bookmarkTooltip = bookmarkTooltipManager?.getWebContent();
-  if (bookmarkTooltip && !bookmarkTooltip.isDestroyed()) bookmarkTooltip.send(appChannels.onDarkMode, isDark);
-
-  const shareScreen = shareScreenManager?.getWebContent();
-  if (shareScreen && !shareScreen.isDestroyed()) shareScreen.send(appChannels.onDarkMode, isDark);
+  const childWebContents = childWindowManager?.getWebContent();
+  if (childWebContents && !childWebContents.isDestroyed()) {
+    childWebContents.send(appChannels.onDarkMode, isDark);
+  }
 
   const quickWeb = getWebContentsIfAvailable(quickWindowManager?.getWindow());
   if (quickWeb) quickWeb.send(appChannels.onDarkMode, isDark);

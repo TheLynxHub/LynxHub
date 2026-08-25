@@ -1,25 +1,15 @@
-import {useDocumentDarkMode} from '@lynx_shared/hooks';
 import bookmarkTooltipIpc from '@lynx_shared/ipc/bookmarkTooltip';
-import {useEffect, useLayoutEffect, useRef, useState} from 'react';
+import {useLayoutEffect, useRef} from 'react';
 
-type TooltipData = {
-  title: string;
-  url: string;
-};
+import {useContextState} from '../redux/reducer';
 
 /**
- * BookmarkTooltip component.
+ * BookmarkTooltip layout component.
  * Displays a rich tooltip preview when hovering over bookmarks in the bookmarks bar.
  */
 export default function BookmarkTooltip() {
-  const [data, setData] = useState<TooltipData | null>(null);
+  const data = useContextState('bookmarkTooltip');
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useDocumentDarkMode('bg-transparent');
-
-  useEffect(() => {
-    return bookmarkTooltipIpc.on.tooltipData(setData);
-  }, []);
 
   useLayoutEffect(() => {
     if (containerRef.current && data) {
