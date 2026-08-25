@@ -69,8 +69,6 @@ export const DISCORD_SERVER: string = 'https://discord.gg/e8rBzhtcnK';
 export const X_URL: string = 'https://x.com/LynxHubAI';
 export const PATREON_URL: string = 'https://www.patreon.com/LynxHub';
 export const GITHUB_URL: string = `${GITHUB_ORG}/LynxHub`;
-export const REDDIT_URL: string = 'https://www.reddit.com/r/LynxHubAI';
-export const YOUTUBE_URL: string = 'https://www.youtube.com/@LynxHubAI';
 
 /**
  * Page IDs used for navigation.
