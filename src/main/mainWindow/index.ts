@@ -103,7 +103,9 @@ export default class MainWindowManager {
     this.onCreateWindowListeners.forEach(listener => listener());
 
     // Initialize child windows that depend on the main window
-    const {contextMenuManager, linkPreviewManager, bookmarkTooltipManager, quickWindowManager} = classHolder;
+    const {childWindowManager, contextMenuManager, linkPreviewManager, bookmarkTooltipManager, quickWindowManager} =
+      classHolder;
+    childWindowManager?.setMainWindow(this.mainWindow);
     contextMenuManager?.createWindow(this.mainWindow);
     linkPreviewManager?.createWindow(this.mainWindow);
     bookmarkTooltipManager?.createWindow(this.mainWindow);

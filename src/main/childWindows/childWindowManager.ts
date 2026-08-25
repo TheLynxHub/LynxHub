@@ -29,6 +29,8 @@ export default class ChildWindowManager {
   private escapeHandler?: () => void;
   private isPreparingShow = false;
   private boundParentHide = () => this.hide(false);
+  private isLoaded = false;
+  private pendingMessages: Array<{channel: string; args: any[]}> = [];
 
   public setMainWindow(mainWindow: BrowserWindow): void {
     this.mainWindow = mainWindow;
@@ -36,9 +38,14 @@ export default class ChildWindowManager {
       this.currentParentWindow = mainWindow;
     }
 
+    this.setupParentListeners(mainWindow);
+
     mainWindow.on('focus', () => {
       this.setCurrentParentWindow(this.mainWindow);
     });
+
+    // Preload the unified child WebContentsView so it is immediately warm and ready on startup
+    this.ensureView(mainWindow);
   }
 
   public setCurrentParentWindow(parentWindow?: BrowserWindow): void {
@@ -47,6 +54,14 @@ export default class ChildWindowManager {
       this.removeParentListeners(this.currentParentWindow);
       this.currentParentWindow = target;
       this.setupParentListeners(target);
+
+      if (this.childView && !this.childView.webContents.isDestroyed() && target && !target.isDestroyed()) {
+        try {
+          target.contentView.addChildView(this.childView);
+        } catch {
+          // Ignored
+        }
+      }
     }
   }
 
@@ -94,7 +109,10 @@ export default class ChildWindowManager {
 
   public sendMessage(channel: string, ...args: any[]): void {
     const webContents = this.getWebContent();
-    if (!webContents) return;
+    if (!webContents || !this.isLoaded) {
+      this.pendingMessages.push({channel, args});
+      return;
+    }
     lynxIpc.send(webContents, channel, ...args);
   }
 
@@ -109,6 +127,7 @@ export default class ChildWindowManager {
     const targetParent = this.getCurrentParentWindow();
 
     if (!this.childView || this.childView.webContents.isDestroyed()) {
+      this.isLoaded = false;
       this.childView = new WebContentsView({
         webPreferences: {
           preload: path.join(__dirname, '../preload/index.cjs'),
@@ -117,6 +136,7 @@ export default class ChildWindowManager {
       });
       this.childView.webContents.setBackgroundThrottling(false);
       this.childView.setBackgroundColor('#00000000');
+      this.childView.setBounds({x: -5000, y: -5000, width: 0, height: 0});
 
       this.setupViewListeners();
       this.loadWindowContent();
@@ -137,6 +157,17 @@ export default class ChildWindowManager {
   private setupViewListeners(): void {
     if (!this.childView) return;
 
+    this.childView.webContents.on('did-finish-load', () => {
+      this.isLoaded = true;
+      this.flushPendingMessages();
+    });
+
+    this.childView.webContents.on('render-process-gone', (_event, details) => {
+      console.warn(`[ChildWindowManager] Render process gone: ${details.reason}`);
+      this.isLoaded = false;
+      this.childView = undefined;
+    });
+
     this.childView.webContents.on('before-input-event', (_, input) => {
       if (input.key.toLowerCase() === 'escape') {
         if (this.escapeHandler) {
@@ -153,6 +184,17 @@ export default class ChildWindowManager {
         this.hide(false);
       }
     });
+  }
+
+  private flushPendingMessages(): void {
+    const webContents = this.getWebContent();
+    if (!webContents || !this.isLoaded) return;
+    while (this.pendingMessages.length > 0) {
+      const msg = this.pendingMessages.shift();
+      if (msg) {
+        lynxIpc.send(webContents, msg.channel, ...msg.args);
+      }
+    }
   }
 
   private setupParentListeners(parent?: BrowserWindow): void {
@@ -215,7 +257,7 @@ export default class ChildWindowManager {
    * so all DOM nodes and layout states are freed from memory.
    */
   public hide(focusParent: boolean = true): void {
-    if (!this.isViewVisible && (!this.childView || this.childView.webContents.isDestroyed())) {
+    if (!this.isViewVisible && !this.activeType && !this.isPreparingShow) {
       return;
     }
 
