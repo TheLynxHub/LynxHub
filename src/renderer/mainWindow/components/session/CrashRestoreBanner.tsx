@@ -3,8 +3,8 @@ import {sessionActions, useSessionState} from '@lynx/redux/reducers/session';
 import {AppDispatch} from '@lynx/redux/store';
 import {restoreSessionSnapshot} from '@lynx/utils/sessionRestoreHelper';
 import {HistoryIcon, RefreshIcon} from '@solar-icons/react/bold-duotone';
-import {CloseCircleIcon} from '@solar-icons/react/linear';
 import {AnimatePresence, motion} from 'framer-motion';
+import {X} from 'lucide-react';
 import {memo, useCallback} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -67,7 +67,7 @@ const CrashRestoreBanner = memo(() => {
               <span>Restore Tabs</span>
             </Button>
             <Button size="sm" variant="ghost" onPress={handleDismiss}>
-              <CloseCircleIcon className="size-4 text-foreground/60" />
+              <X className="size-4 text-foreground/60" />
               <span>Dismiss</span>
             </Button>
           </div>
