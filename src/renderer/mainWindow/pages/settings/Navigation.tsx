@@ -1,4 +1,4 @@
-import {Button, Card, Header, ScrollShadow, SearchField} from '@heroui/react';
+import {Button, Card, Header, ScrollShadow, SearchField, Spinner} from '@heroui/react';
 import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {settingsActions, useSettingsState} from '@lynx/redux/reducers/settings';
 import {Terminal_Icon} from '@lynx_assets/icons';
@@ -15,7 +15,7 @@ import {
 } from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, motion} from 'framer-motion';
 import Fuse from 'fuse.js';
-import {ReactNode, useCallback, useMemo} from 'react';
+import {memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState, useTransition} from 'react';
 import {useDispatch} from 'react-redux';
 
 import {settingsSectionId} from './Container';
@@ -109,7 +109,7 @@ const groupSections: GroupProps[] = [
 ];
 
 /** Navigation bar group and items */
-export const GroupSection = ({title, items, danger = false}: GroupProps) => {
+export const GroupSection = memo(({title, items, danger = false}: GroupProps) => {
   const dispatch = useDispatch();
   const selectedSection = useSettingsState('selectedSection');
   const setSelectedSection = useCallback(
@@ -158,7 +158,7 @@ export const GroupSection = ({title, items, danger = false}: GroupProps) => {
       </div>
     </div>
   );
-};
+});
 
 /** Props for the SettingsPageNav component */
 export type SettingsPageNavProps = {
@@ -166,25 +166,50 @@ export type SettingsPageNavProps = {
   sectionTexts: Map<string, string>;
 };
 
-const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
+const SettingsPageNav = memo(({sectionTexts}: SettingsPageNavProps) => {
   const dispatch = useDispatch();
+  const reduxSearchValue = useSettingsState('searchValue');
+  const [inputValue, setInputValue] = useState(reduxSearchValue);
+  const [isPending, startTransition] = useTransition();
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const searchValue = useSettingsState('searchValue');
-  const setSearchValue = useCallback(
+  useEffect(() => {
+    setInputValue(reduxSearchValue);
+  }, [reduxSearchValue]);
+
+  const handleSearchChange = useCallback(
     (value: string) => {
-      dispatch(settingsActions.setSearchValue(value));
+      setInputValue(value);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      if (!value) {
+        dispatch(settingsActions.setSearchValue(''));
+        return;
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        startTransition(() => {
+          dispatch(settingsActions.setSearchValue(value));
+        });
+      }, 100);
     },
     [dispatch],
   );
 
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
   const buttons = extensionsData.customizePages.settings.add.navButton;
 
-  // The arrays are small, so finding and filtering can be derived quickly on each render
-
-  const groupsToRender = useMemo(() => {
-    if (!searchValue) return groupSections;
-
-    const query = searchValue.trim().toLowerCase();
+  const matchedItemsByElementId = useMemo(() => {
+    if (!reduxSearchValue) return null;
+    const query = reduxSearchValue.trim().toLowerCase();
+    if (!query) return null;
 
     const allItemsWithSearchFields = groupSections.flatMap(group =>
       group.items.map(item => ({
@@ -195,53 +220,40 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
       })),
     );
 
-    const hasAnyDirectMatch = query
-      ? allItemsWithSearchFields.some(({title, groupTitle, sectionText}) =>
-          `${title} ${groupTitle} ${sectionText}`.toLowerCase().includes(query),
-        )
-      : false;
+    const directMatches = allItemsWithSearchFields.filter(({title, groupTitle, sectionText}) =>
+      `${title} ${groupTitle} ${sectionText}`.toLowerCase().includes(query),
+    );
+
+    if (directMatches.length > 0) {
+      return new Set(directMatches.map(r => r.item.elementId));
+    }
+
+    if (query.length >= 2) {
+      const fuse = new Fuse(allItemsWithSearchFields, {
+        keys: ['title', 'groupTitle', 'sectionText'],
+        threshold: 0.25,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+      });
+      const fuzzyResults = fuse.search(reduxSearchValue);
+      return new Set(fuzzyResults.map(r => r.item.item.elementId));
+    }
+
+    return new Set<string>();
+  }, [reduxSearchValue, sectionTexts]);
+
+  const groupsToRender = useMemo(() => {
+    if (!matchedItemsByElementId) return groupSections;
 
     return groupSections
-      .map(group => {
-        const itemsWithSearchFields = group.items.map(item => ({
-          item,
-          title: item.title,
-          groupTitle: group.title,
-          sectionText: sectionTexts.get(item.elementId) ?? '',
-        }));
-
-        const directMatchedItems = query
-          ? itemsWithSearchFields
-              .filter(({title, groupTitle, sectionText}) => {
-                const combined = `${title} ${groupTitle} ${sectionText}`.toLowerCase();
-                return combined.includes(query);
-              })
-              .map(r => r.item)
-          : [];
-
-        if (hasAnyDirectMatch) {
-          return {
-            ...group,
-            items: directMatchedItems,
-          };
-        }
-
-        const fuse = new Fuse(itemsWithSearchFields, {
-          keys: ['title', 'groupTitle', 'sectionText'],
-          threshold: 0.25,
-          ignoreLocation: true,
-          minMatchCharLength: 2,
-        });
-
-        const fuzzyMatchedItems = fuse.search(searchValue).map(r => r.item.item);
-
-        return {
-          ...group,
-          items: fuzzyMatchedItems,
-        };
-      })
+      .map(group => ({
+        ...group,
+        items: group.items.filter(item => matchedItemsByElementId.has(item.elementId)),
+      }))
       .filter(group => group.items.length > 0);
-  }, [searchValue, sectionTexts]);
+  }, [matchedItemsByElementId]);
+
+  const isProcessing = isPending || inputValue !== reduxSearchValue;
 
   return (
     <Card variant="secondary" className="h-full my-2 w-48 shrink-0 px-0">
@@ -250,9 +262,13 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
         <SettingsSearchHighlight text="Settings" />
       </Card.Header>
       <Card.Content className="flex flex-col">
-        <SearchField className="mx-1.5" value={searchValue} onChange={setSearchValue}>
+        <SearchField className="mx-1.5" value={inputValue} onChange={handleSearchChange}>
           <SearchField.Group>
-            <SearchField.SearchIcon />
+            {isProcessing ? (
+              <Spinner size="sm" aria-label="Searching..." className="size-4 shrink-0 ml-3 text-muted" />
+            ) : (
+              <SearchField.SearchIcon />
+            )}
             <SearchField.Input
               spellCheck="false"
               placeholder="Search settings..."
@@ -263,8 +279,8 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
         </SearchField>
 
         <ScrollShadow className="h-full flex flex-col gap-y-3 px-4" hideScrollBar>
-          {groupsToRender.length === 0 && searchValue && (
-            <div className="px-3 text-xs text-muted">No sections match "{searchValue}".</div>
+          {groupsToRender.length === 0 && reduxSearchValue && (
+            <div className="px-3 text-xs text-muted">No sections match "{reduxSearchValue}".</div>
           )}
 
           {groupsToRender.map(section => (
@@ -277,6 +293,6 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
       </Card.Content>
     </Card>
   );
-};
+});
 
 export default SettingsPageNav;

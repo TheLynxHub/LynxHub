@@ -1,4 +1,5 @@
 import {useSettingsState} from '@lynx/redux/reducers/settings';
+import {memo} from 'react';
 import Highlighter from 'react-highlight-words';
 
 /** Props for the SettingsSearchHighlight component */
@@ -29,6 +30,13 @@ const SettingsSearchHighlight = ({text, children, className, highlightClassName}
     return <span className={className}>{content}</span>;
   }
 
+  const lowerContent = content.toLowerCase();
+  const hasMatch = searchWords.some(word => word && lowerContent.includes(word.toLowerCase()));
+
+  if (!hasMatch) {
+    return <span className={className}>{content}</span>;
+  }
+
   return (
     <Highlighter
       className={className}
@@ -40,4 +48,4 @@ const SettingsSearchHighlight = ({text, children, className, highlightClassName}
   );
 };
 
-export default SettingsSearchHighlight;
+export default memo(SettingsSearchHighlight);

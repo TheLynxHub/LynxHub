@@ -222,13 +222,26 @@ export const useRegisterSectionSearch = (sectionId?: string, staticText?: string
   useEffect(() => {
     if (!sectionId) return;
 
+    // Built-in sections already have exhaustive pre-indexed keyword registries in BUILTIN_SECTION_SEARCH_TEXTS.
+    // Avoid running heavy DOM MutationObservers on them to eliminate re-render cycles during search.
+    if (sectionId in BUILTIN_SECTION_SEARCH_TEXTS) {
+      if (staticTextValue) {
+        setSectionSearchText(sectionId, staticTextValue);
+      }
+      return;
+    }
+
     let observer: MutationObserver | null = null;
     let frameId: number | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let activeElement: HTMLElement | null = null;
 
     const update = () => {
-      const contentText = activeElement?.textContent ?? '';
-      setSectionSearchText(sectionId, `${contentText} ${staticTextValue}`.trim());
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const contentText = activeElement?.textContent ?? '';
+        setSectionSearchText(sectionId, `${contentText} ${staticTextValue}`.trim());
+      }, 300);
     };
 
     const connect = () => {
@@ -239,7 +252,8 @@ export const useRegisterSectionSearch = (sectionId?: string, staticText?: string
       }
 
       activeElement = element;
-      update();
+      const contentText = activeElement?.textContent ?? '';
+      setSectionSearchText(sectionId, `${contentText} ${staticTextValue}`.trim());
 
       observer = new MutationObserver(update);
       observer.observe(element, {childList: true, subtree: true, characterData: true});
@@ -250,6 +264,9 @@ export const useRegisterSectionSearch = (sectionId?: string, staticText?: string
     return () => {
       if (frameId !== null) {
         window.cancelAnimationFrame(frameId);
+      }
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
       }
       observer?.disconnect();
     };

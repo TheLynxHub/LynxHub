@@ -2,7 +2,7 @@ import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {useSettingsState} from '@lynx/redux/reducers/settings';
 import Fuse from 'fuse.js';
 import {compact} from 'lodash-es';
-import {type ComponentType, useMemo} from 'react';
+import {type ComponentType, memo, useMemo} from 'react';
 
 import SettingsBrowser, {SettingsBrowserId} from './items/browser';
 import SettingsCard, {SettingsCardId} from './items/card';
@@ -63,7 +63,7 @@ const builtInSections: SettingsSectionDefinition[] = [
  * Renders all available settings sections (built-in and extension-provided)
  * and filters them based on the active search or selected navigation tab.
  */
-export const SettingsSections = ({sectionTexts}: SettingsSectionsProps) => {
+export const SettingsSections = memo(({sectionTexts}: SettingsSectionsProps) => {
   const content = extensionsData.customizePages.settings.add.content;
   const searchValue = useSettingsState('searchValue');
   const selectedSection = useSettingsState('selectedSection');
@@ -134,11 +134,14 @@ export const SettingsSections = ({sectionTexts}: SettingsSectionsProps) => {
       {!hasVisibleSection && searchValue && (
         <div className="py-10 text-center text-sm text-muted">No settings match “{searchValue}”.</div>
       )}
-      {sectionsWithVisibility.map(({Component, elementId, title, visible}, index) => (
-        <div key={elementId || `${title}_${index}`} className={visible ? 'contents' : 'hidden'}>
-          <Component />
-        </div>
-      ))}
+      {sectionsWithVisibility.map(({Component, elementId, title, visible}, index) => {
+        if (!visible) return null;
+        return (
+          <div className="contents" key={elementId || `${title}_${index}`}>
+            <Component />
+          </div>
+        );
+      })}
     </>
   );
-};
+});

@@ -80,13 +80,18 @@ export function searchInStrings(searchText: string, targetTexts: (string | undef
     if (allWordsMatch) return true;
   }
 
-  const fuse = new Fuse(filteredTexts, {
-    threshold: 0.25,
-    ignoreLocation: true,
-    minMatchCharLength: 2,
-  });
+  // Only run fuzzy search for queries of 3+ characters to avoid heavy indexing during early keystrokes
+  if (normalizedQuery.length >= 3) {
+    const fuse = new Fuse(filteredTexts, {
+      threshold: 0.25,
+      ignoreLocation: true,
+      minMatchCharLength: 2,
+    });
 
-  return fuse.search(searchText).length > 0;
+    return fuse.search(searchText).length > 0;
+  }
+
+  return false;
 }
 
 export type HotkeyLike = {

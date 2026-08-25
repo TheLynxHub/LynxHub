@@ -1,4 +1,5 @@
 import {ScrollShadow} from '@heroui/react';
+import {memo} from 'react';
 
 import {SettingsSections} from './Container';
 
@@ -21,4 +22,4 @@ const SettingsPageContents = ({sectionTexts}: SettingsPageContentsProps) => {
   );
 };
 
-export default SettingsPageContents;
+export default memo(SettingsPageContents);

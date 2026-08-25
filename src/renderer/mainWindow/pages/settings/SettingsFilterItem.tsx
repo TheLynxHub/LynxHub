@@ -1,6 +1,6 @@
 import {useSettingsState} from '@lynx/redux/reducers/settings';
 import {searchInStrings} from '@lynx/utils';
-import {PropsWithChildren} from 'react';
+import {memo, PropsWithChildren} from 'react';
 
 /** Props for SettingsFilterItem component */
 export type SettingsFilterItemProps = PropsWithChildren<{
@@ -34,4 +34,4 @@ const SettingsFilterItem = ({searchTexts, children}: SettingsFilterItemProps) =>
   return <div className="contents">{children}</div>;
 };
 
-export default SettingsFilterItem;
+export default memo(SettingsFilterItem);
