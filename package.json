@@ -130,7 +130,7 @@
     "@xterm/xterm": "^6.0.0",
     "chokidar": "^5.0.0",
     "drizzle-kit": "^0.31.10",
-    "electron": "^43.4.0",
+    "electron": "^44.0.0",
     "electron-builder": "^26.15.3",
     "electron-dl": "^4.0.0",
     "electron-log": "^5.4.4",
