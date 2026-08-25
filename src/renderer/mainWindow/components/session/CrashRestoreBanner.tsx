@@ -45,12 +45,12 @@ const CrashRestoreBanner = memo(() => {
         <div
           className={
             'w-full flex items-center justify-between gap-x-4 px-4 py-3 ' +
-            'rounded-2xl border border-warning-200/50 dark:border-warning-900/40 ' +
-            'bg-warning-50/90 dark:bg-warning-950/40 backdrop-blur-md shadow-md'
+            'rounded-2xl border border-warning/30 ' +
+            'bg-warning-soft/90 dark:bg-warning-soft/40 backdrop-blur-md shadow-md'
           }>
           <div className="flex items-center gap-x-3 min-w-0">
-            <div className="size-9 rounded-xl bg-warning-500/15 flex items-center justify-center shrink-0">
-              <HistoryIcon className="size-5 text-warning-600 dark:text-warning-400" />
+            <div className="size-9 rounded-xl bg-warning/15 flex items-center justify-center shrink-0">
+              <HistoryIcon className="size-5 text-warning" />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-semibold text-foreground truncate">Restore Previous Session</span>

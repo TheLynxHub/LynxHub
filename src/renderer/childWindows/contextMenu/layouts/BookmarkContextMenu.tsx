@@ -133,12 +133,12 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
           <ActionButton
             title="Open in New Tab"
             onPress={handleOpenInNewTab}
-            icon={<SquareShareLineIcon className="size-4 text-primary" />}
+            icon={<SquareShareLineIcon className="size-4 text-accent" />}
           />
           <ActionButton
             onPress={handleCopyLink}
             title="Copy Link Address"
-            icon={<CopyIcon className="size-4 text-default-500" />}
+            icon={<CopyIcon className="size-4 text-muted" />}
           />
           <Checkbox className="w-full" isSelected={isIconOnly} onChange={handleToggleShowIconOnly}>
             <Checkbox.Content
@@ -163,7 +163,7 @@ const BookmarkContextMenu = memo(function BookmarkContextMenu() {
           <ActionButton
             title="Open All in New Tabs"
             onPress={handleOpenAllInNewTabs}
-            icon={<FolderOpenIcon className="size-4 text-primary" />}
+            icon={<FolderOpenIcon className="size-4 text-accent" />}
           />
           <ActionButton title="Rename..." onPress={handleEdit} icon={<PenIcon className="size-4 text-warning" />} />
           <ActionButton

@@ -62,7 +62,7 @@ const RenderItem = memo(({item, updateTable, dir, searchValue}: Props) => {
       <div
         className={
           'flex w-full flex-row items-center justify-between rounded-3xl border-2 bg-surface-secondary p-3 ' +
-          'border-transparent transition duration-300 hover:border-default-200 hover:bg-surface-tertiary'
+          'border-transparent transition duration-300 hover:border-border hover:bg-surface-tertiary'
         }>
         <div className="flex min-w-0 flex-1 flex-row items-center gap-4">
           <Avatar>

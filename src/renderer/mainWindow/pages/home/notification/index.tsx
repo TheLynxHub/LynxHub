@@ -133,8 +133,8 @@ function NotificationItem({
   let titleColorClass = 'text-foreground';
 
   if (style === 'info') {
-    cardBgClass = 'bg-primary-soft/10 dark:bg-primary-soft/5 backdrop-blur-md border-primary/20';
-    titleColorClass = 'text-primary';
+    cardBgClass = 'bg-accent-soft/10 dark:bg-accent-soft/5 backdrop-blur-md border-accent/20';
+    titleColorClass = 'text-accent';
   } else if (style === 'success') {
     cardBgClass = 'bg-success/10 dark:bg-success/5 backdrop-blur-md border-success/20';
     titleColorClass = 'text-success';
@@ -155,15 +155,15 @@ function NotificationItem({
   // Resolve Icon Color
   let iconColorClass = 'text-foreground';
   if (iconColor) {
-    if (iconColor === 'primary') iconColorClass = 'text-primary';
-    else if (iconColor === 'secondary') iconColorClass = 'text-secondary';
+    if (iconColor === 'primary' || iconColor === 'accent') iconColorClass = 'text-accent';
+    else if (iconColor === 'secondary') iconColorClass = 'text-muted';
     else if (iconColor === 'success') iconColorClass = 'text-success';
     else if (iconColor === 'warning') iconColorClass = 'text-warning';
     else if (iconColor === 'danger') iconColorClass = 'text-danger';
     else if (iconColor === 'default') iconColorClass = 'text-muted-foreground';
     else iconColorClass = iconColor;
   } else {
-    if (style === 'info') iconColorClass = 'text-primary';
+    if (style === 'info') iconColorClass = 'text-accent';
     else if (style === 'success') iconColorClass = 'text-success';
     else if (style === 'warning') iconColorClass = 'text-warning';
     else if (style === 'danger') iconColorClass = 'text-danger';

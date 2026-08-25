@@ -238,7 +238,7 @@ export default function ModuleConfigModal({isOpen, onClose}: ModuleConfigModalPr
             </div>
             {categorizedCards.map(category => (
               <div key={category.category} className="flex flex-col gap-2 bg-surface-secondary rounded-3xl p-4">
-                <span className="text-medium font-semibold">{category.category}</span>
+                <span className="text-base font-semibold">{category.category}</span>
                 <div className="grid grid-cols-3 gap-2">
                   {category.cards.map(card => (
                     <Checkbox id={card.id} key={card.id} isSelected={card.enabled} onChange={() => toggleCard(card.id)}>

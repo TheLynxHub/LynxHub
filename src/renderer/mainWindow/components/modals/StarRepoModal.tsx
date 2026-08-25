@@ -99,9 +99,7 @@ export default function StarRepoModal() {
             {error}
             <span className="block mt-1">
               You can also{' '}
-              <button
-                onClick={handleManualStar}
-                className="underline hover:text-danger-600 font-semibold cursor-pointer">
+              <button onClick={handleManualStar} className="underline hover:text-danger font-semibold cursor-pointer">
                 star it manually in the browser
               </button>
               .

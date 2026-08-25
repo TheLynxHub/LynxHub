@@ -98,7 +98,7 @@ const Footer = memo(({isRunning, updatingExtensions, updating, updateCount, id, 
           speed={2}
           darkMode={darkMode}
           text={`Updating Extensions ${updateCount}`}
-          className="text-xs font-bold text-secondary/70"
+          className="text-xs font-bold text-LynxPurple/70"
         />
       ) : isRunning ? (
         <ShinyText speed={2} text="Running" darkMode={darkMode} className="text-xs font-bold text-accent/70" />

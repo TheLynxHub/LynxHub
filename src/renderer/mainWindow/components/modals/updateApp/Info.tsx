@@ -94,11 +94,11 @@ export default function Info({updateInfo, releaseNotes}: Props) {
                             <div
                               key={changeIndex}
                               className="flex flex-col gap-2 bg-surface-secondary/50 p-3 rounded-3xl">
-                              <div className={'w-full pb-1 text-sm font-bold text-default-600'}>
+                              <div className={'w-full pb-1 text-sm font-bold text-foreground'}>
                                 {change.title}
                                 <Separator className="mt-1" variant="default" />
                               </div>
-                              <ul className="list-disc pl-4 text-sm text-default-500">
+                              <ul className="list-disc pl-4 text-sm text-muted">
                                 {RenderSubItems(change.items, `section_${index}_${changeIndex}`)}
                               </ul>
                             </div>

@@ -66,7 +66,7 @@ function UserInputsView() {
 
   return (
     <div className="mb-6 mt-4 flex flex-col items-center justify-center gap-y-4 px-2">
-      <span className="text-large font-semibold">
+      <span className="text-lg font-semibold">
         {inputElements.title || 'Please fill in the required information and click Next'}
       </span>
       {inputElements.elements.map(element => {

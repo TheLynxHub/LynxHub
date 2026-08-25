@@ -50,7 +50,7 @@ const ConfirmElement = memo(({title, enabledTitle, confirmName, buttons}: Confir
     <div className="py-4 px-5 w-90">
       <div className="flex flex-row items-center justify-start gap-x-2">
         <ShieldWarningIcon className="text-danger size-7" />
-        <span className="text-medium font-semibold">{title}</span>
+        <span className="text-base font-semibold">{title}</span>
       </div>
 
       <Checkbox className="my-3" variant="secondary" onChange={onToggleSkipConfirm} isSelected={isSkipConfirmSelected}>

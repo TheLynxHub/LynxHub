@@ -135,9 +135,9 @@ export default function AudioControl() {
                 <Switch.Thumb />
               </Switch.Control>
               {globalMuted ? (
-                <VolumeCrossIcon aria-hidden="true" className="size-4.5 shrink-0 text-danger-500" />
+                <VolumeCrossIcon aria-hidden="true" className="size-4.5 shrink-0 text-danger" />
               ) : (
-                <VolumeIcon aria-hidden="true" className="size-5 shrink-0 text-default-500" />
+                <VolumeIcon aria-hidden="true" className="size-5 shrink-0 text-muted" />
               )}
               {globalMuted ? 'All audio muted' : 'Audio enabled'}
             </Switch.Content>

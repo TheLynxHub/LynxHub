@@ -143,7 +143,7 @@ const BookmarkEditMenu = memo(function BookmarkEditMenu() {
           {isFolder ? (
             <FolderIcon className="size-5 text-amber-500 shrink-0" />
           ) : (
-            <BookmarkIcon className="size-5 text-primary shrink-0" />
+            <BookmarkIcon className="size-5 text-accent shrink-0" />
           )}
           <span>{menuTitle}</span>
         </div>

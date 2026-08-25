@@ -82,12 +82,12 @@ const BrowserError = memo(({error, onReload, id}: Props) => {
 
                 <div className="flex flex-col gap-1 rounded-2xl bg-surface-secondary p-3 ">
                   <span className="text-xs font-semibold text-danger">Error Code</span>
-                  <code className="text-xs text-danger-700">{error.errorCode}</code>
+                  <code className="text-xs text-danger">{error.errorCode}</code>
                 </div>
 
                 <div className="flex flex-col gap-1 rounded-2xl bg-surface-secondary p-3 ">
                   <span className="text-xs font-semibold text-warning">Description</span>
-                  <code className="break-all text-xs text-warning-700">{error.errorDescription}</code>
+                  <code className="break-all text-xs text-warning">{error.errorDescription}</code>
                 </div>
               </div>
             </div>

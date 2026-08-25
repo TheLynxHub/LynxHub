@@ -193,7 +193,7 @@ function ImportArgumentsModal({importArgumentsModal, setChosenArguments, id}: Pr
       <Modal.CloseTrigger />
       <Modal.Header className="flex flex-col gap-y-1">
         <div className="flex w-full flex-row items-center gap-x-2">
-          <ImportIcon className="size-5 text-primary" />
+          <ImportIcon className="size-5 text-accent" />
           <span className="font-bold text-base">Import Arguments</span>
         </div>
         <p className="text-xs text-muted">

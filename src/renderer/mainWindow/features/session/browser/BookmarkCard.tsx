@@ -74,7 +74,7 @@ const BookmarkCard = memo(({bookmark}: Props) => {
                 onError={() => setImgError(true)}
               />
             ) : (
-              <EarthIcon className="size-8 text-primary" />
+              <EarthIcon className="size-8 text-accent" />
             )}
             <span className="w-full truncate text-wrap line-clamp-1 text-sm font-medium">
               {bookmark.title || bookmark.url}

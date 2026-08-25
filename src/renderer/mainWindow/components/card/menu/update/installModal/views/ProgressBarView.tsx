@@ -32,7 +32,7 @@ function ProgressBarView() {
 
   return (
     <div className="mb-8 mt-4 flex flex-col text-center">
-      {progressBarState.title && <span className="text-large font-semibold">{progressBarState.title}</span>}
+      {progressBarState.title && <span className="text-lg font-semibold">{progressBarState.title}</span>}
       <ProgressBar
         size="lg"
         isIndeterminate={isIndeterminate}

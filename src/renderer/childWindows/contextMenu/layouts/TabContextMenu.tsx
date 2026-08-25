@@ -69,7 +69,7 @@ const TabContextMenu = memo(function TabContextMenu() {
       <ActionButton
         onPress={handleTogglePin}
         title={isPinned ? 'Unpin Tab' : 'Pin Tab'}
-        icon={<PinIcon className={`size-4 ${isPinned ? 'text-warning' : 'text-primary'}`} />}
+        icon={<PinIcon className={`size-4 ${isPinned ? 'text-warning' : 'text-accent'}`} />}
       />
 
       <Checkbox className="w-full" variant="secondary" isSelected={isIconOnly} onChange={handleToggleShowIconOnly}>
@@ -91,12 +91,12 @@ const TabContextMenu = memo(function TabContextMenu() {
         title="Reopen Closed Tab"
         onPress={handleReopenClosed}
         isDisabled={!canReopenClosedTab}
-        icon={<HistoryIcon className="size-4 text-default-500" />}
+        icon={<HistoryIcon className="size-4 text-muted" />}
       />
 
       <Separator />
 
-      <ActionButton title="Close Tab" onPress={handleClose} icon={<X className="size-4 text-default-500" />} />
+      <ActionButton title="Close Tab" onPress={handleClose} icon={<X className="size-4 text-muted" />} />
 
       <ActionButton
         onPress={handleForceClose}
@@ -108,14 +108,14 @@ const TabContextMenu = memo(function TabContextMenu() {
         title="Close Other Tabs"
         onPress={handleCloseOthers}
         isDisabled={!canCloseOthers}
-        icon={<BroomIcon className="size-4 text-default-500" />}
+        icon={<BroomIcon className="size-4 text-muted" />}
       />
 
       <ActionButton
         onPress={handleCloseRight}
         isDisabled={!canCloseRight}
         title="Close Tabs to the Right"
-        icon={<DoubleAltArrowRightIcon className="size-4 text-default-500" />}
+        icon={<DoubleAltArrowRightIcon className="size-4 text-muted" />}
       />
     </div>
   );

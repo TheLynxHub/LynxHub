@@ -143,7 +143,7 @@ export default function BrowserHome({type}: Props) {
           <motion.section variants={fadeIn} className="w-full">
             <div className="mb-5 flex items-center gap-3">
               <div className="rounded-2xl bg-surface-secondary p-2.5">
-                <BookmarkIcon className="size-10 text-primary" />
+                <BookmarkIcon className="size-10 text-accent" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Bookmarks</h2>
@@ -173,7 +173,7 @@ export default function BrowserHome({type}: Props) {
             <EmptyStateCard
               icon={
                 <div className="mb-4 flex justify-center opacity-60">
-                  <BookmarkIcon className="size-10 text-primary" />
+                  <BookmarkIcon className="size-10 text-accent" />
                 </div>
               }
               variant="secondary"

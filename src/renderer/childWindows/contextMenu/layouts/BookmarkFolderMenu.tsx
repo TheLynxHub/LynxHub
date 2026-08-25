@@ -203,7 +203,7 @@ export default function BookmarkFolderMenu() {
           <div
             className={
               'w-full hover:bg-surface-tertiary transition-colors duration-100 py-1.5 px-2.5 gap-x-2 ' +
-              'flex items-center text-xs text-primary font-medium cursor-pointer shrink-0 rounded-xl select-none'
+              'flex items-center text-xs text-accent font-medium cursor-pointer shrink-0 rounded-xl select-none'
             }
             tabIndex={0}
             role="button"

@@ -155,7 +155,7 @@ const DashboardReportIssue = memo(() => {
       id={DashboardReportIssueId}
       icon={<BugIcon className="size-5" aria-hidden="true" />}>
       <div className="flex flex-col gap-2 max-w-2xl mx-auto py-2">
-        <p className="text-sm text-default-500 text-center mb-4">
+        <p className="text-sm text-muted text-center mb-4">
           Found a bug, have a feature request, or want to ask a question? Fill out the form below.
         </p>
 
@@ -195,7 +195,7 @@ const DashboardReportIssue = memo(() => {
                   <Radio.Indicator />
                 </Radio.Control>
                 <div className="flex items-center gap-1.5 font-medium">
-                  <ChatSquareIcon aria-hidden="true" className="size-4 text-primary" />
+                  <ChatSquareIcon aria-hidden="true" className="size-4 text-accent" />
                   <span>General Feedback</span>
                 </div>
               </Radio.Content>

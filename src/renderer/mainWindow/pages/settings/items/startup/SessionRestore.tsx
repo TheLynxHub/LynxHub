@@ -87,7 +87,7 @@ const SessionRestore = memo(() => {
             <ListBox>
               <ListBox.Item id="home" textValue="Open Home Page">
                 <ListBox.ItemIndicator />
-                <Home2Icon className="size-4 text-primary" />
+                <Home2Icon className="size-4 text-accent" />
                 <div className="flex flex-col">
                   <Label>Open Home Page</Label>
                   <Description>Start fresh on the Home page every time LynxHub opens.</Description>
@@ -96,7 +96,7 @@ const SessionRestore = memo(() => {
 
               <ListBox.Item id="last_page" textValue="Resume Last Active Page">
                 <ListBox.ItemIndicator />
-                <HistoryIcon className="size-4 text-secondary" />
+                <HistoryIcon className="size-4 text-LynxPurple" />
                 <div className="flex flex-col">
                   <Label>Resume Last Active Page</Label>
                   <Description>Reopen the single internal page that was open when closing.</Description>
@@ -191,7 +191,7 @@ const SessionRestore = memo(() => {
                   <Checkbox.Indicator />
                 </Checkbox.Control>
                 <div className="flex items-center gap-x-2 min-w-0">
-                  <GlobalIcon className="size-4 text-primary shrink-0" />
+                  <GlobalIcon className="size-4 text-accent shrink-0" />
                   <span className="truncate">Standalone Browser Tabs</span>
                 </div>
               </Checkbox.Content>
@@ -205,7 +205,7 @@ const SessionRestore = memo(() => {
                   <Checkbox.Indicator />
                 </Checkbox.Control>
                 <div className="flex items-center gap-x-2 min-w-0">
-                  <Widget2Icon className="size-4 text-secondary shrink-0" />
+                  <Widget2Icon className="size-4 text-LynxPurple shrink-0" />
                   <span className="truncate">AI Cards & Workspaces</span>
                 </div>
               </Checkbox.Content>
@@ -248,7 +248,7 @@ const SessionRestore = memo(() => {
                     <Checkbox.Indicator />
                   </Checkbox.Control>
                   <div className="flex items-center gap-x-2 min-w-0">
-                    <PinIcon className="size-4 text-warning-500 shrink-0" />
+                    <PinIcon className="size-4 text-warning shrink-0" />
                     <span className="truncate">Only Restore Pinned Tabs on Startup</span>
                   </div>
                 </Checkbox.Content>

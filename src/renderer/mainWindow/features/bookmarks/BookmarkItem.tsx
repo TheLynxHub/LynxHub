@@ -100,7 +100,7 @@ const BookmarkItem = memo(({item, inDropdown, isOrdering}: Props) => {
 
   const itemClass = inDropdown
     ? 'flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-xs ' +
-      'hover:bg-default-100 dark:hover:bg-default-50/10 cursor-pointer transition-colors ' +
+      'hover:bg-surface-tertiary cursor-pointer transition-colors ' +
       'text-foreground select-none'
     : isIconOnly
       ? 'flex items-center justify-center size-7 rounded-lg text-xs ' +

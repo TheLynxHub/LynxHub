@@ -79,7 +79,7 @@ const CommitInfo = memo(({repoInfo, dir}: CommitInfoProps) => {
         <Modal.CloseTrigger />
         <Modal.Header>
           <Modal.Heading className="flex items-center gap-x-2">
-            <History className="size-5 text-primary" />
+            <History className="size-5 text-accent" />
             Commit History
           </Modal.Heading>
         </Modal.Header>
@@ -130,7 +130,7 @@ const CommitInfo = memo(({repoInfo, dir}: CommitInfoProps) => {
                     className={
                       'flex flex-col rounded-3xl bg-surface-secondary/60 border transition' +
                       'border-border p-4 pb-3 transition-all hover:bg-surface-secondary/90' +
-                      ' hover:border-primary/20 duration-200'
+                      ' hover:border-accent/20 duration-200'
                     }
                     key={commit.hash}>
                     <div className="flex items-start justify-between gap-x-4">
