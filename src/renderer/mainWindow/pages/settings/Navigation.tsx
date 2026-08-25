@@ -226,13 +226,13 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
   }, [searchValue, sectionTexts]);
 
   return (
-    <Card variant="secondary" className="h-full my-2 w-48 shrink-0">
-      <Card.Header className="flex flex-row gap-x-2 items-center">
+    <Card variant="secondary" className="h-full my-2 w-48 shrink-0 px-0">
+      <Card.Header className="flex flex-row gap-x-2 items-center px-4">
         <SettingPage_Icon className="size-5" />
         <SettingsSearchHighlight text="Settings" />
       </Card.Header>
       <Card.Content className="flex flex-col">
-        <SearchField value={searchValue} onChange={setSearchValue}>
+        <SearchField className="mx-1.5" value={searchValue} onChange={setSearchValue}>
           <SearchField.Group>
             <SearchField.SearchIcon />
             <SearchField.Input
@@ -244,7 +244,7 @@ const SettingsPageNav = ({sectionTexts}: SettingsPageNavProps) => {
           </SearchField.Group>
         </SearchField>
 
-        <ScrollShadow className="h-full flex flex-col gap-y-3" hideScrollBar>
+        <ScrollShadow className="h-full flex flex-col gap-y-3 px-4" hideScrollBar>
           {groupsToRender.length === 0 && searchValue && (
             <div className="px-3 text-xs text-muted">No sections match "{searchValue}".</div>
           )}
