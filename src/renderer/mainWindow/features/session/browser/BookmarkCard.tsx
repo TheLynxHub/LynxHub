@@ -2,7 +2,8 @@ import {Card, CloseButton, Tooltip} from '@heroui/react';
 import {BookmarkItem as BookmarkItemType} from '@lynx_common/types/bookmarks';
 import {getCacheUrl} from '@lynx_common/utils';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
-import {EarthIcon, TrashBin2Icon} from '@solar-icons/react/bold-duotone';
+import {EarthIcon} from '@solar-icons/react/bold-duotone';
+import {X} from 'lucide-react';
 import {memo, MouseEvent, useCallback, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -83,7 +84,7 @@ const BookmarkCard = memo(({bookmark}: Props) => {
             <CloseButton
               onPress={handleRemove}
               className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition duration-200">
-              <TrashBin2Icon className="text-warning size-3.5" />
+              <X className="text-danger size-3.5" />
             </CloseButton>
           </Card.Content>
         </Card>
