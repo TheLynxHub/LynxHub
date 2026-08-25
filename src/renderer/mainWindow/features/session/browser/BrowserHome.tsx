@@ -4,10 +4,9 @@ import {cardsActions} from '@lynx/redux/reducers/cards';
 import {useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
 import {Terminal_Icon} from '@lynx_assets/icons';
-import {History_Color_Icon} from '@lynx_assets/icons/Icons_Colorful';
 import {BookmarkItem as BookmarkItemType} from '@lynx_common/types/bookmarks';
 import {FavIcons} from '@lynx_common/types/ipc';
-import {BookmarkIcon} from '@solar-icons/react/bold-duotone';
+import {BookmarkIcon, HistoryIcon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, motion} from 'framer-motion';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -193,7 +192,7 @@ export default function BrowserHome({type}: Props) {
           onRefresh={handleDataRefresh}
           subtitle="Your browsing history"
           emptyDescription="Your history will appear here"
-          icon={<History_Color_Icon className="size-10" id="empty_page_history" />}
+          icon={<HistoryIcon id="empty_page_history" className="size-10 text-LynxPurple" />}
         />
       </motion.div>
     </ScrollShadow>
