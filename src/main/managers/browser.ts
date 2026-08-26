@@ -110,7 +110,7 @@ export default class BrowserManager {
         (browser.attachedWindow === this.mainWindow ? this.lastViewSize : undefined);
       const width = targetBounds?.width || 1440;
       const height = targetBounds?.height || 900;
-      browser.view.setBounds({x: -1439, y: -899, width, height});
+      browser.view.setBounds({x: -width - 50, y: -height - 50, width, height});
     }
 
     browser.paintTimeout = setTimeout(() => {
@@ -138,13 +138,8 @@ export default class BrowserManager {
    */
   private getWebContents(id: string): WebContents | undefined {
     const view = this.getViewByID(id);
-    if (!view?.webContents || view.webContents.isDestroyed()) return undefined;
+    if (!view || view.webContents.isDestroyed()) return undefined;
     return view.webContents;
-  }
-
-  /** Public method to get WebContents by ID for external use */
-  public getWebContentsById(id: string): WebContents | undefined {
-    return this.getWebContents(id);
   }
 
   /**
@@ -161,6 +156,15 @@ export default class BrowserManager {
     }
   }
 
+  /** Public method to get WebContents by ID for external use */
+  public getWebContentsById(id: string): WebContents | undefined {
+    return this.getWebContents(id);
+  }
+
+  /**
+   * Resizes all browser views attached to a specific window.
+   * If senderWindow is not provided, defaults to mainWindow for backward compatibility.
+   */
   public resizeViews(data?: ElementResizeData, senderWindow?: BrowserWindow) {
     const mainWindow = this.getMainWindow();
     const targetWindow = senderWindow || mainWindow;
@@ -190,13 +194,18 @@ export default class BrowserManager {
         if (!browser.lastBoundsByWindow) {
           browser.lastBoundsByWindow = {};
         }
-        browser.lastBoundsByWindow[windowId] = {x: x || 0, y: y || 80, width, height};
+        browser.lastBoundsByWindow[windowId] = {x: x || 0, y: y || 80, width: width || 1440, height: height || 900};
 
         const isSkeleton = this.isLoadingSkeletonEnabled();
         if (!isSkeleton || browser.hasPainted) {
-          browser.view.setBounds({x: x || 0, y: y || 80, width, height});
+          browser.view.setBounds({x: x || 0, y: y || 80, width: width || 1440, height: height || 900});
         } else {
-          browser.view.setBounds({x: -1439, y: -899, width, height});
+          browser.view.setBounds({
+            x: -(width || 1440) - 50,
+            y: -(height || 900) - 50,
+            width: width || 1440,
+            height: height || 900,
+          });
         }
       }
     });
@@ -456,9 +465,8 @@ export default class BrowserManager {
 
     if (options?.backgroundThrottling === false) {
       webContents.setBackgroundThrottling(false);
-      // Position mostly outside the window with 1px overlap so Chromium's compositor
-      // still paints the view. Extreme negative coords cause culling and stop paint events.
-      newView.setBounds({x: -1439, y: -899, width: 1440, height: 900});
+      // Position offscreen so Chromium paints in background
+      newView.setBounds({x: -1500, y: -1000, width: 1440, height: 900});
     }
 
     webContents.setUserAgent(getUserAgent());
@@ -498,7 +506,7 @@ export default class BrowserManager {
       hasPainted: !isSkeleton,
     });
     if (isSkeleton) {
-      newView.setBounds({x: -1439, y: -899, width: 1440, height: 900});
+      newView.setBounds({x: -1500, y: -1000, width: 1440, height: 900});
     }
     mainWindow.contentView.addChildView(newView);
 
@@ -686,7 +694,7 @@ export default class BrowserManager {
           if (!isSkeleton || browser.hasPainted) {
             view.setBounds({x: finalX, y: finalY, width: finalWidth, height: finalHeight});
           } else {
-            view.setBounds({x: -1439, y: -899, width: finalWidth, height: finalHeight});
+            view.setBounds({x: -finalWidth - 50, y: -finalHeight - 50, width: finalWidth, height: finalHeight});
           }
         } catch (e) {
           console.warn('Failed to add child view:', e);
@@ -694,7 +702,7 @@ export default class BrowserManager {
       }
     } else {
       if (hideMode === 'offscreen') {
-        view.setBounds({x: -1439, y: -899, width: 1440, height: 900});
+        view.setBounds({x: -1500, y: -1000, width: 1440, height: 900});
         if (!mainWindow.isDestroyed()) {
           try {
             mainWindow.contentView.addChildView(view, 0);
