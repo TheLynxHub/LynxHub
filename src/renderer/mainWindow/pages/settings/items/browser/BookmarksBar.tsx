@@ -69,20 +69,20 @@ export default function BookmarksBarSetting() {
         <Card.Content>
           <RadioGroup variant="secondary" onChange={handleChange} value={selectedVisibility} isRequired>
             <div className="flex flex-col sm:flex-row gap-4 mb-2">
-              <Radio className="mt-0" value="browser_open">
-                <Radio.Content>
-                  <Radio.Control>
-                    <Radio.Indicator />
-                  </Radio.Control>
-                  <SettingsSearchHighlight text="When browser is open (Default)" />
-                </Radio.Content>
-              </Radio>
               <Radio value="always" className="mt-0">
                 <Radio.Content>
                   <Radio.Control>
                     <Radio.Indicator />
                   </Radio.Control>
-                  <SettingsSearchHighlight text="Always show" />
+                  <SettingsSearchHighlight text="Always show (Default)" />
+                </Radio.Content>
+              </Radio>
+              <Radio className="mt-0" value="browser_open">
+                <Radio.Content>
+                  <Radio.Control>
+                    <Radio.Indicator />
+                  </Radio.Control>
+                  <SettingsSearchHighlight text="When browser is open" />
                 </Radio.Content>
               </Radio>
               <Radio value="never" className="mt-0">

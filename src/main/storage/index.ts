@@ -123,7 +123,7 @@ class BaseStorage {
       favoriteAddress: [],
       historyAddress: [],
       favIcons: [],
-      bookmarksBarVisibility: 'browser_open',
+      bookmarksBarVisibility: 'always',
       bookmarkNewTabBehavior: 'browser',
       loadingSkeleton: true,
       downloadLocation: join(app.getPath('downloads'), APP_NAME),

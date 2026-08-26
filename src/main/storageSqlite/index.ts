@@ -142,7 +142,7 @@ export class BaseSqliteStorage {
       downloadLocation: '',
       downloadBehavior: 'default',
       clearedDownloads: [],
-      bookmarksBarVisibility: 'browser_open',
+      bookmarksBarVisibility: 'always',
       bookmarkNewTabBehavior: 'browser',
       loadingSkeleton: true,
       volumeSettings: {

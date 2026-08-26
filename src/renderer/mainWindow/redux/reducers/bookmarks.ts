@@ -26,7 +26,7 @@ const initialState: BookmarksState = {
     children: [],
   },
   all: [],
-  visibility: 'browser_open',
+  visibility: 'always',
   newTabBehavior: 'browser',
 };
 

@@ -150,7 +150,7 @@ const buildPreloadedState = (): PreloadState | undefined => {
         children: [],
       },
       all: [],
-      visibility: storage.browser.bookmarksBarVisibility ?? 'browser_open',
+      visibility: storage.browser.bookmarksBarVisibility ?? 'always',
       newTabBehavior: storage.browser.bookmarkNewTabBehavior ?? 'browser',
     },
     session: {
