@@ -2,8 +2,8 @@ import {Button, ButtonGroup, ModalFooter} from '@heroui/react';
 import applicationIpc from '@lynx_shared/ipc/application';
 import filesIpc from '@lynx_shared/ipc/files';
 import ptyIpc from '@lynx_shared/ipc/pty';
-import {ArrowRightIcon, DownloadIcon, FolderOpenIcon, RestartIcon} from '@solar-icons/react/bold-duotone';
-import {CheckReadIcon} from '@solar-icons/react/line-duotone';
+import {DownloadIcon, FolderOpenIcon, RestartIcon} from '@solar-icons/react/bold-duotone';
+import {ArrowRightIcon, CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {X} from 'lucide-react';
 import {memo, RefObject, useCallback} from 'react';
 

@@ -5,13 +5,13 @@ import {PATREON_URL} from '@lynx_common/consts';
 import {PatreonSupporter, PatreonSupporterTier} from '@lynx_common/types';
 import staticsIpc from '@lynx_shared/ipc/statics';
 import {
-  ArrowRightUpIcon,
   CrownStarIcon,
   CupFirstIcon,
   HeartAngleIcon,
   HeartPulse2Icon,
   SquareTopDownIcon,
 } from '@solar-icons/react/bold-duotone';
+import {ArrowRightUpIcon} from '@solar-icons/react/line-duotone';
 import {Plus} from 'lucide-react';
 import {memo, ReactNode, useEffect, useMemo, useState} from 'react';
 export const DashboardCreditsId = 'settings_credits_elem';

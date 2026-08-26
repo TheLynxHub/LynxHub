@@ -3,17 +3,9 @@ import type {QuickWebNavState} from '@lynx_common/types/ipc';
 import type {QuickWebStorage} from '@lynx_common/types/storage';
 import contextMenuIpc from '@lynx_shared/ipc/contextMenu';
 import quickWebIpc from '@lynx_shared/ipc/quickWeb';
-import {
-  AltArrowDownIcon,
-  Code2Icon,
-  EarthIcon,
-  PinIcon,
-  RefreshIcon,
-  SquareTopDownIcon,
-} from '@solar-icons/react/bold-duotone';
-import {ArrowLeftIcon, ArrowRightIcon} from '@solar-icons/react/line-duotone';
-import {X} from 'lucide-react';
-import {Minus} from 'lucide-react';
+import {Code2Icon, EarthIcon, PinIcon, RefreshIcon, SquareTopDownIcon} from '@solar-icons/react/bold-duotone';
+import {AltArrowDownIcon, ArrowLeftIcon, ArrowRightIcon} from '@solar-icons/react/line-duotone';
+import {Minus, X} from 'lucide-react';
 import {KeyboardEvent, useEffect, useState} from 'react';
 
 const DEFAULT_CONFIG: QuickWebStorage = {

@@ -1,7 +1,7 @@
 import {Button, Description, Popover} from '@heroui/react';
 import ptyIpc from '@lynx_shared/ipc/pty';
-import {ArrowRightIcon, RestartIcon} from '@solar-icons/react/bold-duotone';
-import {CheckReadIcon} from '@solar-icons/react/line-duotone';
+import {RestartIcon} from '@solar-icons/react/bold-duotone';
+import {ArrowRightIcon, CheckReadIcon} from '@solar-icons/react/line-duotone';
 import {memo, RefObject, useEffect, useRef, useState} from 'react';
 
 import {XTermAPI} from '../../../../../../useXTerm';
