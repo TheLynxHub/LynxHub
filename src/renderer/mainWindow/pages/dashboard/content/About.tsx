@@ -1,6 +1,7 @@
 import {Avatar, Button, Card, Chip, LinkIcon} from '@heroui/react';
+import {SiDiscord, SiGithub, SiGmail, SiX} from '@icons-pack/react-simple-icons';
 import SettingsSection from '@lynx/components/SettingsSection';
-import {DiscordColor_Icon, GitHub_Icon, Gmail_Icon, Scales_Icon} from '@lynx_assets/icons';
+import {Scales_Icon} from '@lynx_assets/icons';
 import {
   APP_BUILD_NUMBER,
   APP_DETAILED_DESCRIPTION,
@@ -14,8 +15,9 @@ import {
   LICENSE_PAGE,
   LYNXHUB_DOCS,
   LYNXHUB_WEBSITE,
+  X_URL,
 } from '@lynx_common/consts';
-import {CopyIcon, DocumentTextIcon, GlobalIcon, InfoCircleIcon} from '@solar-icons/react/bold-duotone';
+import {CopyIcon, DocumentTextIcon, EarthIcon, InfoCircleIcon} from '@solar-icons/react/bold-duotone';
 import {memo, useCallback} from 'react';
 
 import {topToast} from '../../../layouts/ToastProviders';
@@ -37,7 +39,7 @@ const DashboardAbout = memo(() => {
   const socialLinks = [
     {
       name: 'Website',
-      icon: <GlobalIcon className="size-5" />,
+      icon: <EarthIcon className="size-5" />,
       action: () => window.open(LYNXHUB_WEBSITE),
       actionIcon: <LinkIcon className="size-3.5" />,
     },
@@ -49,20 +51,26 @@ const DashboardAbout = memo(() => {
     },
     {
       name: 'Gmail',
-      icon: <Gmail_Icon className="size-5" />,
+      icon: <SiGmail className="size-5" />,
       action: () => copyText(EMAIL),
       actionIcon: <CopyIcon className="size-4" />,
     },
     {
       name: 'GitHub',
-      icon: <GitHub_Icon className="size-5" />,
+      icon: <SiGithub className="size-5" />,
       action: () => window.open(GITHUB_URL),
       actionIcon: <LinkIcon className="size-3.5" />,
     },
     {
       name: 'Discord',
-      icon: <DiscordColor_Icon className="size-5" />,
+      icon: <SiDiscord className="size-5" />,
       action: () => window.open(DISCORD_SERVER),
+      actionIcon: <LinkIcon className="size-3.5" />,
+    },
+    {
+      name: 'X',
+      icon: <SiX className="size-5" />,
+      action: () => window.open(X_URL),
       actionIcon: <LinkIcon className="size-3.5" />,
     },
     {
