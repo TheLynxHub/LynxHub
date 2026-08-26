@@ -144,6 +144,7 @@ export class BaseSqliteStorage {
       clearedDownloads: [],
       bookmarksBarVisibility: 'browser_open',
       bookmarkNewTabBehavior: 'browser',
+      loadingSkeleton: true,
       volumeSettings: {
         globalMuted: false,
         tabVolumes: {},

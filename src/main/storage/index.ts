@@ -125,6 +125,7 @@ class BaseStorage {
       favIcons: [],
       bookmarksBarVisibility: 'browser_open',
       bookmarkNewTabBehavior: 'browser',
+      loadingSkeleton: true,
       downloadLocation: join(app.getPath('downloads'), APP_NAME),
       downloadBehavior: 'default',
       clearedDownloads: [],

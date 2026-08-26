@@ -148,6 +148,7 @@ export type BrowserStorage = {
   clearedDownloads: string[];
   bookmarksBarVisibility: BookmarkBarVisibility;
   bookmarkNewTabBehavior: BookmarkNewTabBehavior;
+  loadingSkeleton: boolean;
   volumeSettings: {
     globalMuted: boolean;
     tabVolumes: {[cardId: string]: number};

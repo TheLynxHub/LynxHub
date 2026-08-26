@@ -43,6 +43,11 @@ export default class BrowserManager {
     this.mainWindow = mainWindow;
   }
 
+  private isLoadingSkeletonEnabled(): boolean {
+    const {storageManager} = classHolder;
+    return storageManager?.getData('browser')?.loadingSkeleton ?? true;
+  }
+
   /**
    * Promotes a browser view to the foreground once Chromium has completed its first visual paint.
    */
@@ -82,6 +87,15 @@ export default class BrowserManager {
   private startPaintTracking(id: string) {
     const browser = this.browsers.find(b => b.id === id);
     if (!browser) return;
+
+    if (!this.isLoadingSkeletonEnabled()) {
+      browser.hasPainted = true;
+      if (browser.paintTimeout) {
+        clearTimeout(browser.paintTimeout);
+        browser.paintTimeout = undefined;
+      }
+      return;
+    }
 
     browser.hasPainted = false;
     if (browser.paintTimeout) {
@@ -178,7 +192,8 @@ export default class BrowserManager {
         }
         browser.lastBoundsByWindow[windowId] = {x: x || 0, y: y || 80, width, height};
 
-        if (browser.hasPainted) {
+        const isSkeleton = this.isLoadingSkeletonEnabled();
+        if (!isSkeleton || browser.hasPainted) {
           browser.view.setBounds({x: x || 0, y: y || 80, width, height});
         } else {
           browser.view.setBounds({x: -1439, y: -899, width, height});
@@ -473,16 +488,18 @@ export default class BrowserManager {
     this.listenForWillPreventUnload(id, webContents);
 
     const isBackground = options?.backgroundThrottling === false;
+    const isSkeleton = this.isLoadingSkeletonEnabled();
     this.browsers.push({
       id,
       view: newView,
       visible: !isBackground,
       hideMode: isBackground ? 'offscreen' : undefined,
       attachedWindow: mainWindow,
-      hasPainted: false,
+      hasPainted: !isSkeleton,
     });
-    // Position offscreen initially so Chromium paints in background until first paint
-    newView.setBounds({x: -1439, y: -899, width: 1440, height: 900});
+    if (isSkeleton) {
+      newView.setBounds({x: -1439, y: -899, width: 1440, height: 900});
+    }
     mainWindow.contentView.addChildView(newView);
 
     this.setupWindowOpenHandler(webContents);
@@ -665,7 +682,8 @@ export default class BrowserManager {
           }
           browser.lastBoundsByWindow[windowId] = {x: finalX, y: finalY, width: finalWidth, height: finalHeight};
 
-          if (browser.hasPainted) {
+          const isSkeleton = this.isLoadingSkeletonEnabled();
+          if (!isSkeleton || browser.hasPainted) {
             view.setBounds({x: finalX, y: finalY, width: finalWidth, height: finalHeight});
           } else {
             view.setBounds({x: -1439, y: -899, width: finalWidth, height: finalHeight});
