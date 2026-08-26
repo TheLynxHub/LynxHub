@@ -151,11 +151,11 @@ export default function UserAgent() {
           </Select.Trigger>
           <Select.Popover>
             <ListBox>
-              <ListBox.Item id="lynxhub" textValue="LynxHub (Default)">
+              <ListBox.Item id="lynxhub" textValue="LynxHub">
                 <ListBox.ItemIndicator />
                 <div className="flex flex-col">
                   <Label>
-                    <SettingsSearchHighlight text="LynxHub (Default)" />
+                    <SettingsSearchHighlight text="LynxHub" />
                   </Label>
                   <Description>
                     <SettingsSearchHighlight text={getAgentDescription('lynxhub')} />
@@ -173,11 +173,11 @@ export default function UserAgent() {
                   </Description>
                 </div>
               </ListBox.Item>
-              <ListBox.Item id="chrome" textValue="Chrome">
+              <ListBox.Item id="chrome" textValue="Chrome (Default)">
                 <ListBox.ItemIndicator />
                 <div className="flex flex-col">
                   <Label>
-                    <SettingsSearchHighlight text="Chrome" />
+                    <SettingsSearchHighlight text="Chrome (Default)" />
                   </Label>
                   <Description>
                     <SettingsSearchHighlight text={getAgentDescription('chrome')} />
