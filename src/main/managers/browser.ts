@@ -32,6 +32,8 @@ export default class BrowserManager {
     hideMode?: 'detach' | 'offscreen';
     attachedWindow?: BrowserWindow;
     lastBoundsByWindow?: {[windowId: number]: {x: number; y: number; width: number; height: number}};
+    hasPainted?: boolean;
+    paintTimeout?: NodeJS.Timeout;
   }[] = [];
   private readonly mainWindow: BrowserWindow;
   private lastViewSize: ElementResizeData | undefined = undefined;
@@ -39,6 +41,67 @@ export default class BrowserManager {
 
   constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow;
+  }
+
+  /**
+   * Promotes a browser view to the foreground once Chromium has completed its first visual paint.
+   */
+  private markPainted(id: string) {
+    const browser = this.browsers.find(b => b.id === id);
+    if (!browser || browser.hasPainted) return;
+
+    browser.hasPainted = true;
+    if (browser.paintTimeout) {
+      clearTimeout(browser.paintTimeout);
+      browser.paintTimeout = undefined;
+    }
+
+    if (browser.visible && browser.attachedWindow && !browser.attachedWindow.isDestroyed()) {
+      try {
+        browser.attachedWindow.contentView.addChildView(browser.view);
+        const windowId = browser.attachedWindow.id;
+        const bounds =
+          this.lastViewSizeByWindow[windowId] ||
+          browser.lastBoundsByWindow?.[windowId] ||
+          (browser.attachedWindow === this.mainWindow ? this.lastViewSize : undefined);
+
+        if (bounds) {
+          const {x, y, width, height} = bounds;
+          browser.view.setBounds({x: x || 0, y: y || 80, width, height});
+        }
+      } catch (e) {
+        console.warn('Failed to bring painted browser view to foreground:', e);
+      }
+    }
+  }
+
+  /**
+   * Puts a browser view into paint-tracking mode during new page navigation, demoting it behind
+   * the renderer so the HeroUI skeleton placeholder is visible until first paint.
+   */
+  private startPaintTracking(id: string) {
+    const browser = this.browsers.find(b => b.id === id);
+    if (!browser) return;
+
+    browser.hasPainted = false;
+    if (browser.paintTimeout) {
+      clearTimeout(browser.paintTimeout);
+    }
+
+    if (browser.visible && browser.attachedWindow && !browser.attachedWindow.isDestroyed()) {
+      const windowId = browser.attachedWindow.id;
+      const targetBounds =
+        this.lastViewSizeByWindow[windowId] ||
+        browser.lastBoundsByWindow?.[windowId] ||
+        (browser.attachedWindow === this.mainWindow ? this.lastViewSize : undefined);
+      const width = targetBounds?.width || 1440;
+      const height = targetBounds?.height || 900;
+      browser.view.setBounds({x: -1439, y: -899, width, height});
+    }
+
+    browser.paintTimeout = setTimeout(() => {
+      this.markPainted(id);
+    }, 3500);
   }
 
   /**
@@ -110,11 +173,16 @@ export default class BrowserManager {
 
     this.browsers.forEach(browser => {
       if (browser.attachedWindow === targetWindow && browser.visible !== false) {
-        browser.view.setBounds({x: x || 0, y: y || 80, width, height});
         if (!browser.lastBoundsByWindow) {
           browser.lastBoundsByWindow = {};
         }
         browser.lastBoundsByWindow[windowId] = {x: x || 0, y: y || 80, width, height};
+
+        if (browser.hasPainted) {
+          browser.view.setBounds({x: x || 0, y: y || 80, width, height});
+        } else {
+          browser.view.setBounds({x: -1439, y: -899, width, height});
+        }
       }
     });
   }
@@ -284,6 +352,12 @@ export default class BrowserManager {
       // Ignore abort errors (usually navigation cancelled) or subframe errors
       if (errorCode === -3 || !isMainFrame) return;
 
+      const browser = this.browsers.find(b => b.id === id);
+      if (browser?.paintTimeout) {
+        clearTimeout(browser.paintTimeout);
+        browser.paintTimeout = undefined;
+      }
+
       this.setVisible(id, false);
       browserIpc.send.onFailedLoadUrl(id, errorCode, errorDescription, validatedURL);
       console.warn('Failed load:', errorCode, errorDescription, validatedURL);
@@ -375,8 +449,15 @@ export default class BrowserManager {
     webContents.setUserAgent(getUserAgent());
     webContents.setZoomFactor(storageManager.getData('cards').zoomFactor);
 
-    // Notify when DOM is ready
-    webContents.on('dom-ready', () => browserIpc.send.onDomReady(id, true));
+    // Notify when DOM is ready and mark painted
+    webContents.on('dom-ready', () => {
+      browserIpc.send.onDomReady(id, true);
+      this.markPainted(id);
+    });
+
+    // Listen for Chromium first visually non-empty paint and finish load
+    (webContents as any).on('did-first-visually-non-empty-paint', () => this.markPainted(id));
+    webContents.on('did-finish-load', () => this.markPainted(id));
 
     // Setup all listeners
     this.listenForNavigate(id, webContents);
@@ -398,9 +479,11 @@ export default class BrowserManager {
       visible: !isBackground,
       hideMode: isBackground ? 'offscreen' : undefined,
       attachedWindow: mainWindow,
+      hasPainted: false,
     });
-    // Insert background views at z-index 0 (behind everything) so they're painted but hidden
-    mainWindow.contentView.addChildView(newView, isBackground ? 0 : undefined);
+    // Position offscreen initially so Chromium paints in background until first paint
+    newView.setBounds({x: -1439, y: -899, width: 1440, height: 900});
+    mainWindow.contentView.addChildView(newView);
 
     this.setupWindowOpenHandler(webContents);
     RegisterHotkeys(webContents);
@@ -457,6 +540,10 @@ export default class BrowserManager {
     if (browserIndex === -1) return;
 
     const browser = this.browsers[browserIndex];
+    if (browser.paintTimeout) {
+      clearTimeout(browser.paintTimeout);
+      browser.paintTimeout = undefined;
+    }
 
     // Remove from array first to prevent any callbacks from accessing stale data
     this.browsers.splice(browserIndex, 1);
@@ -501,6 +588,19 @@ export default class BrowserManager {
   }
 
   public loadURL(id: string, url: string) {
+    if (url && !url.startsWith('about:') && !url.includes('error_page.html')) {
+      this.startPaintTracking(id);
+    } else {
+      const browser = this.browsers.find(b => b.id === id);
+      if (browser) {
+        browser.hasPainted = false;
+        if (browser.paintTimeout) {
+          clearTimeout(browser.paintTimeout);
+          browser.paintTimeout = undefined;
+        }
+      }
+    }
+
     this.withWebContents(id, wc => {
       wc.loadURL(url).catch(error => {
         // ERR_ABORTED (-3) happens on redirects - not a real error
@@ -547,23 +647,28 @@ export default class BrowserManager {
           const windowId = destWindow.id;
           const lastWinBounds = browser.lastBoundsByWindow?.[windowId];
           const lastWinSize = this.lastViewSizeByWindow[windowId];
+          const targetBounds =
+            lastWinSize ||
+            (lastWinBounds
+              ? lastWinBounds
+              : destWindow === mainWindow && this.lastViewSize
+                ? this.lastViewSize
+                : undefined);
 
-          if (lastWinSize) {
-            const {x, y, width, height} = lastWinSize;
-            view.setBounds({x: x || 0, y: y || 80, width, height});
-            if (!browser.lastBoundsByWindow) {
-              browser.lastBoundsByWindow = {};
-            }
-            browser.lastBoundsByWindow[windowId] = {x: x || 0, y: y || 80, width, height};
-          } else if (lastWinBounds) {
-            view.setBounds(lastWinBounds);
-          } else if (destWindow === mainWindow && this.lastViewSize) {
-            const {x, y, width, height} = this.lastViewSize;
-            view.setBounds({x: x || 0, y: y || 80, width, height});
+          const finalX = targetBounds?.x || 0;
+          const finalY = targetBounds?.y || 80;
+          const finalWidth = targetBounds?.width || destWindow.getBounds().width - 200;
+          const finalHeight = targetBounds?.height || destWindow.getBounds().height - 48;
+
+          if (!browser.lastBoundsByWindow) {
+            browser.lastBoundsByWindow = {};
+          }
+          browser.lastBoundsByWindow[windowId] = {x: finalX, y: finalY, width: finalWidth, height: finalHeight};
+
+          if (browser.hasPainted) {
+            view.setBounds({x: finalX, y: finalY, width: finalWidth, height: finalHeight});
           } else {
-            // Fallback default bounds
-            const bounds = destWindow.getBounds();
-            view.setBounds({x: 200, y: 48, width: bounds.width - 200, height: bounds.height - 48});
+            view.setBounds({x: -1439, y: -899, width: finalWidth, height: finalHeight});
           }
         } catch (e) {
           console.warn('Failed to add child view:', e);
@@ -605,6 +710,7 @@ export default class BrowserManager {
   public reload(id: string, targetWindow?: BrowserWindow) {
     const browser = this.browsers.find(b => b.id === id);
     const windowToAttach = targetWindow || browser?.attachedWindow || this.getMainWindow();
+    this.startPaintTracking(id);
     this.setVisible(id, true, undefined, windowToAttach);
     this.withWebContents(id, wc => wc.reload());
     browserIpc.send.onClearFailed(id);
