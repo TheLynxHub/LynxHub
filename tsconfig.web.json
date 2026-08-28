@@ -5,6 +5,7 @@
     "src/common/**/*",
     "extension/src/renderer/**/*",
     "extension/src/cross/**/*",
+    "extension/src/common/**/*",
     "module/src/**/*"
   ],
   "compilerOptions": {

@@ -8,6 +8,7 @@
     "src/common/**/*",
     "extension/src/main/**/*",
     "extension/src/cross/**/*",
+    "extension/src/common/**/*",
     "module/src/**/*",
     "devFiles/**/*"
   ],
