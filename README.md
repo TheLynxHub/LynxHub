@@ -118,6 +118,7 @@ LynxHub's true power lies in its community-driven ecosystem. Integrate these int
 - 📊 [**Hardware Monitor:**](https://github.com/TheLynxHub/Hardware-Monitor) Real-time CPU, GPU, and RAM telemetry injected directly into the status bar.
 - ⚡ [**Custom Actions:**](https://github.com/TheLynxHub/Custom-Actions) Create personalized workflow shortcuts and macro cards.
 - 📖 [**Skills Manager:**](https://github.com/TheLynxHub/Skills-Toolkit) An interactive, feature-rich GUI management extension for AI Coding Agent Skills.
+- 📰 [**AI News:**](https://github.com/TheLynxHub/AI-News) Get the latest AI news, articles, papers, and YouTube videos in one place.
 
 ### Featured Modules
 
