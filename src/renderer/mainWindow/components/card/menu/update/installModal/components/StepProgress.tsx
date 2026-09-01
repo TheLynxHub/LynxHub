@@ -1,7 +1,7 @@
 import {cn, Spinner} from '@heroui/react';
 import {InitialSteps} from '@lynx_common/types/plugins/modules';
-import {CheckCircleIcon, CloseCircleIcon} from '@solar-icons/react/bold-duotone';
-import {UnreadIcon} from '@solar-icons/react/linear';
+import {CheckReadIcon, UnreadIcon} from '@solar-icons/react/linear';
+import {X} from 'lucide-react';
 import {memo, useEffect, useRef} from 'react';
 
 import {useHasScroll} from '../../../../../../utils/hooks';
@@ -45,7 +45,7 @@ function StepIndicator({status}: {status: StepStatus}) {
           'flex size-5 items-center justify-center rounded-full',
           'bg-success text-success-foreground shadow-xs ring-2 ring-success/30',
         )}>
-        <CheckCircleIcon className="size-4" />
+        <CheckReadIcon className="size-4" />
       </div>
     );
   }
@@ -57,7 +57,7 @@ function StepIndicator({status}: {status: StepStatus}) {
           'flex size-5 items-center justify-center rounded-full',
           'bg-danger text-danger-foreground shadow-xs ring-2 ring-danger/30',
         )}>
-        <CloseCircleIcon className="size-4" />
+        <X className="size-3" />
       </div>
     );
   }
