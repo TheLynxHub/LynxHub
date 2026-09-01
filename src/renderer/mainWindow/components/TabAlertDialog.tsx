@@ -1,11 +1,10 @@
 import {AlertDialog, AlertDialogBackdropProps, AlertDialogContainerProps} from '@heroui/react';
 import browserIpc from '@lynx_shared/ipc/browser';
-import {MouseEvent, ReactNode, useCallback, useEffect, useMemo, useState} from 'react';
+import {MouseEvent, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {UNSAFE_PortalProvider} from 'react-aria';
 
 import {useCurrentTabId} from '../layouts/tabs/TabContext';
 import {useCardsState} from '../redux/reducers/cards';
-import {useTabsState} from '../redux/reducers/tabs';
 
 type Props = {
   children: ReactNode;
@@ -36,11 +35,21 @@ export default function TabAlertDialog({
   isKeyboardDismissDisabled,
   tabId: explicitTabId,
 }: Props) {
+  const anchorRef = useRef<HTMLSpanElement>(null);
   const contextTabId = useCurrentTabId();
-  const activeTab = useTabsState('activeTab');
+  const [domTabId, setDomTabId] = useState<string | undefined>(undefined);
   const runningCards = useCardsState('runningCard');
 
-  const resolvedTabId = explicitTabId ?? contextTabId;
+  useLayoutEffect(() => {
+    if (anchorRef.current) {
+      const wrapper = anchorRef.current.closest<HTMLElement>('[id$="_wrapper"]');
+      if (wrapper?.id) {
+        setDomTabId(wrapper.id.replace(/_wrapper$/, ''));
+      }
+    }
+  }, []);
+
+  const resolvedTabId = explicitTabId ?? contextTabId ?? domTabId;
 
   const [uncontrolledOpen, setUncontrolledOpen] = useState<boolean>(false);
   const isControlled = typeof isOpen === 'boolean';
@@ -52,8 +61,8 @@ export default function TabAlertDialog({
   });
 
   const currentRunningCard = useMemo(
-    () => runningCards.find(card => card.tabId === (resolvedTabId ?? activeTab)),
-    [runningCards, resolvedTabId, activeTab],
+    () => (resolvedTabId ? runningCards.find(card => card.tabId === resolvedTabId) : undefined),
+    [runningCards, resolvedTabId],
   );
 
   useEffect(() => {
@@ -64,6 +73,9 @@ export default function TabAlertDialog({
 
     if (resolvedTabId) {
       setTargetContainer(document.getElementById(`${resolvedTabId}_wrapper`));
+    } else if (anchorRef.current) {
+      const wrapper = anchorRef.current.closest<HTMLElement>('[id$="_wrapper"]');
+      setTargetContainer(wrapper ?? null);
     } else {
       setTargetContainer(null);
     }
@@ -104,10 +116,36 @@ export default function TabAlertDialog({
   );
 
   return (
-    <AlertDialog isOpen={isOpen} onOpenChange={handleOpenChange}>
-      {trigger}
-      {targetContainer ? (
-        <UNSAFE_PortalProvider getContainer={() => targetContainer}>
+    <>
+      <span ref={anchorRef} className="hidden" aria-hidden="true" />
+      <AlertDialog isOpen={isOpen} onOpenChange={handleOpenChange}>
+        {trigger}
+        {targetContainer ? (
+          <UNSAFE_PortalProvider getContainer={() => targetContainer}>
+            <AlertDialog.Backdrop
+              className="h-full"
+              isDismissable={false}
+              variant={backdropVariant}
+              onClick={handleBackdropClick}
+              isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
+              <AlertDialog.Container
+                size={size}
+                placement={placement}
+                className={containerClassName ? `h-full max-h-full ${containerClassName}` : 'h-full max-h-full'}>
+                <AlertDialog.Dialog
+                  className={
+                    size === 'cover'
+                      ? dialogClassName
+                        ? `h-full max-h-full ${dialogClassName}`
+                        : 'h-full max-h-full'
+                      : dialogClassName
+                  }>
+                  <UNSAFE_PortalProvider getContainer={() => document.body}>{children}</UNSAFE_PortalProvider>
+                </AlertDialog.Dialog>
+              </AlertDialog.Container>
+            </AlertDialog.Backdrop>
+          </UNSAFE_PortalProvider>
+        ) : (
           <AlertDialog.Backdrop
             className="h-full"
             isDismissable={false}
@@ -126,35 +164,12 @@ export default function TabAlertDialog({
                       : 'h-full max-h-full'
                     : dialogClassName
                 }>
-                <UNSAFE_PortalProvider getContainer={() => document.body}>{children}</UNSAFE_PortalProvider>
+                {children}
               </AlertDialog.Dialog>
             </AlertDialog.Container>
           </AlertDialog.Backdrop>
-        </UNSAFE_PortalProvider>
-      ) : (
-        <AlertDialog.Backdrop
-          className="h-full"
-          isDismissable={false}
-          variant={backdropVariant}
-          onClick={handleBackdropClick}
-          isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
-          <AlertDialog.Container
-            size={size}
-            placement={placement}
-            className={containerClassName ? `h-full max-h-full ${containerClassName}` : 'h-full max-h-full'}>
-            <AlertDialog.Dialog
-              className={
-                size === 'cover'
-                  ? dialogClassName
-                    ? `h-full max-h-full ${dialogClassName}`
-                    : 'h-full max-h-full'
-                  : dialogClassName
-              }>
-              {children}
-            </AlertDialog.Dialog>
-          </AlertDialog.Container>
-        </AlertDialog.Backdrop>
-      )}
-    </AlertDialog>
+        )}
+      </AlertDialog>
+    </>
   );
 }
