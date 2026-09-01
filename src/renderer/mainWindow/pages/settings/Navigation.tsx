@@ -80,7 +80,7 @@ const groupSections: GroupProps[] = [
       },
       {
         title: 'Quick Web',
-        icon: <BoltIcon className="size-4 shrink-0 text-accent-foreground" />,
+        icon: <BoltIcon className="size-4 shrink-0" />,
         elementId: settingsSectionId.SettingsQuickWebId,
       },
       {
