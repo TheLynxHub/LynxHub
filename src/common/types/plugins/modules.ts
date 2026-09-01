@@ -658,6 +658,7 @@ export type GitHubReleaseAsset = {
 export type GitHubRelease = {
   tag_name: string;
   prerelease: boolean;
+  draft?: boolean;
   assets: GitHubReleaseAsset[];
 };
 
