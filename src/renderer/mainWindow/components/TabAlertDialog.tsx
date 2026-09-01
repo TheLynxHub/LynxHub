@@ -101,10 +101,22 @@ export default function TabAlertDialog({
     [isControlled, onOpenChange],
   );
 
+  const mouseDownTargetRef = useRef<EventTarget | null>(null);
+
+  const handleBackdropMouseDown = useCallback((e: MouseEvent<HTMLElement>) => {
+    mouseDownTargetRef.current = e.target;
+  }, []);
+
   const handleBackdropClick = useCallback(
     (e: MouseEvent<HTMLElement>) => {
+      const mouseDownTarget = mouseDownTargetRef.current;
+      mouseDownTargetRef.current = null;
+
       if (
         isDismissable &&
+        mouseDownTarget instanceof HTMLElement &&
+        mouseDownTarget.closest('.alert-dialog__backdrop, .alert-dialog__container') &&
+        !mouseDownTarget.closest('.alert-dialog__dialog') &&
         e.target instanceof HTMLElement &&
         e.target.closest('.alert-dialog__backdrop, .alert-dialog__container') &&
         !e.target.closest('.alert-dialog__dialog')
@@ -127,6 +139,7 @@ export default function TabAlertDialog({
               isDismissable={false}
               variant={backdropVariant}
               onClick={handleBackdropClick}
+              onMouseDown={handleBackdropMouseDown}
               isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
               <AlertDialog.Container
                 size={size}
@@ -151,6 +164,7 @@ export default function TabAlertDialog({
             isDismissable={false}
             variant={backdropVariant}
             onClick={handleBackdropClick}
+            onMouseDown={handleBackdropMouseDown}
             isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
             <AlertDialog.Container
               size={size}

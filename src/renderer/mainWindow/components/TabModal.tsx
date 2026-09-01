@@ -83,10 +83,22 @@ export default function TabModal({
     return undefined;
   }, [isOpen, currentRunningCard]);
 
+  const mouseDownTargetRef = useRef<EventTarget | null>(null);
+
+  const handleBackdropMouseDown = useCallback((e: MouseEvent<HTMLElement>) => {
+    mouseDownTargetRef.current = e.target;
+  }, []);
+
   const handleBackdropClick = useCallback(
     (e: MouseEvent<HTMLElement>) => {
+      const mouseDownTarget = mouseDownTargetRef.current;
+      mouseDownTargetRef.current = null;
+
       if (
         isDismissable &&
+        mouseDownTarget instanceof HTMLElement &&
+        mouseDownTarget.closest('.modal__backdrop, .modal__container') &&
+        !mouseDownTarget.closest('.modal__dialog') &&
         e.target instanceof HTMLElement &&
         e.target.closest('.modal__backdrop, .modal__container') &&
         !e.target.closest('.modal__dialog')
@@ -108,6 +120,7 @@ export default function TabModal({
               isDismissable={false}
               variant={backdropVariant}
               onClick={handleBackdropClick}
+              onMouseDown={handleBackdropMouseDown}
               isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
               <Modal.Container size={size} scroll="inside" className={`h-full max-h-full ${containerClassName}`}>
                 <Modal.Dialog className={size === 'cover' ? `h-full max-h-full ${dialogClassName}` : dialogClassName}>
@@ -122,6 +135,7 @@ export default function TabModal({
             isDismissable={false}
             variant={backdropVariant}
             onClick={handleBackdropClick}
+            onMouseDown={handleBackdropMouseDown}
             isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
             <Modal.Container size={size} scroll="inside" className={`h-full max-h-full ${containerClassName}`}>
               <Modal.Dialog className={size === 'cover' ? `h-full max-h-full ${dialogClassName}` : dialogClassName}>
