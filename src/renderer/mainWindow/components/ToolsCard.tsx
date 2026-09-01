@@ -15,13 +15,28 @@ type Props = {
   onPress?: () => void;
   footer?: ReactNode;
   avatarClassName?: string;
+  isPinned?: boolean;
+  onPinPress?: () => void;
+  hidePin?: boolean;
 };
 
 /**
  * A card component for the Tools page, featuring a spotlight effect and hover animations.
  */
-export function ToolsCard({id, title, description, icon, onPress, footer, avatarClassName}: Props) {
-  const isPinned = useIsPinnedCard(id || '');
+export function ToolsCard({
+  id,
+  title,
+  description,
+  icon,
+  onPress,
+  footer,
+  avatarClassName,
+  isPinned: isPinnedProp,
+  onPinPress,
+  hidePin = false,
+}: Props) {
+  const isPinnedFromHook = useIsPinnedCard(id || '');
+  const isPinned = isPinnedProp !== undefined ? isPinnedProp : isPinnedFromHook;
 
   return (
     <Card
@@ -61,7 +76,7 @@ export function ToolsCard({id, title, description, icon, onPress, footer, avatar
       </Card.Content>
 
       <Card.Footer className="justify-between flex items-center">
-        {id ? (
+        {!hidePin && (id || onPinPress || isPinnedProp !== undefined) ? (
           <div onClick={e => e.stopPropagation()} className="flex items-center gap-x-2">
             <Button
               className={
@@ -69,8 +84,13 @@ export function ToolsCard({id, title, description, icon, onPress, footer, avatar
                 `group-hover:translate-x-0 group-hover:opacity-100`
               }
               onPress={() => {
-                AddBreadcrumb_Renderer(`Pin ToolsCard: id:${id} , ${isPinned ? 'remove' : 'add'}`);
-                storageUtilsIpc.invoke.pinnedCards(isPinned ? 'remove' : 'add', id);
+                if (onPinPress) {
+                  AddBreadcrumb_Renderer(`Pin ToolsCard: id:${id || title} , ${isPinned ? 'remove' : 'add'}`);
+                  onPinPress();
+                } else if (id) {
+                  AddBreadcrumb_Renderer(`Pin ToolsCard: id:${id} , ${isPinned ? 'remove' : 'add'}`);
+                  storageUtilsIpc.invoke.pinnedCards(isPinned ? 'remove' : 'add', id);
+                }
               }}
               size="sm"
               variant="ghost"
