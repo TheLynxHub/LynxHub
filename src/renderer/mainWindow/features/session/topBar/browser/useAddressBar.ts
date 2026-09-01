@@ -52,7 +52,7 @@ const parseAddressForDisplay = (address: string) => {
   if (!address) {
     return {prefix: '', domain: '', rest: ''};
   }
-  const addressRegex = /^(https?:\/\/)?(www\.)?([^/?#]+)(.*)/i;
+  const addressRegex = /^(https?:\/\/|file:\/\/\/|file:\/\/)?(www\.)?([^/?#]+)(.*)/i;
   const matches = address.match(addressRegex);
 
   if (!matches) {

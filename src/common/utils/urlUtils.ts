@@ -62,6 +62,9 @@ export function isValidURL(str: string | string[]): boolean {
   const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z]{2,6})(?:[\\/\w .-]*)?$/i;
 
   const check = (url: string) => {
+    if (url.toLowerCase().startsWith('file://')) {
+      return true;
+    }
     if (urlRegex.test(url)) {
       return true;
     }
@@ -77,6 +80,40 @@ export function isValidURL(str: string | string[]): boolean {
 }
 
 /**
+ * Formats a local file path or file URL into a valid file:// URL.
+ * Handles Windows paths (C:\...), Unix paths (/...), and corrupted prefixes (https://C:/...).
+ * @param {string} input - The file path or URL to format.
+ * @returns {string} The formatted file:// URL.
+ */
+export function formatLocalPathToUrl(input: string): string {
+  if (!input) return '';
+
+  let cleaned = input.trim();
+
+  // Strip accidental file:///https:// or file://https:// or https:// or http:// if followed by drive letter or absolute path
+  cleaned = cleaned.replace(/^file:\/\/(?:https?:\/\/)?/i, '');
+  cleaned = cleaned.replace(/^https?:\/\//i, '');
+
+  // Normalize backslashes to forward slashes
+  cleaned = cleaned.replace(/\\/g, '/');
+
+  // Strip leading file:/ if any remaining
+  cleaned = cleaned.replace(/^file:\/+/i, '');
+
+  // If Windows drive letter (e.g. C:/...)
+  if (/^[a-zA-Z]:\//i.test(cleaned)) {
+    return `file:///${cleaned}`;
+  }
+
+  // If Unix absolute path (starts with /)
+  if (cleaned.startsWith('/')) {
+    return `file://${cleaned}`;
+  }
+
+  return `file:///${cleaned}`;
+}
+
+/**
  * Determines if the given string is a search query rather than a URL.
  * @param {string} input - The input string to check
  * @returns {boolean} True if the input appears to be a search query, false if it's likely a URL
@@ -88,13 +125,18 @@ export function isSearchQuery(input: string): boolean {
 
   const trimmedInput = input.trim();
 
+  // If it starts with file:// protocol or Windows drive letter, it's definitely a URL/path
+  if (trimmedInput.toLowerCase().startsWith('file://') || /^[a-zA-Z]:[\\/]/i.test(trimmedInput)) {
+    return false;
+  }
+
   // If it contains spaces, it's likely a search query
   if (trimmedInput.includes(' ')) {
     return true;
   }
 
   // If it starts with a protocol, it's definitely a URL
-  if (/^https?:\/\//i.test(trimmedInput)) {
+  if (/^(?:https?|file|ftp):\/\//i.test(trimmedInput)) {
     return false;
   }
 
@@ -138,12 +180,22 @@ export function formatWebAddress(address: string, detectSearchQuery?: boolean): 
     return '';
   }
 
+  // If it is a file URL, local file path, or corrupted local path with https:// protocol
+  if (
+    address.match(/^file:\/\//i) ||
+    address.match(/^https?:\/\/[a-zA-Z]:[\\/]/i) ||
+    address.match(/^[a-zA-Z]:[\\/]/i) ||
+    (address.startsWith('/') && !address.startsWith('//'))
+  ) {
+    return formatLocalPathToUrl(address);
+  }
+
   // Check if the input is a search query rather than a URL
   if (detectSearchQuery && isSearchQuery(address)) {
     return `https://google.com/search?q=${encodeURIComponent(address)}`;
   }
 
-  const protocolRegex = /^(?:https?:\/\/|ftp:\/\/|www\.)/i;
+  const protocolRegex = /^(?:https?:\/\/|file:\/\/|ftp:\/\/|www\.)/i;
   const localhostRegex = /^(?:localhost|127(?:\.\d{1,3}){3}|\[::1\])(?::\d+)?$/i;
 
   if (localhostRegex.test(address)) {
