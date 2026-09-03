@@ -1,5 +1,5 @@
 import {AlertDialog, AlertDialogBackdropProps, AlertDialogContainerProps} from '@heroui/react';
-import {MouseEvent, ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
+import {MouseEvent, ReactNode, useCallback, useLayoutEffect, useRef, useState} from 'react';
 import {UNSAFE_PortalProvider} from 'react-aria';
 
 import {useCurrentTabId} from '../layouts/tabs/TabContext';
@@ -48,36 +48,22 @@ export default function TabAlertDialog({
 
   const resolvedTabId = explicitTabId ?? contextTabId ?? domTabId;
 
-  const [uncontrolledOpen, setUncontrolledOpen] = useState<boolean>(false);
   const isControlled = typeof isOpen === 'boolean';
-  const effectiveIsOpen = isControlled ? isOpen : uncontrolledOpen;
 
-  const [targetContainer, setTargetContainer] = useState<HTMLElement | null>(() => {
-    if (typeof document === 'undefined') return null;
-    return resolvedTabId ? document.getElementById(`${resolvedTabId}_wrapper`) : null;
-  });
-
-  useEffect(() => {
-    if (!effectiveIsOpen) {
-      setTargetContainer(null);
-      return;
-    }
-
+  const getContainer = useCallback(() => {
     if (resolvedTabId) {
-      setTargetContainer(document.getElementById(`${resolvedTabId}_wrapper`));
-    } else if (anchorRef.current) {
-      const wrapper = anchorRef.current.closest<HTMLElement>('[id$="_wrapper"]');
-      setTargetContainer(wrapper ?? null);
-    } else {
-      setTargetContainer(null);
+      const el = document.getElementById(`${resolvedTabId}_wrapper`);
+      if (el) return el;
     }
-  }, [effectiveIsOpen, resolvedTabId]);
+    if (anchorRef.current) {
+      const wrapper = anchorRef.current.closest<HTMLElement>('[id$="_wrapper"]');
+      if (wrapper) return wrapper;
+    }
+    return document.body;
+  }, [resolvedTabId]);
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
-      if (!isControlled) {
-        setUncontrolledOpen(open);
-      }
       onOpenChange?.(open);
     },
     [isControlled, onOpenChange],
@@ -114,33 +100,7 @@ export default function TabAlertDialog({
       <span ref={anchorRef} className="hidden" aria-hidden="true" />
       <AlertDialog isOpen={isOpen} onOpenChange={handleOpenChange}>
         {trigger}
-        {targetContainer ? (
-          <UNSAFE_PortalProvider getContainer={() => targetContainer}>
-            <AlertDialog.Backdrop
-              className="h-full"
-              isDismissable={false}
-              variant={backdropVariant}
-              onClick={handleBackdropClick}
-              onMouseDown={handleBackdropMouseDown}
-              isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
-              <AlertDialog.Container
-                size={size}
-                placement={placement}
-                className={containerClassName ? `h-full max-h-full ${containerClassName}` : 'h-full max-h-full'}>
-                <AlertDialog.Dialog
-                  className={
-                    size === 'cover'
-                      ? dialogClassName
-                        ? `h-full max-h-full ${dialogClassName}`
-                        : 'h-full max-h-full'
-                      : dialogClassName
-                  }>
-                  <UNSAFE_PortalProvider getContainer={() => document.body}>{children}</UNSAFE_PortalProvider>
-                </AlertDialog.Dialog>
-              </AlertDialog.Container>
-            </AlertDialog.Backdrop>
-          </UNSAFE_PortalProvider>
-        ) : (
+        <UNSAFE_PortalProvider getContainer={getContainer}>
           <AlertDialog.Backdrop
             className="h-full"
             isDismissable={false}
@@ -160,11 +120,11 @@ export default function TabAlertDialog({
                       : 'h-full max-h-full'
                     : dialogClassName
                 }>
-                {children}
+                <UNSAFE_PortalProvider getContainer={() => document.body}>{children}</UNSAFE_PortalProvider>
               </AlertDialog.Dialog>
             </AlertDialog.Container>
           </AlertDialog.Backdrop>
-        )}
+        </UNSAFE_PortalProvider>
       </AlertDialog>
     </>
   );

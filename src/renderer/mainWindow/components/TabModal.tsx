@@ -1,5 +1,5 @@
 import {Modal, ModalBackdropProps, ModalContainerProps} from '@heroui/react';
-import {MouseEvent, ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
+import {MouseEvent, ReactNode, useCallback, useLayoutEffect, useRef, useState} from 'react';
 import {UNSAFE_PortalProvider} from 'react-aria';
 
 import {useCurrentTabId} from '../layouts/tabs/TabContext';
@@ -44,26 +44,17 @@ export default function TabModal({
 
   const resolvedTabId = explicitTabId ?? contextTabId ?? domTabId;
 
-  const [targetContainer, setTargetContainer] = useState<HTMLElement | null>(() => {
-    if (typeof document === 'undefined') return null;
-    return resolvedTabId ? document.getElementById(`${resolvedTabId}_wrapper`) : null;
-  });
-
-  useEffect(() => {
-    if (!isOpen) {
-      setTargetContainer(null);
-      return;
-    }
-
+  const getContainer = useCallback(() => {
     if (resolvedTabId) {
-      setTargetContainer(document.getElementById(`${resolvedTabId}_wrapper`));
-    } else if (anchorRef.current) {
-      const wrapper = anchorRef.current.closest<HTMLElement>('[id$="_wrapper"]');
-      setTargetContainer(wrapper ?? null);
-    } else {
-      setTargetContainer(null);
+      const el = document.getElementById(`${resolvedTabId}_wrapper`);
+      if (el) return el;
     }
-  }, [isOpen, resolvedTabId]);
+    if (anchorRef.current) {
+      const wrapper = anchorRef.current.closest<HTMLElement>('[id$="_wrapper"]');
+      if (wrapper) return wrapper;
+    }
+    return document.body;
+  }, [resolvedTabId]);
 
   const mouseDownTargetRef = useRef<EventTarget | null>(null);
 
@@ -95,23 +86,7 @@ export default function TabModal({
     <>
       <span ref={anchorRef} className="hidden" aria-hidden="true" />
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        {targetContainer ? (
-          <UNSAFE_PortalProvider getContainer={() => targetContainer}>
-            <Modal.Backdrop
-              className="h-full"
-              isDismissable={false}
-              variant={backdropVariant}
-              onClick={handleBackdropClick}
-              onMouseDown={handleBackdropMouseDown}
-              isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
-              <Modal.Container size={size} scroll="inside" className={`h-full max-h-full ${containerClassName}`}>
-                <Modal.Dialog className={size === 'cover' ? `h-full max-h-full ${dialogClassName}` : dialogClassName}>
-                  <UNSAFE_PortalProvider getContainer={() => document.body}>{children}</UNSAFE_PortalProvider>
-                </Modal.Dialog>
-              </Modal.Container>
-            </Modal.Backdrop>
-          </UNSAFE_PortalProvider>
-        ) : (
+        <UNSAFE_PortalProvider getContainer={getContainer}>
           <Modal.Backdrop
             className="h-full"
             isDismissable={false}
@@ -121,11 +96,11 @@ export default function TabModal({
             isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
             <Modal.Container size={size} scroll="inside" className={`h-full max-h-full ${containerClassName}`}>
               <Modal.Dialog className={size === 'cover' ? `h-full max-h-full ${dialogClassName}` : dialogClassName}>
-                {children}
+                <UNSAFE_PortalProvider getContainer={() => document.body}>{children}</UNSAFE_PortalProvider>
               </Modal.Dialog>
             </Modal.Container>
           </Modal.Backdrop>
-        )}
+        </UNSAFE_PortalProvider>
       </Modal>
     </>
   );
