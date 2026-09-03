@@ -112,9 +112,7 @@ const Profile_Account = memo(() => {
                 ' focus:px-1.5 focus:py-0.5 rounded-lg transition duration-200 line-clamp-1 z-20'
               }
               spellCheck="false"
-              onClick={e => e.stopPropagation()}
-              contentEditable
-              suppressContentEditableWarning>
+              onClick={e => e.stopPropagation()}>
               {userData.name}
             </Label>
             <Description>{userData.tier}</Description>
