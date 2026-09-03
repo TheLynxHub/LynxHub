@@ -8,7 +8,16 @@ import axios from 'axios';
 import {ipcMain, shell} from 'electron';
 import {autoUpdater} from 'electron-updater';
 
-import {deleteTokens, getChannel, getTokens, saveChannel, saveTokens} from './token';
+import {
+  deleteCachedUser,
+  deleteTokens,
+  getCachedUser,
+  getChannel,
+  getTokens,
+  saveCachedUser,
+  saveChannel,
+  saveTokens,
+} from './token';
 
 // Constants
 export const AUTH_CHANNEL_KEY = isDev() ? 'LynxHub-Dev-Auth-Update-Channel' : 'LynxHub-Auth-Update-Channel';
@@ -49,9 +58,11 @@ async function processTokenLogin(token: string) {
   try {
     const userData = await verifyTokenWithWebsite(token);
 
-    // Save token and channel configuration
+    // Save token, channel configuration, and cached user profile
     await saveTokens(AUTH_LOGIN_KEY, token);
     await saveChannel(AUTH_CHANNEL_KEY, userData.subscribeStage);
+    const {updateToken: _updateToken, ...publicUserData} = userData;
+    await saveCachedUser(AUTH_LOGIN_KEY, publicUserData);
 
     // Update UI and configure auto updater
     await refreshChannel(true, userData.subscribeStage);
@@ -106,32 +117,67 @@ async function verifyTokenWithWebsite(token: string): Promise<InternalUserAccoun
 /**
  * Checks if the user is already logged in by verifying the stored token.
  */
-async function checkExistingLogin(): Promise<{
+export async function checkExistingLogin(): Promise<{
   isLoggedIn: boolean;
   userData?: InternalUserAccountData;
+  isOffline?: boolean;
 }> {
   const token = await getTokens(AUTH_LOGIN_KEY);
-  if (token) {
-    try {
-      const userData = await verifyTokenWithWebsite(token);
-      return {
-        isLoggedIn: true,
-        userData,
-      };
-    } catch (error) {
-      if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
-        console.warn('Stored token is invalid or expired. Logging out.');
-        await deleteTokens(AUTH_LOGIN_KEY);
-      } else {
-        console.warn(
-          'Failed to verify token with website (network/server issue):',
-          error instanceof Error ? error.message : error,
-        );
-      }
+  if (!token) {
+    return {isLoggedIn: false};
+  }
+
+  try {
+    const userData = await verifyTokenWithWebsite(token);
+    // Cache latest profile on successful verification
+    const {updateToken: _token, ...publicUserData} = userData;
+    await saveCachedUser(AUTH_LOGIN_KEY, publicUserData);
+    return {
+      isLoggedIn: true,
+      userData,
+      isOffline: false,
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
+      console.warn('Stored token is invalid or expired. Logging out.');
+      await deleteTokens(AUTH_LOGIN_KEY);
+      await deleteCachedUser(AUTH_LOGIN_KEY);
+      await saveChannel(AUTH_CHANNEL_KEY, 'public');
       return {isLoggedIn: false};
     }
+
+    // Network error / Offline / Timeout
+    console.warn(
+      'Failed to verify token with website (network/server issue), falling back to cached profile:',
+      error instanceof Error ? error.message : error,
+    );
+    const cachedUser = await getCachedUser(AUTH_LOGIN_KEY);
+    const cachedChannel = await getChannel(AUTH_CHANNEL_KEY);
+
+    if (cachedUser) {
+      return {
+        isLoggedIn: true,
+        userData: {
+          ...cachedUser,
+          subscribeStage: cachedChannel || cachedUser.subscribeStage || 'public',
+        },
+        isOffline: true,
+      };
+    }
+
+    // Token exists but no cached profile yet -> keep logged in with fallback
+    return {
+      isLoggedIn: true,
+      userData: {
+        tier: 'Offline Supporter',
+        name: 'Logged-in User',
+        imageUrl: '',
+        subscribeStage: cachedChannel || 'public',
+        connectedProviders: [],
+      },
+      isOffline: true,
+    };
   }
-  return {isLoggedIn: false};
 }
 
 /**
@@ -150,21 +196,29 @@ async function refreshChannel(isLogin: boolean, stage: SubscribeStages) {
 /**
  * Safely validates existing login and returns the user's authorized subscription stage.
  * If logged out or token is invalid/expired, returns 'public'.
+ * If offline, preserves the cached subscription stage.
  */
 export async function getValidatedUserStage(): Promise<SubscribeStages> {
   const token = await getTokens(AUTH_LOGIN_KEY);
+  const cachedChannel = await getChannel(AUTH_CHANNEL_KEY);
+
   if (!token) {
     await saveChannel(AUTH_CHANNEL_KEY, 'public');
     return 'public';
   }
 
-  const {isLoggedIn, userData} = await checkExistingLogin();
-  if (!isLoggedIn || !userData) {
+  const {isLoggedIn, userData, isOffline} = await checkExistingLogin();
+  if (!isLoggedIn) {
     await saveChannel(AUTH_CHANNEL_KEY, 'public');
     return 'public';
   }
 
-  const stage = userData.subscribeStage as SubscribeStages;
+  if (isOffline) {
+    // Preserve previously authorized stage in offline mode
+    return cachedChannel || 'public';
+  }
+
+  const stage = (userData?.subscribeStage as SubscribeStages) || 'public';
   if (stage === 'insider' || stage === 'early_access') {
     await saveChannel(AUTH_CHANNEL_KEY, stage);
     return stage;
@@ -229,13 +283,15 @@ export default function Auth() {
       if (existingLogin.isLoggedIn && existingLogin.userData) {
         let currentChannel = await getChannel(AUTH_CHANNEL_KEY);
         let channelChanged = false;
-        if (existingLogin.userData.subscribeStage !== currentChannel) {
+        if (!existingLogin.isOffline && existingLogin.userData.subscribeStage !== currentChannel) {
           await saveChannel(AUTH_CHANNEL_KEY, existingLogin.userData.subscribeStage);
           await refreshChannel(true, existingLogin.userData.subscribeStage);
           currentChannel = existingLogin.userData.subscribeStage;
           channelChanged = true;
         }
-        checkForAppUpdate(currentChannel, existingLogin.userData.updateToken, channelChanged);
+        if (!existingLogin.isOffline) {
+          checkForAppUpdate(currentChannel, existingLogin.userData.updateToken, channelChanged);
+        }
         const {updateToken, ...rendererUserData} = existingLogin.userData;
         return {...rendererUserData, subscribeStage: currentChannel};
       } else {
@@ -269,10 +325,13 @@ export default function Auth() {
   userIpc.account.handle.logout(async () => {
     try {
       await deleteTokens(AUTH_LOGIN_KEY);
+      await deleteCachedUser(AUTH_LOGIN_KEY);
       await refreshChannel(false, 'public');
       checkForAppUpdate('public', null, true);
       return;
     } catch (error) {
+      await deleteTokens(AUTH_LOGIN_KEY);
+      await deleteCachedUser(AUTH_LOGIN_KEY);
       await refreshChannel(false, 'public');
       checkForAppUpdate('public', null, true);
       throw error;

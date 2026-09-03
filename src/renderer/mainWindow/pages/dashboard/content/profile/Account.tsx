@@ -1,5 +1,6 @@
 import {Avatar, Button, Card, Description, Label, Spinner} from '@heroui/react';
 import {SiGithub, SiGoogle, SiPatreon} from '@icons-pack/react-simple-icons';
+import {useAppState} from '@lynx/redux/reducers/app';
 import {userActions, useUserState} from '@lynx/redux/reducers/user';
 import {AppDispatch} from '@lynx/redux/store';
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
@@ -18,9 +19,12 @@ import {
 import {memo, useCallback, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
+import {bottomToast} from '../../../../layouts/ToastProviders';
+
 const Profile_Account = memo(() => {
   const isLoggedIn = useUserState('isLoggedIn');
   const userData = useUserState('userData');
+  const isOnline = useAppState('isOnline');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
@@ -66,6 +70,12 @@ const Profile_Account = memo(() => {
 
   const syncAccount = useCallback(() => {
     AddBreadcrumb_Renderer(`Website Sync`);
+    if (!isOnline) {
+      bottomToast.warning('Cannot sync while offline', {
+        description: 'Please check your internet connection and try again.',
+      });
+      return;
+    }
     setIsSyncing(true);
     userIpc.account
       .getInfo()
@@ -74,19 +84,24 @@ const Profile_Account = memo(() => {
           dispatch(userActions.setUserState({key: 'userData', value: data}));
           dispatch(userActions.setUserState({key: 'isLoggedIn', value: true}));
           pluginsIpc.checkForSync(data.subscribeStage);
+          bottomToast.success('Account synced successfully');
         } else {
           dispatch(userActions.resetUserState('userData'));
           dispatch(userActions.resetUserState('isLoggedIn'));
           pluginsIpc.checkForSync('public');
+          bottomToast.warning('Session expired', {
+            description: 'Please log in again.',
+          });
         }
       })
       .catch(e => {
         console.error(e);
+        bottomToast.danger('Failed to sync account');
       })
       .finally(() => {
         setIsSyncing(false);
       });
-  }, [dispatch]);
+  }, [dispatch, isOnline]);
 
   return (
     <Card className={`${isLoggedIn ? 'border border-success/30' : ''} py-6 px-5`}>

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import {join} from 'node:path';
 
 import {APP_NAME} from '@lynx_common/consts';
-import {SubscribeStages} from '@lynx_common/types';
+import {SubscribeStages, UserAccountData} from '@lynx_common/types';
 import {isDev} from '@lynx_common/utils';
 import {userIpc} from '@lynx_main/ipc/user';
 import {decryptString, encryptString, getExePath, isPortable} from '@lynx_main/utils';
@@ -22,6 +22,7 @@ function getCredentialsFilePath(): string {
 interface CredentialsData {
   tokens: Record<string, string>; // userId -> encrypted token
   channels: Record<string, SubscribeStages>; // userId -> channel
+  cachedUsers?: Record<string, UserAccountData>; // userId -> cached user profile data
 }
 
 function loadCredentials(): CredentialsData {
@@ -29,12 +30,17 @@ function loadCredentials(): CredentialsData {
   try {
     if (fs.existsSync(filePath)) {
       const content = fs.readFileSync(filePath, 'utf8');
-      return JSON.parse(content);
+      const parsed = JSON.parse(content);
+      return {
+        tokens: parsed.tokens || {},
+        channels: parsed.channels || {},
+        cachedUsers: parsed.cachedUsers || {},
+      };
     }
   } catch (error) {
     console.error('Failed to load credentials file:', error);
   }
-  return {tokens: {}, channels: {}};
+  return {tokens: {}, channels: {}, cachedUsers: {}};
 }
 
 function saveCredentials(data: CredentialsData): boolean {
@@ -147,4 +153,51 @@ export async function getChannel(userId: string): Promise<SubscribeStages> {
   }
 
   return stage as SubscribeStages;
+}
+
+/**
+ * Saves the cached user profile data for the given user.
+ */
+export async function saveCachedUser(userId: string, data: UserAccountData): Promise<boolean> {
+  try {
+    const creds = loadCredentials();
+    if (!creds.cachedUsers) {
+      creds.cachedUsers = {};
+    }
+    creds.cachedUsers[userId] = data;
+    return saveCredentials(creds);
+  } catch (error) {
+    console.error(`Failed to save cached user profile for user ${userId}:`, error);
+    return false;
+  }
+}
+
+/**
+ * Retrieves the cached user profile data for the given user.
+ */
+export async function getCachedUser(userId: string): Promise<UserAccountData | null> {
+  try {
+    const creds = loadCredentials();
+    return creds.cachedUsers?.[userId] || null;
+  } catch (error) {
+    console.error(`Failed to retrieve cached user profile for user ${userId}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Deletes the cached user profile data for the given user.
+ */
+export async function deleteCachedUser(userId: string): Promise<boolean> {
+  try {
+    const creds = loadCredentials();
+    if (creds.cachedUsers && creds.cachedUsers[userId]) {
+      delete creds.cachedUsers[userId];
+      return saveCredentials(creds);
+    }
+    return true;
+  } catch (error) {
+    console.error(`Failed to delete cached user profile for user ${userId}:`, error);
+    return false;
+  }
 }
