@@ -102,11 +102,11 @@ export default function TabAlertDialog({
         {trigger}
         <UNSAFE_PortalProvider getContainer={getContainer}>
           <AlertDialog.Backdrop
-            className="h-full"
             isDismissable={false}
             variant={backdropVariant}
             onClick={handleBackdropClick}
             onMouseDown={handleBackdropMouseDown}
+            className="h-full pointer-events-auto"
             isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
             <AlertDialog.Container
               size={size}

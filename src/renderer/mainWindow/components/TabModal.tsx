@@ -88,11 +88,11 @@ export default function TabModal({
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <UNSAFE_PortalProvider getContainer={getContainer}>
           <Modal.Backdrop
-            className="h-full"
             isDismissable={false}
             variant={backdropVariant}
             onClick={handleBackdropClick}
             onMouseDown={handleBackdropMouseDown}
+            className="h-full pointer-events-auto"
             isKeyboardDismissDisabled={isKeyboardDismissDisabled}>
             <Modal.Container size={size} scroll="inside" className={`h-full max-h-full ${containerClassName}`}>
               <Modal.Dialog className={size === 'cover' ? `h-full max-h-full ${dialogClassName}` : dialogClassName}>

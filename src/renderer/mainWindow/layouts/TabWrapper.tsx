@@ -7,6 +7,7 @@ type Props = {children: ReactNode; tabID: string; isActive: boolean};
 
 export default function TabWrapper({children, tabID, isActive}: Props) {
   const onRef = useInertRemover();
+  const visibilityClass = isActive ? 'flex flex-row' : 'hidden';
 
   return (
     <TabContext.Provider value={tabID}>
@@ -14,7 +15,7 @@ export default function TabWrapper({children, tabID, isActive}: Props) {
         ref={onRef}
         id={`${tabID}_wrapper`}
         style={{transform: 'translate(0)'}}
-        className={`${isActive ? 'flex flex-row' : 'hidden'} size-full overflow-hidden`}>
+        className={`${visibilityClass} relative z-10 size-full overflow-hidden pointer-events-none`}>
         {children}
       </div>
     </TabContext.Provider>
