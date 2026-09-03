@@ -8,14 +8,8 @@ import {getCacheUrl, getFallbackString} from '@lynx_common/utils';
 import pluginsIpc from '@lynx_shared/ipc/plugins';
 import userIpc from '@lynx_shared/ipc/user';
 import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
-import {
-  CloseCircleIcon,
-  CrownIcon,
-  LoginIcon,
-  LogoutIcon,
-  RefreshIcon,
-  SettingsIcon,
-} from '@solar-icons/react/bold-duotone';
+import {CrownIcon, Login3Icon, Logout3Icon, RefreshIcon, SettingsIcon} from '@solar-icons/react/bold-duotone';
+import {X} from 'lucide-react';
 import {memo, useCallback, useState} from 'react';
 import {useDispatch} from 'react-redux';
 
@@ -165,7 +159,7 @@ const Profile_Account = memo(() => {
                   <Spinner size="sm" color="current" />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <LogoutIcon className="size-3.5 shrink-0" />
+                    <Logout3Icon className="size-3.5 shrink-0" />
                     <span>Logout</span>
                   </div>
                 )}
@@ -177,7 +171,7 @@ const Profile_Account = memo(() => {
                 <Spinner size="sm" color="current" />
               ) : (
                 <div className="flex items-center gap-2">
-                  <LoginIcon className="size-3.5 shrink-0" />
+                  <Login3Icon className="size-3.5 shrink-0" />
                   <span>Login</span>
                 </div>
               )}
@@ -186,7 +180,7 @@ const Profile_Account = memo(() => {
           {isLoading && !isLoggedIn && (
             <Button size="sm" variant="danger-soft" onPress={cancelLoading}>
               <div className="flex items-center gap-2">
-                <CloseCircleIcon className="size-3.5 shrink-0" />
+                <X className="size-3.5 shrink-0" />
                 <span>Cancel</span>
               </div>
             </Button>
