@@ -93,6 +93,12 @@ if (!gotTheLock) {
     handleDeepLink(url);
   });
 
+  // Check for deep link on cold launch (Windows / Linux)
+  const deepLinkArg = process.argv.find(arg => arg.startsWith('lynxhub://'));
+  if (deepLinkArg) {
+    handleDeepLink(deepLinkArg);
+  }
+
   // Register protocol client
   if (process.defaultApp) {
     if (process.argv.length >= 2) {

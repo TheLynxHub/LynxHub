@@ -5,7 +5,7 @@ import {applicationIpc} from '@lynx_main/ipc/application';
 import {userIpc} from '@lynx_main/ipc/user';
 import classHolder from '@lynx_main/managers/classHolder';
 import axios from 'axios';
-import {ipcMain, shell} from 'electron';
+import {app, ipcMain, shell} from 'electron';
 import {autoUpdater} from 'electron-updater';
 
 import {
@@ -37,13 +37,16 @@ let pendingLoginReject: ((err: any) => void) | null = null;
 /**
  * Handles custom protocol deep links (e.g. lynxhub://auth?token=...)
  */
-export function handleDeepLink(url: string) {
+export async function handleDeepLink(url: string) {
   try {
+    if (!app.isReady()) {
+      await app.whenReady();
+    }
     const parsedUrl = new URL(url);
     if (parsedUrl.hostname === 'auth') {
       const token = parsedUrl.searchParams.get('token');
       if (token) {
-        processTokenLogin(token);
+        await processTokenLogin(token);
       }
     }
   } catch (error) {
