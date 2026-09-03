@@ -1,10 +1,8 @@
 import {Modal, ModalBackdropProps, ModalContainerProps} from '@heroui/react';
-import browserIpc from '@lynx_shared/ipc/browser';
-import {MouseEvent, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import {MouseEvent, ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {UNSAFE_PortalProvider} from 'react-aria';
 
 import {useCurrentTabId} from '../layouts/tabs/TabContext';
-import {useCardsState} from '../redux/reducers/cards';
 
 type Props = {
   children: ReactNode;
@@ -34,7 +32,6 @@ export default function TabModal({
   const anchorRef = useRef<HTMLSpanElement>(null);
   const contextTabId = useCurrentTabId();
   const [domTabId, setDomTabId] = useState<string | undefined>(undefined);
-  const runningCards = useCardsState('runningCard');
 
   useLayoutEffect(() => {
     if (anchorRef.current) {
@@ -52,11 +49,6 @@ export default function TabModal({
     return resolvedTabId ? document.getElementById(`${resolvedTabId}_wrapper`) : null;
   });
 
-  const currentRunningCard = useMemo(
-    () => (resolvedTabId ? runningCards.find(card => card.tabId === resolvedTabId) : undefined),
-    [runningCards, resolvedTabId],
-  );
-
   useEffect(() => {
     if (!isOpen) {
       setTargetContainer(null);
@@ -72,16 +64,6 @@ export default function TabModal({
       setTargetContainer(null);
     }
   }, [isOpen, resolvedTabId]);
-
-  useEffect(() => {
-    if (isOpen && currentRunningCard && currentRunningCard.currentView === 'browser') {
-      browserIpc.send.setVisible(currentRunningCard.id, false);
-      return () => {
-        browserIpc.send.setVisible(currentRunningCard.id, true);
-      };
-    }
-    return undefined;
-  }, [isOpen, currentRunningCard]);
 
   const mouseDownTargetRef = useRef<EventTarget | null>(null);
 

@@ -1,10 +1,8 @@
 import {AlertDialog, AlertDialogBackdropProps, AlertDialogContainerProps} from '@heroui/react';
-import browserIpc from '@lynx_shared/ipc/browser';
-import {MouseEvent, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import {MouseEvent, ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {UNSAFE_PortalProvider} from 'react-aria';
 
 import {useCurrentTabId} from '../layouts/tabs/TabContext';
-import {useCardsState} from '../redux/reducers/cards';
 
 type Props = {
   children: ReactNode;
@@ -38,7 +36,6 @@ export default function TabAlertDialog({
   const anchorRef = useRef<HTMLSpanElement>(null);
   const contextTabId = useCurrentTabId();
   const [domTabId, setDomTabId] = useState<string | undefined>(undefined);
-  const runningCards = useCardsState('runningCard');
 
   useLayoutEffect(() => {
     if (anchorRef.current) {
@@ -60,11 +57,6 @@ export default function TabAlertDialog({
     return resolvedTabId ? document.getElementById(`${resolvedTabId}_wrapper`) : null;
   });
 
-  const currentRunningCard = useMemo(
-    () => (resolvedTabId ? runningCards.find(card => card.tabId === resolvedTabId) : undefined),
-    [runningCards, resolvedTabId],
-  );
-
   useEffect(() => {
     if (!effectiveIsOpen) {
       setTargetContainer(null);
@@ -80,16 +72,6 @@ export default function TabAlertDialog({
       setTargetContainer(null);
     }
   }, [effectiveIsOpen, resolvedTabId]);
-
-  useEffect(() => {
-    if (effectiveIsOpen && currentRunningCard && currentRunningCard.currentView === 'browser') {
-      browserIpc.send.setVisible(currentRunningCard.id, false);
-      return () => {
-        browserIpc.send.setVisible(currentRunningCard.id, true);
-      };
-    }
-    return undefined;
-  }, [effectiveIsOpen, currentRunningCard]);
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
