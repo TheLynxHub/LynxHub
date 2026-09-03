@@ -305,6 +305,8 @@ export function RelaunchApp(saveLastSize: boolean = true): void {
   app.quit();
 }
 
+const FIREFOX_VERSION = '154.0';
+
 /**
  * User agent configuration and templates
  */
@@ -314,10 +316,16 @@ const USER_AGENT_CONFIG = {
     linux: '(X11; Linux x86_64)',
     win32: '(Windows NT 10.0; Win64; x64)',
   },
+  firefoxOsMap: {
+    darwin: `(Macintosh; Intel Mac OS X 10.15; rv:${FIREFOX_VERSION})`,
+    linux: `(X11; Linux x86_64; rv:${FIREFOX_VERSION})`,
+    win32: `(Windows NT 10.0; Win64; x64; rv:${FIREFOX_VERSION})`,
+  },
   getVersionStrings: () => ({
     lynxHub: `LynxHub/${app.getVersion()}`,
     electron: `Electron/${process.versions.electron}`,
     chrome: `Chrome/${process.versions.chrome}`,
+    firefox: `Firefox/${FIREFOX_VERSION}`,
   }),
 };
 
@@ -330,6 +338,7 @@ export function getUserAgent(type?: AgentTypes): string {
   const targetType: AgentTypes = type || classHolder.storageManager.getData('browser').userAgent || 'chrome';
 
   const osString = USER_AGENT_CONFIG.osMap[platform()] || USER_AGENT_CONFIG.osMap.win32;
+  const firefoxOsString = USER_AGENT_CONFIG.firefoxOsMap[platform()] || USER_AGENT_CONFIG.firefoxOsMap.win32;
   const baseUA = `Mozilla/5.0 ${osString} AppleWebKit/537.36 (KHTML, like Gecko)`;
   const versions = USER_AGENT_CONFIG.getVersionStrings();
 
@@ -337,6 +346,7 @@ export function getUserAgent(type?: AgentTypes): string {
     lynxhub: () => `${baseUA} ${versions.lynxHub} ${versions.chrome} ${versions.electron} Safari/537.36`,
     electron: () => `${baseUA} ${versions.chrome} ${versions.electron} Safari/537.36`,
     chrome: () => `${baseUA} ${versions.chrome} Safari/537.36`,
+    firefox: () => `Mozilla/5.0 ${firefoxOsString} Gecko/20100101 ${versions.firefox}`,
     custom: () => classHolder.storageManager.getData('browser').customUserAgent,
   };
 

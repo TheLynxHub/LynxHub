@@ -114,7 +114,7 @@ export type BrowserHistoryData = {
   historyAddress: string[];
   favIcons: FavIcons[];
 };
-export type AgentTypes = 'lynxhub' | 'electron' | 'chrome' | 'custom';
+export type AgentTypes = 'lynxhub' | 'electron' | 'chrome' | 'firefox' | 'custom';
 export type ShowToastTypes = 'success' | 'danger' | 'warning' | 'info';
 
 export type AudioState = {

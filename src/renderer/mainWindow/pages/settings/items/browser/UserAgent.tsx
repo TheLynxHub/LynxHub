@@ -41,10 +41,11 @@ function useUserAgentSettings() {
           setCustomValue(customUserAgent);
         }
 
-        const [lynxhubValue, electronValue, chromeValue, customAgentValue] = await Promise.all([
+        const [lynxhubValue, electronValue, chromeValue, firefoxValue, customAgentValue] = await Promise.all([
           browserIpc.invoke.getUserAgent('lynxhub'),
           browserIpc.invoke.getUserAgent('electron'),
           browserIpc.invoke.getUserAgent('chrome'),
+          browserIpc.invoke.getUserAgent('firefox'),
           browserIpc.invoke.getUserAgent('custom'),
         ]);
 
@@ -54,6 +55,7 @@ function useUserAgentSettings() {
           {id: 'lynxhub', value: lynxhubValue},
           {id: 'electron', value: electronValue},
           {id: 'chrome', value: chromeValue},
+          {id: 'firefox', value: firefoxValue},
           {id: 'custom', value: customAgentValue},
         ]);
       } catch (error) {
@@ -131,6 +133,7 @@ export default function UserAgent() {
     'lynxhub',
     'electron',
     'chrome',
+    'firefox',
     'custom',
     'ua',
     'user agent string',
@@ -181,6 +184,17 @@ export default function UserAgent() {
                   </Label>
                   <Description>
                     <SettingsSearchHighlight text={getAgentDescription('chrome')} />
+                  </Description>
+                </div>
+              </ListBox.Item>
+              <ListBox.Item id="firefox" textValue="Firefox">
+                <ListBox.ItemIndicator />
+                <div className="flex flex-col">
+                  <Label>
+                    <SettingsSearchHighlight text="Firefox" />
+                  </Label>
+                  <Description>
+                    <SettingsSearchHighlight text={getAgentDescription('firefox')} />
                   </Description>
                 </div>
               </ListBox.Item>
