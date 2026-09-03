@@ -11,6 +11,7 @@ import {BrowserWindow, FindInPageOptions, session, shell, WebContents, WebConten
 import {isNil} from 'lodash-es';
 
 import icon from '../../../resources/icon.png?asset';
+import {handleDeepLink} from '../monitoring/auth';
 import classHolder from './classHolder';
 import RegisterHotkeys from './hotkeys';
 
@@ -243,6 +244,13 @@ export default class BrowserManager {
 
     webContents.on('did-finish-load', sendToRenderer);
     webContents.on('did-stop-loading', sendToRenderer);
+
+    webContents.on('will-navigate', (event, url) => {
+      if (url.startsWith('lynxhub://')) {
+        event.preventDefault();
+        handleDeepLink(url);
+      }
+    });
 
     webContents.on('did-start-navigation', e => {
       if (e.isMainFrame) {
