@@ -1,6 +1,6 @@
 import {LYNXHUB_WEBSITE} from '@lynx_common/consts';
 import {SubscribeStages, UserAccountData} from '@lynx_common/types';
-import {toMs} from '@lynx_common/utils';
+import {isDev, toMs} from '@lynx_common/utils';
 import {applicationIpc} from '@lynx_main/ipc/application';
 import {userIpc} from '@lynx_main/ipc/user';
 import classHolder from '@lynx_main/managers/classHolder';
@@ -11,8 +11,8 @@ import {autoUpdater} from 'electron-updater';
 import {deleteTokens, getChannel, getTokens, saveChannel, saveTokens} from './token';
 
 // Constants
-export const AUTH_CHANNEL_KEY = 'LynxHub-Auth-Update-Channel';
-export const AUTH_LOGIN_KEY = 'LynxHub-Auth-Login-User';
+export const AUTH_CHANNEL_KEY = isDev() ? 'LynxHub-Dev-Auth-Update-Channel' : 'LynxHub-Auth-Update-Channel';
+export const AUTH_LOGIN_KEY = isDev() ? 'LynxHub-Dev-Auth-Login-User' : 'LynxHub-Auth-Login-User';
 const UPDATE_CHECK_COOLDOWN = toMs(15, 'minutes');
 let lastUpdateCheckTime = 0;
 
@@ -119,8 +119,15 @@ async function checkExistingLogin(): Promise<{
         userData,
       };
     } catch (error) {
-      console.warn('Stored token is invalid or expired. Logging out.');
-      await deleteTokens(AUTH_LOGIN_KEY);
+      if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
+        console.warn('Stored token is invalid or expired. Logging out.');
+        await deleteTokens(AUTH_LOGIN_KEY);
+      } else {
+        console.warn(
+          'Failed to verify token with website (network/server issue):',
+          error instanceof Error ? error.message : error,
+        );
+      }
       return {isLoggedIn: false};
     }
   }
