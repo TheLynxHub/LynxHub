@@ -1,15 +1,22 @@
 import fs from 'node:fs';
 import {join} from 'node:path';
 
+import {APP_NAME} from '@lynx_common/consts';
 import {SubscribeStages} from '@lynx_common/types';
+import {isDev} from '@lynx_common/utils';
 import {userIpc} from '@lynx_main/ipc/user';
-import {decryptString, encryptString} from '@lynx_main/utils';
-import {app} from 'electron';
+import {decryptString, encryptString, getExePath, isPortable} from '@lynx_main/utils';
+import {app, safeStorage} from 'electron';
 
 const CREDENTIALS_FILE = 'auth-credentials.json';
+const DEV_CREDENTIALS_FILE = 'auth-credentials-dev.json';
 
 function getCredentialsFilePath(): string {
-  return join(app.getPath('userData'), CREDENTIALS_FILE);
+  const fileName = isDev() ? DEV_CREDENTIALS_FILE : CREDENTIALS_FILE;
+  if (isPortable()) {
+    return join(getExePath(), `${APP_NAME}_Data`, fileName);
+  }
+  return join(app.getPath('userData'), fileName);
 }
 
 interface CredentialsData {
@@ -66,7 +73,12 @@ export async function getTokens(userId: string): Promise<string | null> {
     const creds = loadCredentials();
     const encrypted = creds.tokens[userId];
     if (encrypted) {
-      return decryptString(encrypted);
+      const decrypted = decryptString(encrypted);
+      if (safeStorage.isEncryptionAvailable() && decrypted === encrypted) {
+        console.warn(`Failed to decrypt tokens for user ${userId} (key mismatch or corrupted credential).`);
+        return null;
+      }
+      return decrypted || null;
     }
     return null;
   } catch (error) {
