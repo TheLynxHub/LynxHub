@@ -27,7 +27,7 @@ class BaseStorage {
   private readonly migrationManager: StorageMigrationManager;
 
   private readonly DEFAULT_DATA: AppStorageData = {
-    storage: {version: 1.2},
+    storage: {version: 1.3},
     cards: {
       installedCards: [],
       autoUpdateCards: [],
@@ -118,8 +118,8 @@ class BaseStorage {
     },
     browser: {
       recentAddress: [],
-      userAgent: 'chrome',
-      customUserAgent: getUserAgent('chrome'),
+      userAgent: 'lynxhub',
+      customUserAgent: getUserAgent('lynxhub'),
       favoriteAddress: [],
       historyAddress: [],
       favIcons: [],

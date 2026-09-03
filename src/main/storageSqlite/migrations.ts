@@ -7,6 +7,7 @@ import SqliteStorageManager from './storageOperations';
 export class SqliteStorageMigrationManager {
   private readonly migrations = new Map<number, (manager: SqliteStorageManager) => void>([
     [1.2, manager => this.migrate_1_20(manager)],
+    [1.3, manager => this.migrate_1_30(manager)],
   ]);
 
   constructor(private readonly manager: SqliteStorageManager) {}
@@ -43,6 +44,13 @@ export class SqliteStorageMigrationManager {
     const appData = manager.getData('app');
     if (appData && appData.forceReloadConfirm === undefined) {
       manager.updateData('app', {forceReloadConfirm: true});
+    }
+  }
+
+  private migrate_1_30(manager: SqliteStorageManager): void {
+    const browserData = manager.getData('browser');
+    if (browserData && (browserData.userAgent === 'chrome' || !browserData.userAgent)) {
+      manager.updateData('browser', {userAgent: 'lynxhub'});
     }
   }
 }

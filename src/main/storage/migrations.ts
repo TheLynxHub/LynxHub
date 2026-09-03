@@ -50,6 +50,7 @@ export class StorageMigrationManager {
     [1.09, () => this.migrate_1_09()],
     [1.1, () => this.migrate_1_10()],
     [1.2, () => this.migrate_1_20()],
+    [1.3, () => this.migrate_1_30()],
   ]);
 
   constructor(
@@ -139,8 +140,8 @@ export class StorageMigrationManager {
       historyAddress: [],
       recentAddress: [],
       favIcons: [],
-      userAgent: 'chrome',
-      customUserAgent: getUserAgent('chrome'),
+      userAgent: 'lynxhub',
+      customUserAgent: getUserAgent('lynxhub'),
     };
     this.storage.data.app.closeTabConfirm = true;
     this.storage.data.app.hotkeys = Get_Default_Hotkeys();
@@ -396,6 +397,18 @@ export class StorageMigrationManager {
   private migrate_1_20() {
     if (this.storage.data.app && this.storage.data.app.forceReloadConfirm === undefined) {
       this.storage.data.app.forceReloadConfirm = true;
+    }
+  }
+
+  private migrate_1_30() {
+    if (
+      this.storage.data.browser &&
+      (this.storage.data.browser.userAgent === 'chrome' || !this.storage.data.browser.userAgent)
+    ) {
+      this.storage.data.browser = {
+        ...this.storage.data.browser,
+        userAgent: 'lynxhub',
+      };
     }
   }
 }

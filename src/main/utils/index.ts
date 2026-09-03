@@ -335,7 +335,7 @@ const USER_AGENT_CONFIG = {
  * @returns {string} The user agent string.
  */
 export function getUserAgent(type?: AgentTypes): string {
-  const targetType: AgentTypes = type || classHolder.storageManager.getData('browser').userAgent || 'chrome';
+  const targetType: AgentTypes = type || classHolder.storageManager.getData('browser').userAgent || 'lynxhub';
 
   const osString = USER_AGENT_CONFIG.osMap[platform()] || USER_AGENT_CONFIG.osMap.win32;
   const firefoxOsString = USER_AGENT_CONFIG.firefoxOsMap[platform()] || USER_AGENT_CONFIG.firefoxOsMap.win32;
