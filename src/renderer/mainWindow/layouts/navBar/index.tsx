@@ -1,5 +1,6 @@
 import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {useAppState} from '@lynx/redux/reducers/app';
+import {useTabsState} from '@lynx/redux/reducers/tabs';
 import {isEmpty} from 'lodash-es';
 import {memo, useMemo} from 'react';
 
@@ -7,14 +8,17 @@ import {ContentsNav, SettingsNav} from './Buttons';
 
 const CONTAINER_WIDTH = 'w-[5.5rem]';
 
-type Props = {tabID: string; pageID: string};
+type Props = {tabID?: string; pageID?: string};
 
 /**
  * Navigation bar containing two sections: Contents and Settings.
  * Supports extension replacements for container, content bar, and settings bar.
  */
-const NavBar = memo(({tabID, pageID}: Props) => {
+const NavBar = memo(({pageID: propPageID}: Props = {}) => {
   const navBar = useAppState('navBar');
+  const activePage = useTabsState('activePage');
+
+  const pageID = propPageID ?? activePage;
   const {
     container: Container,
     contentBar: ContentBar,
@@ -31,14 +35,14 @@ const NavBar = memo(({tabID, pageID}: Props) => {
     <div className={`flex h-full ${CONTAINER_WIDTH} shrink-0 flex-col items-center justify-between pb-4 pt-3`}>
       {isEmpty(ContentBar) ? (
         <div className="flex items-center justify-center">
-          <ContentsNav tabID={tabID} pageID={pageID} />
+          <ContentsNav pageID={pageID} />
         </div>
       ) : (
         <ContentBar />
       )}
       {isEmpty(SettingsBar) ? (
         <div className="flex items-center justify-center">
-          <SettingsNav tabID={tabID} pageID={pageID} />
+          <SettingsNav pageID={pageID} />
         </div>
       ) : (
         <SettingsBar />

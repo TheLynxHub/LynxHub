@@ -1,5 +1,5 @@
 import {useAppState} from '@lynx/redux/reducers/app';
-import {tabsActions} from '@lynx/redux/reducers/tabs';
+import {tabsActions, useTabsState} from '@lynx/redux/reducers/tabs';
 import {AppDispatch} from '@lynx/redux/store';
 import {AltArrowDownIcon, AltArrowUpIcon} from '@solar-icons/react/linear';
 import {AnimatePresence, motion, Transition} from 'framer-motion';
@@ -17,8 +17,8 @@ export type NavItem = {
 
 type Props = {
   items: NavItem[];
-  tabId: string;
-  pageID: string;
+  tabId?: string;
+  pageID?: string;
 };
 
 const springTransition: Transition = {type: 'spring', stiffness: 400, damping: 40};
@@ -44,9 +44,9 @@ const ScrollArrow = memo(
   },
 );
 
-type ItemProp = {item: NavItem; activePage: string; isDark: boolean; tabID: string};
+type ItemProp = {item: NavItem; activePage: string; isDark: boolean; tabID?: string};
 
-const RenderItem = memo(function RenderItem({item, activePage, isDark, tabID}: ItemProp) {
+const RenderItem = memo(function RenderItem({item, activePage, isDark, tabID = 'dock'}: ItemProp) {
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -156,8 +156,10 @@ const RenderItem = memo(function RenderItem({item, activePage, isDark, tabID}: I
  * NavigationDock component that displays a list of navigation items.
  * Handles responsive layout, scrolling, and hover effects.
  */
-const NavigationDock = memo(({items, tabId, pageID}: Props) => {
+const NavigationDock = memo(({items, tabId = 'dock', pageID: propPageID}: Props) => {
   const isDark = useAppState('darkMode');
+  const reduxActivePage = useTabsState('activePage');
+  const pageID = propPageID ?? reduxActivePage;
 
   const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
   const [isHoveringDock, setIsHoveringDock] = useState(false);
