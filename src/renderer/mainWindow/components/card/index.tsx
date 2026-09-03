@@ -23,7 +23,7 @@ const variants: Variants = {
   animate: (index: number) => ({
     opacity: 1,
     translateY: 0,
-    transition: {delay: Math.min(index, 5) * 0.05},
+    transition: {delay: index * 0.05},
   }),
 };
 
@@ -92,17 +92,14 @@ export const GetComponentsByPath = memo(({routePath, extensionsElements}: GetCom
               <ReplaceCards cards={cards} />
             )}
           </LayoutGroup>
-          {extensionsElements?.map((Comp, index) => (
-            <motion.div
-              animate="animate"
-              initial="initial"
-              variants={variants}
-              key={`extension_card_${index}`}
-              custom={index + cards.length + matchedTools.length}
-              layout>
-              <Comp key={index} />{' '}
-            </motion.div>
-          ))}
+          {extensionsElements?.map((Comp, index) => {
+            const ElementComp = Comp as FC<{startIndex?: number}>;
+            return (
+              <div className="contents" key={`extension_card_${index}`}>
+                <ElementComp key={index} startIndex={cards.length + matchedTools.length} />
+              </div>
+            );
+          })}
         </>
       )}
     </div>

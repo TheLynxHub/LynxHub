@@ -360,7 +360,7 @@ export type ExtensionRendererApi = {
         recentlyCategory: CompFc;
         /**
          * Add elements to the end of the "all categories" section.    */
-        allCategory: CompFcPropCardData;
+        allCategory: CompFc;
       };
     };
 

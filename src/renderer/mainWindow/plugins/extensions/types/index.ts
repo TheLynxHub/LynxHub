@@ -34,8 +34,9 @@ export type SearchResultProps = ComponentProps<'div'> & {searchValue: string};
  * Props for a component that needs access to the card store.
  */
 export type CardDataProps = ComponentProps<'div'> & {
-  useCardStore: UseCardStoreType;
-  useCardOverlayState: typeof useCardOverlayState;
+  useCardStore?: UseCardStoreType;
+  useCardOverlayState?: typeof useCardOverlayState;
+  startIndex?: number;
 };
 
 /**
@@ -204,7 +205,7 @@ export type ExtensionData_Renderer = {
         scrollBottom: FC[];
         pinCategory: FC[];
         recentlyCategory: FC[];
-        allCategory: FcPropCardData[];
+        allCategory: FC[];
       };
     };
     audio: {add: PageAdd};

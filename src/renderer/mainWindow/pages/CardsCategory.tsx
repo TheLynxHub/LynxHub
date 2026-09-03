@@ -13,7 +13,7 @@ import {InboxIcon, PinCircleIcon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, LayoutGroup, motion, Variants} from 'framer-motion';
 import Fuse from 'fuse.js';
 import {isEmpty, isNil} from 'lodash-es';
-import {memo, useId, useMemo, useSyncExternalStore} from 'react';
+import {FC, memo, ReactNode, useId, useMemo, useSyncExternalStore} from 'react';
 
 import {CardContainerClasses} from './CardsContainer';
 import HomeCategory from './home/Category';
@@ -25,12 +25,18 @@ const variants: Variants = {
   animate: (index: number) => ({
     opacity: 1,
     translateY: 0,
-    transition: {delay: Math.min(index, 5) * 0.05},
+    transition: {delay: index * 0.05},
   }),
 };
 
+type CardsByIdsProps = {
+  cardIds: string[];
+  cat: string;
+  children?: ReactNode | ((startIndex: number) => ReactNode);
+};
+
 /** Renders a filtered card list by an array of IDs. */
-const CardsByIds = ({cardIds, cat}: {cardIds: string[]; cat: string}) => {
+const CardsByIds = ({cardIds, cat, children}: CardsByIdsProps) => {
   const allCards = useAllCardDataWithPath();
   const tools = useSyncExternalStore(toolsCardRegistry.subscribe, toolsCardRegistry.getAll);
   const installedCards = useCardsState('installedCards');
@@ -57,61 +63,51 @@ const CardsByIds = ({cardIds, cat}: {cardIds: string[]; cat: string}) => {
     <LayoutGroup id={`${cat}_cards_category`}>
       <AnimatePresence>
         {isNil(ReplaceCards) ? (
-          isEmpty(items) ? (
-            <EmptyStateCard
-              className="size-full"
-              bodyClassName="gap-y-3"
-              title="No Card to Display!"
-              icon={<InboxIcon size={40} />}
-              action={<NavigateToPluginsButton />}
-              description="Please install at least one module in plugins page."
-            />
-          ) : (
-            <>
-              {items.map((item, index) => {
-                if (item.type === 'standard') {
-                  return (
-                    <motion.div
-                      key={item.id}
-                      custom={index}
-                      animate="animate"
-                      initial="initial"
-                      variants={variants}
-                      layout>
-                      <Wrapper
-                        cardData={item.data}
-                        hasArguments={hasArguments.has(item.id)}
-                        isInstalled={installedCardIds.has(item.id)}
+          <>
+            {items.map((item, index) => {
+              if (item.type === 'standard') {
+                return (
+                  <motion.div
+                    key={item.id}
+                    custom={index}
+                    animate="animate"
+                    initial="initial"
+                    variants={variants}
+                    layout>
+                    <Wrapper
+                      cardData={item.data}
+                      hasArguments={hasArguments.has(item.id)}
+                      isInstalled={installedCardIds.has(item.id)}
+                    />
+                  </motion.div>
+                );
+              } else {
+                const CustomCard = item.data.component;
+                return (
+                  <motion.div
+                    key={item.id}
+                    custom={index}
+                    animate="animate"
+                    initial="initial"
+                    variants={variants}
+                    layout>
+                    {CustomCard ? (
+                      <CustomCard />
+                    ) : (
+                      <ToolsCard
+                        id={item.data.id}
+                        icon={item.data.icon}
+                        title={item.data.title}
+                        onPress={item.data.onPress}
+                        description={item.data.description}
                       />
-                    </motion.div>
-                  );
-                } else {
-                  const CustomCard = item.data.component;
-                  return (
-                    <motion.div
-                      key={item.id}
-                      custom={index}
-                      animate="animate"
-                      initial="initial"
-                      variants={variants}
-                      layout>
-                      {CustomCard ? (
-                        <CustomCard />
-                      ) : (
-                        <ToolsCard
-                          id={item.data.id}
-                          icon={item.data.icon}
-                          title={item.data.title}
-                          onPress={item.data.onPress}
-                          description={item.data.description}
-                        />
-                      )}
-                    </motion.div>
-                  );
-                }
-              })}
-            </>
-          )
+                    )}
+                  </motion.div>
+                );
+              }
+            })}
+            {typeof children === 'function' ? children(items.length) : children}
+          </>
         ) : (
           <ReplaceCards cards={items.filter(x => x.type === 'standard').map(x => x.data)} />
         )}
@@ -172,6 +168,10 @@ const AllCards = () => {
                 </motion.div>
               );
             })}
+            {allCategory.map((AllComp, index) => {
+              const Comp = AllComp as unknown as FC<{startIndex?: number}>;
+              return <Comp key={index} startIndex={allCards.length + tools.length} />;
+            })}
           </>
         ) : (
           <ReplaceCards cards={allCards} />
@@ -207,10 +207,14 @@ export const PinnedCars = memo(() => {
             description="Pin your favorite cards to easily access them here."
           />
         ) : (
-          <>
-            <CardsByIds cat="pinned" cardIds={pinnedCards} />
-            {...pinCategory.map((Pin, index) => <Pin key={index} />)}
-          </>
+          <CardsByIds cat="pinned" cardIds={pinnedCards}>
+            {startIndex =>
+              pinCategory.map((Pin, index) => {
+                const Comp = Pin as FC<{startIndex?: number}>;
+                return <Comp key={index} startIndex={startIndex} />;
+              })
+            }
+          </CardsByIds>
         )}
       </div>
     </HomeCategory>
@@ -240,10 +244,14 @@ export const RecentlyCards = memo(() => {
             description="No Recently Used Card to Display!"
           />
         ) : (
-          <>
-            <CardsByIds cat="recently" cardIds={recentlyUsedCards} />
-            {...recentlyCategory.map((Recent, index) => <Recent key={index} />)}
-          </>
+          <CardsByIds cat="recently" cardIds={recentlyUsedCards}>
+            {startIndex =>
+              recentlyCategory.map((Recent, index) => {
+                const Comp = Recent as FC<{startIndex?: number}>;
+                return <Comp key={index} startIndex={startIndex} />;
+              })
+            }
+          </CardsByIds>
         )}
       </div>
     </HomeCategory>
