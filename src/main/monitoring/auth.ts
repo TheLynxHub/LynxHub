@@ -71,8 +71,10 @@ async function processTokenLogin(token: string) {
     await refreshChannel(true, userData.subscribeStage);
     checkForAppUpdate(userData.subscribeStage, userData.updateToken, true);
 
+    const {updateToken, ...rendererUserData} = userData;
+    userIpc.account.send.onUserDataChange(rendererUserData);
+
     if (pendingLoginResolve) {
-      const {updateToken, ...rendererUserData} = userData;
       pendingLoginResolve(rendererUserData);
       pendingLoginResolve = null;
       pendingLoginReject = null;
@@ -331,12 +333,14 @@ export default function Auth() {
       await deleteCachedUser(AUTH_LOGIN_KEY);
       await refreshChannel(false, 'public');
       checkForAppUpdate('public', null, true);
+      userIpc.account.send.onUserDataChange(null);
       return;
     } catch (error) {
       await deleteTokens(AUTH_LOGIN_KEY);
       await deleteCachedUser(AUTH_LOGIN_KEY);
       await refreshChannel(false, 'public');
       checkForAppUpdate('public', null, true);
+      userIpc.account.send.onUserDataChange(null);
       throw error;
     }
   });

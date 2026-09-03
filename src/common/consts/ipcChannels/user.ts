@@ -13,5 +13,6 @@ export const userChannels = {
     submitFeedback: 'account:submitFeedback',
 
     onReleaseChannel: 'account:onReleaseChannel',
+    onUserDataChange: 'account:onUserDataChange',
   },
 } as const;

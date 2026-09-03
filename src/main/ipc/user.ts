@@ -14,6 +14,9 @@ export const userIpc = {
     send: {
       /** Sends release channel update */
       onReleaseChannel: (channel: SubscribeStages) => sendToMain(userChannels.account.onReleaseChannel, channel),
+      /** Sends user data change update */
+      onUserDataChange: (userData: UserAccountData | null) =>
+        sendToMain(userChannels.account.onUserDataChange, userData),
     },
     on: {
       /** Listens for channel update request */

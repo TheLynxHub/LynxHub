@@ -14,8 +14,20 @@ export const useUserAccount = () => {
 
   useEffect(() => {
     const offReleaseChannel = userIpc.account.onReleaseChannel(stage => dispatch(userActions.setUpdateChannel(stage)));
+    const offUserDataChange = userIpc.account.onUserDataChange(userData => {
+      if (userData) {
+        dispatch(userActions.setUserState({key: 'userData', value: userData}));
+        dispatch(userActions.setUserState({key: 'isLoggedIn', value: true}));
+      } else {
+        dispatch(userActions.resetUserState('userData'));
+        dispatch(userActions.resetUserState('isLoggedIn'));
+      }
+    });
 
-    return () => offReleaseChannel();
+    return () => {
+      offReleaseChannel();
+      offUserDataChange();
+    };
   }, [dispatch]);
 
   useEffect(() => {

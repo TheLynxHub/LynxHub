@@ -30,6 +30,9 @@ const userIpc = {
     // Listens for release channel changes
     onReleaseChannel: (result: (stage: SubscribeStages) => void) =>
       lynxIpc.on(userChannels.account.onReleaseChannel, result),
+    // Listens for user data changes
+    onUserDataChange: (result: (userData: UserAccountData | null) => void) =>
+      lynxIpc.on(userChannels.account.onUserDataChange, result),
   },
 };
 
