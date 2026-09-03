@@ -6,6 +6,7 @@ import {useClearOldFaviconCache, useMigrateCardTitles} from './migration';
 import {useFilterPinnedCards} from './states';
 import useCheckPluginLoadFailures from './useCheckPluginLoadFailures';
 import useAppEvents from './useEvents';
+import usePtyExitListener from './usePtyExitListener';
 import useSessionRestore from './useSessionRestore';
 import useSessionSnapshotTracker from './useSessionSnapshotTracker';
 import useUsageTracker from './useUsageTracker';
@@ -23,6 +24,7 @@ const AppHooks = memo(() => {
   useUsageTracker();
   useSessionSnapshotTracker();
   useSessionRestore();
+  usePtyExitListener();
 
   return null;
 });

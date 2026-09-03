@@ -14,12 +14,8 @@ import TextGenerationPage from '@lynx/pages/text';
 import ToolsPage from '@lynx/pages/tools';
 import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {useCardsState} from '@lynx/redux/reducers/cards';
-import {useTerminalState} from '@lynx/redux/reducers/terminal';
 import {PageID} from '@lynx_common/consts';
-import ptyIpc from '@lynx_shared/ipc/pty';
-import {ComponentType, memo, useEffect, useMemo} from 'react';
-
-import {useRemoveTab} from './tabs/utils';
+import {ComponentType, memo, useMemo} from 'react';
 
 const PageComponents = {
   [PageID.home]: HomePage,
@@ -43,27 +39,15 @@ type Props = {tabID: string; pageID: string};
  */
 const AppPages = memo(({tabID, pageID}: Props) => {
   const runningCards = useCardsState('runningCard');
-  const closeTabOnExit = useTerminalState('closeTabOnExit');
   const {visibility} = useBookmarks();
 
   const isAlwaysBar = visibility === 'always';
   const foundRunningCard = runningCards.find(card => card.tabId === tabID);
 
-  const removeTab = useRemoveTab();
-
   const RunningView = useMemo(() => {
     const Container = extensionsData.runningAI.container;
     return Container ? Container : SessionView;
   }, []);
-
-  // Handle PTY exit events
-  useEffect(() => {
-    const removeListener = ptyIpc.onExit(id => {
-      if (closeTabOnExit) removeTab({id});
-    });
-
-    return () => removeListener();
-  }, [closeTabOnExit, removeTab]);
 
   if (foundRunningCard) return <RunningView runningCard={foundRunningCard} />;
 
