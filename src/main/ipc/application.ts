@@ -139,8 +139,6 @@ export const applicationIpc = {
       sendToMain(appChannels.showToast, message, type, placement),
     /** Changes window state */
     changeWinState: (state: WinStateChange) => sendToMain(appChannels.onChangeState, state),
-    /** Updates channel change event */
-    updateChannelChange: (channel: string) => sendToMain(appChannels.updateChannelChange, channel),
     /** Notifies about dark mode change */
     onDarkMode: (isDark: boolean) => notifyAllWindowsDarkMode(isDark),
   },

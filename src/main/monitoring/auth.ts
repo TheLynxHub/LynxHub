@@ -191,10 +191,10 @@ export async function checkExistingLogin(): Promise<{
 async function refreshChannel(isLogin: boolean, stage: SubscribeStages) {
   if (isLogin && (stage === 'insider' || stage === 'early_access')) {
     await saveChannel(AUTH_CHANNEL_KEY, stage);
-    applicationIpc.send.updateChannelChange(stage);
+    userIpc.account.send.onReleaseChannel(stage);
   } else {
     await saveChannel(AUTH_CHANNEL_KEY, 'public');
-    applicationIpc.send.updateChannelChange('public');
+    userIpc.account.send.onReleaseChannel('public');
   }
 }
 
@@ -421,7 +421,7 @@ export default function Auth() {
   userIpc.account.on.updateChannel(async channel => {
     if (channel === 'get') {
       const currentChannel = await getChannel(AUTH_CHANNEL_KEY);
-      applicationIpc.send.updateChannelChange(currentChannel);
+      userIpc.account.send.onReleaseChannel(currentChannel);
     }
   });
 
