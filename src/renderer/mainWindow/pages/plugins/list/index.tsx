@@ -229,7 +229,13 @@ function SyncAllButton() {
   return (
     <Button size="sm" onPress={syncAll} isPending={updatingAll}>
       {updatingAll ? <Spinner size="sm" color="current" /> : <RefreshIcon />}
-      {updatingAll ? 'Syncing...' : `Sync All (${syncList.length})`}
+      {updatingAll ? (
+        'Syncing...'
+      ) : (
+        <span>
+          Sync All <span className="bg-surface/50 text-xs rounded-full py-px px-1">{syncList.length}</span>
+        </span>
+      )}
     </Button>
   );
 }
