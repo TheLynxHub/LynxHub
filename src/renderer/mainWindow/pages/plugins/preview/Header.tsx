@@ -9,13 +9,12 @@ import AddBreadcrumb_Renderer from '@lynx_shared/sentry/Breadcrumbs';
 import {
   BoxMinimalisticIcon,
   CalendarMinimalisticIcon,
-  DownloadMinimalisticIcon,
   HomeAngle2Icon,
   SquareTopDownIcon,
   UserIcon,
   WidgetAddIcon,
 } from '@solar-icons/react/bold-duotone';
-import {ArrowRightIcon} from '@solar-icons/react/line-duotone';
+import {ArrowRightIcon, DownloadMinimalisticIcon} from '@solar-icons/react/line-duotone';
 import {useCallback, useMemo} from 'react';
 
 import PluginActionButtons from './ActionButtons';
@@ -95,14 +94,14 @@ export default function PluginPreviewHeader({installedPlugin}: PluginPreviewHead
 
                 {/* Release date chip */}
                 <Chip size="sm" variant="tertiary" className="text-muted">
-                  <CalendarMinimalisticIcon />
+                  <CalendarMinimalisticIcon className="size-3.5" />
                   {releaseDate}
                 </Chip>
 
                 {/* Downloads count chip */}
                 {selectedPlugin?.downloadsCount !== undefined && (
                   <Chip size="sm" variant="tertiary" className="text-muted font-JetBrainsMono">
-                    <DownloadMinimalisticIcon />
+                    <DownloadMinimalisticIcon className="size-3.5" />
                     <span>{formatNumber(selectedPlugin.downloadsCount).toLowerCase()}</span>
                   </Chip>
                 )}
