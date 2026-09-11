@@ -78,7 +78,7 @@ export function PluginListItemDefault({
       onClick={isCompatible ? handleSelect : undefined}>
       <Card.Header>
         <div className="inline-flex items-center gap-2">
-          <Avatar>
+          <Avatar className="size-10 shrink-0 bg-transparent rounded-none">
             <Avatar.Image alt={item.metadata.title} src={getCacheUrl(getPluginIconUrl(item.url))} />
             <Avatar.Fallback>{getFallbackString(item.metadata.title)}</Avatar.Fallback>
           </Avatar>

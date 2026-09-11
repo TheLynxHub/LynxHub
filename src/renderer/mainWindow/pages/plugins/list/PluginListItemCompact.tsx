@@ -79,7 +79,7 @@ export function PluginListItemCompact({
       onClick={isCompatible ? handleSelect : undefined}>
       {/* Left Side: Avatar, Title and Author */}
       <div className="flex items-center gap-x-2.5 overflow-hidden min-w-0 flex-1">
-        <Avatar className="size-8 min-w-8 shrink-0">
+        <Avatar className="size-8 min-w-8 shrink-0 bg-transparent rounded-none">
           <Avatar.Image alt={item.metadata.title} src={getCacheUrl(getPluginIconUrl(item.url))} />
           <Avatar.Fallback className="text-xs">{getFallbackString(item.metadata.title)}</Avatar.Fallback>
         </Avatar>
