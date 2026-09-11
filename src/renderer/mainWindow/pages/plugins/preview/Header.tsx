@@ -124,7 +124,7 @@ export default function PluginPreviewHeader({installedPlugin}: PluginPreviewHead
         {/* Owner & homepage link row */}
         <div className="flex flex-row items-center ml-12">
           <Chip variant="tertiary">
-            <UserIcon />
+            <UserIcon className="size-3.5" />
             {pluginOwner}
           </Chip>
           <Button
