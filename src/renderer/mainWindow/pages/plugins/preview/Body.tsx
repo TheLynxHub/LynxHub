@@ -4,8 +4,7 @@ import {extensionsData} from '@lynx/plugins/extensions/loader';
 import {usePluginsState} from '@lynx/redux/reducers/plugins';
 import {getPluginReadmeUrl} from '@lynx_common/utils/plugins';
 import {useDebounceBreadcrumb} from '@lynx_shared/sentry/Breadcrumbs';
-import {HomeAngle2Icon} from '@solar-icons/react/bold-duotone';
-import {ChecklistIcon} from '@solar-icons/react/line-duotone';
+import {HistoryIcon, HomeAngle2Icon} from '@solar-icons/react/bold-duotone';
 import {AnimatePresence, motion} from 'framer-motion';
 import {isNil} from 'lodash-es';
 import {useEffect, useMemo, useState} from 'react';
@@ -51,12 +50,12 @@ export default function PluginPreviewBody({isInstalled}: PluginPreviewBodyProps)
         <Tabs.ListContainer>
           <Tabs.List aria-label="Options">
             <Tabs.Tab id="readme" className="gap-x-1">
-              <HomeAngle2Icon />
+              <HomeAngle2Icon className="size-4" />
               Readme
               <Tabs.Indicator />
             </Tabs.Tab>
             <Tabs.Tab id="changelog" className="gap-x-1">
-              <ChecklistIcon />
+              <HistoryIcon className="size-4" />
               Changelog
               <Tabs.Indicator />
             </Tabs.Tab>
